@@ -13,4 +13,4 @@ main.pdf: main.tex
 	mv build/main.pdf .
 
 clean:
-	rm -rf build
+	rm -rf build main.pdf
