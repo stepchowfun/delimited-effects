@@ -40,17 +40,23 @@
 \newcommand\tconst{\kappa}
 \newcommand\tvar{\alpha}
 \newcommand\tarrow[2]{#1 \rightarrow #2}
-\newcommand\hastype[2]{#1 : #2}
-\newcommand\tjudgment[3]{#1 \vdash \hastype{#2}{#3}}
+\newcommand\tanno[2]{#1 : #2}
+\newcommand\tjudgment[3]{#1 \vdash \tanno{#2}{#3}}
+\newcommand\twithx{\sigma}
+\newcommand\tx[2]{#1 \ ! \ #2}
+
+% Effects
+\newcommand\xeffect{\epsilon}
+\newcommand\xanno[2]{#1 \ ! \ #2}
+\newcommand\xeffects{E}
+\newcommand\xempty{\varnothing_{\xeffect}}
+\newcommand\xextend[2]{#1, #2}
+\newcommand\xunion[2]{#1, #2}
 
 % Contexts
 \newcommand\ccontext{\Gamma}
-\newcommand\cempty{\varnothing}
-\newcommand\cextend[3]{#1, \ \hastype{#2}{#3}}
-
-% Operational semantics
-\newcommand\sstep[2]{#1 \longrightarrow #2}
-\newcommand\sjudgment[2]{\sstep{#1}{#2}}
+\newcommand\cempty{\varnothing_{\ccontext}}
+\newcommand\cextend[3]{#1, \ \tanno{#2}{#3}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -70,10 +76,15 @@
           & $\eapp{\eterm}{\eterm}$ & application \\
           $\evalue \Coloneqq $ & & value \\
           & $\econst$ & constant \\
-          & $\eabs{\hastype{\evar}{\ttype}}{\eterm}$ & abstraction \\
+          & $\eabs{\tanno{\evar}{\ttype}}{\eterm}$ & abstraction \\
           $\ttype \Coloneqq$ & & type \\
           & $\tconst$ & type of constants \\
-          & $\tarrow{\ttype}{\ttype}$ & arrow type \\
+          & $\tarrow{\twithx}{\twithx}$ & arrow type \\
+          $\twithx \Coloneqq$ & & type with effects \\
+          & $\tx{\xeffects}{\ttype}$ & effect annotation \\
+          $\xeffects \Coloneqq$ & & effect set \\
+          & $\xempty$ & empty effect \\
+          & $\xextend{\xeffects}{\xeffect}$ & effect extension \\
           $\ccontext \Coloneqq$ & & context \\
           & $\cempty$ & empty context \\
           & $\cextend{\ccontext}{\evar}{\ttype}$ & variable binding \\
@@ -88,7 +99,7 @@
   \begin{figure}
     \begin{mdframed}
       \begin{center}
-        \framebox{$\tjudgment{\ccontext}{\eterm}{\ttype}$}
+        \framebox{$\tjudgment{\ccontext}{\eterm}{\twithx}$}
       \end{center}
 
       \medskip
@@ -96,61 +107,30 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{T-Constant})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\econst}{\tconst}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\econst}{\tx{\xempty}{\tconst}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\evar}{\ttype} \in \ccontext$}
+          \AxiomC{$\tanno{\evar}{\twithx} \in \ccontext$}
         \RightLabel{(\textsc{T-Variable})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\evar}{\ttype}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\evar}{\twithx}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\evar}{\ttype_1}}{\eterm}{\ttype_2}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\evar}{\ttype}}{\eterm}{\twithx}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eabs{\hastype{\evar}{\ttype_1}}{\eterm}}{\tarrow{\ttype_1}{\ttype_2}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eabs{\tanno{\evar}{\ttype}}{\eterm}}{\tarrow{\ttype}{\twithx}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\ttype_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\tarrow{\ttype_1}{\ttype_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\tx{\xeffects_1}{\ttype_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\tx{\xeffects_2}{\parens{\tarrow{\ttype_1}{\tx{\xeffects_3}{\ttype_2}}}}}$}
         \RightLabel{(\textsc{T-Application})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\ttype_2}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\tx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}{\ttype_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}
       \label{fig:typing_rules}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}
-      \begin{center}
-        \framebox{$\sjudgment{\eterm}{\eterm}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\sjudgment{\eterm_1}{\eterm'_1}$}
-        \RightLabel{(\textsc{E-LeftApp})}
-        \UnaryInfC{$\sjudgment{\eapp{\eterm_1}{\eterm_2}}{\eapp{\eterm'_1}{\eterm_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sjudgment{\eterm}{\eterm'}$}
-        \RightLabel{(\textsc{E-RightApp})}
-        \UnaryInfC{$\sjudgment{\eapp{\evalue}{\eterm}}{\eapp{\evalue}{\eterm'}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Beta})}
-        \UnaryInfC{$\sjudgment{\eapp{\parens{\eabs{\hastype{\evar}{\ttype}}{\eterm}}{\evalue}}}{\sub{\eterm}{\evar}{\evalue}}$}
-      \end{prooftree}
-
-      \caption{Operational semantics}
-      \label{fig:semantics}
     \end{mdframed}
   \end{figure}
 
