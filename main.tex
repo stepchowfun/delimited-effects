@@ -18,6 +18,7 @@
 \usepackage{bussproofs}
 \usepackage{mathtools}
 \usepackage{mdframed}
+\usepackage{stackengine} % For stacking axioms
 
 %%%%%%%%%%
 % Macros %
@@ -34,6 +35,12 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \ . \ #2}
 \newcommand\eapp[2]{#1 \ #2}
+\newcommand\eprovide[3]{\text{provide} \ #1 \ \text{as} \ #2\ \text{in} \ #3}
+
+% Provide
+\newcommand\pname{s}
+\newcommand\pitem[2]{#1 = #2}
+\newcommand\pall{S}
 
 % Types
 \newcommand\ttype{\tau}
@@ -52,6 +59,8 @@
 \newcommand\xempty{\varnothing_{\xeffect}}
 \newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
+\newcommand\xmap{\Phi}
+\newcommand\xmaplookup[1]{\xmap(#1)}
 
 % Contexts
 \newcommand\ccontext{\Gamma}
@@ -127,6 +136,18 @@
           \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\tx{\xeffects_2}{\parens{\tarrow{\ttype_1}{\tx{\xeffects_3}{\ttype_2}}}}}$}
         \RightLabel{(\textsc{T-Application})}
         \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\tx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}{\ttype_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\tx{\xeffects}{\ttype}}$}
+        \RightLabel{(\textsc{T-Weaken})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\tx{\xextend{\xeffect}{\xeffects}}{\ttype}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+        \AxiomC{\Shortstack[c]{{$\pall = \{\pitem{\pname_1}{\eterm_1}, \ldots, \pitem{\pname_n}{\eterm_n}\}$} {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$} {$\twithx_i = \tx{\xeffect}{\ttype_i}$} {$\xmaplookup{\xeffect} = \{\pitem{\pname_1}{\twithx_1}, \ldots, \pitem{\pname_n}{\twithx_n}\}$} {$\tjudgment{\ccontext, \tanno{\pname_1}{\twithx_1}, \ldots, \tanno{\pname_n}{\twithx_n}}{\eterm}\tx{\xeffects}{\ttype}$}}}
+        \RightLabel{(\textsc{T-Provide})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{S}{\xeffect}{\eterm}}{\tx{\xeffects - \xeffect, \xeffects_1, \ldots, \xeffects_n}{\ttype}}$}
       \end{prooftree}
 
       \caption{Typing rules}
