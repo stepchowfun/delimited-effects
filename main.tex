@@ -67,7 +67,7 @@
 % Contexts
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
-\newcommand\cextend[3]{#1, \tanno{#2}{#3}}
+\newcommand\cextend[2]{#1, #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -102,7 +102,7 @@
           & $\xextend{\xeffects}{\xeffect}$ & effect extension \\
           $\ccontext \Coloneqq$ & & context \\
           & $\cempty$ & empty context \\
-          & $\cextend{\ccontext}{\evar}{\ttype}$ & variable binding \\
+          & $\cextend{\ccontext}{\tanno{\evar}{\ttype}}$ & variable binding \\
         \end{tabular}
       \end{center}
 
@@ -132,7 +132,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\evar}{\ttype}}{\eterm}{\twithx}$}
+        \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\ttype}}}{\eterm}{\twithx}$}
         \RightLabel{(\textsc{T-Abstraction})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eabs{\tanno{\evar}{\ttype}}{\eterm}}{\tarrow{\ttype}{\twithx}}$}
       \end{prooftree}
@@ -156,7 +156,7 @@
           {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
           {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xmaplookup{\xeffect} = \left\{\pitem{\pname_1}{\twithx_1}, \ldots, \pitem{\pname_n}{\twithx_n}\right\}$}
-          {$\tjudgment{\ccontext, \tanno{\pname_1}{\twithx_1}, \ldots, \tanno{\pname_n}{\twithx_n}}{\eterm}{\tx{\xeffects}{\ttype}}$}}
+          {$\tjudgment{\cextend{\cextend{\cextend{\ccontext}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}}{\eterm}{\tx{\xeffects}{\ttype}}$}}
         }
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{\pall}{\xeffect}{\eterm}}{\tx{\xeffects - \xeffect}{\ttype}}$}
