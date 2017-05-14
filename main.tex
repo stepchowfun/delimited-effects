@@ -61,7 +61,10 @@
 \newcommand\xempty{\varnothing_{\xeffect}}
 \newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
-\newcommand\xmap{\Phi}
+\newcommand\xmap{\Delta}
+\newcommand\xmapempty{\varnothing_{\xmap}}
+\newcommand\xmapextend[2]{#1, #2}
+\newcommand\xmapitem[2]{#1 = #2}
 \newcommand\xmaplookup[1]{\xmap\left(#1\right)}
 
 % Contexts
@@ -92,6 +95,9 @@
           $\pall \Coloneqq$ & & effect handler \\
           & $\pempty$ & empty handler \\
           & $\pextend{\pall}{\pitem{\pname}{\eterm}}$ & handler extension \\
+          $\xmap \Coloneqq$ & & effect map \\
+          & $\xmapempty$ & empty effect map \\
+          & $\xmapextend{\xmap}{\xmapitem{\xeffect}{\ccontext}}$ & effect map extension \\
           $\ttype \Coloneqq$ & & type \\
           & $\tconst$ & type of constants \\
           & $\tarrow{\twithx}{\twithx}$ & arrow type \\
@@ -155,7 +161,7 @@
           {$\pall = \left( \pextend{\pempty}{\pextend{\pitem{\pname_1}{\eterm_1}}{\pextend{\ldots}{\pitem{\pname_n}{\eterm_n}}}} \right)$}
           {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
           {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
-          {$\xmaplookup{\xeffect} = \left(\tanno{\pname_1}{\twithx_1}, \ldots, \tanno{\pname_n}{\twithx_n}\right)$}
+          {$\xmapitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}} \in \xmap$}
            {$\tjudgment{\cextend{\cextend{\cextend{\ccontext}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}}{\eterm}{\tx{\xeffects}{\ttype}}$}}
         }
         \RightLabel{(\textsc{T-Provide})}
