@@ -40,7 +40,7 @@
 % Provide
 \newcommand\pall{S}
 \newcommand\pname{s}
-\newcommand\pitem[2]{#1 = #2}
+\newcommand\pitem[2]{#1 \mapsto #2}
 \newcommand\pempty{\varnothing_{\pall}}
 \newcommand\pextend[2]{#1, #2}
 
@@ -158,7 +158,7 @@
 
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{
-          {$\pall = \left( \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}} \right)$}
+          {$\pall =  \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
           {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
           {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xcitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}} \in \xc$}
