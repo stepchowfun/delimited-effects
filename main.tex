@@ -148,7 +148,7 @@
         \AxiomC{\Shortstack[c]{
           {$\pall = \left\{\pitem{\pname_1}{\eterm_1}, \ldots, \pitem{\pname_n}{\eterm_n}\right\}$}
           {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
-          {$\twithx_i = \tx{\xeffect}{\ttype_i}$}
+          {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xmaplookup{\xeffect} = \left\{\pitem{\pname_1}{\twithx_1}, \ldots, \pitem{\pname_n}{\twithx_n}\right\}$}
           {$\tjudgment{\ccontext, \tanno{\pname_1}{\twithx_1}, \ldots, \tanno{\pname_n}{\twithx_n}}{\eterm}{\tx{\xeffects}{\ttype}}$}}
         }
