@@ -38,9 +38,11 @@
 \newcommand\eprovide[3]{\text{provide} \ #1 \ \text{as} \ #2 \ \text{in} \ #3}
 
 % Provide
+\newcommand\pall{S}
 \newcommand\pname{s}
 \newcommand\pitem[2]{#1 = #2}
-\newcommand\pall{S}
+\newcommand\pempty{\varnothing_{\pall}}
+\newcommand\pextend[2]{#1, #2}
 
 % Types
 \newcommand\ttype{\tau}
@@ -65,7 +67,7 @@
 % Contexts
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
-\newcommand\cextend[3]{#1, \ \tanno{#2}{#3}}
+\newcommand\cextend[3]{#1, \tanno{#2}{#3}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -83,9 +85,13 @@
           & $\evalue$ & value \\
           & $\evar$ & variable \\
           & $\eapp{\eterm}{\eterm}$ & application \\
+          & $\eprovide{\pall}{\xeffect}{\eterm}$ & provide \\
           $\evalue \Coloneqq $ & & value \\
           & $\econst$ & constant \\
           & $\eabs{\tanno{\evar}{\ttype}}{\eterm}$ & abstraction \\
+          $\pall \Coloneqq$ & & effect handler \\
+          & $\pempty$ & empty handler \\
+          & $\pextend{\pall}{\pitem{\pname}{\eterm}}$ & handler extension \\
           $\ttype \Coloneqq$ & & type \\
           & $\tconst$ & type of constants \\
           & $\tarrow{\twithx}{\twithx}$ & arrow type \\
