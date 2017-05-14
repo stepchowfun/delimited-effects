@@ -158,7 +158,7 @@
 
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{
-          {$\pall = \left( \pextend{\pempty}{\pextend{\pitem{\pname_1}{\eterm_1}}{\pextend{\ldots}{\pitem{\pname_n}{\eterm_n}}}} \right)$}
+          {$\pall = \left( \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}} \right)$}
           {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
           {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xmapitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}} \in \xmap$}
