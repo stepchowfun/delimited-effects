@@ -14,6 +14,7 @@ set -eu -o pipefail
 DEBIAN_FRONTEND=noninteractive sudo apt-get -y update
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y python-pip texlive-full
 sudo pip install awscli
+make lint
 make
 if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
   if [ "$TRAVIS_BRANCH" = 'master' ]; then
