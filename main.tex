@@ -39,7 +39,6 @@
 
 % Provide
 \newcommand\pall{S}
-\newcommand\pname{s}
 \newcommand\pitem[2]{#1\mapsto#2}
 \newcommand\pempty{\varnothing_{\pall}}
 \newcommand\pextend[2]{#1, #2}
@@ -93,7 +92,7 @@
           & $\eabs{\tanno{\evar}{\ttype}}{\eterm}$ & abstraction \\
           $\pall \Coloneqq$ & & effect handler \\
           & $\pempty$ & empty handler \\
-          & $\pextend{\pall}{\pitem{\pname}{\eterm}}$ & handler extension \\
+          & $\pextend{\pall}{\pitem{\evar}{\eterm}}$ & handler extension \\
           $\xc \Coloneqq$ & & effect context \\
           & $\xcempty$ & empty effect context \\
           & $\xcextend{\xc}{\xcitem{\xeffect}{\ccontext}}$ & effect context extension \\
@@ -149,11 +148,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{\Shortstack[c]{{$\pall = \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
+        \AxiomC{\Shortstack[c]{{$\pall = \pextend{\pextend{\pextend{\pempty}{\pitem{\evar_1}{\eterm_1}}}{\ldots}}{\pitem{\evar_n}{\eterm_n}}$}
           {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
           {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xcitem{\xeffect}{\ccontext_2} \in \xc$}
-          {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}$}
+          {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\evar_1}{\tx_1}}}{\ldots}}{\tanno{\evar_n}{\tx_n}}$}
           {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}}
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
