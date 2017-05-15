@@ -51,12 +51,11 @@
 \newcommand\tarrow[2]{#1 \rightarrow #2}
 \newcommand\tanno[2]{#1 : #2}
 \newcommand\tjudgment[3]{#1 \vdash \tanno{#2}{#3}}
-\newcommand\twithx{\sigma}
-\newcommand\tx[2]{#1 \ ! \ #2}
+\newcommand\tx{\sigma}
+\newcommand\twithx[2]{#1 \ ! \ #2}
 
 % Effects
 \newcommand\xeffect{\varepsilon}
-\newcommand\xanno[2]{#1 \ ! \ #2}
 \newcommand\xeffects{E}
 \newcommand\xempty{\varnothing_{\xeffect}}
 \newcommand\xextend[2]{#1, #2}
@@ -65,7 +64,6 @@
 \newcommand\xcempty{\varnothing_{\xc}}
 \newcommand\xcextend[2]{#1, #2}
 \newcommand\xcitem[2]{#1 = #2}
-\newcommand\xclookup[1]{\xc\left(#1\right)}
 
 % Contexts
 \newcommand\ccontext{\Gamma}
@@ -100,9 +98,9 @@
           & $\xcextend{\xc}{\xcitem{\xeffect}{\ccontext}}$ & effect context extension \\
           $\ttype \Coloneqq$ & & type \\
           & $\tconst$ & type of constants \\
-          & $\tarrow{\twithx}{\twithx}$ & arrow type \\
-          $\twithx \Coloneqq$ & & type with effects \\
-          & $\tx{\xeffects}{\ttype}$ & effect annotation \\
+          & $\tarrow{\tx}{\tx}$ & arrow type \\
+          $\tx \Coloneqq$ & & type with effects \\
+          & $\twithx{\xeffects}{\ttype}$ & effect annotation \\
           $\xeffects \Coloneqq$ & & effect set \\
           & $\xempty$ & empty effect \\
           & $\xextend{\xeffects}{\xeffect}$ & effect extension \\
@@ -120,7 +118,7 @@
   \begin{figure}
     \begin{mdframed}
       \begin{center}
-        \framebox{$\tjudgment{\ccontext}{\eterm}{\twithx}$}
+        \framebox{$\tjudgment{\ccontext}{\eterm}{\tx}$}
       \end{center}
 
       \medskip
@@ -128,44 +126,44 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{T-Constant})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\econst}{\tx{\xempty}{\tconst}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\econst}{\twithx{\xempty}{\tconst}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tanno{\evar}{\twithx} \in \ccontext$}
+          \AxiomC{$\tanno{\evar}{\tx} \in \ccontext$}
         \RightLabel{(\textsc{T-Variable})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\evar}{\twithx}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\evar}{\tx}$}
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\ttype}}}{\eterm}{\twithx}$}
+        \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\ttype}}}{\eterm}{\tx}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eabs{\tanno{\evar}{\ttype}}{\eterm}}{\tarrow{\ttype}{\twithx}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eabs{\tanno{\evar}{\ttype}}{\eterm}}{\tarrow{\ttype}{\tx}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\tx{\xeffects_1}{\ttype_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\tx{\xeffects_2}{\parens{\tarrow{\ttype_1}{\tx{\xeffects_3}{\ttype_2}}}}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\twithx{\xeffects_1}{\ttype_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\twithx{\xeffects_2}{\tarrow{\ttype_1}{\twithx{\xeffects_3}{\ttype_2}}}}$}
         \RightLabel{(\textsc{T-Application})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\tx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}{\ttype_2}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}{\ttype_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\tx{\xeffects}{\ttype}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xeffects}{\ttype}}$}
         \RightLabel{(\textsc{T-Weaken})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\tx{\xextend{\xeffects}{\xeffect}}{\ttype}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xextend{\xeffects}{\xeffect}}{\ttype}}$}
       \end{prooftree}
 
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{
           {$\pall =  \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
-          {$\tjudgment{\ccontext}{\eterm_i}{\tx{\xeffects_i}{\ttype_i}}$}
-          {$\twithx_i = \tx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
-          {$\xcitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}} \in \xc$}
-          {$\tjudgment{\cextend{\cextend{\cextend{\ccontext}{\tanno{\pname_1}{\twithx_1}}}{\ldots}}{\tanno{\pname_n}{\twithx_n}}}{\eterm}{\tx{\xeffects}{\ttype}}$}}
+          {$\tjudgment{\ccontext}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
+          {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
+          {$\xcitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}} \in \xc$}
+          {$\tjudgment{\cextend{\cextend{\cextend{\ccontext}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}
         }
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{\pall}{\xeffect}{\eterm}}{\tx{\xeffects - \xeffect}{\ttype}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
       \end{prooftree}
 
       \caption{Typing rules}
