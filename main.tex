@@ -69,6 +69,7 @@
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
 \newcommand\cextend[2]{#1, #2}
+\newcommand\cunion[2]{#1, #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -151,13 +152,14 @@
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{
           {$\pall =  \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
-          {$\tjudgment{\ccontext}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
+          {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
           {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
-          {$\xcitem{\xeffect}{\cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}} \in \xc$}
-          {$\tjudgment{\cextend{\cextend{\cextend{\ccontext}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}
+          {$\xcitem{\xeffect}{\ccontext_2} \in \xc$}
+          {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}$}
+          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}
         }
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
+        \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
       \end{prooftree}
 
       \begin{prooftree}
