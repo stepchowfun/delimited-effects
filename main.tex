@@ -25,22 +25,22 @@
 %%%%%%%%%%
 
 % Misc
-\newcommand\parens[1]{\left( #1 \right)}
-\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]}
+\newcommand\parens[1]{\left(#1\right)}
+\newcommand\sub[3]{#1 \left[#2\mapsto#3\right]}
 
 % Terms
 \newcommand\eterm{t}
 \newcommand\evalue{v}
 \newcommand\econst{c}
 \newcommand\evar{x}
-\newcommand\eabs[2]{\lambda #1 \ . \ #2}
-\newcommand\eapp[2]{#1 \ #2}
-\newcommand\eprovide[3]{\text{provide} \ #1 \ \text{as} \ #2 \ \text{in} \ #3}
+\newcommand\eabs[2]{\lambda#1\;.\;#2}
+\newcommand\eapp[2]{#1\ #2}
+\newcommand\eprovide[3]{\text{provide}\ #1\ \text{as}\ #2\ \text{in}\ #3}
 
 % Provide
 \newcommand\pall{S}
 \newcommand\pname{s}
-\newcommand\pitem[2]{#1 \mapsto #2}
+\newcommand\pitem[2]{#1\mapsto#2}
 \newcommand\pempty{\varnothing_{\pall}}
 \newcommand\pextend[2]{#1, #2}
 
@@ -48,11 +48,11 @@
 \newcommand\ttype{\tau}
 \newcommand\tconst{\kappa}
 \newcommand\tvar{\alpha}
-\newcommand\tarrow[2]{#1 \rightarrow #2}
-\newcommand\tanno[2]{#1 : #2}
-\newcommand\tjudgment[3]{#1 \vdash \tanno{#2}{#3}}
+\newcommand\tarrow[2]{#1\rightarrow#2}
+\newcommand\tanno[2]{#1:#2}
+\newcommand\tjudgment[3]{#1\vdash\tanno{#2}{#3}}
 \newcommand\tx{\sigma}
-\newcommand\twithx[2]{#1 \ ! \ #2}
+\newcommand\twithx[2]{#1\;!\;#2}
 
 % Effects
 \newcommand\xeffect{\varepsilon}
@@ -111,8 +111,7 @@
         \end{tabular}
       \end{center}
 
-      \caption{Syntax}
-      \label{fig:syntax}
+      \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
   \end{figure}
 
@@ -150,14 +149,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{\Shortstack[c]{
-          {$\pall =  \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
+        \AxiomC{\Shortstack[c]{{$\pall = \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
           {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
           {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xcitem{\xeffect}{\ccontext_2} \in \xc$}
           {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\pname_1}{\tx_1}}}{\ldots}}{\tanno{\pname_n}{\tx_n}}$}
-          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}
-        }
+          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}}
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
       \end{prooftree}
@@ -168,8 +165,7 @@
         \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xextend{\xeffects}{\xeffect}}{\ttype}}$}
       \end{prooftree}
 
-      \caption{Typing rules}
-      \label{fig:typing_rules}
+      \caption{Typing rules}\label{fig:typing_rules}
     \end{mdframed}
   \end{figure}
 
