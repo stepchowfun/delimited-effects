@@ -149,12 +149,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xeffects}{\ttype}}$}
-        \RightLabel{(\textsc{T-Weaken})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xextend{\xeffects}{\xeffect}}{\ttype}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
         \AxiomC{\Shortstack[c]{
           {$\pall =  \pextend{\pextend{\pextend{\pempty}{\pitem{\pname_1}{\eterm_1}}}{\ldots}}{\pitem{\pname_n}{\eterm_n}}$}
           {$\tjudgment{\ccontext}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
@@ -164,6 +158,12 @@
         }
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xeffects}{\ttype}}$}
+        \RightLabel{(\textsc{T-Weaken})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xextend{\xeffects}{\xeffect}}{\ttype}}$}
       \end{prooftree}
 
       \caption{Typing rules}
