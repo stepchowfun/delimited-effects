@@ -35,7 +35,7 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda#1\;.\;#2}
 \newcommand\eapp[2]{#1\ #2}
-\newcommand\eprovide[3]{\text{provide}\ #1\ \text{as}\ #2\ \text{in}\ #3}
+\newcommand\eprovide[4]{\text{provide}\ #1\ \text{as}\ #2\ \text{using}\ #3\ \text{in}\ #4}
 
 % Provide
 \newcommand\pall{S}
@@ -86,7 +86,7 @@
           & $\evalue$ & value \\
           & $\evar$ & variable \\
           & $\eapp{\eterm}{\eterm}$ & application \\
-          & $\eprovide{\pall}{\xeffect}{\eterm}$ & provide \\
+          & $\eprovide{\pall}{\xeffect}{\xeffects}{\eterm}$ & provide \\
           $\evalue \Coloneqq $ & & value \\
           & $\econst$ & constant \\
           & $\eabs{\tanno{\evar}{\ttype}}{\eterm}$ & abstraction \\
@@ -149,13 +149,13 @@
 
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{{$\pall = \pextend{\pextend{\pextend{\pempty}{\pitem{\evar_1}{\eterm_1}}}{\ldots}}{\pitem{\evar_n}{\eterm_n}}$}
-          {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xeffects_i}{\ttype_i}}$}
+          {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xunion{\xeffects_1}{\xeffects_i}}{\ttype_i}}$}
           {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
           {$\xcitem{\xeffect}{\ccontext_2} \in \xc$}
           {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\evar_1}{\tx_1}}}{\ldots}}{\tanno{\evar_n}{\tx_n}}$}
-          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects}{\ttype}}$}}}
+          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects_2}{\ttype}}$}}}
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\eterm}}{\twithx{\xeffects - \xeffect}{\ttype}}$}
+        \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\xeffects_1}{\eterm}}{\twithx{\xunion{\xeffects_1}{\xeffects_2} - \xeffect}{\ttype}}$}
       \end{prooftree}
 
       \begin{prooftree}
