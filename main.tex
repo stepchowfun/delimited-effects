@@ -141,10 +141,10 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\twithx{\xeffects_2}{\tarrow{\parens{\twithx{\xeffects_3}{\ttype_1}}}{\twithx{\xeffects_4}{\ttype_2}}}}$}
+        \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype_1}}$}
+           {$\tjudgment{\ccontext}{\eterm_2}{\twithx{\xeffects_2}{\tarrow{\parens{\twithx{\xeffects_3}{\ttype_1}}}{\twithx{\xeffects_4}{\ttype_2}}}}$}}}
         \RightLabel{(\textsc{T-Application})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_4}}}{\ttype_2}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_4}}}{\ttype_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
