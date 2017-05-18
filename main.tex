@@ -59,6 +59,7 @@
 \newcommand\xempty{\varnothing_{\xeffect}}
 \newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
+\newcommand\xdiff[2]{#1 - #2}
 \newcommand\xc{\Delta}
 \newcommand\xcempty{\varnothing_{\xc}}
 \newcommand\xcextend[2]{#1, #2}
@@ -149,13 +150,14 @@
 
       \begin{prooftree}
         \AxiomC{\Shortstack[c]{{$\pall = \pextend{\pextend{\pextend{\pempty}{\pitem{\evar_1}{\eterm_1}}}{\ldots}}{\pitem{\evar_n}{\eterm_n}}$}
-          {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xunion{\xeffects_1}{\xeffects_i}}{\ttype_i}}$}
-          {$\tx_i = \twithx{\xextend{\xeffects_i}{\xeffect}}{\ttype_i}$}
+          {$\tjudgment{\ccontext_1}{\eterm_i}{\twithx{\xunion{\xeffects_{i_1}}{\xeffects_{i_2}}}{\ttype_i}}$}
+          {$\tx_i = \twithx{\xextend{\xeffects_{i_2}}{\xeffect}}{\ttype_i}$}
           {$\xcitem{\xeffect}{\ccontext_2} \in \xc$}
           {$\ccontext_2 = \cextend{\cextend{\cextend{\cempty}{\tanno{\evar_1}{\tx_1}}}{\ldots}}{\tanno{\evar_n}{\tx_n}}$}
-          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects_2}{\ttype}}$}}}
+          {$\tjudgment{\cunion{\ccontext_1}{\ccontext_2}}{\eterm}{\twithx{\xeffects_2}{\ttype}}$}
+          {$\xeffects_3 = \xunion{\xunion{\xeffects_{1_1}}{\ldots}}{\xeffects_{n_1}}$}}}
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\xeffects_1}{\eterm}}{\twithx{\xunion{\xeffects_1}{\xeffects_2} - \xeffect}{\ttype}}$}
+        \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\xeffects_1}{\eterm}}{\twithx{\xunion{\xdiff{\xeffects_3}{\xeffects_1}}{\xdiff{\xeffects_2}{\xeffect}}}{\ttype}}$}
       \end{prooftree}
 
       \begin{prooftree}
