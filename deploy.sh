@@ -14,7 +14,6 @@ set -eu -o pipefail
 DEBIAN_FRONTEND=noninteractive sudo apt-get -y update
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y python-pip texlive-full
 sudo pip install awscli
-make lint
 make
 if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
   if [ "$TRAVIS_BRANCH" = 'master' ]; then
@@ -23,3 +22,4 @@ if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
     aws s3 cp --acl public-read main.pdf "s3://stephan-misc/paper/branch-$TRAVIS_BRANCH.pdf"
   fi
 fi
+make lint
