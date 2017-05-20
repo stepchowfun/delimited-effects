@@ -113,6 +113,10 @@
         \end{tabular}
       \end{center}
 
+      \bigskip
+
+      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. Similarly, let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} = \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tanno{\evar}{\tx}}}} = \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tanno{\evar}{\tx}}$.
+
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
   \end{figure}
@@ -169,10 +173,28 @@
         \UnaryInfC{$\tjudgment{\ccontext_1}{\eprovide{\pall}{\xeffect}{\xeffects_1}{\eterm}}{\twithx{\xunion{\xdiff{\xeffects_3}{\xeffects_1}}{\xdiff{\xeffects_2}{\xeffect}}}{\ttype}}$}
       \end{prooftree}
 
+      \caption{Typing rules}\label{fig:typing_rules}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}
+      \begin{center}
+        \framebox{$\tjudgment{\ccontext}{\eterm}{\tx}$}
+      \end{center}
+
+      \medskip
+
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\tx_1}}}{\eterm}{\tx_2}$}
         \RightLabel{(\textsc{T-Weaken})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\tx_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_1}{\tx_1}}}{\tanno{x_2}{\tx_2}}}{\ccontext_2}}{\eterm}{\tx_3}$}
+        \RightLabel{(\textsc{T-Permutation})}
+        \UnaryInfC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_2}{\tx_2}}}{\tanno{x_1}{\tx_1}}}{\ccontext_2}}{\eterm}{\tx_3}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -187,7 +209,19 @@
         \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\xeffects}{\ttype}}}}{\eterm}{\tx}$}
       \end{prooftree}
 
-      \caption{Typing rules}\label{fig:typing_rules}
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}{\ttype}}$}
+        \RightLabel{(\textsc{E-Permutation1})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eterm}{\twithx{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}{\ttype}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}{\ttype}}}}{\eterm}{\tx}$}
+        \RightLabel{(\textsc{E-Permutation2})}
+        \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}{\ttype}}}}{\eterm}{\tx}$}
+      \end{prooftree}
+
+      \caption{Structural rules}\label{fig:structural_rules}
     \end{mdframed}
   \end{figure}
 
