@@ -143,10 +143,9 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{\Shortstack[c]{{$\ccontext$,} {$\tanno{\evar}{\twithx{\xextend{\xeffects_1}{\xeffect}}{\ttype}}$,} {$\forall \xeffects_2, \xeffects_3, a \;.\; \tarrow{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype}}{\tarrow{\twithx{\xextend{\xeffects_2}{\xeffect}}{a}}{\twithx{\xunion{\xeffects_2}{\xeffects_3}}{a}}}$} {$\vdash \tanno{\eterm}{\tx}$}}}
-          \AxiomC{$\xeffect \notin \tx$}
+          \AxiomC{\Shortstack[c]{{$\ccontext$,} {$\tanno{\evar}{\twithx{\xextend{\xeffects_1}{\xeffect}}{\ttype}}$,} {$\tanno{\evar_{\xeffect}}{\forall \xeffects_2, \xeffects_3, a \;.\; \tarrow{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype}}{\tarrow{\twithx{\xextend{\xeffects_2}{\xeffect}}{a}}{\twithx{\xunion{\xeffects_2}{\xeffects_3}}{a}}}}$} {$\vdash \tanno{\eterm}{\tx}$} {$\xeffect \notin \tx$}}}
         \RightLabel{(\textsc{T-Effect})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eeffect{\xeffect}{\evar}{\twithx{\xeffects_1}{\ttype}}{\eterm}}{\tx}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eeffect{\xeffect}{\evar}{\twithx{\xeffects_1}{\ttype}}{\eterm}}{\tx}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -168,7 +167,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_1}{\tx_1}}}{\tanno{x_2}{\tx_2}}}{\ccontext_2}}{\eterm}{\tx_3}$}
+          \AxiomC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_1}{\tx_1}}}{\tanno{x_2}{\tx_2}}}{\ccontext_2}}{\eterm}{\tx_3}$}
         \RightLabel{(\textsc{$\ccontext$-Permutation})}
         \UnaryInfC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_2}{\tx_2}}}{\tanno{x_1}{\tx_1}}}{\ccontext_2}}{\eterm}{\tx_3}$}
       \end{prooftree}
