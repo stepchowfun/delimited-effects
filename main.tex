@@ -148,7 +148,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\ccontext$,} {$\tanno{\evar}{\twithx{\xextend{\xeffects_1}{\xeffect}}{\ttype}}$,} {$\tanno{\evar_{\xeffect}}{\forall \xeffects_2, \xeffects_3, a \;.\; \tarrow{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype}}{\tarrow{\twithx{\xextend{\xeffects_2}{\xeffect}}{a}}{\twithx{\xunion{\xeffects_2}{\xeffects_3}}{a}}}}$} {$\vdash \tanno{\eterm}{\tx}$} {$\xeffect \notin \tx$}}}
+          \AxiomC{\Shortstack[c]{{$\ccontext$,} {$\tanno{\evar}{\twithx{\xextend{\xeffects_1}{\xeffect}}{\ttype}}$,} {$\tanno{\xeffect}{\forall \xeffects_2, \xeffects_3, a \;.\; \tarrow{\twithx{\xunion{\xeffects_1}{\xeffects_3}}{\ttype}}{\tarrow{\twithx{\xextend{\xeffects_2}{\xeffect}}{a}}{\twithx{\xunion{\xeffects_2}{\xeffects_3}}{a}}}}$} {$\vdash \tanno{\eterm}{\tx}$} {$\xeffect \notin \tx$}}}
         \RightLabel{(\textsc{T-Effect})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eeffect{\xeffect}{\evar}{\twithx{\xeffects_1}{\ttype}}{\eterm}}{\tx}$}
       \end{prooftree}
