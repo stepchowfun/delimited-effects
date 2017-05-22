@@ -140,16 +140,16 @@
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
-          {$\tjudgment{\ccontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xempty}}{\twithx{\xeffects_2}{\ttype_2}}}}{\xeffects_3}}$}}}
+          {$\tjudgment{\ccontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}}}
         \RightLabel{(\textsc{T-Application1})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\tx}$}
-          {$\tjudgment{\ccontext}{\eterm_2}{\twithx{\parens{\tarrow{\tx}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_1}}$}}}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
+          {$\tjudgment{\ccontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xunion{\xeffects_1}{\xeffects_4}}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}}}
         \RightLabel{(\textsc{T-Application2})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eappx{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xeffects_2}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eappx{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_2}{\xeffects_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
