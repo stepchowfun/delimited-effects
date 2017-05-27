@@ -12,7 +12,7 @@ set -eu -o pipefail
 #   ./deploy.sh
 
 DEBIAN_FRONTEND=noninteractive sudo apt-get -y update
-DEBIAN_FRONTEND=noninteractive sudo apt-get install -y python-pip texlive-full
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -y python-pip texlive-full coq
 sudo pip install awscli
 make
 if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
@@ -23,3 +23,4 @@ if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
   fi
 fi
 make lint
+make certify
