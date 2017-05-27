@@ -54,17 +54,24 @@
 
 % Effects
 \newcommand\xeffect{e}
-\newcommand\xeffects{\Delta}
+\newcommand\xeffects{E}
 \newcommand\xempty{\varnothing_{\xeffect}}
 \newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
 
-% Contexts
+% Type contexts
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
 \newcommand\cextend[2]{#1, #2}
 \newcommand\cunion[2]{#1, #2}
+
+% Effect contexts
+\newcommand\dcontext{\Delta}
+\newcommand\dempty{\varnothing_{\dcontext}}
+\newcommand\dextend[2]{#1, #2}
+\newcommand\dunion[2]{#1, #2}
+\newcommand\deffect[3]{#1 \mapsto \tanno{#2}{#3}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -103,12 +110,15 @@
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
+          $\dcontext \Coloneqq$ & & effect context \\
+          & $\dempty$ & empty effect context \\
+          & $\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx}}$ & effect binding \\
         \end{tabular}
       \end{center}
 
       \bigskip
 
-      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. Similarly, let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} = \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tanno{\evar}{\tx}}}} = \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tanno{\evar}{\tx}}$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$.
+      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
