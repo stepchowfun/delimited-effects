@@ -75,7 +75,5 @@ Proof. apply aunit. Qed.
 
 Definition v_id := eabs (makeId "x") tunit (evar (makeId "x")).
 
-Print v_id.
-
 Theorem v_tid : emptyContext ⊢ v_id ∈ tarrow tunit tunit.
 Proof. apply aabs. apply avar. simpl. reflexivity. Qed.
