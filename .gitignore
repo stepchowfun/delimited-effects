@@ -1,2 +1,5 @@
 build
 main.pdf
+formalization/*.vo
+formalization/*.vo.aux
+formalization/*.glob

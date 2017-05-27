@@ -12,6 +12,9 @@ main.pdf: main.tex
 	done
 	mv build/main.pdf .
 
+certify:
+	coqc formalization/definitions.v
+
 lint:
 	OUTPUT="$$(lacheck main.tex)"; \
 		if [ -n "$$OUTPUT" ]; \
@@ -27,4 +30,4 @@ lint:
 		fi
 
 clean:
-	rm -rf build main.pdf
+	rm -rf build main.pdf formalization/*.vo formalization/.*.vo.aux formalization/*.glob
