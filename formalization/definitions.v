@@ -59,7 +59,12 @@ where "c '|-' t ':::' T" := (hasType c t T).
 
 (* An example proof *)
 
-Definition v := eunit.
+Definition v_unit := eunit.
 
-Theorem v_tunit : emptyContext |- v ::: tunit.
+Theorem v_tunit : emptyContext |- v_unit ::: tunit.
 Proof. apply aunit. Qed.
+
+Definition v_id := eabs (makeId "x") tunit (evar (makeId "x")).
+
+Theorem v_tid : emptyContext |- v_id ::: tarrow tunit tunit.
+Proof. apply aabs. apply avar. simpl. reflexivity. Qed.
