@@ -5,9 +5,9 @@ Require Import Coq.Strings.String.
 Inductive id : Type :=
 | makeId : string -> id.
 
-Definition eqId (x1 : id) (x2 : id) : bool :=
-  match x1 with
-    makeId s1 => match x2 with
+Definition eqId i1 i2 : bool :=
+  match i1 with
+    makeId s1 => match i2 with
       makeId s2 => andb (prefix s1 s2) (prefix s2 s1)
     end
   end.
@@ -30,15 +30,13 @@ Inductive term : Type :=
 
 Definition context := id -> option type.
 
-Definition emptyContext : context := fun s => None.
+Definition emptyContext : context := fun i => None.
 
-Definition extendContext (c : context) (x1 : id) (t : type) : context :=
-  fun x2 => if eqId x1 x2 then Some t else c x2.
+Definition extendContext c i1 t : context :=
+  fun i2 => if eqId i1 i2 then Some t else c i2.
 
-(* Helper functions *)
-
-Definition lookupVar (c : context) (x : term) := match x with
-| evar s => c s
+Definition lookupVar (c : context) e := match e with
+| evar i => c i
 | _ => None
 end.
 
@@ -47,11 +45,11 @@ end.
 Reserved Notation "c '|-' t ':::' T" (at level 40).
 
 Inductive hasType : context -> term -> type -> Prop :=
-| aunit : forall c : context, c |- eunit ::: tunit
-| avar : forall c x t, lookupVar c x = Some t -> c |- x ::: t
-| aabs : forall c x t1 t2 e,
-         (extendContext c x t1 |- e ::: t2) ->
-         (c |- eabs x t1 e ::: tarrow t1 t2)
+| aunit : forall c, c |- eunit ::: tunit
+| avar : forall c e t, lookupVar c e = Some t -> c |- e ::: t
+| aabs : forall c i t1 t2 e,
+         (extendContext c i t1 |- e ::: t2) ->
+         (c |- eabs i t1 e ::: tarrow t1 t2)
 | aapp : forall c e1 e2 t1 t2,
          c |- e1 ::: t1 ->
          c |- e2 ::: tarrow t1 t2 ->
@@ -62,5 +60,5 @@ where "c '|-' t ':::' T" := (hasType c t T).
 
 Definition v := eunit.
 
-Theorem v_type : emptyContext |- v ::: tunit.
+Theorem v_tunit : emptyContext |- v ::: tunit.
 Proof. apply aunit. Qed.
