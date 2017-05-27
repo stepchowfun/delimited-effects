@@ -165,9 +165,10 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\ccontext$,} {$\tanno{\evar}{\twithx{\ttype}{\xextend{\xeffects_1}{\xeffect}}}$,} {$\tanno{\xeffect}{\forall \xeffects_2, \xeffects_3, a \;.\; \tarrow{\twithx{\ttype}{\xunion{\xeffects_1}{\xeffects_3}}}{\tarrow{\twithx{a}{\xextend{\xeffects_2}{\xeffect}}}{\twithx{a}{\xunion{\xeffects_2}{\xeffects_3}}}}}$} {$\vdash \tanno{\eterm}{\tx}$} {$\xeffect \notin \tx$}}}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\twithx{\ttype}{\xextend{\xeffects}{\xeffect}}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\ttype}}}{\eterm}{\tx}$}
+          \AxiomC{$\xeffect \notin \tx$}
         \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\twithx{\ttype}{\xeffects_1}}{\eterm}}{\tx}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\twithx{\ttype}{\xeffects}}{\eterm}}{\tx}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
