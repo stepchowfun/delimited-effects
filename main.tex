@@ -40,6 +40,7 @@
 \newcommand\eapp[2]{#1 \; #2}
 \newcommand\eappx[2]{#1 \; \$ \; #2}
 \newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
+\newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\ttype{\tau}
@@ -89,7 +90,8 @@
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
           & $\eapp{\eterm}{\eterm}$ & effect-realizing application \\
           & $\eappx{\eterm}{\eterm}$ & effect-preserving application \\
-          & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect introduction \\
+          & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
+          & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tconst$ & type of constants \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
