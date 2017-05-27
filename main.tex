@@ -166,9 +166,10 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\twithx{\ttype}{\xextend{\xeffects}{\xeffect}}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\ttype}}}{\eterm}{\tx}$}
+          \AxiomC{$\xeffect \notin \dcontext$}
           \AxiomC{$\xeffect \notin \tx$}
         \RightLabel{(\textsc{T-Effect})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\twithx{\ttype}{\xeffects}}{\eterm}}{\tx}$}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\twithx{\ttype}{\xeffects}}{\eterm}}{\tx}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
