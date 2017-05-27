@@ -35,10 +35,11 @@ Definition emptyContext : context := fun i => None.
 Definition extendContext c i1 t : context :=
   fun i2 => if eqId i1 i2 then Some t else c i2.
 
-Definition lookupVar (c : context) e := match e with
-| evar i => c i
-| _ => None
-end.
+Definition lookupVar (c : context) e :=
+  match e with
+  | evar i => c i
+  | _ => None
+  end.
 
 (*  Typing rules *)
 
