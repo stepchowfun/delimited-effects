@@ -188,7 +188,7 @@
           \AxiomC{$\tsub{\tx_1}{\xeffect}{\xeffects_2} = \tx_2$}
           \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eprovide{\xeffect}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\left(\xextend{\xeffects_1}{\xeffects_2}\right) - e}}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eprovide{\xeffect}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\parens{\xextend{\xeffects_1}{\xeffects_2}} - e}}$}
       \end{prooftree}
 
       \begin{prooftree}
