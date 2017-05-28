@@ -34,7 +34,7 @@
 
 % Terms
 \newcommand\eterm{t}
-\newcommand\econst{c}
+\newcommand\eunit{()}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
@@ -43,7 +43,7 @@
 
 % Types
 \newcommand\ttype{\tau}
-\newcommand\tconst{\kappa}
+\newcommand\tunit{\textbf{1}}
 \newcommand\tvar{\alpha}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
 \newcommand\tanno[2]{#1 : #2} % chktex 26
@@ -92,14 +92,14 @@
       \begin{center}
         \begin{tabular}{l l l}
           $\eterm \Coloneqq $ & & term \\
-          & $\econst$ & constant \\
+          & $\eunit$ & unit \\
           & $\evar$ & variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
           & $\eapp{\eterm}{\eterm}$ & effect application \\
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
-          & $\tconst$ & type of constants \\
+          & $\tunit$ & unit type \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
           $\tx \Coloneqq$ & & type with effects \\
           & $\twithx{\ttype}{\xeffects}$ & effect annotation \\
@@ -133,8 +133,8 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{T-Constant})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\econst}{\twithx{\tconst}{\xempty}}$}
+        \RightLabel{(\textsc{T-Unit})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eunit}{\twithx{\tunit}{\xempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
