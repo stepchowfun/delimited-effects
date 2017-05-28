@@ -41,6 +41,8 @@
 \newcommand\eapp[2]{#1 \; #2}
 \newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
 \newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
+\newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\etapp[2]{#1 \; \left[#2\right]}
 
 % Types
 \newcommand\ttype{\tau}
@@ -52,6 +54,7 @@
 \newcommand\tx{\sigma}
 \newcommand\twithx[2]{#1 \; ! \; #2} % chktex 26
 \newcommand\tsub[3]{#1\left[#2/#3\right]}
+\newcommand\tforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 
 % Effects
 \newcommand\xeffect{e}
@@ -98,11 +101,15 @@
           & $\evar$ & variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
           & $\eapp{\eterm}{\eterm}$ & effect application \\
+          & $\etabs{\tvar}{\eterm}$ & type abstraction \\
+          & $\etapp{\eterm}{\tx}$ & type application \\
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tunit$ & unit type \\
+          & $\tvar$ & type variable \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
+          & $\tforall{\tvar}{\tx}$ & universal type \\
           $\tx \Coloneqq$ & & type with effects \\
           & $\twithx{\ttype}{\xeffects}$ & effect annotation \\
           $\xeffects \Coloneqq$ & & effect set \\
@@ -111,6 +118,7 @@
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
+          & $\cextend{\ccontext}{\tvar}$ & type variable binding \\
           $\dcontext \Coloneqq$ & & effect context \\
           & $\dempty$ & empty effect context \\
           & $\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx}}$ & effect binding \\
