@@ -106,8 +106,8 @@
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
-          & $\tunit$ & unit type \\
           & $\tvar$ & type variable \\
+          & $\tunit$ & unit type \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
           & $\tforall{\tvar}{\tx}$ & universal type \\
           $\tx \Coloneqq$ & & type with effects \\
@@ -188,6 +188,18 @@
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
         \RightLabel{(\textsc{T-Application})}
         \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tvar}}{\dcontext}{\eterm}{\tx}$}
+        \RightLabel{(\textsc{T-TypeAbstraction})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etabs{\tvar}{\eterm}}{\tforall{\tvar}{\tx}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tforall{\tvar}{\tx_1}}$}
+        \RightLabel{(\textsc{T-TypeApplication})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etapp{\eterm}{\tx_2}}{\sub{\tx_1}{\tvar}{\tx_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
