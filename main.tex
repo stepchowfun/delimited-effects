@@ -38,7 +38,6 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
-\newcommand\eappx[2]{#1 \; \$ \; #2}
 \newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
 \newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
 
@@ -96,8 +95,7 @@
           & $\econst$ & constant \\
           & $\evar$ & variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
-          & $\eapp{\eterm}{\eterm}$ & effect-realizing application \\
-          & $\eappx{\eterm}{\eterm}$ & effect-preserving application \\
+          & $\eapp{\eterm}{\eterm}$ & effect application \\
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
@@ -154,16 +152,10 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
           {$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}}}
-        \RightLabel{(\textsc{T-Application1})}
+        \RightLabel{(\textsc{T-Application})}
         \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
       \end{prooftree}
 
-      \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
-          {$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xunion{\xeffects_1}{\xeffects_4}}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}}}
-        \RightLabel{(\textsc{T-Application2})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eappx{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_2}{\xeffects_3}}}$}
-      \end{prooftree}
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
           {$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_1}{\tx_2}$}
