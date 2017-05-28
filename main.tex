@@ -118,7 +118,6 @@
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
-          & $\cextend{\ccontext}{\tvar}$ & type variable binding \\
           $\dcontext \Coloneqq$ & & effect context \\
           & $\dempty$ & empty effect context \\
           & $\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx}}$ & effect binding \\
@@ -191,7 +190,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tvar}}{\dcontext}{\eterm}{\tx}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
         \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etabs{\tvar}{\eterm}}{\tforall{\tvar}{\tx}}$}
       \end{prooftree}
