@@ -59,6 +59,7 @@
 \newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
+\newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -126,6 +127,30 @@
   \begin{figure}
     \begin{mdframed}
       \begin{center}
+        \framebox{$\xopwellformed{\xeffect}{\tx}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{O-Unit})}
+        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\tunit}{\xextend{\xeffects}{\xeffect}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\xopwellformed{\xeffect}{\tx_2}$}
+        \RightLabel{(\textsc{O-Arrow})}
+        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
+      \end{prooftree}
+
+      \caption{Operation type well-formedness}\label{fig:operation_type}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}
+      \begin{center}
         \framebox{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
       \end{center}
 
@@ -166,11 +191,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\twithx{\ttype}{\xextend{\xeffects}{\xeffect}}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\ttype}}}{\eterm}{\tx}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx_1}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
+          \AxiomC{$\xopwellformed{\xeffect}{\tx_1}$}
           \AxiomC{$\xeffect \notin \dcontext$}
-          \AxiomC{$\xeffect \notin \tx$}
+          \AxiomC{$\xeffect \notin \tx_2$}
         \RightLabel{(\textsc{T-Effect})}
-        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\twithx{\ttype}{\xeffects}}{\eterm}}{\tx}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
