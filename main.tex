@@ -176,19 +176,19 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
-          {$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}}}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
         \RightLabel{(\textsc{T-Application})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
-          {$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_1}{\tx_2}$}
-          {$\tsub{\tx_1}{\xeffect}{\xeffects_2} = \tx_2$}
-          {$\xnotint{e}{\ttype}$}}}
+          \AxiomC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_1}{\tx_2}$}
+          \AxiomC{$\tsub{\tx_1}{\xeffect}{\xeffects_2} = \tx_2$}
+          \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eprovide{\xeffect}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\left(\xextend{\xeffects_1}{\xeffects_2}\right) - e}}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eprovide{\xeffect}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\left(\xextend{\xeffects_1}{\xeffects_2}\right) - e}}$}
       \end{prooftree}
 
       \begin{prooftree}
