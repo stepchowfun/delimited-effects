@@ -65,6 +65,7 @@
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
 \newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
+\newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -129,7 +130,7 @@
 
       \bigskip
 
-      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
+      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xeffect$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
@@ -146,14 +147,14 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{EM-Unit})}
-        \UnaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xeffect}{\twithx{\tunit}{\xextend{\xunion{\xeffects_3}{\xeffects_4}}{\xeffect}}}{\twithx{\tunit}{\xunion{\xeffects_1}{\xeffects_3}}}$}
+        \UnaryInfC{$\xusing{\xeffects_2}{\xeffect}{\twithx{\tunit}{\xunion{\xeffects_1}{\xeffects_3}}}{\twithx{\tunit}{\xsub{\xeffects_1}{\xeffect}{\xeffects_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xusing{\xeffects_3}{\xeffect}{\tx_3}{\tx_1}$}
           \AxiomC{$\xusing{\xeffects_4}{\xeffect}{\tx_2}{\tx_4}$}
         \RightLabel{(\textsc{EM-Arrow})}
-        \BinaryInfC{$\xusing{\xunion{\xunion{\xeffects_2}{\xeffects_3}}{\xeffects_4}}{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xextend{\xunion{\xeffects_1}{\xeffects_5}}{\xeffect}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xunion{\xeffects_1}{\xeffects_2}}}$}
+        \BinaryInfC{$\xusing{\xunion{\xunion{\xeffects_2}{\xeffects_3}}{\xeffects_4}}{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xunion{\xeffects_1}{\xeffects_5}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xsub{\xeffects_1}{\xeffect}{\xeffects_2}}}$}
       \end{prooftree}
 
       \caption{Effect masking}\label{fig:effect_masking}
