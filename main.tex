@@ -237,7 +237,7 @@
           \AxiomC{$\deffect{\xeffect}{\evar}{\tx_1} \in \dcontext$}
           \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\parens{\xextend{\xeffects_1}{\xeffects_2}} - e}}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xextend{\xeffects_1 - e}{\xeffects_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
