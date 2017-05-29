@@ -12,6 +12,7 @@
 \usepackage{draftwatermark}
 \SetWatermarkText{\textsc{Draft}}
 \SetWatermarkScale{3}
+\SetWatermarkLightness{0.9}
 
 %%%%%%%%%%%%
 % Packages %
@@ -22,7 +23,7 @@
 \usepackage{amssymb}
 \usepackage{bussproofs}
 \usepackage{mathtools}
-\usepackage{mdframed}
+\usepackage[framemethod=tikz]{mdframed} % The `tikz` thing allows us to have a transparent background
 \usepackage{stackengine} % For stacking axioms
 
 %%%%%%%%%%
@@ -96,7 +97,7 @@
   \section{Introduction}
 
   \begin{figure}
-    \begin{mdframed}
+    \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \begin{tabular}{l l l}
           $\eterm \Coloneqq $ & & term \\
@@ -136,7 +137,7 @@
   \end{figure}
 
   \begin{figure}
-    \begin{mdframed}
+    \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \framebox{$\xusing{\xeffects}{\xeffect}{\tx}{\tx}$}
       \end{center}
@@ -161,7 +162,7 @@
   \end{figure}
 
   \begin{figure}
-    \begin{mdframed}
+    \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \framebox{$\xopwellformed{\xeffect}{\tx}$}
       \end{center}
@@ -185,7 +186,7 @@
   \end{figure}
 
   \begin{figure}
-    \begin{mdframed}
+    \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \framebox{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
       \end{center}
