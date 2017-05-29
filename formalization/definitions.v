@@ -77,4 +77,4 @@ Proof. apply aunit. Qed.
 Definition ex2 := λ @ "x" ∈ tunit ⇒ evar (@ "x").
 
 Theorem ex2WellTyped : Ø ⊢ ex2 ∈ tunit → tunit.
-Proof. apply aabs. apply avar. simpl. reflexivity. Qed.
+Proof. apply aabs. apply avar. reflexivity. Qed.
