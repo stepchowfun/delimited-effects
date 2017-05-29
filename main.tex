@@ -31,7 +31,6 @@
 
 % Misc
 \newcommand\parens[1]{\left( #1 \right)} % chktex 37
-\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Terms
 \newcommand\eterm{t}
@@ -40,7 +39,7 @@
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
 \newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
+\newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\etapp[2]{#1 \; \left[#2\right]}
 
@@ -53,8 +52,8 @@
 \newcommand\tjudgment[4]{#1; #2 \vdash \tanno{#3}{#4}} % chktex 1
 \newcommand\tx{\sigma}
 \newcommand\twithx[2]{#1 \; ! \; #2} % chktex 26
-\newcommand\tsub[3]{#1\left[#2/#3\right]}
 \newcommand\tforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
+\newcommand\tsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Effects
 \newcommand\xeffect{e}
@@ -64,12 +63,15 @@
 \newcommand\xunion[2]{#1, #2}
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
 \newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
+\newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
+\newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
 \newcommand\cextend[2]{#1, #2}
 \newcommand\cunion[2]{#1, #2}
+\newcommand\cdom[1]{\text{dom}\parens{#1}}
 
 % Effect contexts
 \newcommand\dcontext{\Delta}
@@ -77,6 +79,7 @@
 \newcommand\dextend[2]{#1, #2}
 \newcommand\dunion[2]{#1, #2}
 \newcommand\deffect[3]{#1 \mapsto \tanno{#2}{#3}} % chktex 1
+\newcommand\ddom[1]{\text{dom}\parens{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -104,7 +107,7 @@
           & $\etabs{\tvar}{\eterm}$ & type abstraction \\
           & $\etapp{\eterm}{\tx}$ & type application \\
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
-          & $\eprovide{\xeffect}{\evar}{\eterm}{\eterm}$ & effect definition \\
+          & $\eprovide{\xeffect}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tvar$ & type variable \\
           & $\tunit$ & unit type \\
@@ -126,9 +129,34 @@
 
       \bigskip
 
-      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$.
+      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xeffect$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}
+      \begin{center}
+        \framebox{$\xusing{\xeffects}{\xeffect}{\tx}{\tx}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{EM-Unit})}
+        \UnaryInfC{$\xusing{\xeffects_2}{\xeffect}{\twithx{\tunit}{\xunion{\xeffects_1}{\xeffects_3}}}{\twithx{\tunit}{\xsub{\xeffects_1}{\xeffect}{\xeffects_2}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\xusing{\xeffects_3}{\xeffect}{\tx_3}{\tx_1}$}
+          \AxiomC{$\xusing{\xeffects_4}{\xeffect}{\tx_2}{\tx_4}$}
+        \RightLabel{(\textsc{EM-Arrow})}
+        \BinaryInfC{$\xusing{\xunion{\xunion{\xeffects_2}{\xeffects_3}}{\xeffects_4}}{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xunion{\xeffects_1}{\xeffects_5}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xsub{\xeffects_1}{\xeffect}{\xeffects_2}}}$}
+      \end{prooftree}
+
+      \caption{Effect masking}\label{fig:effect_masking}
     \end{mdframed}
   \end{figure}
 
@@ -142,13 +170,13 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{O-Unit})}
+        \RightLabel{(\textsc{Op-Unit})}
         \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\tunit}{\xextend{\xeffects}{\xeffect}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xopwellformed{\xeffect}{\tx_2}$}
-        \RightLabel{(\textsc{O-Arrow})}
+        \RightLabel{(\textsc{Op-Arrow})}
         \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
       \end{prooftree}
 
@@ -171,15 +199,16 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\tanno{\evar}{\tx} \in \ccontext$}
         \RightLabel{(\textsc{T-Variable})}
-        \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx}}}{\dcontext}{\evar}{\tx}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\evar}{\tx}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx_1}}}{\dcontext}{\eterm}{\tx_2}$}
+          \AxiomC{$\evar \notin \cdom{\ccontext}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eabs{\tanno{\evar}{\tx_1}}{\eterm}}{\tarrow{\tx_1}{\tx_2}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eabs{\tanno{\evar}{\tx_1}}{\eterm}}{\tarrow{\tx_1}{\tx_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -198,76 +227,29 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tforall{\tvar}{\tx_1}}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etapp{\eterm}{\tx_2}}{\sub{\tx_1}{\tvar}{\tx_2}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etapp{\eterm}{\tx_2}}{\tsub{\tx_1}{\tvar}{\tx_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm_1}{\tx_2}$}
-          \AxiomC{$\tsub{\tx_1}{\xeffect}{\xeffects_2} = \tx_2$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
+          \AxiomC{$\xusing{\xeffects_2}{\xeffect}{\tx_1}{\tx_2}$}
+          \AxiomC{$\deffect{\xeffect}{\evar}{\tx_1} \in \dcontext$}
           \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eprovide{\xeffect}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\parens{\xextend{\xeffects_1}{\xeffects_2}} - e}}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\parens{\xextend{\xeffects_1}{\xeffects_2}} - e}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx_1}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
           \AxiomC{$\xopwellformed{\xeffect}{\tx_1}$}
-          \AxiomC{$\xeffect \notin \dcontext$}
+          \AxiomC{$\xeffect \notin \ddom{\dcontext}$}
           \AxiomC{$\xeffect \notin \tx_2$}
         \RightLabel{(\textsc{T-Effect})}
         \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}
-      \begin{center}
-        \framebox{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx_2}$}
-        \RightLabel{(\textsc{$\ccontext$-Weaken})}
-        \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\tx_1}}}{\dcontext}{\eterm}{\tx_2}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_1}{\tx_1}}}{\tanno{x_2}{\tx_2}}}{\ccontext_2}}{\dcontext}{\eterm}{\tx_3}$}
-        \RightLabel{(\textsc{$\ccontext$-Permutation})}
-        \UnaryInfC{$\tjudgment{\cunion{\cextend{\cextend{\ccontext_1}{\tanno{x_2}{\tx_2}}}{\tanno{x_1}{\tx_1}}}{\ccontext_2}}{\dcontext}{\eterm}{\tx_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\twithx{\ttype}{\xeffects}}$}
-        \RightLabel{(\textsc{$\xeffects$-Weaken1})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\twithx{\ttype}{\xextend{\xeffects}{\xeffect}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\ttype}{\xextend{\xeffects}{\xeffect}}}}}{\dcontext}{\eterm}{\tx}$}
-        \RightLabel{(\textsc{$\xeffects$-Weaken2})}
-        \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\ttype}{\xeffects}}}}{\dcontext}{\eterm}{\tx}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\twithx{\ttype}{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}}$}
-        \RightLabel{(\textsc{$\xeffects$-Permutation1})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\twithx{\ttype}{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\ttype}{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}}}}{\dcontext}{\eterm}{\tx}$}
-        \RightLabel{(\textsc{$\xeffects$-Permutation2})}
-        \UnaryInfC{$\tjudgment{\cextend{\ccontext}{\tanno{x}{\twithx{\ttype}{\xunion{\xextend{\xextend{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}}}}{\dcontext}{\eterm}{\tx}$}
-      \end{prooftree}
-
-      \caption{Structural rules}\label{fig:structural_rules}
     \end{mdframed}
   \end{figure}
 
