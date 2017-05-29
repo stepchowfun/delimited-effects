@@ -42,7 +42,9 @@
 \newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
 \newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\etapp[2]{#1 \; \left[#2\right]}
+\newcommand\exabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\etapp[2]{#1 \; \left[#2\right]_{\tx}}
+\newcommand\exapp[2]{#1 \; \left[#2\right]_{\xeffects}}
 
 % Types
 \newcommand\ttype{\tau}
@@ -58,13 +60,15 @@
 
 % Effects
 \newcommand\xeffect{e}
+\newcommand\xvar{\varepsilon}
+\newcommand\xsingleton[1]{\left\{#1\right\}}
 \newcommand\xeffects{E}
 \newcommand\xempty{\varnothing_{\xeffect}}
-\newcommand\xextend[2]{#1, #2}
 \newcommand\xunion[2]{#1, #2}
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
 \newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
+\newcommand\xforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 \newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Type contexts
@@ -104,21 +108,26 @@
           & $\eunit$ & unit \\
           & $\evar$ & variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
-          & $\eapp{\eterm}{\eterm}$ & effect application \\
+          & $\eapp{\eterm}{\eterm}$ & application \\
           & $\etabs{\tvar}{\eterm}$ & type abstraction \\
           & $\etapp{\eterm}{\tx}$ & type application \\
+          & $\exabs{\xvar}{\eterm}$ & effects abstraction \\
+          & $\exapp{\eterm}{\xeffects}$ & effects application \\
           & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xeffect}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tvar$ & type variable \\
           & $\tunit$ & unit type \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
-          & $\tforall{\tvar}{\tx}$ & universal type \\
+          & $\tforall{\tvar}{\tx}$ & quantified type \\
+          & $\xforall{\xvar}{\tx}$ & quantified effect \\
           $\tx \Coloneqq$ & & type with effects \\
           & $\twithx{\ttype}{\xeffects}$ & effect annotation \\
           $\xeffects \Coloneqq$ & & effect set \\
+          & $\xvar$ & effects variable \\
           & $\xempty$ & empty effect \\
-          & $\xextend{\xeffects}{\xeffect}$ & effect extension \\
+          & $\xsingleton{\xeffect}$ & singleton effect \\
+          & $\xunion{\xeffects}{\xeffects}$ & effect union \\
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
@@ -130,7 +139,7 @@
 
       \bigskip
 
-      Let $\xunion{\xeffects_1}{\xeffects_2}$ denote the concatenation of $\xeffects_1$ and $\xeffects_2$. Formally, let $\xunion{\xeffects}{\xempty} = \xeffects$ and $\xunion{\xeffects_1}{\parens{\xextend{\xeffects_2}{\xeffect}}} = \xextend{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffect}$. We use analogous notation for $\ccontext$ and $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xeffect$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
+      Let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} = \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tx}}} = \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tx}$. We use analogous notation for $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xeffect$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
@@ -172,7 +181,7 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{Op-Unit})}
-        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\tunit}{\xextend{\xeffects}{\xeffect}}}$}
+        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\tunit}{\xunion{\xeffects}{\xsingleton{\xeffect}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -232,13 +241,25 @@
       \end{prooftree}
 
       \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
+        \RightLabel{(\textsc{T-EffectAbstraction})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exabs{\xvar}{\eterm}}{\xforall{\xvar}{\tx}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\xforall{\xvar}{\tx}}$}
+        \RightLabel{(\textsc{T-EffectApplication})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exapp{\eterm}{\xeffects}}{\xsub{\tx}{\xvar}{\xeffects}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
           \AxiomC{$\xusing{\xeffects_2}{\xeffect}{\tx_1}{\tx_2}$}
           \AxiomC{$\deffect{\xeffect}{\evar}{\tx_1} \in \dcontext$}
           \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xextend{\xeffects_1 - e}{\xeffects_2}}}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - e}{\xeffects_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
