@@ -32,6 +32,8 @@
 
 % Misc
 \newcommand\parens[1]{\left( #1 \right)} % chktex 37
+\newcommand\lstof[1]{\overline{#1}}
+\newcommand\lstlen[1]{\text{len}\parens{\lstof{#1}}}
 
 % Terms
 \newcommand\eterm{t}
@@ -60,6 +62,7 @@
 
 % Effects
 \newcommand\xeffect{e}
+\newcommand\xtapp[2]{#1 \; \lstof{#2}}
 \newcommand\xvar{\varepsilon}
 \newcommand\xsingleton[1]{\left\{#1\right\}}
 \newcommand\xeffects{E}
@@ -83,7 +86,7 @@
 \newcommand\dempty{\varnothing_{\dcontext}}
 \newcommand\dextend[2]{#1, #2}
 \newcommand\dunion[2]{#1, #2}
-\newcommand\deffect[3]{#1 \mapsto \tanno{#2}{#3}} % chktex 1
+\newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \tanno{#3}{#4}} % chktex 1 chktex 26
 \newcommand\ddom[1]{\text{dom}\parens{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -113,8 +116,8 @@
           & $\etapp{\eterm}{\tx}$ & type application \\
           & $\exabs{\xvar}{\eterm}$ & effects abstraction \\
           & $\exapp{\eterm}{\xeffects}$ & effects application \\
-          & $\eeffect{\xeffect}{\evar}{\tx}{\eterm}$ & effect declaration \\
-          & $\eprovide{\xeffect}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
+          & $\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx}{\eterm}$ & effect declaration \\
+          & $\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tvar$ & type variable \\
           & $\tunit$ & unit type \\
@@ -126,14 +129,14 @@
           $\xeffects \Coloneqq$ & & effect set \\
           & $\xvar$ & effects variable \\
           & $\xempty$ & empty effect \\
-          & $\xsingleton{\xeffect}$ & singleton effect \\
+          & $\xsingleton{\xtapp{\xeffect}{\tx}}$ & singleton effect \\
           & $\xunion{\xeffects}{\xeffects}$ & effect union \\
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
           $\dcontext \Coloneqq$ & & effect context \\
           & $\dempty$ & empty effect context \\
-          & $\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx}}$ & effect binding \\
+          & $\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx}}$ & effect binding \\
         \end{tabular}
       \end{center}
 
@@ -148,7 +151,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xusing{\xeffects}{\xeffect}{\tx}{\tx}$}
+        \framebox{$\xusing{\xeffects}{\xtapp{\xeffect}{\tx}}{\tx}{\tx}$}
       \end{center}
 
       \medskip
@@ -156,14 +159,14 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{EM-Unit})}
-        \UnaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xeffect}{\twithx{\tunit}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\tunit}{\xsub{\xeffects_3}{\xeffect}{\xeffects_1}}}$}
+        \UnaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\tunit}{\xsub{\xeffects_3}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xeffect}{\tx_1}{\tx_3}$}
-          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xeffect}{\tx_2}{\tx_4}$}
+          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
+          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
         \RightLabel{(\textsc{EM-Arrow})}
-        \BinaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xsub{\xeffects_3}{\xeffect}{\xeffects_1}}}$}
+        \BinaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xsub{\xeffects_3}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}}$}
       \end{prooftree}
 
       \caption{Effect masking}\label{fig:effect_masking}
@@ -173,21 +176,21 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xopwellformed{\xeffect}{\tx}$}
+        \framebox{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\lstlen{\tvar} = \lstlen{\tx}$}
         \RightLabel{(\textsc{Op-Unit})}
-        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\tunit}{\xunion{\xeffects}{\xsingleton{\xeffect}}}}$}
+        \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\tunit}{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\xopwellformed{\xeffect}{\tx_2}$}
+          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_2}$}
         \RightLabel{(\textsc{Op-Arrow})}
-        \UnaryInfC{$\xopwellformed{\xeffect}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
+        \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type}
@@ -255,20 +258,20 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
-          \AxiomC{$\xusing{\xeffects_2}{\xeffect}{\tx_1}{\tx_2}$}
-          \AxiomC{$\deffect{\xeffect}{\evar}{\tx_1} \in \dcontext$}
+          \AxiomC{$\xusing{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\tsub{\tx_1}{\lstof{\tvar}}{\lstof{\tx}}}{\tx_2}$}
+          \AxiomC{$\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1} \in \dcontext$}
           \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xeffect}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - e}{\xeffects_2}}}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - \xtapp{\xeffect}{\tx}}{\xeffects_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx_1}}}{\dextend{\dcontext}{\deffect{\xeffect}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
-          \AxiomC{$\xopwellformed{\xeffect}{\tx_1}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tforall{\lstof{\tvar}}{\tx_1}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
+          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
           \AxiomC{$\xeffect \notin \ddom{\dcontext}$}
           \AxiomC{$\xeffect \notin \tx_2$}
         \RightLabel{(\textsc{T-Effect})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xeffect}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
