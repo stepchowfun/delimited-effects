@@ -73,6 +73,7 @@
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
 \newcommand\xforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 \newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
+\newcommand\xeq[2]{#1 \; \cong \; #2} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -157,19 +158,38 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
         \RightLabel{(\textsc{EM-Unit})}
-        \UnaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\tunit}{\xsub{\xeffects_3}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}}$}
+        \UnaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xeffects_2}}{\twithx{\tunit}{\xeffects_3}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
-          \AxiomC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
+          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
+          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
+          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
         \RightLabel{(\textsc{EM-Arrow})}
-        \BinaryInfC{$\xusing{\xunion{\xeffects_1}{\xeffects_2}}{\xtapp{\xeffect}{\tx}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xunion{\xeffects_3}{\xeffects_4}}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xsub{\xeffects_3}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}}$}
+        \TrinaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects_2}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xeffects_3}}$}
       \end{prooftree}
 
       \caption{Effect masking}\label{fig:effect_masking}
+    \end{mdframed}
+  \end{figure}
+
+\begin{figure}
+    \begin{mdframed}
+      \begin{center}
+        \framebox{$\xeq{\xeffects}{\xeffects}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{$\xeffects$-Permutation})}
+        \UnaryInfC{$\xeq{\xunion{\xunion{\xunion{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}{\xunion{\xunion{\xunion{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}$}
+      \end{prooftree}
+
+      \caption{Structural rules}\label{fig:structural_rules}
     \end{mdframed}
   \end{figure}
 
@@ -277,5 +297,4 @@
       \caption{Typing rules}\label{fig:typing_rules}
     \end{mdframed}
   \end{figure}
-
 \end{document}
