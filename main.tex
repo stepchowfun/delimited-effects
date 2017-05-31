@@ -189,7 +189,13 @@
         \UnaryInfC{$\xeq{\xunion{\xunion{\xunion{\xeffects_1}{\xeffect_1}}{\xeffect_2}}{\xeffects_2}}{\xunion{\xunion{\xunion{\xeffects_1}{\xeffect_2}}{\xeffect_1}}{\xeffects_2}}$}
       \end{prooftree}
 
-      \caption{Structural rules}\label{fig:structural_rules}
+      \begin{prooftree}
+          \AxiomC{$\xeq{\xeffects_1}{\xeffects_2}$}
+          \AxiomC{$\xeq{\xeffects_2}{\xeffects_3}$}
+        \RightLabel{(\textsc{$\xeffects$-Transitive})}
+        \BinaryInfC{$\xeq{\xeffects_1}{\xeffects_3}$}
+      \end{prooftree}
+      \caption{Effect equivalence rules}\label{fig:structural_rules}
     \end{mdframed}
   \end{figure}
 
