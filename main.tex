@@ -41,37 +41,37 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
-\newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\exabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\etapp[2]{#1 \; \left[#2\right]_{\tx}}
-\newcommand\exapp[2]{#1 \; \left[#2\right]_{\xeffects}}
+\newcommand\etapp[2]{#1 \; #2}
+\newcommand\exapp[2]{#1 \; #2}
+\newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
+\newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
 
 % Types
 \newcommand\ttype{\tau}
-\newcommand\tunit{1}
 \newcommand\tvar{\alpha}
+\newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
-\newcommand\tanno[2]{#1 : #2} % chktex 26
-\newcommand\tjudgment[4]{#1; #2 \vdash \tanno{#3}{#4}} % chktex 1
+\newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
+\newcommand\txforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 \newcommand\tx{\sigma}
 \newcommand\twithx[2]{#1 \; ! \; #2} % chktex 26
-\newcommand\tforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
+\newcommand\tanno[2]{#1 : #2} % chktex 26
 \newcommand\tsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
+\newcommand\tjudgment[4]{#1; #2 \vdash \tanno{#3}{#4}} % chktex 1
 
 % Effects
-\newcommand\xeffect{e}
-\newcommand\xtapp[2]{#1 \; \lstof{#2}}
-\newcommand\xvar{\varepsilon}
-\newcommand\xsingleton[1]{\left\{#1\right\}}
 \newcommand\xeffects{E}
-\newcommand\xempty{\varnothing_{\xeffect}}
+\newcommand\xvar{\varepsilon}
+\newcommand\xempty{\varnothing_{\xeffects}}
+\newcommand\xtapp[2]{#1 \; \lstof{#2}}
+\newcommand\xsingleton[1]{\left\{ #1 \right\}}
 \newcommand\xunion[2]{#1, #2}
+\newcommand\xeffect{e}
 \newcommand\xnotint[2]{#1 \notin #2} % chktex 1
 \newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
-\newcommand\xforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 \newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 \newcommand\xeq[2]{#1 \; \cong \; #2} % chktex 1
 
@@ -86,8 +86,8 @@
 \newcommand\dcontext{\Delta}
 \newcommand\dempty{\varnothing_{\dcontext}}
 \newcommand\dextend[2]{#1, #2}
-\newcommand\dunion[2]{#1, #2}
 \newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \tanno{#3}{#4}} % chktex 1 chktex 26
+\newcommand\dunion[2]{#1, #2}
 \newcommand\ddom[1]{\text{dom}\parens{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -122,11 +122,11 @@
           & $\tvar$ & type variable \\
           & $\tunit$ & unit type \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
-          & $\tforall{\tvar}{\tx}$ & quantified type \\
-          & $\xforall{\xvar}{\tx}$ & quantified effect \\
+          & $\ttforall{\tvar}{\tx}$ & quantified type \\
+          & $\txforall{\xvar}{\tx}$ & quantified effect \\
           $\tx \Coloneqq$ & & type with effects \\
           & $\twithx{\ttype}{\xeffects}$ & effect annotation \\
-          $\xeffects \Coloneqq$ & & effect set \\
+          $\xeffects \Coloneqq$ & & effect row \\
           & $\xvar$ & effects variable \\
           & $\xempty$ & empty effect \\
           & $\xsingleton{\xtapp{\xeffect}{\tx}}$ & singleton effect \\
@@ -278,11 +278,11 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etabs{\tvar}{\eterm}}{\tforall{\tvar}{\tx}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etabs{\tvar}{\eterm}}{\ttforall{\tvar}{\tx}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tforall{\tvar}{\tx_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\ttforall{\tvar}{\tx_1}}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etapp{\eterm}{\tx_2}}{\tsub{\tx_1}{\tvar}{\tx_2}}$}
       \end{prooftree}
@@ -290,11 +290,11 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
         \RightLabel{(\textsc{T-EffectAbstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exabs{\xvar}{\eterm}}{\xforall{\xvar}{\tx}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exabs{\xvar}{\eterm}}{\txforall{\xvar}{\tx}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\xforall{\xvar}{\tx}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\txforall{\xvar}{\tx}}$}
         \RightLabel{(\textsc{T-EffectApplication})}
         \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exapp{\eterm}{\xeffects}}{\xsub{\tx}{\xvar}{\xeffects}}$}
       \end{prooftree}
@@ -310,8 +310,8 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tforall{\lstof{\tvar}}{\tx_1}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
-          \AxiomC{$\evar \notin \cdom{\ccontext}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\ttforall{\lstof{\tvar}}{\tx_1}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
+          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
           \AxiomC{$\xeffect \notin \ddom{\dcontext}$}
           \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
           \AxiomC{$\xeffect \notin \tx_2$}
