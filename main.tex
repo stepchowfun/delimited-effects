@@ -311,11 +311,12 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tforall{\lstof{\tvar}}{\tx_1}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
-          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
+          \AxiomC{$\evar \notin \cdom{\ccontext}$}
           \AxiomC{$\xeffect \notin \ddom{\dcontext}$}
+          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
           \AxiomC{$\xeffect \notin \tx_2$}
         \RightLabel{(\textsc{T-Effect})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
