@@ -184,32 +184,32 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{$\xeffects$-Reflexivity})}
+        \RightLabel{(\textsc{\xeffects-Reflexivity})}
         \UnaryInfC{$\xeq{\xeffects}{\xeffects}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xeq{\xeffects_1}{\xeffects_2}$}
-        \RightLabel{(\textsc{$\xeffects$-Symmetry})}
+        \RightLabel{(\textsc{\xeffects-Symmetry})}
         \UnaryInfC{$\xeq{\xeffects_2}{\xeffects_1}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xeq{\xeffects_1}{\xeffects_2}$}
           \AxiomC{$\xeq{\xeffects_2}{\xeffects_3}$}
-        \RightLabel{(\textsc{$\xeffects$-Transitivity})}
+        \RightLabel{(\textsc{\xeffects-Transitivity})}
         \BinaryInfC{$\xeq{\xeffects_1}{\xeffects_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{$\xeffects$-Contraction})}
+        \RightLabel{(\textsc{\xeffects-Contraction})}
         \UnaryInfC{$\xeq{\xunion{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}{\xsingleton{\xtapp{\xeffect}{\tx}}}}{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{$\xeffects$-Exchange})}
+        \RightLabel{(\textsc{\xeffects-Exchange})}
         \UnaryInfC{$\xeq{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\xtapp{\xeffect_1}{\tx}_1}}}{\xsingleton{\xtapp{\xeffect_2}{\tx}_2}}}{\xeffects_2}}{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\xtapp{\xeffect_2}{\tx}_2}}}{\xsingleton{\xtapp{\xeffect_1}{\tx}_1}}}{\xeffects_2}}$}
       \end{prooftree}
 
