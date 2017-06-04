@@ -34,19 +34,18 @@ Notation "'λ' i '∈' t '⇒' e" := (eabs i t e) (at level 39).
 
 (* Contexts *)
 
-Definition context := id -> option type.
+Inductive context : Type :=
+| cempty : context
+| cextend : context -> id -> type -> context.
 
-Definition emptyContext : context := fun i => None.
+Notation "'Ø'" := cempty.
+Notation "c ',' i '∈' t" := (cextend c i t) (at level 39).
 
-Notation "'Ø'" := emptyContext.
-
-Definition extendContext c i1 t : context :=
-  fun i2 => if eqId i1 i2 then Some t else c i2.
-
-Notation "c '⊕' i '∈' t" := (extendContext c i t) (at level 39).
-
-Definition lookupVar (c : context) e :=
+Fixpoint lookupVar (c1 : context) e :=
   match e with
-  | evar i => c i
+  | evar i1 => match c1 with
+               | cempty => None
+               | cextend c2 i2 t => if eqId i1 i2 then Some t else lookupVar c2 e
+               end
   | _ => None
   end.
