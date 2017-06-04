@@ -22,5 +22,3 @@ if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
     aws s3 cp --acl public-read main.pdf "s3://stephan-misc/paper/branch-$TRAVIS_BRANCH.pdf"
   fi
 fi
-make lint
-make certify

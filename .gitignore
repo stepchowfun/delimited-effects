@@ -1,5 +1,5 @@
-build
 main.pdf
+paper-build
 formalization/*.vo
 formalization/*.vo.aux
 formalization/*.glob

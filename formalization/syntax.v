@@ -50,31 +50,3 @@ Definition lookupVar (c : context) e :=
   | evar i => c i
   | _ => None
   end.
-
-(*  Typing rules *)
-
-Reserved Notation "c '⊢' e '∈' t" (at level 40).
-
-Inductive hasType : context -> term -> type -> Prop :=
-| aunit : forall c, c ⊢ eunit ∈ tunit
-| avar : forall c e t, lookupVar c e = Some t -> c ⊢ e ∈ t
-| aabs : forall c i t1 t2 e,
-         c ⊕ i ∈ t1 ⊢ e ∈ t2 ->
-         c ⊢ λ i ∈ t1 ⇒ e ∈ t1 → t2
-| aapp : forall c e1 e2 t1 t2,
-         c ⊢ e1 ∈ t1 ->
-         c ⊢ e2 ∈ t1 → t2 ->
-         c ⊢ eapp e2 e1 ∈ t2
-where "c '⊢' e '∈' t" := (hasType c e t).
-
-(* Example proofs *)
-
-Definition ex1 := eunit.
-
-Theorem ex1WellTyped : Ø ⊢ ex1 ∈ tunit.
-Proof. apply aunit. Qed.
-
-Definition ex2 := λ @ "x" ∈ tunit ⇒ evar (@ "x").
-
-Theorem ex2WellTyped : Ø ⊢ ex2 ∈ tunit → tunit.
-Proof. apply aabs. apply avar. reflexivity. Qed.
