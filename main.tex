@@ -142,7 +142,7 @@
 
       \bigskip
 
-      Let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} = \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tx}}} = \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tx}$. We use analogous notation for $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\xeffect}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
+      Let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} \Coloneqq \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tx}}} \Coloneqq \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tx}$. We use analogous notation for $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\xeffect}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
