@@ -9,8 +9,8 @@ Notation "'@' s" := (makeId s) (at level 10).
 
 Definition eqId i1 i2 : bool :=
   match i1 with
-    @ s1 => match i2 with
-      @ s2 => andb (prefix s1 s2) (prefix s2 s1)
+  | @ s1 => match i2 with
+    | @ s2 => andb (prefix s1 s2) (prefix s2 s1)
     end
   end.
 
