@@ -79,7 +79,6 @@
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
 \newcommand\cextend[2]{#1, #2}
-\newcommand\cunion[2]{#1, #2}
 \newcommand\cdom[1]{\text{dom}\parens{#1}}
 
 % Effect contexts
@@ -87,7 +86,6 @@
 \newcommand\dempty{\varnothing_{\dcontext}}
 \newcommand\dextend[2]{#1, #2}
 \newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \tanno{#3}{#4}} % chktex 1 chktex 26
-\newcommand\dunion[2]{#1, #2}
 \newcommand\ddom[1]{\text{dom}\parens{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -108,14 +106,14 @@
       \begin{center}
         \begin{tabular}{l l l}
           $\eterm \Coloneqq $ & & term \\
-          & $\eunit$ & unit \\
-          & $\evar$ & variable \\
-          & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & abstraction \\
-          & $\eapp{\eterm}{\eterm}$ & application \\
+          & $\eunit$ & unit term \\
+          & $\evar$ & term variable \\
+          & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & term abstraction \\
+          & $\eapp{\eterm}{\eterm}$ & term application \\
           & $\etabs{\tvar}{\eterm}$ & type abstraction \\
           & $\etapp{\eterm}{\tx}$ & type application \\
-          & $\exabs{\xvar}{\eterm}$ & effects abstraction \\
-          & $\exapp{\eterm}{\xeffects}$ & effects application \\
+          & $\exabs{\xvar}{\eterm}$ & effect row abstraction \\
+          & $\exapp{\eterm}{\xeffects}$ & effect row application \\
           & $\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx}{\eterm}$ & effect declaration \\
           & $\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
@@ -125,12 +123,12 @@
           & $\ttforall{\tvar}{\tx}$ & quantified type \\
           & $\txforall{\xvar}{\tx}$ & quantified effect \\
           $\tx \Coloneqq$ & & type with effects \\
-          & $\twithx{\ttype}{\xeffects}$ & effect annotation \\
+          & $\twithx{\ttype}{\xeffects}$ & effect row bound \\
           $\xeffects \Coloneqq$ & & effect row \\
-          & $\xvar$ & effects variable \\
-          & $\xempty$ & empty effect \\
-          & $\xsingleton{\xtapp{\xeffect}{\tx}}$ & singleton effect \\
-          & $\xunion{\xeffects}{\xeffects}$ & effect union \\
+          & $\xvar$ & effect row variable \\
+          & $\xempty$ & empty effect row \\
+          & $\xsingleton{\xtapp{\xeffect}{\tx}}$ & singleton effect row \\
+          & $\xunion{\xeffects}{\xeffects}$ & effect row union \\
           $\ccontext \Coloneqq$ & & type context \\
           & $\cempty$ & empty type context \\
           & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
@@ -142,35 +140,9 @@
 
       \bigskip
 
-      Let $\cunion{\ccontext_1}{\ccontext_2}$ denote the concatenation of $\ccontext_1$ and $\ccontext_2$. Formally, let $\cunion{\ccontext}{\cempty} \Coloneqq \ccontext$ and $\cunion{\ccontext_1}{\parens{\cextend{\ccontext_2}{\tx}}} \Coloneqq \cextend{\parens{\cunion{\ccontext_1}{\ccontext_2}}}{\tx}$. We use analogous notation for $\dcontext$. Let $\xnotint{\xeffect}{\tx}$ denote the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xeffect}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\xeffect}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
+      Let $\lstof{\tvar}$ and $\lstof{\tx}$ denote a list of type variables of length $\lstlen{\tvar}$ and a list of types and effects $\tx$ of length $\lstlen{\tx}$, respectively. Let $\cdom{\ccontext}$ and $\ddom{\dcontext}$ denote the term variables bound by $\ccontext$ and effect row variables bound by $\dcontext$, respectively. Let $\tanno{\evar}{\tx} \in \ccontext$ be the judgment that $\evar$ is bound by $\ccontext$ with type and effects $\tx$. Let $\xnotint{\xeffect}{\tx}$ be the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\xtapp{\xeffect}{\tx}}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\xusing{\xeffects}{\xtapp{\xeffect}{\tx}}{\tx}{\tx}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
-        \RightLabel{(\textsc{EM-Unit})}
-        \UnaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xeffects_2}}{\twithx{\tunit}{\xeffects_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
-          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
-          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
-        \RightLabel{(\textsc{EM-Arrow})}
-        \TrinaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects_2}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xeffects_3}}$}
-      \end{prooftree}
-
-      \caption{Effect masking}\label{fig:effect_masking}
     \end{mdframed}
   \end{figure}
 
@@ -213,7 +185,33 @@
         \UnaryInfC{$\xeq{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\xtapp{\xeffect_1}{\tx}_1}}}{\xsingleton{\xtapp{\xeffect_2}{\tx}_2}}}{\xeffects_2}}{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\xtapp{\xeffect_2}{\tx}_2}}}{\xsingleton{\xtapp{\xeffect_1}{\tx}_1}}}{\xeffects_2}}$}
       \end{prooftree}
 
-      \caption{Effect equivalence rules}\label{fig:structural_rules}
+      \caption{Effect row equivalence rules}\label{fig:structural_rules}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\xusing{\xeffects}{\xtapp{\xeffect}{\tx}}{\tx}{\tx}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
+        \RightLabel{(\textsc{C-Unit})}
+        \UnaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xeffects_2}}{\twithx{\tunit}{\xeffects_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
+          \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
+          \AxiomC{$\xeq{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
+        \RightLabel{(\textsc{C-Arrow})}
+        \TrinaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects_2}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xeffects_3}}$}
+      \end{prooftree}
+
+      \caption{Operation type compatibility}\label{fig:operation_type_compatibility}
     \end{mdframed}
   \end{figure}
 
@@ -227,13 +225,13 @@
 
       \begin{prooftree}
           \AxiomC{$\lstlen{\tvar} = \lstlen{\tx}$}
-        \RightLabel{(\textsc{Op-Unit})}
+        \RightLabel{(\textsc{WF-Unit})}
         \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\tunit}{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_2}$}
-        \RightLabel{(\textsc{Op-Arrow})}
+        \RightLabel{(\textsc{WF-Arrow})}
         \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
       \end{prooftree}
 
@@ -271,8 +269,9 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
+          \AxiomC{$\xeq{\xeffects_5}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}$}
         \RightLabel{(\textsc{T-Application})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}}$}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xeffects_5}}$}
       \end{prooftree}
 
       \begin{prooftree}
