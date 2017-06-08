@@ -181,26 +181,14 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-LeftIdentity1})}
+        \RightLabel{(\textsc{\xeffects-LeftIdentity})}
         \UnaryInfC{$\xpre{\xunion{\xempty}{\xeffects}}{\xeffects}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-LeftIdentity2})}
-        \UnaryInfC{$\xpre{\xunion{\xeffects}{\xempty}}{\xeffects}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-RightIdentity1})}
+        \RightLabel{(\textsc{\xeffects-RightIdentity})}
         \UnaryInfC{$\xpre{\xeffects}{\xunion{\xempty}{\xeffects}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-RightIdentity2})}
-        \UnaryInfC{$\xpre{\xeffects}{\xunion{\xeffects}{\xempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -217,14 +205,8 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-Weakening1})}
+        \RightLabel{(\textsc{\xeffects-Weakening})}
         \UnaryInfC{$\xpre{\xeffects}{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-Weakening2})}
-        \UnaryInfC{$\xpre{\xeffects}{\xunion{\xsingleton{\xtapp{\xeffect}{\tx}}}{\xeffects}}$}
       \end{prooftree}
 
       \begin{prooftree}
