@@ -11,48 +11,54 @@ Inductive eid : Type := . (* Term id *)
 Inductive rid : Type := . (* Effect row id *)
 Inductive xid : Type := . (* Effect id *)
 
+Definition typeId := id tid.
+Definition termId := id eid.
+Definition effectRowId := id rid.
+Definition effectId := id xid.
+
+
 (* Types *)
 
 Inductive type : Type :=
-| tvar : id tid -> type
+| tvar : typeId -> type
 | tunit : type
 | tarrow : type -> type -> type
-| ttforall : id tid -> type -> type
-| txforall : id rid -> type -> type.
+| ttforall : typeId -> type -> type
+| txforall : effectRowId -> type -> type.
 
 (* Terms *)
 
 Inductive term : Type :=
 | eunit : term
-| evar : id eid -> term
-| eabs : id eid -> type -> term -> term
+| evar : termId -> term
+| eabs : termId -> type -> term -> term
 | eapp : term -> term -> term
-| etabs : id tid -> term -> term
+| etabs : typeId -> term -> term
 | etapp : term -> type -> term
-| exabs : id rid -> term -> term
+| exabs : effectRowId -> term -> term
 | exapp : term -> effects -> term
-| eeffect : id xid -> list (id tid) -> id eid -> type -> term -> term
-| eprovide : id xid -> list type -> effects -> id eid -> term -> term -> term
+| eeffect : effectId -> list (typeId) -> termId -> type -> term -> term
+| eprovide : effectId -> list type -> effects -> termId -> term -> term -> term
 
 (* Effects *)
 
 with effects : Type :=
-| xvar : id rid -> effects
+| xvar : effectRowId -> effects
 | xempty : effects
-| xsingleton : id xid -> list type -> effects
+| xsingleton : effectId -> list type -> effects
 | xunion : effects -> effects.
 
 (* Type contexts *)
 
 Inductive context : Type :=
 | cempty : context
-| cextend : context -> id eid -> type -> context.
+| cextend : context -> termId -> type -> context.
 
 (* Effect context *)
 
 Inductive xContext : Type :=
 | dempty : xContext
-| dextend : xContext -> id xid -> list (id tid) -> id eid -> type -> xContext.
+| dextend : xContext -> effectId -> list (typeId) -> termId -> type -> xContext.
 
 (* Notation "'@'" := makeId (at level 10). *)
 Notation "t1 '→' t2" := (tarrow t1 t2) (at level 38).
