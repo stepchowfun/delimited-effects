@@ -37,7 +37,6 @@
 
 % Terms
 \newcommand\eterm{t}
-\newcommand\eunit{()}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
@@ -51,7 +50,6 @@
 % Types
 \newcommand\ttype{\tau}
 \newcommand\tvar{\alpha}
-\newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
 \newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
 \newcommand\txforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
@@ -106,7 +104,6 @@
       \begin{center}
         \begin{tabular}{l l l}
           $\eterm \Coloneqq $ & & term \\
-          & $\eunit$ & unit term \\
           & $\evar$ & term variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & term abstraction \\
           & $\eapp{\eterm}{\eterm}$ & term application \\
@@ -118,7 +115,6 @@
           & $\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
           $\ttype \Coloneqq$ & & type \\
           & $\tvar$ & type variable \\
-          & $\tunit$ & unit type \\
           & $\tarrow{\tx}{\tx}$ & arrow type \\
           & $\ttforall{\tvar}{\tx}$ & quantified type \\
           & $\txforall{\xvar}{\tx}$ & quantified effect \\
@@ -228,12 +224,6 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\xpre{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
-        \RightLabel{(\textsc{C-Unit})}
-        \UnaryInfC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\twithx{\tunit}{\xeffects_2}}{\twithx{\tunit}{\xeffects_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_1}{\tx_3}$}
           \AxiomC{$\xusing{\xeffects_1}{\xtapp{\xeffect}{\tx}}{\tx_2}{\tx_4}$}
           \AxiomC{$\xpre{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\xeffects_1}}$}
@@ -254,12 +244,6 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\lstlen{\tvar} = \lstlen{\tx}$}
-        \RightLabel{(\textsc{WF-Unit})}
-        \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\tunit}{\xunion{\xeffects}{\xsingleton{\xtapp{\xeffect}{\tx}}}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_2}$}
         \RightLabel{(\textsc{WF-Arrow})}
         \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
@@ -276,12 +260,6 @@
       \end{center}
 
       \medskip
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{T-Unit})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eunit}{\twithx{\tunit}{\xempty}}$}
-      \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tanno{\evar}{\tx} \in \ccontext$}
