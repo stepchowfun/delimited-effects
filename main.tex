@@ -311,9 +311,8 @@
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
           \AxiomC{$\xusing{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\tsub{\tx_1}{\lstof{\tvar}}{\lstof{\tx}}}{\tx_2}$}
           \AxiomC{$\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1} \in \dcontext$}
-          \AxiomC{$\xnotint{e}{\ttype}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - \xtapp{\xeffect}{\tx}}{\xeffects_2}}}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - \xtapp{\xeffect}{\tx}}{\xeffects_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
