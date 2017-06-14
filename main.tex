@@ -307,12 +307,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xsingleton{\xtapp{\xeffect}{\tx}}}}$}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
-          \AxiomC{$\xusing{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\tsub{\tx_1}{\lstof{\tvar}}{\lstof{\tx}}}{\tx_2}$}
+          \AxiomC{$\xusing{\xeffects}{\xtapp{\xeffect}{\tx}}{\tsub{\tx_1}{\lstof{\tvar}}{\lstof{\tx}}}{\tx_2}$}
           \AxiomC{$\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1} \in \dcontext$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - \xtapp{\xeffect}{\tx}}{\xeffects_2}}}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xeffects}}$}
       \end{prooftree}
 
       \begin{prooftree}
