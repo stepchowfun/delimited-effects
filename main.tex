@@ -40,6 +40,7 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eapp[2]{#1 \; #2}
+\newcommand\eappx[2]{#1 \; \$ \; #2}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\exabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\etapp[2]{#1 \; #2}
@@ -106,7 +107,8 @@
           $\eterm \Coloneqq $ & & term \\
           & $\evar$ & term variable \\
           & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & term abstraction \\
-          & $\eapp{\eterm}{\eterm}$ & term application \\
+          & $\eapp{\eterm}{\eterm}$ & effect-realizing application \\
+          & $\eappx{\eterm}{\eterm}$ & effect-preserving application \\
           & $\etabs{\tvar}{\eterm}$ & type abstraction \\
           & $\etapp{\eterm}{\tx}$ & type application \\
           & $\exabs{\xvar}{\eterm}$ & effect row abstraction \\
@@ -277,9 +279,16 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
-          \AxiomC{$\xpre{\xeffects_5}{\xunion{\xeffects_1}{\xunion{\xeffects_2}{\xeffects_3}}}$}
-        \RightLabel{(\textsc{T-Application})}
-        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xeffects_5}}$}
+        \RightLabel{(\textsc{T-EffectRealizingApplication})}
+        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xunion{\xeffects_1}{\xeffects_2}}{\xeffects_3}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
+          \AxiomC{$\xpre{\xeffects_1}{\xeffects_4}$}
+        \RightLabel{(\textsc{T-EffectPreservingApplication})}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eappx{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_2}{\xeffects_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
