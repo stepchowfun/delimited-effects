@@ -152,7 +152,7 @@
 
       \bigskip
 
-      Let $\lstof{\tvar}$ and $\lstof{\tx}$ denote a list of type variables of length $\lstlen{\tvar}$ and a list of types and effects $\tx$ of length $\lstlen{\tx}$, respectively. Let $\cdom{\ccontext}$ and $\ddom{\dcontext}$ denote the term variables bound by $\ccontext$ and effect row variables bound by $\dcontext$, respectively. Let $\tanno{\evar}{\tx} \in \ccontext$ be the judgment that $\evar$ is bound by $\ccontext$ with type and effects $\tx$. Let $\xnotint{\xeffect}{\tx}$ be the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. We write $\xnotint{\xeffect}{\ttype}$ as shorthand for $\xnotint{\xeffect}{\twithx{\ttype}{\xempty}}$. Let $\xsub{\xeffects_1}{\xtapp{\xeffect}{\lstof{\tanno{\tx}{\kkind}}}}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\xtapp{\xeffect}{\lstof{\tanno{\tx}{\kkind}}}}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
+      Let $\cdom{\ccontext}$ and $\ddom{\dcontext}$ denote the term variables bound by $\ccontext$ and effect row variables bound by $\dcontext$, respectively. Let $\tanno{\evar}{\tx} \in \ccontext$ be the judgment that $\evar$ is bound by $\ccontext$ with type and effects $\tx$. Let $\xnotint{\xeffect}{\tx}$ be the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. Let $\xsub{\xeffects_1}{\tx}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\tx}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
