@@ -25,76 +25,73 @@
 \usepackage{mathtools}
 \usepackage[framemethod=tikz]{mdframed} % The `tikz` thing allows us to have a transparent background
 \usepackage{stackengine} % For stacking axioms
+\usepackage{stmaryrd} % For \llbracket and \rrbracket
 
 %%%%%%%%%%
 % Macros %
 %%%%%%%%%%
 
 % Misc
-\newcommand\parens[1]{\left( #1 \right)} % chktex 37
+\newcommand\anno[2]{#1 : #2} % chktex 26
+\newcommand\dom[1]{\text{dom}\parens{#1}}
 \newcommand\lstof[1]{\overline{#1}}
-\newcommand\lstlen[1]{\text{len}\parens{\lstof{#1}}}
+\newcommand\parens[1]{\left( #1 \right)} % chktex 37
+\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
 
 % Terms
 \newcommand\eterm{t}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\eapp[2]{#1 \; #2}
-\newcommand\eappx[2]{#1 \; \$ \; #2}
-\newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\exabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\etapp[2]{#1 \; #2}
-\newcommand\exapp[2]{#1 \; #2}
-\newcommand\eeffect[4]{\textbf{effect} \; #1 \; \textbf{with} \; \tanno{#2}{#3} \; \textbf{in} \; #4}
+\newcommand\eappxr[2]{#1 \; #2}
+\newcommand\eappxp[2]{#1 \left\llbracket #2 \right\rrbracket} % chktex 1
+\newcommand\esabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\esapp[2]{#1 \; #2}
+\newcommand\eeffect[5]{\textbf{effect} \; #1 \; #2 \; \textbf{with} \; \anno{#3}{#4} \; \textbf{in} \; #5}
 \newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
+
+% Schemes
+\newcommand\sscheme{\sigma}
+\newcommand\stwithx[2]{#1 \; ! \; #2} % chktex 26
+\newcommand\svar{\alpha}
+\newcommand\sabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\sapp[2]{#1 \; #2} % chktex 1 chktex 26
 
 % Types
 \newcommand\ttype{\tau}
-\newcommand\tvar{\alpha}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
 \newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
-\newcommand\txforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
-\newcommand\tx{\sigma}
-\newcommand\twithx[2]{#1 \; ! \; #2} % chktex 26
-\newcommand\tanno[2]{#1 : #2} % chktex 26
-\newcommand\tsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
-\newcommand\tjudgment[4]{#1; #2 \vdash \tanno{#3}{#4}} % chktex 1
-\newcommand\ttabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\ttapp[2]{#1 \; #2} % chktex 1 chktex 26
 
-% Effects
-\newcommand\xeffects{E}
-\newcommand\xvar{\varepsilon}
-\newcommand\xempty{\varnothing_{\xeffects}}
-\newcommand\xtapp[2]{#1 \; #2} % chktex 26
-\newcommand\xsingleton[1]{\left\{ #1 \right\}}
-\newcommand\xunion[2]{#1, #2}
-\newcommand\xeffect{e}
-\newcommand\xnotint[2]{#1 \notin #2} % chktex 1
-\newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
-\newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
-\newcommand\xsub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
-\newcommand\xpre[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+% Effect rows
+\newcommand\rrow{\varepsilon}
+\newcommand\rempty{\varnothing_{\rrow}}
+\newcommand\rsingleton[1]{\left\{ #1 \right\}}
+\newcommand\runion[2]{#1, #2}
+
+% Kinds
+\newcommand\kkind{\kappa}
+\newcommand\ktype{\ast}
+\newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
+\newcommand\krow{\diamond} % chktex 26
+\newcommand\karrow[2]{#1 \rightarrow #2} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
 \newcommand\cempty{\varnothing_{\ccontext}}
 \newcommand\cextend[2]{#1, #2}
-\newcommand\cdom[1]{\text{dom}\parens{#1}}
 
-% Effect contexts
+% Judgements
+\newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
+\newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
+\newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
+\newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
+
+% DEPRECATED
+\newcommand\keffectold{\dagger}
 \newcommand\dcontext{\Delta}
 \newcommand\dempty{\varnothing_{\dcontext}}
 \newcommand\dextend[2]{#1, #2}
-\newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \tanno{#3}{#4}} % chktex 1 chktex 26
-\newcommand\ddom[1]{\text{dom}\parens{#1}}
-
-% Kinds
-\newcommand\kkind{\kappa}
-\newcommand\ktype{*}
-\newcommand\keffect{!}
-\newcommand\keffectset{\left\{ ! \right\}} % chktex 26
-\newcommand\karrow[2]{#1 \rightarrow #2} % chktex 1
+\newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \anno{#3}{#4}} % chktex 1 chktex 26
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -113,46 +110,44 @@
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \begin{tabular}{l l l}
-          $\eterm \Coloneqq $ & & term \\
+          $\eterm \Coloneqq $ & & terms: \\
           & $\evar$ & term variable \\
-          & $\eabs{\tanno{\evar}{\tx}}{\eterm}$ & term abstraction \\
-          & $\eapp{\eterm}{\eterm}$ & effect-realizing application \\
-          & $\eappx{\eterm}{\eterm}$ & effect-preserving application \\
-          & $\etabs{\tanno{\tvar}{\kkind}}{\eterm}$ & type abstraction \\
-          & $\etapp{\eterm}{\tx}$ & type application \\
-          & $\eeffect{\xtapp{\xeffect}{\lstof{\tanno{\tvar}{\kkind}}}}{\evar}{\tx}{\eterm}$ & effect declaration \\
-          & $\eprovide{\tx}{\xeffects}{\evar}{\eterm}{\eterm}$ & effect definition \\
-          $\tx \Coloneqq$ & & scheme \\
-          & $\twithx{\ttype}{\xeffects}$ & effect row bound \\
-          & $\xeffect$ & effect variable \\
-          & $\xeffects$ & effect row \\
-          & $\tvar$ & scheme variable \\
-          & $\ttabs{\tanno{\tvar}{\kkind}}{\tx}$ & operator abstraction \\
-          & $\ttapp{\tx}{\tx}$ & operator application \\
-          $\ttype \Coloneqq$ & & type \\
-          & $\ttforall{\tanno{\tvar}{\kkind}}{\tx}$ & quantified type \\
-          & $\tarrow{\tx}{\tx}$ & arrow type \\
-          $\xeffects \Coloneqq$ & & effect row \\
-          & $\xempty$ & empty effect row \\
-          & $\xsingleton{\tx}$ & singleton effect row \\
-          & $\xunion{\xeffects}{\xeffects}$ & effect row union \\
-          $\kkind \Coloneqq $ & & kind \\
+          & $\eabs{\anno{\evar}{\sscheme}}{\eterm}$ & term abstraction \\
+          & $\eappxr{\eterm}{\eterm}$ & effect-realizing application \\
+          & $\eappxp{\eterm}{\eterm}$ & effect-preserving application \\
+          & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
+          & $\esapp{\eterm}{\sscheme}$ & scheme application \\
+          & $\eeffect{\svar}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme}{\eterm}$ & effect declaration \\
+          & $\eprovide{\sscheme}{\rrow}{\evar}{\eterm}{\eterm}$ & effect definition \\
+          \\
+          $\sscheme \Coloneqq$ & & schemes: \\
+          & $\stwithx{\ttype}{\rrow}$ & type with effects \\
+          & $\rrow$ & effect row \\
+          & $\svar$ & scheme variable \\
+          & $\sabs{\anno{\svar}{\kkind}}{\sscheme}$ & operator abstraction \\
+          & $\sapp{\sscheme}{\sscheme}$ & operator application \\
+          \\
+          $\ttype \Coloneqq$ & & types: \\
+          & $\tarrow{\sscheme}{\sscheme}$ & arrow type \\
+          & $\ttforall{\anno{\svar}{\kkind}}{\sscheme}$ & quantified type \\
+          \\
+          $\rrow \Coloneqq$ & & effect rows: \\
+          & $\rempty$ & empty effect row \\
+          & $\rsingleton{\sscheme}$ & singleton effect row \\
+          & $\runion{\rrow}{\rrow}$ & effect row union \\
+          \\
+          $\kkind \Coloneqq $ & & kinds: \\
           & $\ktype$ & kind of proper types \\
-          & $\keffect$ & kind of an effect \\
-          & $\keffectset$ & kind of an effect row \\
+          & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
+          & $\krow$ & kind of an effect row \\
           & $\karrow{\kkind}{\kkind}$ & kind of operators \\
-          $\ccontext \Coloneqq$ & & type context \\
-          & $\cempty$ & empty type context \\
-          & $\cextend{\ccontext}{\tanno{\evar}{\tx}}$ & variable binding \\
-          $\dcontext \Coloneqq$ & & effect context \\
-          & $\dempty$ & empty effect context \\
-          & $\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx}}$ & effect binding \\
+          \\
+          $\ccontext \Coloneqq$ & & contexts: \\
+          & $\cempty$ & empty context \\
+          & $\cextend{\ccontext}{\anno{\evar}{\sscheme}}$ & term variable binding \\
+          & $\cextend{\ccontext}{\anno{\svar}{\kkind}}$ & scheme variable binding \\
         \end{tabular}
       \end{center}
-
-      \bigskip
-
-      Let $\cdom{\ccontext}$ and $\ddom{\dcontext}$ denote the term variables bound by $\ccontext$ and effect row variables bound by $\dcontext$, respectively. Let $\tanno{\evar}{\tx} \in \ccontext$ be the judgment that $\evar$ is bound by $\ccontext$ with type and effects $\tx$. Let $\xnotint{\xeffect}{\tx}$ be the judgment that $\xeffect$ does not appear anywhere in the type or effects of $\tx$. Let $\xsub{\xeffects_1}{\tx}{\xeffects_2}$ denote the result of substituting $\xeffects_2$ for $\xsingleton{\tx}$ in $\xeffects_1$. Let $\tsub{\tx_1}{\tvar}{\tx_2}$ denote the capture-avoiding substitution of $\tx_2$ for $\tvar$ in $\tx_1$.
 
       \caption{Syntax}\label{fig:syntax}
     \end{mdframed}
@@ -161,70 +156,70 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xpre{\xeffects}{\xeffects}$}
+        \framebox{$\rorder{\rrow}{\rrow}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-Reflexivity})}
-        \UnaryInfC{$\xpre{\xeffects}{\xeffects}$}
+        \RightLabel{(\textsc{E-Reflexivity})}
+        \UnaryInfC{$\rorder{\rrow}{\rrow}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\xpre{\xeffects_1}{\xeffects_2}$}
-          \AxiomC{$\xpre{\xeffects_2}{\xeffects_3}$}
-        \RightLabel{(\textsc{\xeffects-Transitivity})}
-        \BinaryInfC{$\xpre{\xeffects_1}{\xeffects_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-LeftAssociativity})}
-        \UnaryInfC{$\xpre{\xunion{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffects_3}}{\xunion{\xeffects_1}{\parens{\xunion{\xeffects_2}{\xeffects_3}}}}$}
+          \AxiomC{$\rorder{\rrow_1}{\rrow_2}$}
+          \AxiomC{$\rorder{\rrow_2}{\rrow_3}$}
+        \RightLabel{(\textsc{E-Transitivity})}
+        \BinaryInfC{$\rorder{\rrow_1}{\rrow_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-RightAssociativity})}
-        \UnaryInfC{$\xpre{\xunion{\xeffects_1}{\parens{\xunion{\xeffects_2}{\xeffects_3}}}}{\xunion{\parens{\xunion{\xeffects_1}{\xeffects_2}}}{\xeffects_3}}$}
+        \RightLabel{(\textsc{E-LeftAssociativity})}
+        \UnaryInfC{$\rorder{\runion{\parens{\runion{\rrow_1}{\rrow_2}}}{\rrow_3}}{\runion{\rrow_1}{\parens{\runion{\rrow_2}{\rrow_3}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-LeftIdentity})}
-        \UnaryInfC{$\xpre{\xunion{\xempty}{\xeffects}}{\xeffects}$}
+        \RightLabel{(\textsc{E-RightAssociativity})}
+        \UnaryInfC{$\rorder{\runion{\rrow_1}{\parens{\runion{\rrow_2}{\rrow_3}}}}{\runion{\parens{\runion{\rrow_1}{\rrow_2}}}{\rrow_3}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-RightIdentity})}
-        \UnaryInfC{$\xpre{\xeffects}{\xunion{\xempty}{\xeffects}}$}
+        \RightLabel{(\textsc{E-LeftIdentity})}
+        \UnaryInfC{$\rorder{\runion{\rempty}{\rrow}}{\rrow}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-LeftContraction})}
-        \UnaryInfC{$\xpre{\xunion{\xunion{\xeffects}{\xsingleton{\tx}}}{\xsingleton{\tx}}}{\xunion{\xeffects}{\xsingleton{\tx}}}$}
+        \RightLabel{(\textsc{E-RightIdentity})}
+        \UnaryInfC{$\rorder{\rrow}{\runion{\rempty}{\rrow}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-RightContraction})}
-          \UnaryInfC{$\xpre{\xunion{\xeffects}{\xsingleton{\tx}}}{\xunion{\xunion{\xeffects}{\xsingleton{\tx}}}{\xsingleton{\tx}}}$}
+        \RightLabel{(\textsc{E-LeftContraction})}
+        \UnaryInfC{$\rorder{\runion{\runion{\rrow}{\rsingleton{\sscheme}}}{\rsingleton{\sscheme}}}{\runion{\rrow}{\rsingleton{\sscheme}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-Weakening})}
-        \UnaryInfC{$\xpre{\xeffects}{\xunion{\xeffects}{\xsingleton{\tx}}}$}
+        \RightLabel{(\textsc{E-RightContraction})}
+          \UnaryInfC{$\rorder{\runion{\rrow}{\rsingleton{\sscheme}}}{\runion{\runion{\rrow}{\rsingleton{\sscheme}}}{\rsingleton{\sscheme}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{\xeffects-Exchange})}
-        \UnaryInfC{$\xpre{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\tx_1}}}{\xsingleton{\tx_2}}}{\xeffects_2}}{\xunion{\xunion{\xunion{\xeffects_1}{\xsingleton{\tx_2}}}{\xsingleton{\tx_1}}}{\xeffects_2}}$}
+        \RightLabel{(\textsc{E-Weakening})}
+        \UnaryInfC{$\rorder{\rrow}{\runion{\rrow}{\rsingleton{\sscheme}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{E-Exchange})}
+        \UnaryInfC{$\rorder{\runion{\runion{\runion{\rrow_1}{\rsingleton{\sscheme_1}}}{\rsingleton{\sscheme_2}}}{\rrow_2}}{\runion{\runion{\runion{\rrow_1}{\rsingleton{\sscheme_2}}}{\rsingleton{\sscheme_1}}}{\rrow_2}}$}
       \end{prooftree}
 
       \caption{Effect row preorder}\label{fig:preorder}
@@ -234,17 +229,17 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xusing{\xeffects}{\tx}{\tx}{\tx}$}
+        \framebox{$\xusing{\rrow}{\sscheme}{\sscheme}{\sscheme}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\xusing{\xeffects_1}{\tx_5}{\tx_1}{\tx_3}$}
-          \AxiomC{$\xusing{\xeffects_1}{\tx_5}{\tx_2}{\tx_4}$}
-          \AxiomC{$\xpre{\xunion{\xeffects_3}{\xeffects_4}}{\xsub{\xeffects_2}{\tx_5}{\xeffects_1}}$}
+          \AxiomC{$\xusing{\rrow_1}{\sscheme_5}{\sscheme_1}{\sscheme_3}$}
+          \AxiomC{$\xusing{\rrow_1}{\sscheme_5}{\sscheme_2}{\sscheme_4}$}
+          \AxiomC{$\rorder{\runion{\rrow_3}{\rrow_4}}{\sub{\rrow_2}{\sscheme_5}{\rrow_1}}$}
         \RightLabel{(\textsc{C-Arrow})}
-        \TrinaryInfC{$\xusing{\xeffects_1}{\tx_5}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects_2}}{\twithx{\parens{\tarrow{\tx_3}{\tx_4}}}{\xeffects_3}}$}
+        \TrinaryInfC{$\xusing{\rrow_1}{\sscheme_5}{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow_2}}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_4}}}{\rrow_3}}$}
       \end{prooftree}
 
       \caption{Operation type compatibility}\label{fig:operation_type_compatibility}
@@ -254,15 +249,15 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xopwellformed{\xtapp{\xeffect}{\lstof{\tanno{\tvar}{\kkind}}}}{\tx}$}
+        \framebox{$\xopwellformed{\sscheme}{\sscheme}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\lstof{\tanno{\tvar}{\kkind}}}}{\tx_2}$}
+          \AxiomC{$\xopwellformed{\sscheme_1}{\sscheme_2}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\xopwellformed{\xtapp{\xeffect}{\lstof{\tanno{\tvar}{\kkind}}}}{\twithx{\parens{\tarrow{\tx_1}{\tx_2}}}{\xeffects}}$}
+        \UnaryInfC{$\xopwellformed{\sscheme_1}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_2}}}{\rrow}}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type}
@@ -272,83 +267,147 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
+        \framebox{$\tjudgment{\ccontext}{\eterm}{\sscheme}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\tanno{\evar}{\tx} \in \ccontext$}
+          \AxiomC{$\anno{\evar}{\sscheme} \in \ccontext$}
         \RightLabel{(\textsc{T-Variable})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\evar}{\tx}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\evar}{\sscheme}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\tx_1}}}{\dcontext}{\eterm}{\tx_2}$}
-          \AxiomC{$\evar \notin \cdom{\ccontext}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\evar}{\sscheme_1}}}{\eterm}{\sscheme_2}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\ktype}$}
+          \AxiomC{$\evar \notin \dom{\ccontext}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eabs{\tanno{\evar}{\tx_1}}{\eterm}}{\tarrow{\tx_1}{\tx_2}}$}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\parens{\eabs{\anno{\evar}{\sscheme_1}}{\eterm}}}{\tarrow{\sscheme_1}{\sscheme_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
         \RightLabel{(\textsc{T-EffectRealizingApplication})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eapp{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xunion{\xeffects_1}{\xeffects_2}}{\xeffects_3}}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\eappxr{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\runion{\rrow_1}{\rrow_2}}{\rrow_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\twithx{\ttype_1}{\xeffects_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\parens{\tarrow{\twithx{\ttype_1}{\xeffects_4}}{\twithx{\ttype_2}{\xeffects_2}}}}{\xeffects_3}}$}
-          \AxiomC{$\xpre{\xeffects_1}{\xeffects_4}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
+          \AxiomC{$\rorder{\rrow_1}{\rrow_4}$}
         \RightLabel{(\textsc{T-EffectPreservingApplication})}
-        \TrinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eappx{\eterm_2}{\eterm_1}}{\twithx{\ttype_2}{\xunion{\xeffects_2}{\xeffects_3}}}$}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\eappxp{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind}}}{\eterm}{\sscheme}$}
+          \AxiomC{$\svar \notin \dom{\ccontext}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etabs{\tvar}{\eterm}}{\ttforall{\tvar}{\tx}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\parens{\esabs{\anno{\svar}{\kkind}}{\eterm}}}{\ttforall{\anno{\svar}{\kkind}}{\sscheme}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\ttforall{\tvar}{\tx_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\ttforall{\anno{\svar}{\kkind}}{\sscheme_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\kkind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\etapp{\eterm}{\tx_2}}{\tsub{\tx_1}{\tvar}{\tx_2}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\esapp{\eterm}{\sscheme_2}}{\sub{\sscheme_1}{\svar}{\sscheme_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\tx}$}
-        \RightLabel{(\textsc{T-EffectAbstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exabs{\xvar}{\eterm}}{\txforall{\xvar}{\tx}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm}{\txforall{\xvar}{\tx}}$}
-        \RightLabel{(\textsc{T-EffectApplication})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\dcontext}{\exapp{\eterm}{\xeffects}}{\xsub{\tx}{\xvar}{\xeffects}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_2}{\twithx{\ttype}{\xeffects_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\dcontext}{\eterm_1}{\tx_2}$}
-          \AxiomC{$\xusing{\xeffects_2}{\xtapp{\xeffect}{\tx}}{\tsub{\tx_1}{\lstof{\tvar}}{\lstof{\tx}}}{\tx_2}$}
-          \AxiomC{$\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1} \in \dcontext$}
-        \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eprovide{\xtapp{\xeffect}{\tx}}{\xeffects_2}{\evar}{\eterm_1}{\eterm_2}}{\twithx{\ttype}{\xunion{\xeffects_1 - \xtapp{\xeffect}{\tx}}{\xeffects_2}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\tanno{\evar}{\ttforall{\lstof{\tvar}}{\tx_1}}}}{\dextend{\dcontext}{\deffect{\xeffect}{\lstof{\tvar}}{\evar}{\tx_1}}}{\eterm}{\tx_2}$}
-          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
-          \AxiomC{$\xeffect \notin \ddom{\dcontext}$}
-          \AxiomC{$\xopwellformed{\xtapp{\xeffect}{\tvar}}{\tx_1}$}
-          \AxiomC{$\xeffect \notin \tx_2$}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\evar}{\ttforall{\lstof{\svar}}{\sscheme_1}}}}{\eterm}{\sscheme_2}$}
+          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
+          \AxiomC{$\svar \notin \dom{\dcontext}$}
+          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
+          \AxiomC{$\svar \notin \sscheme_2$}
         \RightLabel{(\textsc{T-Effect})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\dcontext}{\eeffect{\xtapp{\xeffect}{\tvar}}{\evar}{\tx_1}{\eterm}}{\tx_2}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\eeffect{\svar}{\svar}{\evar}{\sscheme_1}{\eterm}}{\sscheme_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow_1}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_2}$}
+          \AxiomC{$\xusing{\rrow_2}{\sscheme}{\sub{\sscheme_1}{\lstof{\svar}}{\lstof{\sscheme}}}{\sscheme_2}$}
+          \AxiomC{$\deffect{\svar}{\lstof{\svar}}{\evar}{\sscheme_1} \in \dcontext$}
+        \RightLabel{(\textsc{T-Provide})}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\eprovide{\sscheme}{\rrow_2}{\evar}{\eterm_1}{\eterm_2}}{\stwithx{\ttype}{\runion{\rrow_1 - \sscheme}{\rrow_2}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\sscheme_1}$}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\ktype}$}
+        \RightLabel{(\textsc{T-Equiv})}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\eterm}{\sscheme_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\tjudgment{\ccontext}{\sscheme}{\kkind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\ktype}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\ktype}$}
+          \AxiomC{$\tjudgment{\ccontext}{\rrow}{\krow}$}
+        \RightLabel{(\textsc{K-Arrow})}
+        \TrinaryInfC{$\tjudgment{\ccontext}{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind}}}{\sscheme}{\ktype}$}
+          \AxiomC{$\tjudgment{\ccontext}{\rrow}{\krow}$}
+        \RightLabel{(\textsc{K-ForAll})}
+        \BinaryInfC{$\tjudgment{\ccontext}{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind}}{\sscheme}}}{\rrow}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-EmptyEffectRow})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\rempty}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme}{\ktype}$}
+        \RightLabel{(\textsc{K-SingletonEffectRow})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\sscheme}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\rrow_1}{\krow}$}
+          \AxiomC{$\tjudgment{\ccontext}{\rrow_2}{\krow}$}
+        \RightLabel{(\textsc{K-EffectRowUnion})}
+        \BinaryInfC{$\tjudgment{\ccontext}{\runion{\rrow_1}{\rrow_2}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\anno{\svar}{\kkind} \in \ccontext$}
+        \RightLabel{(\textsc{K-Variable})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\svar}{\kkind}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind_1}}}{\sscheme}{\kkind_2}$}
+        \RightLabel{(\textsc{K-Abstraction})}
+        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\sabs{\anno{\svar}{\kkind_1}}{\sscheme}}}{\karrow{\kkind_1}{\kkind_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\kkind_1}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\kkind_1}{\kkind_2}}$}
+        \RightLabel{(\textsc{K-Application})}
+        \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\kkind_2}$}
+      \end{prooftree}
+
+      \caption{Kinding rules}\label{fig:kinding_rules}
     \end{mdframed}
   \end{figure}
 \end{document}
