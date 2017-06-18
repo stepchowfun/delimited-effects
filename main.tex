@@ -60,6 +60,7 @@
 \newcommand\ttype{\tau}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
 \newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
+\newcommand\teffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 
 % Effect rows
 \newcommand\rrow{\varepsilon}
@@ -70,7 +71,6 @@
 % Kinds
 \newcommand\kkind{\kappa}
 \newcommand\ktype{\ast}
-\newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\krow{\diamond} % chktex 26
 \newcommand\karrow[2]{#1 \rightarrow #2} % chktex 1
 
@@ -87,7 +87,7 @@
 \newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
 
 % DEPRECATED
-\newcommand\keffectold{\dagger}
+\newcommand\teffectold{\dagger}
 \newcommand\dcontext{\Delta}
 \newcommand\dempty{\varnothing_{\dcontext}}
 \newcommand\dextend[2]{#1, #2}
@@ -117,7 +117,7 @@
           & $\eappxp{\eterm}{\eterm}$ & effect-preserving application \\
           & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
           & $\esapp{\eterm}{\sscheme}$ & scheme application \\
-          & $\eeffect{\svar}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme}{\eterm}$ & effect declaration \\
+          & $\eeffect{\evar}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme}{\eterm}$ & effect declaration \\
           & $\eprovide{\sscheme}{\rrow}{\evar}{\eterm}{\eterm}$ & effect definition \\
           \\
           $\sscheme \Coloneqq$ & & schemes: \\
@@ -130,15 +130,15 @@
           $\ttype \Coloneqq$ & & types: \\
           & $\tarrow{\sscheme}{\sscheme}$ & arrow type \\
           & $\ttforall{\anno{\svar}{\kkind}}{\sscheme}$ & quantified type \\
+          & $\teffect{\evar}{\sscheme}$ & type of an effect \\
           \\
           $\rrow \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
-          & $\rsingleton{\sscheme}$ & singleton effect row \\
+          & $\rsingleton{\eterm}$ & singleton effect row \\
           & $\runion{\rrow}{\rrow}$ & effect row union \\
           \\
           $\kkind \Coloneqq $ & & kinds: \\
           & $\ktype$ & kind of proper types \\
-          & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
           & $\krow$ & kind of an effect row \\
           & $\karrow{\kkind}{\kkind}$ & kind of operators \\
           \\
@@ -316,13 +316,13 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\evar}{\ttforall{\lstof{\svar}}{\sscheme_1}}}}{\eterm}{\sscheme_2}$}
-          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
-          \AxiomC{$\svar \notin \dom{\dcontext}$}
-          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
-          \AxiomC{$\svar \notin \sscheme_2$}
+          \AxiomC{$\tjudgment{\cextend{\cextend{\ccontext}{\anno{\evar_1}{\sabs{\lstof{\anno{\svar}{\kkind}}}{\teffect{\evar_2}{\sscheme_1}}}}}{\anno{\evar_2}{\ttforall{\lstof{\anno{\svar}{\kkind}}}{\sscheme_1}}}}{\eterm}{\sscheme_2}$}
+          \AxiomC{$\xopwellformed{\evar_1}{\sscheme_1}$}
+          \AxiomC{$\evar_1 \notin \dom{\ccontext}$}
+          \AxiomC{$\evar_2 \notin \dom{\ccontext}$}
+          \AxiomC{$\evar_2 \notin \sscheme_2$}
         \RightLabel{(\textsc{T-Effect})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\eeffect{\svar}{\svar}{\evar}{\sscheme_1}{\eterm}}{\sscheme_2}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\parens{\eeffect{\evar_1}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme_1}{\eterm}}}{\sscheme_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -376,9 +376,9 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme}{\ktype}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm}{\teffect{\evar}{\sscheme}}$}
         \RightLabel{(\textsc{K-SingletonEffectRow})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\sscheme}}{\krow}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\eterm}}{\teffect{\evar}{\sscheme}}$}
       \end{prooftree}
 
       \begin{prooftree}
