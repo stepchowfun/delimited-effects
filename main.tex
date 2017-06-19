@@ -72,7 +72,7 @@
 \newcommand\ktype{\ast}
 \newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\krow{\diamond} % chktex 26
-\newcommand\karrow[3]{\parens{\anno{#1}{#2}} \rightarrow #2} % chktex 1
+\newcommand\karrow[3]{\parens{\anno{#1}{#2}} \rightarrow #3} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -402,7 +402,7 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\kkind_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{}{\kkind_1}{\kkind_2}}$}
         \RightLabel{(\textsc{K-Application})}
         \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\kkind_2}$}
       \end{prooftree}
