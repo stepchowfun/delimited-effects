@@ -72,7 +72,7 @@
 \newcommand\ktype{\ast}
 \newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\krow{\diamond} % chktex 26
-\newcommand\karrow[3]{\parens{\anno{#1}{#2}} \rightarrow #3} % chktex 1
+\newcommand\karrow[2]{\parens{#1} \rightarrow #2} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -140,7 +140,7 @@
           & $\ktype$ & kind of proper types \\
           & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
           & $\krow$ & kind of an effect row \\
-          & $\karrow{\svar}{\kkind}{\kkind}$ & kind of operators \\
+          & $\karrow{\anno{\svar}{\kkind}}{\kkind}$ & kind of operators \\
           \\
           $\ccontext \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
@@ -316,13 +316,13 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\evar}{\ttforall{\lstof{\svar}}{\sscheme_1}}}}{\eterm}{\sscheme_2}$}
-          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
-          \AxiomC{$\svar \notin \dom{\dcontext}$}
-          \AxiomC{$\xopwellformed{\sapp{\svar}{\svar}}{\sscheme_1}$}
-          \AxiomC{$\svar \notin \sscheme_2$}
+          \AxiomC{$\tjudgment{\cextend{\cextend{\ccontext}{\anno{\svar_1}{\karrow{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\keffect{\evar}{\sscheme_1}}}}}{\anno{\evar}{\sscheme_1}}}{\eterm}{\sscheme_2}$}
+          \AxiomC{$\xopwellformed{\svar_1}{\sscheme_1}$}
+          \AxiomC{$\svar_1 \notin \sscheme_2$}
+          \AxiomC{$\svar_1 \notin \dom{\ccontext}$}
+          \AxiomC{$\evar \notin \dom{\ccontext}$}
         \RightLabel{(\textsc{T-Effect})}
-        \QuinaryInfC{$\tjudgment{\ccontext}{\eeffect{\svar}{\svar}{\evar}{\sscheme_1}{\eterm}}{\sscheme_2}$}
+        \QuinaryInfC{$\tjudgment{\ccontext}{\parens{\eeffect{\svar_1}{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\evar}{\sscheme_1}{\eterm}}}{\sscheme_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -397,12 +397,12 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind_1}}}{\sscheme}{\kkind_2}$}
         \RightLabel{(\textsc{K-Abstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\sabs{\anno{\svar}{\kkind_1}}{\sscheme}}}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\sabs{\anno{\svar}{\kkind_1}}{\sscheme}}}{\karrow{\anno{\svar}{\kkind_1}}{\kkind_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\kkind_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\anno{\svar}{\kkind_1}}{\kkind_2}}$}
         \RightLabel{(\textsc{K-Application})}
         \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\sub{\kkind_2}{\svar}{\sscheme_1}}$}
       \end{prooftree}
