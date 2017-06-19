@@ -376,9 +376,9 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme}{\ktype}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\keffect{\evar}{\sscheme_2}}$}
         \RightLabel{(\textsc{K-SingletonEffectRow})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\sscheme}}{\krow}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\sscheme_1}}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -402,9 +402,9 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\kkind_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{}{\kkind_1}{\kkind_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
         \RightLabel{(\textsc{K-Application})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\kkind_2}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\sub{\kkind_2}{\svar}{\sscheme_1}}$}
       \end{prooftree}
 
       \caption{Kinding rules}\label{fig:kinding_rules}
