@@ -66,6 +66,7 @@
 \newcommand\rempty{\varnothing_{\rrow}}
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1, #2}
+\newcommand\rdiff[2]{#1 \; - \; #2} % chktex 8
 
 % Kinds
 \newcommand\kkind{\kappa}
@@ -327,12 +328,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_2}$}
-          \AxiomC{$\xusing{\rrow_2}{\sscheme}{\sub{\sscheme_1}{\lstof{\svar}}{\lstof{\sscheme}}}{\sscheme_2}$}
-          \AxiomC{$\deffect{\svar}{\lstof{\svar}}{\evar}{\sscheme_1} \in \dcontext$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_1}$}
+          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\keffect{\evar}{\sscheme_3}}$}
+          \AxiomC{$\xusing{\rrow_1}{\sscheme_2}{\sscheme_1}{\sscheme_3}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\eprovide{\sscheme}{\rrow_2}{\evar}{\eterm_1}{\eterm_2}}{\stwithx{\ttype}{\runion{\rrow_1 - \sscheme}{\rrow_2}}}$}
+        \QuaternaryInfC{$\tjudgment{\ccontext}{\parens{\eprovide{\sscheme_2}{\rrow_1}{\evar}{\eterm_1}{\eterm_2}}}{\stwithx{\ttype}{\runion{\rrow_1}{\parens{\rdiff{\rrow_2}{\rsingleton{\sscheme_2}}}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
