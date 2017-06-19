@@ -72,7 +72,7 @@
 \newcommand\ktype{\ast}
 \newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\krow{\diamond} % chktex 26
-\newcommand\karrow[2]{#1 \rightarrow #2} % chktex 1
+\newcommand\karrow[3]{\parens{\anno{#1}{#2}} \rightarrow #2} % chktex 1
 
 % Type contexts
 \newcommand\ccontext{\Gamma}
@@ -140,7 +140,7 @@
           & $\ktype$ & kind of proper types \\
           & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
           & $\krow$ & kind of an effect row \\
-          & $\karrow{\kkind}{\kkind}$ & kind of operators \\
+          & $\karrow{\svar}{\kkind}{\kkind}$ & kind of operators \\
           \\
           $\ccontext \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
@@ -397,12 +397,12 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind_1}}}{\sscheme}{\kkind_2}$}
         \RightLabel{(\textsc{K-Abstraction})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\sabs{\anno{\svar}{\kkind_1}}{\sscheme}}}{\karrow{\kkind_1}{\kkind_2}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\sabs{\anno{\svar}{\kkind_1}}{\sscheme}}}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\kkind_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\kkind_1}{\kkind_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\karrow{\svar}{\kkind_1}{\kkind_2}}$}
         \RightLabel{(\textsc{K-Application})}
         \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\kkind_2}$}
       \end{prooftree}
