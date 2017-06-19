@@ -85,6 +85,7 @@
 \newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
 \newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
+\newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
 
 % DEPRECATED
 \newcommand\keffectold{\dagger}
@@ -337,9 +338,8 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\eterm}{\sscheme_1}$}
           \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\ktype}$}
         \RightLabel{(\textsc{T-Equiv})}
-        \TrinaryInfC{$\tjudgment{\ccontext}{\eterm}{\sscheme_2}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\eterm}{\sscheme_2}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -407,7 +407,58 @@
         \BinaryInfC{$\tjudgment{\ccontext}{\sapp{\sscheme_2}{\sscheme_1}}{\sub{\kkind_2}{\svar}{\sscheme_1}}$}
       \end{prooftree}
 
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme}{\kkind_1}$}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
+        \RightLabel{(\textsc{K-Equiv})}
+        \BinaryInfC{$\tjudgment{\ccontext}{\sscheme}{\kkind_2}$}
+      \end{prooftree}
+
       \caption{Kinding rules}\label{fig:kinding_rules}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\kequiv{\kkind}{\kkind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{KE-Reflexivity})}
+        \UnaryInfC{$\kequiv{\kkind}{\kkind}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
+        \RightLabel{(\textsc{KE-Symmetry})}
+        \UnaryInfC{$\kequiv{\kkind_2}{\kkind_1}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
+          \AxiomC{$\kequiv{\kkind_2}{\kkind_3}$}
+        \RightLabel{(\textsc{KE-Transitivity})}
+        \BinaryInfC{$\kequiv{\kkind_1}{\kkind_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+        \RightLabel{(\textsc{KE-Effect})}
+        \UnaryInfC{$\kequiv{\keffect{\evar}{\sscheme_1}}{\keffect{\evar}{\sscheme_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_3}$}
+          \AxiomC{$\kequiv{\kkind_2}{\kkind_4}$}
+        \RightLabel{(\textsc{KE-Operator})}
+        \BinaryInfC{$\kequiv{\karrow{\svar}{\kkind_1}{\kkind_2}}{\karrow{\svar}{\kkind_3}{\kkind_4}}$}
+      \end{prooftree}
+
+      \caption{Kind equivalence}\label{fig:kind_equivalence}
     \end{mdframed}
   \end{figure}
 \end{document}
