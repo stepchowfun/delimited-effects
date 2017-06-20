@@ -312,14 +312,14 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\cextend{\ccontext}{\anno{\svar}{\kkind}}}{\eterm}{\sscheme}$}
           \AxiomC{$\svar \notin \dom{\ccontext}$}
-        \RightLabel{(\textsc{T-TypeAbstraction})}
+        \RightLabel{(\textsc{T-SchemeAbstraction})}
         \BinaryInfC{$\tjudgment{\ccontext}{\parens{\esabs{\anno{\svar}{\kkind}}{\eterm}}}{\ttforall{\anno{\svar}{\kkind}}{\sscheme}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\eterm}{\ttforall{\anno{\svar}{\kkind}}{\sscheme_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\kkind}$}
-        \RightLabel{(\textsc{T-TypeApplication})}
+        \RightLabel{(\textsc{T-SchemeApplication})}
         \BinaryInfC{$\tjudgment{\ccontext}{\esapp{\eterm}{\sscheme_2}}{\sub{\sscheme_1}{\svar}{\sscheme_2}}$}
       \end{prooftree}
 
@@ -478,14 +478,14 @@
       \begin{prooftree}
           \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
           \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
-        \RightLabel{(\textsc{SE-TypeAbstraction})}
+        \RightLabel{(\textsc{SE-SchemeAbstraction})}
         \BinaryInfC{$\sequiv{\sabs{\anno{\svar}{\kkind_1}}{\sscheme_1}}{\sabs{\anno{\svar}{\kkind_2}}{\sscheme_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\sequiv{\sscheme_1}{\sscheme_3}$}
           \AxiomC{$\sequiv{\sscheme_2}{\sscheme_4}$}
-        \RightLabel{(\textsc{SE-TypeApplication})}
+        \RightLabel{(\textsc{SE-SchemeApplication})}
         \BinaryInfC{$\sequiv{\sapp{\sscheme_1}{\sscheme_2}}{\sapp{\sscheme_3}{\sscheme_4}}$}
       \end{prooftree}
 
