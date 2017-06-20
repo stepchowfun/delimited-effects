@@ -209,7 +209,7 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{E-RightContraction})}
-          \UnaryInfC{$\rorder{\runion{\rrow}{\rsingleton{\sscheme}}}{\runion{\runion{\rrow}{\rsingleton{\sscheme}}}{\rsingleton{\sscheme}}}$}
+        \UnaryInfC{$\rorder{\runion{\rrow}{\rsingleton{\sscheme}}}{\runion{\runion{\rrow}{\rsingleton{\sscheme}}}{\rsingleton{\sscheme}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -222,6 +222,12 @@
           \AxiomC{}
         \RightLabel{(\textsc{E-Exchange})}
         \UnaryInfC{$\rorder{\runion{\runion{\runion{\rrow_1}{\rsingleton{\sscheme_1}}}{\rsingleton{\sscheme_2}}}{\rrow_2}}{\runion{\runion{\runion{\rrow_1}{\rsingleton{\sscheme_2}}}{\rsingleton{\sscheme_1}}}{\rrow_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+        \RightLabel{(\textsc{E-SchemeEquivalence})}
+        \UnaryInfC{$\rorder{\runion{\rrow}{\rsingleton{\sscheme_1}}}{\runion{\rrow}{\rsingleton{\sscheme_2}}}$}
       \end{prooftree}
 
       \caption{Effect row preorder}\label{fig:preorder}
