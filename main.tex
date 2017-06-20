@@ -422,6 +422,74 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
+        \framebox{$\sequiv{\sscheme}{\sscheme}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{SE-Reflexivity})}
+        \UnaryInfC{$\sequiv{\sscheme}{\sscheme}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+        \RightLabel{(\textsc{SE-Symmetry})}
+        \UnaryInfC{$\sequiv{\sscheme_2}{\sscheme_1}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+          \AxiomC{$\sequiv{\sscheme_2}{\sscheme_3}$}
+        \RightLabel{(\textsc{SE-Transitivity})}
+        \BinaryInfC{$\sequiv{\sscheme_1}{\sscheme_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_3}$}
+          \AxiomC{$\sequiv{\sscheme_2}{\sscheme_4}$}
+          \AxiomC{$\sequiv{\rrow_1}{\rrow_2}$}
+        \RightLabel{(\textsc{SE-Arrow})}
+        \TrinaryInfC{$\sequiv{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow_1}}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_4}}}{\rrow_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+          \AxiomC{$\sequiv{\rrow_1}{\rrow_2}$}
+        \RightLabel{(\textsc{SE-ForAll})}
+        \TrinaryInfC{$\sequiv{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind_1}}{\sscheme_1}}}{\rrow_1}}{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind_2}}{\sscheme_2}}}{\rrow_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rorder{\rrow_1}{\rrow_2}$}
+          \AxiomC{$\rorder{\rrow_2}{\rrow_1}$}
+        \RightLabel{(\textsc{SE-EffectRow})}
+        \BinaryInfC{$\sequiv{\rrow_1}{\rrow_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
+        \RightLabel{(\textsc{SE-TypeAbstraction})}
+        \BinaryInfC{$\sequiv{\sabs{\anno{\svar}{\kkind_1}}{\sscheme_1}}{\sabs{\anno{\svar}{\kkind_2}}{\sscheme_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sequiv{\sscheme_1}{\sscheme_3}$}
+          \AxiomC{$\sequiv{\sscheme_2}{\sscheme_4}$}
+        \RightLabel{(\textsc{SE-TypeApplication})}
+        \BinaryInfC{$\sequiv{\sapp{\sscheme_1}{\sscheme_2}}{\sapp{\sscheme_3}{\sscheme_4}}$}
+      \end{prooftree}
+
+      \caption{Scheme equivalence}\label{fig:scheme_equivalence}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
         \framebox{$\kequiv{\kkind}{\kkind}$}
       \end{center}
 
