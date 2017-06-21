@@ -302,11 +302,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
-          \AxiomC{$\rorder{\rrow_1}{\rrow_4}$}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
+            {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
+            {$\rorder{\rrow_1}{\rrow_4}$}}}
         \RightLabel{(\textsc{T-EffectPreservingApplication})}
-        \TrinaryInfC{$\tjudgment{\ccontext}{\eappxp{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eappxp{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
