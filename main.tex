@@ -71,8 +71,8 @@
 % Kinds
 \newcommand\kkind{\kappa}
 \newcommand\ktype{\ast}
-\newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\krow{\diamond} % chktex 26
+\newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
 \newcommand\karrow[2]{\parens{#1} \rightarrow #2} % chktex 1
 
 % Type contexts
@@ -83,7 +83,7 @@
 % Judgements
 \newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
-\newcommand\xopwellformed[2]{#1 \vdash #2} % chktex 1
+\newcommand\xopwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
 \newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
 \newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
 \newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
@@ -140,8 +140,8 @@
           \\
           $\kkind \Coloneqq $ & & kinds: \\
           & $\ktype$ & kind of proper types \\
-          & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
           & $\krow$ & kind of an effect row \\
+          & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
           & $\karrow{\anno{\svar}{\kkind}}{\kkind}$ & kind of operators \\
           \\
           $\ccontext \Coloneqq$ & & contexts: \\
@@ -263,21 +263,21 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\xopwellformed{\sscheme_1}{\sscheme_2}$}
+          \AxiomC{$\xopwellformed{\sscheme_2}{\sscheme_3}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\xopwellformed{\sscheme_1}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_2}}}{\rrow}}$}
+        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\sscheme_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\xopwellformed{\sscheme_1}{\sscheme_2}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \UnaryInfC{$\xopwellformed{\sscheme_1}{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind}}{\sscheme_2}}}{\rrow}}$}
+        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind}}{\sscheme_1}}}{\rrow}}{\sscheme_2}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\rorder{\rsingleton{\sscheme}}{\rrow}$}
         \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\xopwellformed{\sscheme}{\stwithx{\ttype}{\rrow}}$}
+        \UnaryInfC{$\xopwellformed{\stwithx{\ttype}{\rrow}}{\sscheme}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type}
@@ -336,8 +336,8 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\anno{\sscheme_1}{\ktype}$}
-            {$\xopwellformed{\sapp{\svar_1}{\lstof{\svar_2^i}}}{\sscheme_1}$}
+          \AxiomC{\Shortstack[c]{{$\xopwellformed{\sscheme_1}{\sapp{\svar_1}{\lstof{\svar_2^i}}}$}
+            {$\tjudgment{\ccontext}{\sscheme_1}{\ktype}$}
             {$\svar_1 \notin \sscheme_2$}
             {$\svar_1 \notin \dom{\ccontext}$}
             {$\evar \notin \dom{\ccontext}$}
