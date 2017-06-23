@@ -113,10 +113,10 @@
       \begin{center}
         \begin{tabular}{l l l}
           $\eterm \Coloneqq $ & & terms: \\
-          & $\evar$ & term variable \\
-          & $\eabs{\anno{\evar}{\sscheme}}{\eterm}$ & term abstraction \\
-          & $\eappxr{\eterm}{\eterm}$ & effect-realizing application \\
-          & $\eappxp{\eterm}{\eterm}$ & effect-preserving application \\
+          & $\evar$ & variable \\
+          & $\eabs{\anno{\evar}{\sscheme}}{\eterm}$ & abstraction \\
+          & $\eappxr{\eterm}{\eterm}$ & application by value \\
+          & $\eappxp{\eterm}{\eterm}$ & application by name \\
           & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
           & $\esapp{\eterm}{\sscheme}$ & scheme application \\
           & $\eeffect{\svar}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme}{\eterm}$ & effect declaration \\
@@ -309,7 +309,7 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
-        \RightLabel{(\textsc{T-EffectRealizingApplication})}
+        \RightLabel{(\textsc{T-ApplicationByValue})}
         \BinaryInfC{$\tjudgment{\ccontext}{\eappxr{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\runion{\rrow_1}{\rrow_2}}{\rrow_3}}}$}
       \end{prooftree}
 
@@ -317,7 +317,7 @@
           \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
             {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
             {$\rorder{\rrow_1}{\rrow_4}$}}}
-        \RightLabel{(\textsc{T-EffectPreservingApplication})}
+        \RightLabel{(\textsc{T-ApplicationByName})}
         \UnaryInfC{$\tjudgment{\ccontext}{\eappxp{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
       \end{prooftree}
 
