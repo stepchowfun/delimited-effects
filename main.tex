@@ -46,7 +46,7 @@
 \newcommand\eappxp[2]{#1 \left\llbracket #2 \right\rrbracket} % chktex 1
 \newcommand\esabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\esapp[2]{#1 \; #2}
-\newcommand\eeffect[5]{\textbf{effect} \; #1 \; #2 \; \textbf{with} \; \anno{#3}{#4} \; \textbf{in} \; #5}
+\newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
 \newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
 
 % Schemes
@@ -59,7 +59,7 @@
 % Types
 \newcommand\ttype{\tau}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
-\newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktk 1 chktex 26
+\newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktex 26
 
 % Effect rows
 \newcommand\rrow{\varepsilon}
@@ -72,7 +72,7 @@
 \newcommand\kkind{\kappa}
 \newcommand\ktype{\ast}
 \newcommand\krow{\diamond} % chktex 26
-\newcommand\keffect[2]{\left\langle\anno{#1}{#2}\right\rangle}
+\newcommand\keffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle} % chktex 1 chktex 26
 \newcommand\karrow[2]{\parens{#1} \rightarrow #2} % chktex 1
 
 % Type contexts
@@ -119,7 +119,7 @@
           & $\eappxp{\eterm}{\eterm}$ & application by name \\
           & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
           & $\esapp{\eterm}{\sscheme}$ & scheme application \\
-          & $\eeffect{\svar}{\lstof{\anno{\svar}{\kkind}}}{\evar}{\sscheme}{\eterm}$ & effect declaration \\
+          & $\eeffect{\svar}{\kkind}{\eterm}$ & effect declaration \\
           & $\eprovide{\sscheme}{\rrow}{\evar}{\eterm}{\eterm}$ & effect definition \\
           \\
           $\sscheme \Coloneqq$ & & schemes: \\
@@ -140,8 +140,8 @@
           \\
           $\kkind \Coloneqq $ & & kinds: \\
           & $\ktype$ & kind of proper types \\
-          & $\krow$ & kind of an effect row \\
-          & $\keffect{\evar}{\sscheme}$ & kind of an effect \\
+          & $\krow$ & kind of effect rows \\
+          & $\keffect{\svar}{\evar}{\sscheme}$ & kind of effects \\
           & $\karrow{\anno{\svar}{\kkind}}{\kkind}$ & kind of operators \\
           \\
           $\ccontext \Coloneqq$ & & contexts: \\
@@ -237,6 +237,37 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
+        \framebox{$\xopwellformed{\sscheme}{\svar}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\xopwellformed{\sscheme_2}{\svar}$}
+        \RightLabel{(\textsc{WF-Arrow})}
+        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\svar}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\xopwellformed{\sscheme}{\svar_2}$}
+          \AxiomC{$\svar_1 \neq \svar_2$}
+        \RightLabel{(\textsc{WF-ForAll})}
+        \BinaryInfC{$\xopwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kkind}}{\sscheme}}}{\rrow}}{\svar_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rorder{\rsingleton{\svar}}{\rrow}$}
+        \RightLabel{(\textsc{WF-TypeWithEffects})}
+        \UnaryInfC{$\xopwellformed{\stwithx{\ttype}{\rrow}}{\svar}$}
+      \end{prooftree}
+
+      \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
         \framebox{$\xusing{\rrow}{\sscheme}{\sscheme}{\sscheme}$}
       \end{center}
 
@@ -251,36 +282,6 @@
       \end{prooftree}
 
       \caption{Operation type compatibility}\label{fig:operation_type_compatibility}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\xopwellformed{\sscheme}{\sscheme}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\xopwellformed{\sscheme_2}{\sscheme_3}$}
-        \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\sscheme_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\xopwellformed{\sscheme_1}{\sscheme_2}$}
-        \RightLabel{(\textsc{WF-ForAll})}
-        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\ttforall{\anno{\svar}{\kkind}}{\sscheme_1}}}{\rrow}}{\sscheme_2}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\rsingleton{\sscheme}}{\rrow}$}
-        \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\xopwellformed{\stwithx{\ttype}{\rrow}}{\sscheme}$}
-      \end{prooftree}
-
-      \caption{Operation type well-formedness}\label{fig:operation_type}
     \end{mdframed}
   \end{figure}
 
@@ -336,20 +337,20 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\xopwellformed{\sscheme_1}{\sapp{\svar_1}{\lstof{\svar_2^i}}}$}
-            {$\tjudgment{\ccontext}{\sscheme_1}{\ktype}$}
+          \AxiomC{\Shortstack[c]{{$\xopwellformed{\sscheme_1}{\svar_3}$}
+            {$\tjudgment{\cextend{\cextend{\ccontext}{\lstof{\anno{\svar_2^i}{\kkind^i}}}}{\anno{\svar_3}{\keffect{\svar_3}{\evar}{\sscheme_1}}}}{\sscheme_1}{\ktype}$}
             {$\svar_1 \notin \sscheme_2$}
             {$\svar_1 \notin \dom{\ccontext}$}
             {$\evar \notin \dom{\ccontext}$}
-            {$\tjudgment{\cextend{\cextend{\ccontext}{\anno{\svar_1}{\karrow{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\keffect{\evar}{\sscheme_1}}}}}{\anno{\evar}{\sscheme_1}}}{\eterm}{\sscheme_2}$}}}
+            {$\tjudgment{\cextend{\cextend{\ccontext}{\anno{\svar_1}{\karrow{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\keffect{\svar_3}{\evar}{\sscheme_1}}}}}{\anno{\evar}{\sscheme_1}}}{\eterm}{\sscheme_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\eeffect{\svar_1}{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\evar}{\sscheme_1}{\eterm}}}{\sscheme_2}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\eeffect{\svar_1}{\karrow{\lstof{\anno{\svar_2^i}{\kkind^i}}}{\keffect{\svar_3}{\evar}{\sscheme_1}}}{\eterm}}}{\sscheme_2}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_1}$}
           \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow_2}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\keffect{\evar}{\sscheme_3}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\keffect{\svar}{\evar}{\sscheme_3}}$}
           \AxiomC{$\xusing{\rrow_1}{\sscheme_2}{\sscheme_1}{\sscheme_3}$}
         \RightLabel{(\textsc{T-Provide})}
         \QuaternaryInfC{$\tjudgment{\ccontext}{\parens{\eprovide{\sscheme_2}{\rrow_1}{\evar}{\eterm_1}{\eterm_2}}}{\stwithx{\ttype}{\runion{\rrow_1}{\parens{\rdiff{\rrow_2}{\rsingleton{\sscheme_2}}}}}}$}
@@ -396,7 +397,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\keffect{\evar}{\sscheme_2}}$}
+          \AxiomC{$\tjudgment{\ccontext}{\sscheme_1}{\keffect{\svar}{\evar}{\sscheme_2}}$}
         \RightLabel{(\textsc{K-SingletonEffectRow})}
         \UnaryInfC{$\tjudgment{\ccontext}{\rsingleton{\sscheme_1}}{\krow}$}
       \end{prooftree}
@@ -536,7 +537,7 @@
       \begin{prooftree}
           \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
         \RightLabel{(\textsc{KE-Effect})}
-        \UnaryInfC{$\kequiv{\keffect{\evar}{\sscheme_1}}{\keffect{\evar}{\sscheme_2}}$}
+        \UnaryInfC{$\kequiv{\keffect{\svar}{\evar}{\sscheme_1}}{\keffect{\svar}{\evar}{\sscheme_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
