@@ -42,8 +42,8 @@
 \newcommand\eterm{t}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\eappxr[2]{#1 \; #2}
-\newcommand\eappxp[2]{#1 \left\llbracket #2 \right\rrbracket} % chktex 1
+\newcommand\eappbv[2]{#1 \left\llbracket #2 \right\rrbracket_{\textsc{V}}} % chktex 1
+\newcommand\eappbn[2]{#1 \left\llbracket #2 \right\rrbracket_{\textsc{N}}} % chktex 1
 \newcommand\esabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\esapp[2]{#1 \; #2}
 \newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
@@ -115,8 +115,8 @@
           $\eterm \Coloneqq $ & & terms: \\
           & $\evar$ & variable \\
           & $\eabs{\anno{\evar}{\sscheme}}{\eterm}$ & abstraction \\
-          & $\eappxr{\eterm}{\eterm}$ & application by value \\
-          & $\eappxp{\eterm}{\eterm}$ & application by name \\
+          & $\eappbv{\eterm}{\eterm}$ & application by value \\
+          & $\eappbn{\eterm}{\eterm}$ & application by name \\
           & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
           & $\esapp{\eterm}{\sscheme}$ & scheme application \\
           & $\eeffect{\svar}{\kkind}{\eterm}$ & effect declaration \\
@@ -311,7 +311,7 @@
           \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
           \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
         \RightLabel{(\textsc{T-ApplicationByValue})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eappxr{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\runion{\rrow_1}{\rrow_2}}{\rrow_3}}}$}
+        \BinaryInfC{$\tjudgment{\ccontext}{\eappbv{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\runion{\rrow_1}{\rrow_2}}{\rrow_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -319,7 +319,7 @@
             {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
             {$\rorder{\rrow_1}{\rrow_4}$}}}
         \RightLabel{(\textsc{T-ApplicationByName})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eappxp{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eappbn{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -359,7 +359,7 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\eterm}{\sscheme_1}$}
           \AxiomC{$\sequiv{\sscheme_1}{\sscheme_2}$}
-        \RightLabel{(\textsc{T-Equiv})}
+        \RightLabel{(\textsc{T-Equivalence})}
         \BinaryInfC{$\tjudgment{\ccontext}{\eterm}{\sscheme_2}$}
       \end{prooftree}
 
@@ -431,7 +431,7 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ccontext}{\sscheme}{\kkind_1}$}
           \AxiomC{$\kequiv{\kkind_1}{\kkind_2}$}
-        \RightLabel{(\textsc{K-Equiv})}
+        \RightLabel{(\textsc{K-Equivalence})}
         \BinaryInfC{$\tjudgment{\ccontext}{\sscheme}{\kkind_2}$}
       \end{prooftree}
 
