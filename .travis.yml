@@ -2,4 +2,5 @@ os: linux
 dist: trusty
 language: generic
 sudo: required
+services: docker
 script: ./deploy.sh

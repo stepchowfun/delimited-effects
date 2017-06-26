@@ -1,0 +1,3 @@
+FROM stephanmisc/delimited-effects:deps
+COPY . /root/delimited-effects
+RUN cd /root/delimited-effects && make
