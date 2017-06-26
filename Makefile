@@ -1,6 +1,6 @@
 # Phony targets
 
-.PHONY: all paper lint formalization clean clean-paper clean-formalization
+.PHONY: all paper lint formalization clean clean-paper clean-formalization docker-deps docker-build
 
 all: paper lint formalization
 
@@ -29,6 +29,12 @@ clean-paper:
 
 clean-formalization:
 	rm -rf paper-build formalization/*.vo formalization/.*.vo.aux formalization/*.glob
+
+docker-deps:
+	docker build -f docker/Dockerfile-deps -t stephanmisc/delimited-effects:deps .
+
+docker-build:
+	docker build -f docker/Dockerfile-build -t stephanmisc/delimited-effects:build .
 
 # The paper
 

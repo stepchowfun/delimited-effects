@@ -1,5 +1,5 @@
 # NOTE: If you change this file, you probably
-#       also want to change .dockerignore.
+#       also want to change .gitignore.
 
 main.pdf
 paper-build
