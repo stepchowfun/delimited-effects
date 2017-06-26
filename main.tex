@@ -47,7 +47,7 @@
 \newcommand\esabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\esapp[2]{#1 \; #2}
 \newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
-\newcommand\eprovide[5]{\textbf{provide} \; #1 \; \textbf{using} \; #2 \; \textbf{with} \; #3 = #4 \; \textbf{in} \; #5}
+\newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
 
 % Schemes
 \newcommand\sscheme{\sigma}
@@ -82,9 +82,9 @@
 
 % Judgements
 \newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\sorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
 \newcommand\xopwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
-\newcommand\xusing[4]{#1 \vdash #3 \Rightarrow_{#2} #4} % chktex 1
 \newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
 \newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
 
@@ -120,7 +120,7 @@
           & $\esabs{\anno{\svar}{\kkind}}{\eterm}$ & scheme abstraction \\
           & $\esapp{\eterm}{\sscheme}$ & scheme application \\
           & $\eeffect{\svar}{\kkind}{\eterm}$ & effect declaration \\
-          & $\eprovide{\sscheme}{\rrow}{\evar}{\eterm}{\eterm}$ & effect definition \\
+          & $\eprovide{\sscheme}{\evar}{\eterm}{\eterm}$ & effect definition \\
           \\
           $\sscheme \Coloneqq$ & & schemes: \\
           & $\stwithx{\ttype}{\rrow}$ & type with effects \\
@@ -237,6 +237,39 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
+        \framebox{$\sorder{\sscheme}{\sscheme}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Reflexivity})}
+        \UnaryInfC{$\sorder{\sscheme}{\sscheme}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\sscheme_1}{\sscheme_2}$}
+          \AxiomC{$\sorder{\sscheme_2}{\sscheme_3}$}
+        \RightLabel{(\textsc{S-Transitivity})}
+        \BinaryInfC{$\sorder{\sscheme_1}{\sscheme_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\sscheme_3}{\sscheme_1}$}
+          \AxiomC{$\sorder{\sscheme_2}{\sscheme_4}$}
+          \AxiomC{$\rorder{\rrow_1}{\rrow_2}$}
+        \RightLabel{(\textsc{S-Arrow})}
+        \TrinaryInfC{$\sorder{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow_1}}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_4}}}{\rrow_2}}$}
+      \end{prooftree}
+
+      \caption{Subtyping rules}\label{fig:subtyping}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
         \framebox{$\xopwellformed{\sscheme}{\svar}$}
       \end{center}
 
@@ -268,26 +301,6 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xusing{\rrow}{\sscheme}{\sscheme}{\sscheme}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\xusing{\rrow_1}{\sscheme_5}{\sscheme_1}{\sscheme_3}$}
-          \AxiomC{$\xusing{\rrow_1}{\sscheme_5}{\sscheme_2}{\sscheme_4}$}
-          \AxiomC{$\rorder{\runion{\rrow_3}{\rrow_4}}{\sub{\rrow_2}{\sscheme_5}{\rrow_1}}$}
-        \RightLabel{(\textsc{C-Arrow})}
-        \TrinaryInfC{$\xusing{\rrow_1}{\sscheme_5}{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow_2}}{\stwithx{\parens{\tarrow{\sscheme_3}{\sscheme_4}}}{\rrow_3}}$}
-      \end{prooftree}
-
-      \caption{Operation type compatibility}\label{fig:operation_type_compatibility}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
         \framebox{$\tjudgment{\ccontext}{\eterm}{\sscheme}$}
       \end{center}
 
@@ -308,18 +321,19 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
+            {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_2}{\rrow_2}}{\stwithx{\ttype_3}{\rrow_3}}}}{\rrow_4}}$}
+            {$\sorder{\stwithx{\ttype_1}{\rempty}}{\stwithx{\ttype_2}{\rrow_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByValue})}
-        \BinaryInfC{$\tjudgment{\ccontext}{\eappbv{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\runion{\rrow_1}{\rrow_2}}{\rrow_3}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eappbv{\eterm_2}{\eterm_1}}{\stwithx{\ttype_4}{\runion{\runion{\rrow_1}{\rrow_3}}{\rrow_4}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\stwithx{\ttype_1}{\rrow_1}}$}
-            {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_1}{\rrow_4}}{\stwithx{\ttype_2}{\rrow_2}}}}{\rrow_3}}$}
-            {$\rorder{\rrow_1}{\rrow_4}$}}}
+            {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\parens{\tarrow{\stwithx{\ttype_2}{\rrow_2}}{\stwithx{\ttype_3}{\rrow_3}}}}{\rrow_4}}$}
+            {$\sorder{\stwithx{\ttype_1}{\rrow_1}}{\stwithx{\ttype_2}{\rrow_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByName})}
-        \UnaryInfC{$\tjudgment{\ccontext}{\eappbn{\eterm_2}{\eterm_1}}{\stwithx{\ttype_2}{\runion{\rrow_2}{\rrow_3}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\eappbn{\eterm_2}{\eterm_1}}{\stwithx{\ttype_4}{\runion{\rrow_3}{\rrow_4}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -348,12 +362,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_1}$}
-          \AxiomC{$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow_2}}$}
-          \AxiomC{$\tjudgment{\ccontext}{\sscheme_2}{\keffect{\svar}{\evar}{\sscheme_3}}$}
-          \AxiomC{$\xusing{\rrow_1}{\sscheme_2}{\sscheme_1}{\sscheme_3}$}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\ccontext}{\eterm_1}{\sscheme_1}$}
+            {$\tjudgment{\ccontext}{\eterm_2}{\stwithx{\ttype}{\rrow}}$}
+            {$\tjudgment{\ccontext}{\sscheme_2}{\keffect{\svar}{\evar}{\sscheme_3}}$}
+            {$\sorder{\sscheme_1}{\sub{\sscheme_3}{\svar}{\keffect{\svar}{\evar}{\sscheme_3}}}$}}}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\tjudgment{\ccontext}{\parens{\eprovide{\sscheme_2}{\rrow_1}{\evar}{\eterm_1}{\eterm_2}}}{\stwithx{\ttype}{\runion{\rrow_1}{\parens{\rdiff{\rrow_2}{\rsingleton{\sscheme_2}}}}}}$}
+        \UnaryInfC{$\tjudgment{\ccontext}{\parens{\eprovide{\sscheme_2}{\evar}{\eterm_1}{\eterm_2}}}{\stwithx{\ttype}\rdiff{\rrow}{\rsingleton{\sscheme_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
