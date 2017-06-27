@@ -20,7 +20,7 @@ lint:
 			else echo "No ChkTeX errors."; \
 		fi
 
-formalization: $(addprefix formalization/, syntax.vo typingRules.vo examples.vo)
+formalization: $(addprefix formalization/, syntax.vo)
 
 clean: clean-paper clean-formalization
 
@@ -54,9 +54,3 @@ main.pdf: main.tex
 
 formalization/syntax.vo: formalization/syntax.v
 	COQPATH="$$(pwd)/formalization" coqc formalization/syntax.v
-
-formalization/typingRules.vo: $(addprefix formalization/, syntax.vo typingRules.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/typingRules.v
-
-formalization/examples.vo: $(addprefix formalization/, syntax.vo typingRules.vo examples.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/examples.v

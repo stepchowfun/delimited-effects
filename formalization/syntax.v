@@ -6,10 +6,8 @@ Require Import Coq.Strings.String.
 Inductive id (T : Type) : Type :=
 | makeId : string -> id T.
 
-Inductive sid : Type := . (* Type id *)
+Inductive sid : Type := . (* Scheme id *)
 Inductive eid : Type := . (* Term id *)
-Inductive rid : Type := . (* Effect row id *)
-Inductive xid : Type := . (* Effect id *)
 
 Definition schemeId := id sid.
 Definition termId := id eid.
@@ -21,7 +19,7 @@ Inductive term : Type :=
 | eabs : termId -> scheme -> term -> term
 | eappbv : term -> term -> term
 | eappbn : term -> term -> term
-| esabs : schemeId -> term -> term
+| esabs : schemeId -> kind -> term -> term
 | esapp : term -> scheme -> term
 | eeffect : schemeId -> kind -> term -> term
 | eprovide : scheme -> termId -> term -> term -> term
@@ -29,24 +27,24 @@ Inductive term : Type :=
 (* Schemes *)
 
 with scheme : Type :=
-| stwithx : type -> effects -> scheme
-| rrow : effects -> scheme
+| stwithx : type -> row -> scheme
+| rrow : row -> scheme
 | svar : schemeId -> scheme
-| sabs : schemeId -> kind -> scheme
+| sabs : schemeId -> kind -> scheme -> scheme
 | sapp : scheme -> scheme -> scheme
 
 (* Types *)
 
 with type : Type :=
-| tarrow : type -> type -> type
-| ttforall : schemeId -> type -> type
+| tarrow : scheme -> scheme -> type
+| ttforall : schemeId -> kind -> scheme -> type
 
-(* Effects *)
+(* Effect rows *)
 
-with effects : Type :=
-| rempty : effects
-| rsingleton : scheme -> effects
-| runion : effects -> effects -> effects
+with row : Type :=
+| rempty : row
+| rsingleton : scheme -> row
+| runion : row -> row -> row
 
 (* Kinds *)
 
@@ -67,7 +65,7 @@ Inductive context : Type :=
 Notation "t1 '→' t2" := (tarrow t1 t2) (at level 38).
 Notation "'λ' i '∈' t '⇒' e" := (eabs i t e) (at level 39).
 Notation "'Ø'" := cempty.
-Notation "c ',t' i '∈' s" := (ceextend c i s) (at level 39).
+Notation "c ',e' i '∈' s" := (ceextend c i s) (at level 39).
 Notation "c ',s' i '∈' k" := (csextend c i k) (at level 39).
 
 Definition eqId {X : Set} (i1 : id X) (i2 : id X) : bool :=
