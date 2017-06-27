@@ -81,19 +81,12 @@
 \newcommand\cextend[2]{#1, #2}
 
 % Judgements
+\newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
+\newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
 \newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\sorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
-\newcommand\xopwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
-\newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
-\newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
-
-% DEPRECATED
-\newcommand\keffectold{\dagger}
-\newcommand\dcontext{\Delta}
-\newcommand\dempty{\varnothing_{\dcontext}}
-\newcommand\dextend[2]{#1, #2}
-\newcommand\deffect[4]{#1 \mapsto \exists #2 \; . \; \anno{#3}{#4}} % chktex 1 chktex 26
+\newcommand\opwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -270,28 +263,28 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\xopwellformed{\sscheme}{\svar}$}
+        \framebox{$\opwellformed{\sscheme}{\svar}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\xopwellformed{\sscheme_2}{\svar}$}
+          \AxiomC{$\opwellformed{\sscheme_2}{\svar}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\xopwellformed{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\svar}$}
+        \UnaryInfC{$\opwellformed{\stwithx{\parens{\tarrow{\sscheme_1}{\sscheme_2}}}{\rrow}}{\svar}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\xopwellformed{\sscheme}{\svar_2}$}
+          \AxiomC{$\opwellformed{\sscheme}{\svar_2}$}
           \AxiomC{$\svar_1 \neq \svar_2$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\xopwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kkind}}{\sscheme}}}{\rrow}}{\svar_2}$}
+        \BinaryInfC{$\opwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kkind}}{\sscheme}}}{\rrow}}{\svar_2}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\rorder{\rsingleton{\svar}}{\rrow}$}
         \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\xopwellformed{\stwithx{\ttype}{\rrow}}{\svar}$}
+        \UnaryInfC{$\opwellformed{\stwithx{\ttype}{\rrow}}{\svar}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
@@ -351,7 +344,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\xopwellformed{\sscheme_1}{\svar_3}$}
+          \AxiomC{\Shortstack[c]{{$\opwellformed{\sscheme_1}{\svar_3}$}
             {$\tjudgment{\cextend{\cextend{\ccontext}{\lstof{\anno{\svar_2^i}{\kkind^i}}}}{\anno{\svar_3}{\keffect{\svar_3}{\evar}{\sscheme_1}}}}{\sscheme_1}{\ktype}$}
             {$\svar_1 \notin \sscheme_2$}
             {$\svar_1 \notin \dom{\ccontext}$}
