@@ -6,11 +6,11 @@ Require Import Coq.Strings.String.
 Inductive id (T : Type) : Type :=
 | makeId : string -> id T.
 
-Inductive sid : Type := . (* Scheme id *)
 Inductive eid : Type := . (* Term id *)
+Inductive sid : Type := . (* Scheme id *)
 
-Definition schemeId := id sid.
 Definition termId := id eid.
+Definition schemeId := id sid.
 
 (* Terms *)
 
