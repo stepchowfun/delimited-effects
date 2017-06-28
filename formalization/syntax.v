@@ -28,7 +28,7 @@ Inductive term : Type :=
 
 with scheme : Type :=
 | stwithx : type -> row -> scheme
-| rrow : row -> scheme
+| srow : row -> scheme
 | svar : schemeId -> scheme
 | sabs : schemeId -> kind -> scheme -> scheme
 | sapp : scheme -> scheme -> scheme
@@ -49,7 +49,7 @@ with row : Type :=
 (* Kinds *)
 
 with kind : Type :=
-| kkind : kind
+| ktype : kind
 | krow : kind
 | keffect : schemeId -> termId -> scheme -> kind
 | karrow : schemeId -> kind -> kind -> kind.
