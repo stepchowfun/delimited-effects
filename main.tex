@@ -171,6 +171,12 @@
       \end{prooftree}
 
       \begin{prooftree}
+          \AxiomC{$\rorder{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{E-Subsumption})}
+        \UnaryInfC{$\rorder{\runion{\row_1}{\row_3}}{\runion{\row_2}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{E-LeftAssociativity})}
         \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
@@ -180,6 +186,30 @@
           \AxiomC{}
         \RightLabel{(\textsc{E-RightAssociativity})}
         \UnaryInfC{$\rorder{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{E-LeftContraction})}
+        \UnaryInfC{$\rorder{\runion{\row}{\row}}{\row}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{E-RightContraction})}
+        \UnaryInfC{$\rorder{\row}{\runion{\row}{\row}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{E-Weakening})}
+        \UnaryInfC{$\rorder{\row_1}{\runion{\row_1}{\row_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{E-Exchange})}
+        \UnaryInfC{$\rorder{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -195,33 +225,9 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-LeftContraction})}
-        \UnaryInfC{$\rorder{\runion{\runion{\row}{\rsingleton{\scheme}}}{\rsingleton{\scheme}}}{\runion{\row}{\rsingleton{\scheme}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-RightContraction})}
-        \UnaryInfC{$\rorder{\runion{\row}{\rsingleton{\scheme}}}{\runion{\runion{\row}{\rsingleton{\scheme}}}{\rsingleton{\scheme}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Weakening})}
-        \UnaryInfC{$\rorder{\row}{\runion{\row}{\rsingleton{\scheme}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Exchange})}
-        \UnaryInfC{$\rorder{\runion{\runion{\runion{\row_1}{\rsingleton{\scheme_1}}}{\rsingleton{\scheme_2}}}{\row_2}}{\runion{\runion{\runion{\row_1}{\rsingleton{\scheme_2}}}{\rsingleton{\scheme_1}}}{\row_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
         \RightLabel{(\textsc{E-SchemeEquivalence})}
-        \UnaryInfC{$\rorder{\runion{\row}{\rsingleton{\scheme_1}}}{\runion{\row}{\rsingleton{\scheme_2}}}$}
+        \UnaryInfC{$\rorder{\rsingleton{\scheme_1}}{\rsingleton{\scheme_2}}$}
       \end{prooftree}
 
       \caption{Effect row subsumption}\label{fig:preorder}
