@@ -97,6 +97,15 @@ with schemeEq : scheme -> scheme -> Prop :=
 | seRefl :
     forall s,
     schemeEq s s
+| seSymm :
+    forall s1 s2,
+    schemeEq s1 s2 ->
+    schemeEq s2 s1
+| seTrans :
+    forall s1 s2 s3,
+    schemeEq s1 s2 ->
+    schemeEq s2 s3 ->
+    schemeEq s1 s3
 (* TODO: Fill in the other rules here. *)
 
 (* Kind equivalence *)
