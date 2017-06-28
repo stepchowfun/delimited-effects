@@ -11,36 +11,26 @@ Inductive subsumes : row -> row -> Prop :=
     subsumes r1 r2 ->
     subsumes r2 r3 ->
     subsumes r1 r3
-| rsSub :
-    forall r1 r2 r3,
-    subsumes r1 r2 ->
-    subsumes (runion r1 r3) (runion r2 r3)
-| rsLeftAssoc:
-    forall r1 r2 r3,
-    subsumes (runion r1 r2) r3 ->
-    subsumes r1 (runion r2 r3)
-| rsRightAssoc:
-    forall r1 r2 r3,
-    subsumes r1 (runion r2 r3) ->
-    subsumes (runion r1 r2) r3
-| rsLeftContract:
+| rsContract:
     forall r1,
     subsumes (runion r1 r1) r1
-| rsRightContract:
-    forall r1,
-    subsumes r1 (runion r1 r1)
 | rsWeaken :
     forall r1 r2,
     subsumes r1 (runion r1 r2)
-| rsLeftId:
-    forall r1,
-    subsumes (runion rempty r1) r1
-| rsRightId:
-    forall r1,
-    subsumes r1 (runion rempty r1)
 | rsExchange :
     forall r1 r2,
     subsumes (runion r1 r2) (runion r2 r1)
+| rsSub :		
+    forall r1 r2 r3,		
+    subsumes r1 r2 ->		
+    subsumes (runion r1 r3) (runion r2 r3)
+| rsId:
+    forall r1,
+    subsumes rempty r1
+| rsAssoc:
+    forall r1 r2 r3,
+    subsumes (runion r1 r2) r3 ->
+    subsumes r1 (runion r2 r3)
 | rsSchemeEq :
     forall s1 s2,
     schemeEq s1 s2 ->
@@ -87,14 +77,14 @@ with hasKind : context -> scheme -> kind -> Prop :=
 
 with schemeEq : scheme -> scheme -> Prop :=
 | seRefl :
-    forall a b,
-    schemeEq a b
+    forall s,
+    schemeEq s s
 (* TODO: Fill in the other rules here. *)
 
 (* Kind equivalence *)
 
 with kindEq : kind -> kind -> Prop :=
 | keRefl :
-    forall a b,
-    kindEq a b.
+    forall k,
+    kindEq k k.
 (* TODO: Fill in the other rules here. *)

@@ -171,33 +171,9 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{E-Subsumption})}
-        \UnaryInfC{$\rorder{\runion{\row_1}{\row_3}}{\runion{\row_2}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{E-LeftAssociativity})}
-        \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-RightAssociativity})}
-        \UnaryInfC{$\rorder{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-LeftContraction})}
+        \RightLabel{(\textsc{E-Contraction})}
         \UnaryInfC{$\rorder{\runion{\row}{\row}}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-RightContraction})}
-        \UnaryInfC{$\rorder{\row}{\runion{\row}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -213,15 +189,21 @@
       \end{prooftree}
 
       \begin{prooftree}
+          \AxiomC{$\rorder{\row_1}{\row_2}$}		
+        \RightLabel{(\textsc{E-Subsumption})}		
+        \UnaryInfC{$\rorder{\runion{\row_1}{\row_3}}{\runion{\row_2}{\row_3}}$}		
+      \end{prooftree}		
+
+      \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{E-LeftIdentity})}
-        \UnaryInfC{$\rorder{\runion{\rempty}{\row}}{\row}$}
+        \RightLabel{(\textsc{E-Identity})}
+        \UnaryInfC{$\rorder{\rempty}{\row}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{E-RightIdentity})}
-        \UnaryInfC{$\rorder{\row}{\runion{\rempty}{\row}}$}
+        \RightLabel{(\textsc{E-Associativity})}
+        \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
       \end{prooftree}
 
       \begin{prooftree}

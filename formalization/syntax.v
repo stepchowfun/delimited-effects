@@ -3,8 +3,8 @@ Require Import Coq.Strings.String.
 
 (* Identifiers *)
 
-Inductive id (T : Type) : Type :=
-| makeId : string -> id T.
+Inductive id : Type -> Type :=
+| makeId : forall T, string -> id T.
 
 Inductive eid : Type := . (* Term id *)
 Inductive sid : Type := . (* Scheme id *)
