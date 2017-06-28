@@ -224,7 +224,7 @@
         \UnaryInfC{$\rorder{\runion{\row}{\rsingleton{\scheme_1}}}{\runion{\row}{\rsingleton{\scheme_2}}}$}
       \end{prooftree}
 
-      \caption{Effect row preorder}\label{fig:preorder}
+      \caption{Effect row subsumption}\label{fig:preorder}
     \end{mdframed}
   \end{figure}
 
@@ -253,7 +253,7 @@
           \AxiomC{$\sorder{\scheme_3}{\scheme_1}$}
           \AxiomC{$\sorder{\scheme_2}{\scheme_4}$}
           \AxiomC{$\rorder{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{S-Arow})}
+        \RightLabel{(\textsc{S-Arrow})}
         \TrinaryInfC{$\sorder{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row_1}}{\stwithx{\parens{\tarrow{\scheme_3}{\scheme_4}}}{\row_2}}$}
       \end{prooftree}
 
@@ -271,7 +271,7 @@
 
       \begin{prooftree}
           \AxiomC{$\opwellformed{\scheme_2}{\svar}$}
-        \RightLabel{(\textsc{WF-Arow})}
+        \RightLabel{(\textsc{WF-Arrow})}
         \UnaryInfC{$\opwellformed{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row}}{\svar}$}
       \end{prooftree}
 
@@ -387,7 +387,7 @@
           \AxiomC{$\tjudgment{\context}{\scheme_1}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\scheme_2}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
-        \RightLabel{(\textsc{K-Arow})}
+        \RightLabel{(\textsc{K-Arrow})}
         \TrinaryInfC{$\tjudgment{\context}{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row}}{\ktype}$}
       \end{prooftree}
 
@@ -478,7 +478,7 @@
           \AxiomC{$\sequiv{\scheme_1}{\scheme_3}$}
           \AxiomC{$\sequiv{\scheme_2}{\scheme_4}$}
           \AxiomC{$\sequiv{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{SE-Arow})}
+        \RightLabel{(\textsc{SE-Arrow})}
         \TrinaryInfC{$\sequiv{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row_1}}{\stwithx{\parens{\tarrow{\scheme_3}{\scheme_4}}}{\row_2}}$}
       \end{prooftree}
 
