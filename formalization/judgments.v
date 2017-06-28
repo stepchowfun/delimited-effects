@@ -42,7 +42,17 @@ with isSubtypeOf : scheme -> scheme -> Prop :=
 | stRefl :
     forall s,
     isSubtypeOf s s
-(* TODO: Fill in the other rules here. *)
+| stTrans :
+    forall s1 s2 s3,
+    isSubtypeOf s1 s2 ->
+    isSubtypeOf s2 s3 ->
+    isSubtypeOf s1 s3
+| stArrow :
+    forall s1 s2 s3 s4 r1 r2,
+    isSubtypeOf s3 s1 ->
+    isSubtypeOf s2 s4 ->
+    subsumes r1 r2 ->
+    isSubtypeOf (stwithx (tarrow s1 s2) r1) (stwithx (tarrow s3 s4) r2)
 
 (* Operation type well-formedness *)
 
