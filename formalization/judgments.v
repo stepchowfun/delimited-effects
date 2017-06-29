@@ -51,7 +51,15 @@ with opTypeWellFormed : scheme -> schemeId -> Prop :=
     forall s1 s2 a r,
     opTypeWellFormed s2 a ->
     opTypeWellFormed (stwithx (tarrow s1 s2) r) a
-(* TODO: Fill in the other rules here. *)
+| wfForAll :
+    forall s k r a1 a2,
+    opTypeWellFormed s a2 ->
+    eqId a1 a2 = false ->
+    opTypeWellFormed (stwithx (ttforall a1 k s) r) a2
+| wfTWithEff :
+    forall a r t,
+    subsumes (rsingleton (svar a)) r ->
+    opTypeWellFormed (stwithx t r) a
 
 (* Typing rules *)
 
