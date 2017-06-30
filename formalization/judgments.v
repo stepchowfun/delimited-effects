@@ -20,9 +20,9 @@ Inductive subsumes : row -> row -> Prop :=
 | rsExchange :
     forall r1 r2,
     subsumes (runion r1 r2) (runion r2 r1)
-| rsSub :		
-    forall r1 r2 r3,		
-    subsumes r1 r2 ->		
+| rsSub :
+    forall r1 r2 r3,
+    subsumes r1 r2 ->
     subsumes (runion r1 r3) (runion r2 r3)
 | rsId:
     forall r1,

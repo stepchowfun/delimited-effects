@@ -20,10 +20,16 @@ Definition containment r1 r2 :=
   exists s2,
   (schemeEq s1 s2 /\ rowContains r2 s2).
 
-Lemma containmentImpliesSubsumption : forall r1 r2, containment r1 r2 -> subsumes r1 r2.
+Lemma containmentImpliesSubsumption :
+  forall r1 r2,
+  containment r1 r2 ->
+  subsumes r1 r2.
 Admitted.
 
-Lemma subsumptionImpliesContainment : forall r1 r2, subsumes r1 r2 -> containment r1 r2.
+Lemma subsumptionImpliesContainment :
+  forall r1 r2,
+  subsumes r1 r2 ->
+  containment r1 r2.
 Proof.
   intros r1 r2 H.
   unfold containment.
@@ -126,7 +132,10 @@ Proof.
       * apply rcSingleton.
 Qed.
 
-Theorem subsumptionCorrect : forall r1 r2, containment r1 r2 <-> subsumes r1 r2.
+Theorem subsumptionCorrect :
+  forall r1 r2,
+  containment r1 r2 <->
+  subsumes r1 r2.
 Proof.
   split.
   - apply containmentImpliesSubsumption.

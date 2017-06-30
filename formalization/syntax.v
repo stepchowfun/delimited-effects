@@ -79,7 +79,9 @@ Fixpoint lookupEVar (c1 : context) e :=
   match e with
   | evar i1 => match c1 with
                | cempty => None
-               | ceextend c2 i2 s => if eqId i1 i2 then Some s else lookupEVar c2 e
+               | ceextend c2 i2 s => if eqId i1 i2
+                                     then Some s
+                                     else lookupEVar c2 e
                | csextend c2 i2 k => lookupEVar c2 e
                end
   | _ => None
