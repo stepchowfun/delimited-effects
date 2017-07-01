@@ -169,7 +169,7 @@
           \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
           \AxiomC{$\evar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \TrinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\ptarrow{\type_1}{\type_2}}$}
+        \TrinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithx{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -192,11 +192,11 @@
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
           \AxiomC{$\tvar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\ptforall{\anno{\tvar}{\kind}}{\type}}$}
+        \BinaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\ptforall{\anno{\tvar}{\kind}}{\type_1}}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \BinaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
