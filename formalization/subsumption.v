@@ -18,7 +18,7 @@ Definition containment r1 r2 :=
   forall s1,
   rowContains r1 s1 ->
   exists s2,
-  (schemeEq s1 s2 /\ rowContains r2 s2).
+  (subtype s1 s2 /\ rowContains r2 s2).
 
 Lemma containmentImpliesSubsumption :
   forall r1 r2,
@@ -34,13 +34,13 @@ Proof.
   intros r1 r2 H.
   unfold containment.
   induction H.
-  (* rsRefl *)
+  (* rRefl *)
   - intros.
     exists s1.
     split.
-    + apply seRefl.
+    + apply stRefl.
     + auto.
-  (* rsTrans *)
+  (* rTrans *)
   - intros.
     destruct IHsubsumes1 with (s1 := s1).
     + auto.
@@ -51,20 +51,42 @@ Proof.
         elim H5. intros.
         exists x0.
         split.
-        - apply seTrans with (s2 := x); auto.
+        - apply stTrans with (s2 := x); auto.
         - auto.
       }
-  (* rsContract *)
+  (* rEmpty *)
+  - intros.
+    exists s1.
+    inversion H.
+  (* rSingleton *)
+  - intros.
+    exists s2.
+    intros.
+    inversion H0.
+    assert (subtype s0 s2).
+    + apply stTrans with (s2 := s1).
+      * rewrite H1.
+        apply stRefl.
+      * auto.
+    + split.
+      * auto.
+      * apply rcSingleton.
+  (* rUnion *)
+  - intros.
+    inversion H1.
+    + destruct IHsubsumes1 with (s1 := s1).
+      * auto.
+      * exists x.
+        auto.
+    + destruct IHsubsumes2 with (s1 := s1).
+      * auto.
+      * exists x.
+        auto.
+  (* rWeaken *)
   - intros.
     exists s1.
     split.
-    + inversion H; apply seRefl.
-    + inversion H; auto.
-  (* rsWeaken *)
-  - intros.
-    exists s1.
-    split.
-    + apply seRefl.
+    + apply stRefl.
     + inversion H.
       * apply rcUnionLeft.
         apply rcSingleton.
@@ -74,39 +96,17 @@ Proof.
       * rewrite H1.
         apply rcUnionLeft.
         auto.
-  (* rsExchange *)
+  (* rExchange *)
   - intros.
     exists s1.
     split.
-    + apply seRefl.
+    + apply stRefl.
     + inversion H.
       * apply rcUnionRight.
         auto.
       * apply rcUnionLeft.
         auto.
-  (* rsSub *)
-  - intros.
-    inversion H0.
-    + destruct IHsubsumes with (s1 := s1).
-      * auto.
-      * {
-        elim H5. intros.
-        exists x.
-        split.
-        - auto.
-        - apply rcUnionLeft.
-          auto.
-      }
-    + exists s1.
-      split.
-      * apply seRefl.
-      * apply rcUnionRight.
-        auto.
-  (* rsId *)
-  - intros.
-    exists s1.
-    inversion H.
-  (* rsAssoc *)
+  (* rAssoc *)
   - intros.
     destruct IHsubsumes with (s1 := s1).
     + apply rcUnionLeft.
@@ -117,19 +117,6 @@ Proof.
       * auto.
       * apply rcUnionRight.
         auto.
-  (* rsSchemeEq *)
-  - intros.
-    exists s2.
-    intros.
-    inversion H0.
-    assert (schemeEq s0 s2).
-    + apply seTrans with (s2 := s1).
-      * rewrite H1.
-        apply seRefl.
-      * auto.
-    + split.
-      * auto.
-      * apply rcSingleton.
 Qed.
 
 Theorem subsumptionCorrect :
