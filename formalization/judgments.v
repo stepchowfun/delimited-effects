@@ -113,5 +113,22 @@ with schemeEq : scheme -> scheme -> Prop :=
 with kindEq : kind -> kind -> Prop :=
 | keRefl :
     forall k,
-    kindEq k k.
-(* TODO: Fill in the other rules here. *)
+    kindEq k k
+| keSymm :
+    forall k1 k2,
+    kindEq k1 k2 ->
+    kindEq k2 k1
+| keTrans :
+    forall k1 k2 k3,
+    kindEq k1 k2 ->
+    kindEq k2 k3 ->
+    kindEq k1 k3
+| keEffect :
+    forall s1 s2 a x,
+    schemeEq s1 s2 ->
+    kindEq (keffect a x s1) (keffect a x s2)
+| keOperator :
+    forall k1 k2 k3 k4 a,
+    kindEq k1 k3 ->
+    kindEq k2 k4 ->
+    kindEq (karrow a k1 k2) (karrow a k3 k4).
