@@ -14,6 +14,42 @@ Inductive rowContains : row -> scheme -> Prop :=
     rowContains r2 s ->
     rowContains (runion r1 r2) s.
 
+Theorem rRefl : forall r, subsumes r r.
+Proof.
+  intros.
+  induction r.
+  - apply rEmpty.
+  - apply rSingleton.
+    apply stRefl.
+  - apply rUnion.
+    + apply rWeaken.
+    + apply rTrans with (r2 := runion r2 r1).
+      * apply rWeaken.
+      * apply rExchange.
+Qed.
+
+Theorem rAssoc :
+  forall r1 r2 r3,
+  subsumes (runion (runion r1 r2) r3) (runion r1 (runion r2 r3)).
+Proof.
+  intros.
+  apply rUnion.
+  - apply rUnion.
+    + apply rWeaken.
+    + apply rTrans with (r2 := runion (runion r2 r3) r1).
+      * apply rTrans with (r2 := runion r2 r3); apply rWeaken.
+      * apply rExchange.
+  - apply rTrans with (r2 := runion (runion r2 r3) r1).
+    + apply rTrans with (r2 := runion r2 r3).
+      * {
+        apply rTrans with (r2 := runion r3 r2).
+        - apply rWeaken.
+        - apply rExchange.
+      }
+      * apply rWeaken.
+    + apply rExchange.
+Qed.
+
 Definition containment r1 r2 :=
   forall s1,
   rowContains r1 s1 ->
@@ -123,12 +159,6 @@ Proof.
   intros r1 r2 H.
   unfold containment.
   induction H.
-  (* rRefl *)
-  - intros.
-    exists s1.
-    split.
-    + apply stRefl.
-    + auto.
   (* rTrans *)
   - intros.
     destruct IHsubsumes1 with (s1 := s1).
@@ -194,17 +224,6 @@ Proof.
       * apply rcUnionRight.
         auto.
       * apply rcUnionLeft.
-        auto.
-  (* rAssoc *)
-  - intros.
-    destruct IHsubsumes with (s1 := s1).
-    + apply rcUnionLeft.
-      auto.
-    + elim H1. intros.
-      exists x.
-      split.
-      * auto.
-      * apply rcUnionRight.
         auto.
 Qed.
 
