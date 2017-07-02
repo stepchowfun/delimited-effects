@@ -64,7 +64,7 @@ with subsumes : row -> row -> Prop :=
     forall r1 r2,
     subsumes (runion r1 r2) (runion r2 r1)
 
-(* Scheme equivalence *)
+(* Subtyping *)
 
 with subtype : scheme -> scheme -> Prop :=
 | stRefl :
