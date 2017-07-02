@@ -6,43 +6,43 @@ Inductive id : Type -> Type :=
 | makeId : forall T, string -> id T.
 
 Inductive eid : Type := . (* Term id *)
-Inductive sid : Type := . (* Scheme id *)
+Inductive tid : Type := . (* Type id *)
 
 Definition termId := id eid.
-Definition schemeId := id sid.
+Definition typeId := id tid.
 
 (* Terms *)
 
 Inductive term : Type :=
 | evar : termId -> term
-| eabs : termId -> scheme -> term -> term
+| eabs : termId -> type -> term -> term
 | eappbv : term -> term -> term
 | eappbn : term -> term -> term
-| esabs : schemeId -> kind -> term -> term
-| esapp : term -> scheme -> term
-| eeffect : schemeId -> kind -> term -> term
-| eprovide : scheme -> termId -> term -> term -> term
-
-(* Schemes *)
-
-with scheme : Type :=
-| stwithx : type -> row -> scheme
-| srow : row -> scheme
-| svar : schemeId -> scheme
-| sabs : schemeId -> kind -> scheme -> scheme
-| sapp : scheme -> scheme -> scheme
+| etabs : typeId -> kind -> term -> term
+| etapp : term -> type -> term
+| eeffect : typeId -> kind -> term -> term
+| eprovide : type -> termId -> term -> term -> term
 
 (* Types *)
 
 with type : Type :=
-| tarrow : scheme -> scheme -> type
-| tforall : schemeId -> kind -> scheme -> type
+| tptwithx : properType -> row -> type
+| trow : row -> type
+| tvar : typeId -> type
+| tabs : typeId -> kind -> type -> type
+| tapp : type -> type -> type
+
+(* Proper types *)
+
+with properType : Type :=
+| ptarrow : type -> type -> properType
+| ptforall : typeId -> kind -> type -> properType
 
 (* Effect rows *)
 
 with row : Type :=
 | rempty : row
-| rsingleton : scheme -> row
+| rsingleton : type -> row
 | runion : row -> row -> row
 
 (* Kinds *)
@@ -50,21 +50,21 @@ with row : Type :=
 with kind : Type :=
 | ktype : kind
 | krow : kind
-| keffect : schemeId -> termId -> scheme -> kind
-| karrow : schemeId -> kind -> kind -> kind.
+| keffect : typeId -> termId -> type -> kind
+| karrow : typeId -> kind -> kind -> kind.
 
 (* Type contexts *)
 
 Inductive context : Type :=
 | cempty : context
-| ceextend : context -> termId -> scheme -> context
-| csextend : context -> schemeId -> kind -> context.
+| ceextend : context -> termId -> type -> context
+| csextend : context -> typeId -> kind -> context.
 
 (* Notation "'@'" := makeId (at level 10). *)
-Notation "t1 '→' t2" := (tarrow t1 t2) (at level 38).
+Notation "t1 '→' t2" := (ptarrow t1 t2) (at level 38).
 Notation "'λ' i '∈' t '⇒' e" := (eabs i t e) (at level 39).
 Notation "'Ø'" := cempty.
-Notation "c ',e' i '∈' s" := (ceextend c i s) (at level 39).
+Notation "c ',e' i '∈' t" := (ceextend c i t) (at level 39).
 Notation "c ',s' i '∈' k" := (csextend c i k) (at level 39).
 
 Definition eqId {X : Set} (i1 : id X) (i2 : id X) : bool :=
@@ -78,22 +78,22 @@ Fixpoint lookupEVar (c1 : context) e :=
   match e with
   | evar i1 => match c1 with
                | cempty => None
-               | ceextend c2 i2 s => if eqId i1 i2
-                                     then Some s
+               | ceextend c2 i2 t => if eqId i1 i2
+                                     then Some t
                                      else lookupEVar c2 e
                | csextend c2 i2 k => lookupEVar c2 e
                end
   | _ => None
   end.
 
-Fixpoint lookupSVar (c1 : context) e :=
+Fixpoint lookupTVar (c1 : context) e :=
   match e with
-  | svar i1 => match c1 with
+  | tvar i1 => match c1 with
                | cempty => None
-               | ceextend c2 i2 s => lookupSVar c2 e
+               | ceextend c2 i2 t => lookupTVar c2 e
                | csextend c2 i2 k => if eqId i1 i2
                                      then Some k
-                                     else lookupSVar c2 e
+                                     else lookupTVar c2 e
                end
   | _ => None
   end.
