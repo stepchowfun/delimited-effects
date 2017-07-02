@@ -36,7 +36,7 @@ with scheme : Type :=
 
 with type : Type :=
 | tarrow : scheme -> scheme -> type
-| ttforall : schemeId -> kind -> scheme -> type
+| tforall : schemeId -> kind -> scheme -> type
 
 (* Effect rows *)
 

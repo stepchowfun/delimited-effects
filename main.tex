@@ -59,7 +59,7 @@
 % Types
 \newcommand\type{\tau}
 \newcommand\tarrow[2]{#1 \rightarrow #2} % chktex 1
-\newcommand\ttforall[2]{\forall #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\tforall[2]{\forall #1 \; . \; #2} % chktex 1 chktex 26
 
 % Effect rows
 \newcommand\row{\varepsilon}
@@ -123,7 +123,7 @@
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tarrow{\scheme}{\scheme}$ & arrow type \\
-          & $\ttforall{\anno{\svar}{\kind}}{\scheme}$ & quantified type \\
+          & $\tforall{\anno{\svar}{\kind}}{\scheme}$ & quantified type \\
           \\
           $\row \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
@@ -189,11 +189,11 @@
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\svar}{\kind}}}{\term}{\scheme}$}
           \AxiomC{$\svar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-SchemeAbstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\esabs{\anno{\svar}{\kind}}{\term}}}{\ttforall{\anno{\svar}{\kind}}{\scheme}}$}
+        \BinaryInfC{$\tjudgment{\context}{\parens{\esabs{\anno{\svar}{\kind}}{\term}}}{\tforall{\anno{\svar}{\kind}}{\scheme}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\ttforall{\anno{\svar}{\kind}}{\scheme_1}}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\tforall{\anno{\svar}{\kind}}{\scheme_1}}$}
           \AxiomC{$\tjudgment{\context}{\scheme_2}{\kind}$}
         \RightLabel{(\textsc{T-SchemeApplication})}
         \BinaryInfC{$\tjudgment{\context}{\esapp{\term}{\scheme_2}}{\sub{\scheme_1}{\svar}{\scheme_2}}$}
@@ -250,7 +250,7 @@
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\svar}{\kind}}}{\scheme}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-ForAll})}
-        \BinaryInfC{$\tjudgment{\context}{\stwithx{\parens{\ttforall{\anno{\svar}{\kind}}{\scheme}}}{\row}}{\ktype}$}
+        \BinaryInfC{$\tjudgment{\context}{\stwithx{\parens{\tforall{\anno{\svar}{\kind}}{\scheme}}}{\row}}{\ktype}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -313,7 +313,7 @@
           \AxiomC{$\opwellformed{\scheme}{\svar_2}$}
           \AxiomC{$\svar_1 \neq \svar_2$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\opwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kind}}{\scheme}}}{\row}}{\svar_2}$}
+        \BinaryInfC{$\opwellformed{\stwithx{\parens{\tforall{\anno{\svar_1}{\kind}}{\scheme}}}{\row}}{\svar_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -409,14 +409,7 @@
           \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
           \AxiomC{$\sorder{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \BinaryInfC{$\sorder{\stwithx{\parens{\ttforall{\anno{\svar}{\kind}}{\scheme_1}}}{\row_1}}{\stwithx{\parens{\ttforall{\anno{\svar}{\kind}}{\scheme_2}}}{\row_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}
-          \AxiomC{$\rorder{\row_2}{\row_1}$}
-        \RightLabel{(\textsc{ST-EffectRow})}
-        \BinaryInfC{$\sorder{\row_1}{\row_2}$}
+        \BinaryInfC{$\sorder{\stwithx{\parens{\tforall{\anno{\svar}{\kind}}{\scheme_1}}}{\row_1}}{\stwithx{\parens{\tforall{\anno{\svar}{\kind}}{\scheme_2}}}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}

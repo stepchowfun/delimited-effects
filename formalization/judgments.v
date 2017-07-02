@@ -31,7 +31,7 @@ with opTypeWellFormed : scheme -> schemeId -> Prop :=
     forall s k r a1 a2,
     opTypeWellFormed s a2 ->
     eqId a1 a2 = false ->
-    opTypeWellFormed (stwithx (ttforall a1 k s) r) a2
+    opTypeWellFormed (stwithx (tforall a1 k s) r) a2
 | wfTWithEff :
     forall a r t,
     subsumes (rsingleton (svar a)) r ->
@@ -74,5 +74,23 @@ with subtype : scheme -> scheme -> Prop :=
     forall s1 s2 s3,
     subtype s1 s2 ->
     subtype s2 s3 ->
-    subtype s1 s3.
-(* TODO: Fill in the other rules here. *)
+    subtype s1 s3
+| stArrow :
+    forall s1 s2 s3 s4 r1 r2,
+    subtype s3 s1 ->
+    subtype s2 s4 ->
+    subsumes r1 r2 ->
+    subtype (stwithx (tarrow s1 s2) r1) (stwithx (tarrow s3 s4) r2)
+| stForAll :
+    forall s1 s2 r1 r2 a k,
+    subtype s1 s2 ->
+    subsumes r1 r2 ->
+    subtype (stwithx (tforall a k s1) r1) (stwithx (tforall a k s2) r2)
+| stSchemeAbs :
+    forall s1 s2 a k,
+    subtype s1 s2 ->
+    subtype (sabs a k s1) (sabs a k s2)
+| stSchemeApp :
+    forall s1 s2 s3,
+    subtype s1 s2 ->
+    subtype (sapp s1 s3) (sapp s2 s3).
