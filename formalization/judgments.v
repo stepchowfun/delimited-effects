@@ -40,9 +40,6 @@ with opTypeWellFormed : scheme -> schemeId -> Prop :=
 (* Effect row subsumption *)
 
 with subsumes : row -> row -> Prop :=
-| rRefl :
-    forall r,
-    subsumes r r
 | rTrans :
     forall r1 r2 r3,
     subsumes r1 r2 ->
@@ -66,10 +63,6 @@ with subsumes : row -> row -> Prop :=
 | rExchange :
     forall r1 r2,
     subsumes (runion r1 r2) (runion r2 r1)
-| rAssoc:
-    forall r1 r2 r3,
-    subsumes (runion r1 r2) r3 ->
-    subsumes r1 (runion r2 r3)
 
 (* Scheme equivalence *)
 

@@ -335,12 +335,6 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{R-Reflexivity})}
-        \UnaryInfC{$\rorder{\row}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{$\rorder{\row_1}{\row_2}$}
           \AxiomC{$\rorder{\row_2}{\row_3}$}
         \RightLabel{(\textsc{R-Transitivity})}
@@ -376,12 +370,6 @@
           \AxiomC{}
         \RightLabel{(\textsc{R-Exchange})}
         \UnaryInfC{$\rorder{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{R-Associativity})}
-        \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
       \end{prooftree}
 
       \caption{Effect row subsumption}\label{fig:preorder}
