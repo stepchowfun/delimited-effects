@@ -92,7 +92,9 @@ Fixpoint lookupSVar (c1 : context) e :=
   | svar i1 => match c1 with
                | cempty => None
                | ceextend c2 i2 s => lookupSVar c2 e
-               | csextend c2 i2 k => if eqId i1 i2 then Some k else lookupSVar c2 e
+               | csextend c2 i2 k => if eqId i1 i2
+                                     then Some k
+                                     else lookupSVar c2 e
                end
   | _ => None
   end.

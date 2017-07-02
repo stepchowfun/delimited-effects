@@ -82,12 +82,11 @@
 \newcommand\csextend[2]{#1, #2}
 
 % Judgements
-\newcommand\kequiv[2]{#1 \equiv #2} % chktex 1
-\newcommand\sequiv[2]{#1 \equiv #2} % chktex 1
-\newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
-\newcommand\sorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
 \newcommand\opwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
+\newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\sorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\korder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -146,137 +145,6 @@
       \end{center}
 
       \caption{Syntax}\label{fig:syntax}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\rorder{\row}{\row}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Reflexivity})}
-        \UnaryInfC{$\rorder{\row}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}
-          \AxiomC{$\rorder{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{E-Transitivity})}
-        \BinaryInfC{$\rorder{\row_1}{\row_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Contraction})}
-        \UnaryInfC{$\rorder{\runion{\row}{\row}}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Weakening})}
-        \UnaryInfC{$\rorder{\row_1}{\runion{\row_1}{\row_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Exchange})}
-        \UnaryInfC{$\rorder{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}		
-        \RightLabel{(\textsc{E-Subsumption})}		
-        \UnaryInfC{$\rorder{\runion{\row_1}{\row_3}}{\runion{\row_2}{\row_3}}$}		
-      \end{prooftree}		
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Identity})}
-        \UnaryInfC{$\rorder{\rempty}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{E-Associativity})}
-        \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{E-SchemeEquivalence})}
-        \UnaryInfC{$\rorder{\rsingleton{\scheme_1}}{\rsingleton{\scheme_2}}$}
-      \end{prooftree}
-
-      \caption{Effect row subsumption}\label{fig:preorder}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\sorder{\scheme}{\scheme}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{S-Reflexivity})}
-        \UnaryInfC{$\sorder{\scheme}{\scheme}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
-          \AxiomC{$\sorder{\scheme_2}{\scheme_3}$}
-        \RightLabel{(\textsc{S-Transitivity})}
-        \BinaryInfC{$\sorder{\scheme_1}{\scheme_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sorder{\scheme_3}{\scheme_1}$}
-          \AxiomC{$\sorder{\scheme_2}{\scheme_4}$}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{S-Arrow})}
-        \TrinaryInfC{$\sorder{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row_1}}{\stwithx{\parens{\tarrow{\scheme_3}{\scheme_4}}}{\row_2}}$}
-      \end{prooftree}
-
-      \caption{Subtyping rules}\label{fig:subtyping}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\opwellformed{\scheme}{\svar}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\opwellformed{\scheme_2}{\svar}$}
-        \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\opwellformed{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row}}{\svar}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\opwellformed{\scheme}{\svar_2}$}
-          \AxiomC{$\svar_1 \neq \svar_2$}
-        \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\opwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kind}}{\scheme}}}{\row}}{\svar_2}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\rsingleton{\svar}}{\row}$}
-        \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\opwellformed{\stwithx{\type}{\row}}{\svar}$}
-      \end{prooftree}
-
-      \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
     \end{mdframed}
   \end{figure}
 
@@ -354,8 +222,8 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\context}{\term}{\scheme_1}$}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{T-Equivalence})}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+        \RightLabel{(\textsc{T-Subsumption})}
         \BinaryInfC{$\tjudgment{\context}{\term}{\scheme_2}$}
       \end{prooftree}
 
@@ -426,8 +294,8 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\context}{\scheme}{\kind_1}$}
-          \AxiomC{$\kequiv{\kind_1}{\kind_2}$}
-        \RightLabel{(\textsc{K-Equivalence})}
+          \AxiomC{$\korder{\kind_1}{\kind_2}$}
+        \RightLabel{(\textsc{K-Subsumption})}
         \BinaryInfC{$\tjudgment{\context}{\scheme}{\kind_2}$}
       \end{prooftree}
 
@@ -438,112 +306,190 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\sequiv{\scheme}{\scheme}$}
+        \framebox{$\opwellformed{\scheme}{\svar}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{SE-Reflexivity})}
-        \UnaryInfC{$\sequiv{\scheme}{\scheme}$}
+          \AxiomC{$\opwellformed{\scheme_2}{\svar}$}
+        \RightLabel{(\textsc{WF-Arrow})}
+        \UnaryInfC{$\opwellformed{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row}}{\svar}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{SE-Symmetry})}
-        \UnaryInfC{$\sequiv{\scheme_2}{\scheme_1}$}
+          \AxiomC{$\opwellformed{\scheme}{\svar_2}$}
+          \AxiomC{$\svar_1 \neq \svar_2$}
+        \RightLabel{(\textsc{WF-ForAll})}
+        \BinaryInfC{$\opwellformed{\stwithx{\parens{\ttforall{\anno{\svar_1}{\kind}}{\scheme}}}{\row}}{\svar_2}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-          \AxiomC{$\sequiv{\scheme_2}{\scheme_3}$}
-        \RightLabel{(\textsc{SE-Transitivity})}
-        \BinaryInfC{$\sequiv{\scheme_1}{\scheme_3}$}
+          \AxiomC{$\rorder{\rsingleton{\svar}}{\row}$}
+        \RightLabel{(\textsc{WF-TypeWithEffects})}
+        \UnaryInfC{$\opwellformed{\stwithx{\type}{\row}}{\svar}$}
       \end{prooftree}
 
-      \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_3}$}
-          \AxiomC{$\sequiv{\scheme_2}{\scheme_4}$}
-          \AxiomC{$\sequiv{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{SE-Arrow})}
-        \TrinaryInfC{$\sequiv{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row_1}}{\stwithx{\parens{\tarrow{\scheme_3}{\scheme_4}}}{\row_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\kequiv{\kind_1}{\kind_2}$}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-          \AxiomC{$\sequiv{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{SE-ForAll})}
-        \TrinaryInfC{$\sequiv{\stwithx{\parens{\ttforall{\anno{\svar}{\kind_1}}{\scheme_1}}}{\row_1}}{\stwithx{\parens{\ttforall{\anno{\svar}{\kind_2}}{\scheme_2}}}{\row_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rorder{\row_1}{\row_2}$}
-          \AxiomC{$\rorder{\row_2}{\row_1}$}
-        \RightLabel{(\textsc{SE-EffectRow})}
-        \BinaryInfC{$\sequiv{\row_1}{\row_2}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\kequiv{\kind_1}{\kind_2}$}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{SE-SchemeAbstraction})}
-        \BinaryInfC{$\sequiv{\sabs{\anno{\svar}{\kind_1}}{\scheme_1}}{\sabs{\anno{\svar}{\kind_2}}{\scheme_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_3}$}
-          \AxiomC{$\sequiv{\scheme_2}{\scheme_4}$}
-        \RightLabel{(\textsc{SE-SchemeApplication})}
-        \BinaryInfC{$\sequiv{\sapp{\scheme_1}{\scheme_2}}{\sapp{\scheme_3}{\scheme_4}}$}
-      \end{prooftree}
-
-      \caption{Scheme equivalence}\label{fig:scheme_equivalence}
+      \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
     \end{mdframed}
   \end{figure}
 
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\kequiv{\kind}{\kind}$}
+        \framebox{$\rorder{\row}{\row}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{KE-Reflexivity})}
-        \UnaryInfC{$\kequiv{\kind}{\kind}$}
+        \RightLabel{(\textsc{R-Reflexivity})}
+        \UnaryInfC{$\rorder{\row}{\row}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\kequiv{\kind_1}{\kind_2}$}
-        \RightLabel{(\textsc{KE-Symmetry})}
-        \UnaryInfC{$\kequiv{\kind_2}{\kind_1}$}
+          \AxiomC{$\rorder{\row_1}{\row_2}$}
+          \AxiomC{$\rorder{\row_2}{\row_3}$}
+        \RightLabel{(\textsc{R-Transitivity})}
+        \BinaryInfC{$\rorder{\row_1}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\kequiv{\kind_1}{\kind_2}$}
-          \AxiomC{$\kequiv{\kind_2}{\kind_3}$}
-        \RightLabel{(\textsc{KE-Transitivity})}
-        \BinaryInfC{$\kequiv{\kind_1}{\kind_3}$}
+          \AxiomC{}
+        \RightLabel{(\textsc{R-Empty})}
+        \UnaryInfC{$\rorder{\rempty}{\row}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\sequiv{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{KE-Effect})}
-        \UnaryInfC{$\kequiv{\keffect{\svar}{\evar}{\scheme_1}}{\keffect{\svar}{\evar}{\scheme_2}}$}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+        \RightLabel{(\textsc{R-Singleton})}
+        \UnaryInfC{$\rorder{\rsingleton{\scheme_1}}{\rsingleton{\scheme_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\kequiv{\kind_1}{\kind_3}$}
-          \AxiomC{$\kequiv{\kind_2}{\kind_4}$}
-        \RightLabel{(\textsc{KE-Operator})}
-        \BinaryInfC{$\kequiv{\karrow{\anno{\svar}{\kind_1}}{\kind_2}}{\karrow{\anno{\svar}{\kind_3}}{\kind_4}}$}
+          \AxiomC{$\rorder{\row_1}{\row_3}$}
+          \AxiomC{$\rorder{\row_2}{\row_3}$}
+        \RightLabel{(\textsc{R-Union})}
+        \BinaryInfC{$\rorder{\runion{\row_1}{\row_2}}{\row_3}$}
       \end{prooftree}
 
-      \caption{Kind equivalence}\label{fig:kind_equivalence}
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{R-Weakening})}
+        \UnaryInfC{$\rorder{\row_1}{\runion{\row_1}{\row_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{R-Exchange})}
+        \UnaryInfC{$\rorder{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{R-Associativity})}
+        \UnaryInfC{$\rorder{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
+      \end{prooftree}
+
+      \caption{Effect row subsumption}\label{fig:preorder}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\sorder{\scheme}{\scheme}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-Reflexivity})}
+        \UnaryInfC{$\sorder{\scheme}{\scheme}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+          \AxiomC{$\sorder{\scheme_2}{\scheme_3}$}
+        \RightLabel{(\textsc{ST-Transitivity})}
+        \BinaryInfC{$\sorder{\scheme_1}{\scheme_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_3}{\scheme_1}$}
+          \AxiomC{$\sorder{\scheme_2}{\scheme_4}$}
+          \AxiomC{$\sorder{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{ST-Arrow})}
+        \TrinaryInfC{$\sorder{\stwithx{\parens{\tarrow{\scheme_1}{\scheme_2}}}{\row_1}}{\stwithx{\parens{\tarrow{\scheme_3}{\scheme_4}}}{\row_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+          \AxiomC{$\sorder{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{ST-ForAll})}
+        \BinaryInfC{$\sorder{\stwithx{\parens{\ttforall{\anno{\svar}{\kind}}{\scheme_1}}}{\row_1}}{\stwithx{\parens{\ttforall{\anno{\svar}{\kind}}{\scheme_2}}}{\row_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rorder{\row_1}{\row_2}$}
+          \AxiomC{$\rorder{\row_2}{\row_1}$}
+        \RightLabel{(\textsc{ST-EffectRow})}
+        \BinaryInfC{$\sorder{\row_1}{\row_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+        \RightLabel{(\textsc{ST-SchemeAbstraction})}
+        \UnaryInfC{$\sorder{\sabs{\anno{\svar}{\kind}}{\scheme_1}}{\sabs{\anno{\svar}{\kind}}{\scheme_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+        \RightLabel{(\textsc{ST-SchemeApplication})}
+        \UnaryInfC{$\sorder{\sapp{\scheme_1}{\scheme_3}}{\sapp{\scheme_2}{\scheme_3}}$}
+      \end{prooftree}
+
+      \caption{Subtyping}\label{fig:subtyping}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\korder{\kind}{\kind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{SK-Reflexivity})}
+        \UnaryInfC{$\korder{\kind}{\kind}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\korder{\kind_1}{\kind_2}$}
+          \AxiomC{$\korder{\kind_2}{\kind_3}$}
+        \RightLabel{(\textsc{SK-Transitivity})}
+        \BinaryInfC{$\korder{\kind_1}{\kind_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
+        \RightLabel{(\textsc{SK-Effect})}
+        \UnaryInfC{$\korder{\keffect{\svar}{\evar}{\scheme_1}}{\keffect{\svar}{\evar}{\scheme_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\korder{\kind_3}{\kind_1}$}
+          \AxiomC{$\korder{\kind_2}{\kind_4}$}
+        \RightLabel{(\textsc{SK-Operator})}
+        \BinaryInfC{$\korder{\karrow{\anno{\svar}{\kind_1}}{\kind_2}}{\karrow{\anno{\svar}{\kind_3}}{\kind_4}}$}
+      \end{prooftree}
+
+      \caption{Subkinding}\label{fig:subkinding}
     \end{mdframed}
   \end{figure}
 \end{document}

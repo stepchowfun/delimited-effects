@@ -1,58 +1,24 @@
 Require Import syntax.
 
-(* Effect row subsumption *)
+(* Typing rules *)
 
-Inductive subsumes : row -> row -> Prop :=
-| rsRefl :
-    forall r,
-    subsumes r r
-| rsTrans :
-    forall r1 r2 r3,
-    subsumes r1 r2 ->
-    subsumes r2 r3 ->
-    subsumes r1 r3
-| rsContract:
-    forall r1,
-    subsumes (runion r1 r1) r1
-| rsWeaken :
-    forall r1 r2,
-    subsumes r1 (runion r1 r2)
-| rsExchange :
-    forall r1 r2,
-    subsumes (runion r1 r2) (runion r2 r1)
-| rsSub :
-    forall r1 r2 r3,
-    subsumes r1 r2 ->
-    subsumes (runion r1 r3) (runion r2 r3)
-| rsId:
-    forall r1,
-    subsumes rempty r1
-| rsAssoc:
-    forall r1 r2 r3,
-    subsumes (runion r1 r2) r3 ->
-    subsumes r1 (runion r2 r3)
-| rsSchemeEq :
-    forall s1 s2,
-    schemeEq s1 s2 ->
-    subsumes (rsingleton s1) (rsingleton s2)
+Inductive hasType : context -> term -> scheme -> Prop :=
+| tVar :
+    forall c e s,
+    lookupEVar c e = Some s ->
+    hasType c e s
+(* TODO: Fill in the other rules here. *)
 
-(* Subtyping *)
+(* Kinding rules *)
 
-with isSubtypeOf : scheme -> scheme -> Prop :=
-| stRefl :
-    forall s,
-    isSubtypeOf s s
-| stTrans :
-    forall s1 s2 s3,
-    isSubtypeOf s1 s2 ->
-    isSubtypeOf s2 s3 ->
-    isSubtypeOf s1 s3
-| stArrow :
-    forall s1 s2 s3 s4 r1 r2,
-    isSubtypeOf s3 s1 ->
-    isSubtypeOf s2 s4 ->
-    subsumes r1 r2 ->
-    isSubtypeOf (stwithx (tarrow s1 s2) r1) (stwithx (tarrow s3 s4) r2)
+with hasKind : context -> scheme -> kind -> Prop :=
+| kArrow :
+    forall c s1 s2 r,
+    hasKind c s1 ktype ->
+    hasKind c s2 ktype ->
+    hasKind c (srow r) krow ->
+    hasKind c (stwithx (tarrow s1 s2) r) ktype
+(* TODO: Fill in the other rules here. *)
 
 (* Operation type well-formedness *)
 
@@ -71,64 +37,70 @@ with opTypeWellFormed : scheme -> schemeId -> Prop :=
     subsumes (rsingleton (svar a)) r ->
     opTypeWellFormed (stwithx t r) a
 
-(* Typing rules *)
+(* Effect row subsumption *)
 
-with hasType : context -> term -> scheme -> Prop :=
-| htVar :
-    forall c e s,
-    lookupEVar c e = Some s ->
-    hasType c e s
-(* TODO: Fill in the other rules here. *)
-
-(* Kinding rules *)
-
-with hasKind : context -> scheme -> kind -> Prop :=
-| hkArrow :
-    forall c s1 s2 r,
-    hasKind c s1 ktype ->
-    hasKind c s2 ktype ->
-    hasKind c (srow r) krow ->
-    hasKind c (stwithx (tarrow s1 s2) r) ktype
-(* TODO: Fill in the other rules here. *)
+with subsumes : row -> row -> Prop :=
+| rRefl :
+    forall r,
+    subsumes r r
+| rTrans :
+    forall r1 r2 r3,
+    subsumes r1 r2 ->
+    subsumes r2 r3 ->
+    subsumes r1 r3
+| rEmpty:
+    forall r1,
+    subsumes rempty r1
+| rSingleton :
+    forall s1 s2,
+    subtype s1 s2 ->
+    subsumes (rsingleton s1) (rsingleton s2)
+| rUnion :
+    forall r1 r2 r3,
+    subsumes r1 r3 ->
+    subsumes r2 r3 ->
+    subsumes (runion r1 r2) r3
+| rWeaken :
+    forall r1 r2,
+    subsumes r1 (runion r1 r2)
+| rExchange :
+    forall r1 r2,
+    subsumes (runion r1 r2) (runion r2 r1)
+| rAssoc:
+    forall r1 r2 r3,
+    subsumes (runion r1 r2) r3 ->
+    subsumes r1 (runion r2 r3)
 
 (* Scheme equivalence *)
 
-with schemeEq : scheme -> scheme -> Prop :=
-| seRefl :
+with subtype : scheme -> scheme -> Prop :=
+| stRefl :
     forall s,
-    schemeEq s s
-| seSymm :
-    forall s1 s2,
-    schemeEq s1 s2 ->
-    schemeEq s2 s1
-| seTrans :
+    subtype s s
+| stTrans :
     forall s1 s2 s3,
-    schemeEq s1 s2 ->
-    schemeEq s2 s3 ->
-    schemeEq s1 s3
+    subtype s1 s2 ->
+    subtype s2 s3 ->
+    subtype s1 s3
 (* TODO: Fill in the other rules here. *)
 
 (* Kind equivalence *)
 
-with kindEq : kind -> kind -> Prop :=
-| keRefl :
+with subkind : kind -> kind -> Prop :=
+| skRefl :
     forall k,
-    kindEq k k
-| keSymm :
-    forall k1 k2,
-    kindEq k1 k2 ->
-    kindEq k2 k1
-| keTrans :
+    subkind k k
+| skTrans :
     forall k1 k2 k3,
-    kindEq k1 k2 ->
-    kindEq k2 k3 ->
-    kindEq k1 k3
-| keEffect :
+    subkind k1 k2 ->
+    subkind k2 k3 ->
+    subkind k1 k3
+| skEffect :
     forall s1 s2 a x,
-    schemeEq s1 s2 ->
-    kindEq (keffect a x s1) (keffect a x s2)
-| keOperator :
+    subtype s1 s2 ->
+    subkind (keffect a x s1) (keffect a x s2)
+| skOperator :
     forall k1 k2 k3 k4 a,
-    kindEq k1 k3 ->
-    kindEq k2 k4 ->
-    kindEq (karrow a k1 k2) (karrow a k3 k4).
+    subkind k1 k3 ->
+    subkind k2 k4 ->
+    subkind (karrow a k1 k2) (karrow a k3 k4).
