@@ -86,7 +86,6 @@
 \newcommand\opwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
 \newcommand\rorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 \newcommand\sorder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
-\newcommand\korder[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -292,13 +291,6 @@
         \BinaryInfC{$\tjudgment{\context}{\sapp{\scheme_2}{\scheme_1}}{\sub{\kind_2}{\svar}{\scheme_1}}$}
       \end{prooftree}
 
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\scheme}{\kind_1}$}
-          \AxiomC{$\korder{\kind_1}{\kind_2}$}
-        \RightLabel{(\textsc{K-Subsumption})}
-        \BinaryInfC{$\tjudgment{\context}{\scheme}{\kind_2}$}
-      \end{prooftree}
-
       \caption{Kinding rules}\label{fig:kinding_rules}
     \end{mdframed}
   \end{figure}
@@ -452,44 +444,6 @@
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\korder{\kind}{\kind}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{SK-Reflexivity})}
-        \UnaryInfC{$\korder{\kind}{\kind}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\korder{\kind_1}{\kind_2}$}
-          \AxiomC{$\korder{\kind_2}{\kind_3}$}
-        \RightLabel{(\textsc{SK-Transitivity})}
-        \BinaryInfC{$\korder{\kind_1}{\kind_3}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\sorder{\scheme_1}{\scheme_2}$}
-        \RightLabel{(\textsc{SK-Effect})}
-        \UnaryInfC{$\korder{\keffect{\svar}{\evar}{\scheme_1}}{\keffect{\svar}{\evar}{\scheme_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\korder{\kind_3}{\kind_1}$}
-          \AxiomC{$\korder{\kind_2}{\kind_4}$}
-        \RightLabel{(\textsc{SK-Operator})}
-        \BinaryInfC{$\korder{\karrow{\anno{\svar}{\kind_1}}{\kind_2}}{\karrow{\anno{\svar}{\kind_3}}{\kind_4}}$}
-      \end{prooftree}
-
-      \caption{Subkinding}\label{fig:subkinding}
     \end{mdframed}
   \end{figure}
 \end{document}

@@ -81,26 +81,5 @@ with subtype : scheme -> scheme -> Prop :=
     forall s1 s2 s3,
     subtype s1 s2 ->
     subtype s2 s3 ->
-    subtype s1 s3
+    subtype s1 s3.
 (* TODO: Fill in the other rules here. *)
-
-(* Kind equivalence *)
-
-with subkind : kind -> kind -> Prop :=
-| skRefl :
-    forall k,
-    subkind k k
-| skTrans :
-    forall k1 k2 k3,
-    subkind k1 k2 ->
-    subkind k2 k3 ->
-    subkind k1 k3
-| skEffect :
-    forall s1 s2 a x,
-    subtype s1 s2 ->
-    subkind (keffect a x s1) (keffect a x s2)
-| skOperator :
-    forall k1 k2 k3 k4 a,
-    subkind k1 k3 ->
-    subkind k2 k4 ->
-    subkind (karrow a k1 k2) (karrow a k3 k4).
