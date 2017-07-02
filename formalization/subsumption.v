@@ -37,24 +37,24 @@ Proof.
     + apply rExchange.
 Qed.
 
-Inductive rowContains : row -> scheme -> Prop :=
+Inductive rowContains : row -> type -> Prop :=
 | rcSingleton :
-    forall s,
-    rowContains (rsingleton s) s
+    forall t,
+    rowContains (rsingleton t) t
 | rcUnionLeft :
-    forall r1 r2 s,
-    rowContains r1 s ->
-    rowContains (runion r1 r2) s
+    forall r1 r2 t,
+    rowContains r1 t ->
+    rowContains (runion r1 r2) t
 | rcUnionRight :
-    forall r1 r2 s,
-    rowContains r2 s ->
-    rowContains (runion r1 r2) s.
+    forall r1 r2 t,
+    rowContains r2 t ->
+    rowContains (runion r1 r2) t.
 
 Definition containment r1 r2 :=
-  forall s1,
-  rowContains r1 s1 ->
-  exists s2,
-  (subtype s1 s2 /\ rowContains r2 s2).
+  forall t1,
+  rowContains r1 t1 ->
+  exists t2,
+  (subtype t1 t2 /\ rowContains r2 t2).
 
 Lemma subsumptionImpliesContainment :
   forall r1 r2,
@@ -66,29 +66,29 @@ Proof.
   induction H.
   (* rTrans *)
   - intros.
-    destruct IHsubsumes1 with (s1 := s1).
+    destruct IHsubsumes1 with (t1 := t1).
     + auto.
     + elim H2. intros.
-      destruct IHsubsumes2 with (s1 := x).
+      destruct IHsubsumes2 with (t1 := x).
       * auto.
       * {
         elim H5. intros.
         exists x0.
         split.
-        - apply stTrans with (s2 := x); auto.
+        - apply stTrans with (t2 := x); auto.
         - auto.
       }
   (* rEmpty *)
   - intros.
-    exists s1.
+    exists t1.
     inversion H.
   (* rSingleton *)
   - intros.
-    exists s2.
+    exists t2.
     intros.
     inversion H0.
-    assert (subtype s0 s2).
-    + apply stTrans with (s2 := s1).
+    assert (subtype t0 t2).
+    + apply stTrans with (t2 := t1).
       * rewrite H1.
         apply stRefl.
       * auto.
@@ -98,17 +98,17 @@ Proof.
   (* rUnion *)
   - intros.
     inversion H1.
-    + destruct IHsubsumes1 with (s1 := s1).
+    + destruct IHsubsumes1 with (t1 := t1).
       * auto.
       * exists x.
         auto.
-    + destruct IHsubsumes2 with (s1 := s1).
+    + destruct IHsubsumes2 with (t1 := t1).
       * auto.
       * exists x.
         auto.
   (* rWeaken *)
   - intros.
-    exists s1.
+    exists t1.
     split.
     + apply stRefl.
     + inversion H.
@@ -122,7 +122,7 @@ Proof.
         auto.
   (* rExchange *)
   - intros.
-    exists s1.
+    exists t1.
     split.
     + apply stRefl.
     + inversion H.
@@ -145,30 +145,30 @@ Proof.
   (* rsingleton *)
   - induction r2.
     (* rempty *)
-    + set (H1 := H s).
-      set (H2 := H1 (rcSingleton s)).
+    + set (H1 := H t).
+      set (H2 := H1 (rcSingleton t)).
       elim H2. intros.
       elim H0. intros.
       inversion H4.
     (* rsingleton *)
-    + set (H1 := H s).
-      set (H2 := H1 (rcSingleton s)).
+    + set (H1 := H t).
+      set (H2 := H1 (rcSingleton t)).
       elim H2. intros.
       elim H0. intros.
       inversion H4.
       apply rSingleton. auto.
     (* runion *)
-    + set (H1 := H s).
-      set (H2 := H1 (rcSingleton s)).
+    + set (H1 := H t).
+      set (H2 := H1 (rcSingleton t)).
       elim H2. intros.
       elim H0. intros.
       inversion H4.
       * {
         assert (
-          forall s1 : scheme,
-          rowContains (rsingleton s) s1 ->
-          exists s2 : scheme,
-          subtype s1 s2 /\ rowContains r2_1 s2
+          forall t1 : type,
+          rowContains (rsingleton t) t1 ->
+          exists t2 : type,
+          subtype t1 t2 /\ rowContains r2_1 t2
         ).
         - intros.
           exists x.
@@ -181,10 +181,10 @@ Proof.
       }
       * {
         assert (
-          forall s1 : scheme,
-          rowContains (rsingleton s) s1 ->
-          exists s2 : scheme,
-          subtype s1 s2 /\ rowContains r2_2 s2
+          forall t1 : type,
+          rowContains (rsingleton t) t1 ->
+          exists t2 : type,
+          subtype t1 t2 /\ rowContains r2_2 t2
         ).
         - intros.
           exists x.
@@ -199,27 +199,27 @@ Proof.
       }
   (* runion *)
   - assert (
-      forall s1 : scheme,
-      rowContains r1_1 s1 ->
-      exists s2 : scheme,
-      subtype s1 s2 /\ rowContains r2 s2
+      forall t1 : type,
+      rowContains r1_1 t1 ->
+      exists t2 : type,
+      subtype t1 t2 /\ rowContains r2 t2
     ).
     + intros.
-      set (H1 := H s1).
-      assert (rowContains (runion r1_1 r1_2) s1).
+      set (H1 := H t1).
+      assert (rowContains (runion r1_1 r1_2) t1).
       * apply rcUnionLeft. auto.
       * set (H3 := H1 H2).
         auto.
     + assert (
-        forall s1 : scheme,
-        rowContains r1_2 s1 ->
-        exists s2 : scheme,
-        subtype s1 s2 /\ rowContains r2 s2
+        forall t1 : type,
+        rowContains r1_2 t1 ->
+        exists t2 : type,
+        subtype t1 t2 /\ rowContains r2 t2
       ).
       * {
         intros.
-        set (H2 := H s1).
-        assert (rowContains (runion r1_1 r1_2) s1).
+        set (H2 := H t1).
+        assert (rowContains (runion r1_1 r1_2) t1).
         - apply rcUnionRight. auto.
         - set (H4 := H2 H3).
           auto.
