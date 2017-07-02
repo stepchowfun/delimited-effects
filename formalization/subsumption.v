@@ -24,7 +24,96 @@ Lemma containmentImpliesSubsumption :
   forall r1 r2,
   containment r1 r2 ->
   subsumes r1 r2.
-Admitted.
+Proof.
+  intros.
+  unfold containment in H.
+  induction r1.
+  (* rempty *)
+  - apply rEmpty.
+  (* rsingleton *)
+  - induction r2.
+    (* rempty *)
+    + set (H1 := H s).
+      set (H2 := H1 (rcSingleton s)).
+      elim H2. intros.
+      elim H0. intros.
+      inversion H4.
+    (* rsingleton *)
+    + set (H1 := H s).
+      set (H2 := H1 (rcSingleton s)).
+      elim H2. intros.
+      elim H0. intros.
+      inversion H4.
+      apply rSingleton. auto.
+    (* runion *)
+    + set (H1 := H s).
+      set (H2 := H1 (rcSingleton s)).
+      elim H2. intros.
+      elim H0. intros.
+      inversion H4.
+      * {
+        assert (
+          forall s1 : scheme,
+          rowContains (rsingleton s) s1 ->
+          exists s2 : scheme,
+          subtype s1 s2 /\ rowContains r2_1 s2
+        ).
+        - intros.
+          exists x.
+          inversion H9.
+          rewrite H10 in H3. auto.
+        - apply IHr2_1 in H9.
+          assert (subsumes r2_1 (runion r2_1 r2_2)).
+          + apply rWeaken.
+          + apply rTrans with (r2 := r2_1); auto.
+      }
+      * {
+        assert (
+          forall s1 : scheme,
+          rowContains (rsingleton s) s1 ->
+          exists s2 : scheme,
+          subtype s1 s2 /\ rowContains r2_2 s2
+        ).
+        - intros.
+          exists x.
+          inversion H9.
+          rewrite H10 in H3. auto.
+        - apply IHr2_2 in H9.
+          assert (subsumes r2_2 (runion r2_1 r2_2)).
+          + apply rTrans with (r2 := runion r2_2 r2_1).
+            * apply rWeaken.
+            * apply rExchange.
+          + apply rTrans with (r2 := r2_2); auto.
+      }
+  (* runion *)
+  - assert (
+      forall s1 : scheme,
+      rowContains r1_1 s1 ->
+      exists s2 : scheme,
+      subtype s1 s2 /\ rowContains r2 s2
+    ).
+    + intros.
+      set (H1 := H s1).
+      assert (rowContains (runion r1_1 r1_2) s1).
+      * apply rcUnionLeft. auto.
+      * set (H3 := H1 H2).
+        auto.
+    + assert (
+        forall s1 : scheme,
+        rowContains r1_2 s1 ->
+        exists s2 : scheme,
+        subtype s1 s2 /\ rowContains r2 s2
+      ).
+      * {
+        intros.
+        set (H2 := H s1).
+        assert (rowContains (runion r1_1 r1_2) s1).
+        - apply rcUnionRight. auto.
+        - set (H4 := H2 H3).
+          auto.
+      }
+      * apply rUnion; auto.
+Qed.
 
 Lemma subsumptionImpliesContainment :
   forall r1 r2,
