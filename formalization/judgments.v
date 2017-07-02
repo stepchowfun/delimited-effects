@@ -34,35 +34,8 @@ with opTypeWellFormed : type -> typeId -> Prop :=
     opTypeWellFormed (tptwithx (ptforall a1 k t) r) a2
 | wfTWithEff :
     forall a r t,
-    subsumes (rsingleton (tvar a)) r ->
+    subtype (trow (rsingleton (tvar a))) (trow r) ->
     opTypeWellFormed (tptwithx t r) a
-
-(* Effect row subsumption *)
-
-with subsumes : row -> row -> Prop :=
-| rTrans :
-    forall r1 r2 r3,
-    subsumes r1 r2 ->
-    subsumes r2 r3 ->
-    subsumes r1 r3
-| rEmpty:
-    forall r1,
-    subsumes rempty r1
-| rSingleton :
-    forall t1 t2,
-    subtype t1 t2 ->
-    subsumes (rsingleton t1) (rsingleton t2)
-| rUnion :
-    forall r1 r2 r3,
-    subsumes r1 r3 ->
-    subsumes r2 r3 ->
-    subsumes (runion r1 r2) r3
-| rWeaken :
-    forall r1 r2,
-    subsumes r1 (runion r1 r2)
-| rExchange :
-    forall r1 r2,
-    subsumes (runion r1 r2) (runion r2 r1)
 
 (* Subtyping *)
 
@@ -79,13 +52,31 @@ with subtype : type -> type -> Prop :=
     forall t1 t2 t3 t4 r1 r2,
     subtype t3 t1 ->
     subtype t2 t4 ->
-    subsumes r1 r2 ->
+    subtype (trow r1) (trow r2) ->
     subtype (tptwithx (ptarrow t1 t2) r1) (tptwithx (ptarrow t3 t4) r2)
 | stForAll :
     forall t1 t2 r1 r2 a k,
     subtype t1 t2 ->
-    subsumes r1 r2 ->
+    subtype (trow r1) (trow r2) ->
     subtype (tptwithx (ptforall a k t1) r1) (tptwithx (ptforall a k t2) r2)
+| stEmpty:
+    forall r,
+    subtype (trow rempty) (trow r)
+| stSingleton :
+    forall t1 t2,
+    subtype t1 t2 ->
+    subtype (trow (rsingleton t1)) (trow (rsingleton t2))
+| stUnion :
+    forall r1 r2 t,
+    subtype (trow r1) t ->
+    subtype (trow r2) t ->
+    subtype (trow (runion r1 r2)) t
+| stWeaken :
+    forall r1 r2,
+    subtype (trow r1) (trow (runion r1 r2))
+| stExchange :
+    forall r1 r2,
+    subtype (trow (runion r1 r2)) (trow (runion r2 r1))
 | stTypeAbs :
     forall t1 t2 a k,
     subtype t1 t2 ->
