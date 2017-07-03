@@ -4,7 +4,7 @@ Require Import syntax.
 
 Inductive hasType : context -> term -> type -> Prop :=
 | tVar :
-    forall c e t,
+    forall e t c,
     lookupEVar c e = Some t ->
     hasType c e t
 (* TODO: Fill in the other rules here. *)
@@ -13,12 +13,41 @@ Inductive hasType : context -> term -> type -> Prop :=
 
 with hasKind : context -> type -> kind -> Prop :=
 | kArrow :
-    forall c t1 t2 r,
+    forall t1 t2 r c,
     hasKind c t1 ktype ->
     hasKind c t2 ktype ->
     hasKind c (trow r) krow ->
     hasKind c (tptwithx (ptarrow t1 t2) r) ktype
-(* TODO: Fill in the other rules here. *)
+| kForAll :
+    forall t a r k c,
+    hasKind (ctextend c a k) t ktype ->
+    hasKind c (trow r) krow ->
+    hasKind c (tptwithx (ptforall a k t) r) ktype
+| kEmpty :
+    forall c,
+    hasKind c (trow rempty) krow
+| kSingleton :
+    forall x t1 t2 a c,
+    hasKind c t1 (keffect a x t2) ->
+    hasKind c (trow (rsingleton t1)) krow
+| kUnion :
+    forall r1 r2 c,
+    hasKind c (trow r1) krow ->
+    hasKind c (trow r2) krow ->
+    hasKind c (trow (runion r1 r2)) krow
+| kVar :
+    forall a k c,
+    lookupTVar c a = Some k ->
+    hasKind c a k
+| kAbs :
+    forall t a k1 k2 c,
+    hasKind (ctextend c a k1) t k2 ->
+    hasKind c (tabs a k1 t) (karrow a k1 k2)
+| kApp :
+    forall t1 t2 a k1 k2 c,
+    hasKind c t1 k2 ->
+    hasKind c t1 (karrow a k1 k2) ->
+    hasKind c (tapp t1 t2) k2 (* TODO: substitute t1 for a in k2 *)
 
 (* Operation type well-formedness *)
 
@@ -28,12 +57,12 @@ with opTypeWellFormed : type -> typeId -> Prop :=
     opTypeWellFormed t2 a ->
     opTypeWellFormed (tptwithx (ptarrow t1 t2) r) a
 | wfForAll :
-    forall t k r a1 a2,
+    forall t a1 a2 r k,
     opTypeWellFormed t a2 ->
     eqId a1 a2 = false ->
     opTypeWellFormed (tptwithx (ptforall a1 k t) r) a2
 | wfTWithEff :
-    forall a r t,
+    forall t a r,
     subtype (trow (rsingleton (tvar a))) (trow r) ->
     opTypeWellFormed (tptwithx t r) a
 
@@ -55,7 +84,7 @@ with subtype : type -> type -> Prop :=
     subtype (trow r1) (trow r2) ->
     subtype (tptwithx (ptarrow t1 t2) r1) (tptwithx (ptarrow t3 t4) r2)
 | stForAll :
-    forall t1 t2 r1 r2 a k,
+    forall t1 t2 a r1 r2 k,
     subtype t1 t2 ->
     subtype (trow r1) (trow r2) ->
     subtype (tptwithx (ptforall a k t1) r1) (tptwithx (ptforall a k t2) r2)
@@ -67,7 +96,7 @@ with subtype : type -> type -> Prop :=
     subtype t1 t2 ->
     subtype (trow (rsingleton t1)) (trow (rsingleton t2))
 | stUnion :
-    forall r1 r2 t,
+    forall t r1 r2,
     subtype (trow r1) t ->
     subtype (trow r2) t ->
     subtype (trow (runion r1 r2)) t
