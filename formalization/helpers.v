@@ -64,7 +64,7 @@ Fixpoint occurs (id1 : typeId) (t1 : type) :=
   | tapp t2 t3 => orb (occurs id1 t2) (occurs id1 t3)
   end.
 
-(* TODO: substition should check inside rows and kinds *)
+(* TODO: substition should check inside rows and kinds, and be capture-avoiding *)
 Fixpoint typeSubst (t1 : type) (id1 : typeId) (t2 : type) :=
   match t1 with
   | tptwithx pt r => match pt with
