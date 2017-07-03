@@ -112,7 +112,7 @@ with hasKind : context -> type -> kind -> Prop :=
     forall t1 t2 a k1 k2 c,
     hasKind c t1 k2 ->
     hasKind c t1 (karrow a k1 k2) ->
-    hasKind c (tapp t1 t2) k2 (* TODO: substitute t1 for a in k2 *)
+    hasKind c (tapp t1 t2) (substKind k2 a t1)
 
 (* Operation type well-formedness *)
 
