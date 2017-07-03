@@ -88,7 +88,7 @@ with subtype : type -> type -> Prop :=
     subtype t1 t2 ->
     subtype (trow r1) (trow r2) ->
     subtype (tptwithx (ptforall a k t1) r1) (tptwithx (ptforall a k t2) r2)
-| stEmpty:
+| stEmpty :
     forall r,
     subtype (trow rempty) (trow r)
 | stSingleton :
