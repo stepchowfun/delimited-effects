@@ -26,7 +26,7 @@ Inductive term : Type :=
 (* Types *)
 
 with type : Type :=
-| tptwithx : properType -> row -> type
+| tptwithr : properType -> row -> type
 | trow : row -> type
 | tvar : typeId -> type
 | tabs : typeId -> kind -> type -> type
