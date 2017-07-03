@@ -358,7 +358,7 @@ Proof.
       * apply stUnion; auto.
 Qed.
 
-Theorem subtypeCorrect :
+Theorem effectRowSubtyping :
   forall r1 r2,
   subtype (trow r1) (trow r2) <->
   subset r1 r2.

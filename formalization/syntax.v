@@ -59,4 +59,3 @@ Inductive context : Type :=
 | cempty : context
 | ceextend : context -> termId -> type -> context
 | ctextend : context -> typeId -> kind -> context.
-
