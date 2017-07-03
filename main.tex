@@ -404,8 +404,22 @@
 
       \begin{prooftree}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\type_3}{\type_4}$}
+          \AxiomC{$\subtype{\type_4}{\type_3}$}
         \RightLabel{(\textsc{ST-TypeApplication})}
-        \UnaryInfC{$\subtype{\tapp{\type_1}{\type_3}}{\tapp{\type_2}{\type_3}}$}
+        \TrinaryInfC{$\subtype{\tapp{\type_1}{\type_3}}{\tapp{\type_2}{\type_4}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-Beta1})}
+        \UnaryInfC{$\subtype{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-Beta2})}
+        \UnaryInfC{$\subtype{\sub{\type_1}{\tvar}{\type_2}}{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
