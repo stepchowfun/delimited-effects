@@ -2,12 +2,26 @@ Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 Require Import syntax.
 
-Definition eqId {X : Set} (id1 : id X) (id2 : id X) : bool :=
-  match id1 with
-  | makeId _ s1 => match id2 with
-    | makeId _ s2 => andb (prefix s1 s2) (prefix s2 s1)
-    end
-  end.
+Lemma eqIdDec : forall {X} (id1 id2 : id X), {id1 = id2} + {id1 <> id2}.
+Proof.
+  intros.
+  destruct id1 as [t s1].
+  destruct id2 as [t s2].
+  set (P := string_dec s1 s2).
+  destruct P as [H1 | H1].
+  - assert (makeId t s1 = makeId t s2).
+    + rewrite H1.
+      reflexivity.
+    + apply left.
+      auto.
+  - assert (makeId t s1 <> makeId t s2).
+    + unfold not.
+      intros H2.
+      inversion H2.
+      contradiction.
+    + apply right.
+      auto.
+Qed.
 
 Definition expandArgs (params : list (typeId * kind)) (k1 : kind) :=
   fold_right (
@@ -27,113 +41,124 @@ Definition ctextendAll (c1 : context) (types : list (typeId * kind)) :=
 
 Fixpoint lookupEVar c1 e :=
   match e with
-  | evar x1 => match c1 with
-               | cempty => None
-               | ceextend c2 x2 t => if eqId x1 x2
-                                     then Some t
-                                     else lookupEVar c2 e
-               | ctextend c2 _ _ => lookupEVar c2 e
-               end
+  | evar x1 =>
+    match c1 with
+    | cempty => None
+    | ceextend c2 x2 t =>
+      match eqIdDec x1 x2 with
+      | left _ => Some t
+      | right _ => lookupEVar c2 e
+      end
+    | ctextend c2 _ _ => lookupEVar c2 e
+    end
   | _ => None
   end.
 
 Fixpoint lookupTVar c1 t :=
   match t with
-  | tvar a1 => match c1 with
-               | cempty => None
-               | ceextend c2 _ _ => lookupTVar c2 t
-               | ctextend c2 a2 k => if eqId a1 a2
-                                     then Some k
-                                     else lookupTVar c2 t
-               end
+  | tvar a1 =>
+    match c1 with
+    | cempty => None
+    | ceextend c2 _ _ => lookupTVar c2 t
+    | ctextend c2 a2 k =>
+      match eqIdDec a1 a2 with
+      | left _ => Some k
+      | right _ => lookupTVar c2 t
+      end
+    end
   | _ => None
   end.
 
-Fixpoint occursType (a1 : typeId) (t1 : type) :=
+Fixpoint freeTVarsInType (t1 : type) :=
   match t1 with
-  | tptwithr pt r => orb (occursRow a1 r) (
-                       match pt with
-                       | ptarrow t2 t3 => orb
-                                            (occursType a1 t2)
-                                            (occursType a1 t3)
-                       | ptforall a2 k t2 => if eqId a1 a2
-                                             then occursKind a1 k
-                                             else orb
-                                                    (occursKind a1 k)
-                                                    (occursType a1 t2)
-                       end
-                     )
-  | trow r => occursRow a1 r
-  | tvar a2 => eqId a1 a2
-  | tabs a2 k t2 => if eqId a1 a2
-                    then occursKind a1 k
-                    else orb (occursKind a1 k) (occursType a1 t2)
-  | tapp t2 t3 => orb (occursType a1 t2) (occursType a1 t3)
+  | tptwithr pt r =>
+    match pt with
+    | ptarrow t2 t3 => freeTVarsInType t2 ++ freeTVarsInType t3
+    | ptforall a k t2 =>
+      freeTVarsInKind k ++ (remove eqIdDec a (freeTVarsInType t2))
+    end
+  | trow r => freeTVarsInRow r
+  | tvar a => a :: nil
+  | tabs a k t3 => freeTVarsInKind k ++ (remove eqIdDec a (freeTVarsInType t3))
+  | tapp t2 t3 => freeTVarsInType t2 ++ freeTVarsInType t3
   end
 
-with occursRow (a : typeId) (r1 : row) :=
-  match r1 with
-  | rempty => false
-  | rsingleton t => occursType a t
-  | runion r2 r3 => orb (occursRow a r2) (occursRow a r3)
+with freeTVarsInRow (r : row) :=
+  match r with
+  | rempty => nil
+  | rsingleton t => freeTVarsInType t
+  | runion r1 r2 => freeTVarsInRow r1 ++ freeTVarsInRow r2
   end
 
-with occursKind (a1 : typeId) (k1 : kind) :=
+with freeTVarsInKind (k1 : kind) :=
   match k1 with
-  | ktype => false
-  | krow => false
-  | keffect a2 x t => if eqId a1 a2
-                      then false
-                      else occursType a1 t
-  | karrow a2 k2 k3 => if eqId a1 a2
-                       then occursKind a1 k2
-                       else orb (occursKind a1 k2) (occursKind a1 k3)
+  | ktype => nil
+  | krow => nil
+  | keffect a x t => remove eqIdDec a (freeTVarsInType t)
+  | karrow a k2 k3 => freeTVarsInKind k2 ++ remove eqIdDec a (freeTVarsInKind k3)
+  end.
+
+Definition occursInType (a : typeId) (t : type) :=
+  match in_dec eqIdDec a (freeTVarsInType t) with
+  | left _ => true
+  | right _ => false
   end.
 
 (* TODO: make substitution capture-avoiding *)
-Fixpoint substType (t1 : type) (a1 : typeId) (t2 : type) :=
+Fixpoint substTypeInType (t1 : type) (a1 : typeId) (t2 : type) :=
   match t1 with
-  | tptwithr pt r => match pt with
-                     | ptarrow t3 t4 => tptwithr (
-                                          ptarrow
-                                            (substType t3 a1 t2)
-                                            (substType t4 a1 t2)
-                                        ) (substRow r a1 t2)
-                     | ptforall a2 k t3 => tptwithr (
-                                             ptforall a2 (substKind k a1 t2) (
-                                               if eqId a1 a2
-                                               then t3
-                                               else substType t3 a1 t2
-                                             )
-                                           ) (substRow r a1 t2)
-                     end
-  | trow r => trow (substRow r a1 t2)
-  | tvar a2 => if eqId a1 a2
-               then t2
-               else tvar a2
-  | tabs a2 k t3 => if eqId a1 a2
-                    then tabs a2 (substKind k a1 t2) t3
-                    else tabs a2 (substKind k a1 t2) (substType t3 a1 t2)
-  | tapp t3 t4 => tapp (substType t3 a1 t2) (substType t4 a1 t2)
+  | tptwithr pt r =>
+    match pt with
+    | ptarrow t3 t4 =>
+      tptwithr (
+        ptarrow
+          (substTypeInType t3 a1 t2)
+          (substTypeInType t4 a1 t2)
+      ) (substTypeInRow r a1 t2)
+    | ptforall a2 k t3 =>
+      tptwithr (
+        ptforall a2 (substTypeInKind k a1 t2) (
+          match eqIdDec a1 a2 with
+          | left _ => t3
+          | right _ => substTypeInType t3 a1 t2
+          end
+        )
+      ) (substTypeInRow r a1 t2)
+    end
+  | trow r => trow (substTypeInRow r a1 t2)
+  | tvar a2 =>
+    match eqIdDec a1 a2 with
+    | left _ => t2
+    | right _ => tvar a2
+    end
+  | tabs a2 k t3 =>
+    match eqIdDec a1 a2 with
+    | left _ => tabs a2 (substTypeInKind k a1 t2) t3
+    | right _ => tabs a2 (substTypeInKind k a1 t2) (substTypeInType t3 a1 t2)
+    end
+  | tapp t3 t4 => tapp (substTypeInType t3 a1 t2) (substTypeInType t4 a1 t2)
   end
 
-with substRow (r1 : row) (a : typeId) (t1 : type) :=
+with substTypeInRow (r1 : row) (a : typeId) (t1 : type) :=
   match r1 with
   | rempty => rempty
-  | rsingleton t2 => rsingleton (substType t2 a t1)
-  | runion r2 r3 => runion (substRow r2 a t1) (substRow r3 a t1)
+  | rsingleton t2 => rsingleton (substTypeInType t2 a t1)
+  | runion r2 r3 => runion (substTypeInRow r2 a t1) (substTypeInRow r3 a t1)
   end
 
-with substKind (k1 : kind) (a1 : typeId) (t1 : type) :=
+with substTypeInKind (k1 : kind) (a1 : typeId) (t1 : type) :=
   match k1 with
   | ktype => ktype
   | krow => krow
-  | keffect a2 x t2 => if eqId a1 a2
-                       then keffect a2 x t2
-                       else keffect a2 x (substType t2 a1 t1)
-  | karrow a2 k2 k3 => if eqId a1 a2
-                       then karrow a2 (substKind k2 a1 t1) k3
-                       else karrow a2
-                              (substKind k2 a1 t1)
-                              (substKind k3 a1 t1)
+  | keffect a2 x t2 =>
+    match eqIdDec a1 a2 with
+    | left _ => keffect a2 x t2
+    | right _ => keffect a2 x (substTypeInType t2 a1 t1)
+    end
+  | karrow a2 k2 k3 =>
+    match eqIdDec a1 a2 with
+    | left _ => karrow a2 (substTypeInKind k2 a1 t1) k3
+    | right _ =>
+      karrow a2 (substTypeInKind k2 a1 t1) (substTypeInKind k3 a1 t1)
+    end
   end.

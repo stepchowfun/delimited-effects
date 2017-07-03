@@ -50,12 +50,12 @@ Inductive hasType : context -> term -> type -> Prop :=
     forall e t1 t2 a k c,
     hasType c e (tptwithr (ptforall a k t1) rempty) ->
     hasKind c t2 k ->
-    hasType c (etapp e t2) (substType t1 a t2)
+    hasType c (etapp e t2) (substTypeInType t1 a t2)
 | htEffect :
     forall e x t1 t2 a1 a2s a3 c,
     opTypeWellFormed t1 a3 ->
     hasKind (ctextend (ctextendAll c a2s) a3 (keffect a3 x t1)) t1 ktype ->
-    occursType a1 t2 = false ->
+    occursInType a1 t2 = false ->
     lookupTVar c (tvar a1) = None ->
     lookupEVar c (evar x) = None ->
     hasType (ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1) e t2 ->
@@ -65,7 +65,7 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e1 t1 ->
     hasType c e2 (tptwithr pt r1) ->
     hasKind c t2 (keffect a x t3) ->
-    subtype t1 (substType t3 a t2) ->
+    subtype t1 (substTypeInType t3 a t2) ->
     (* TODO: ensure that r2 = r1 - {t2} *)
     hasType c (eprovide t2 x e1 e2) (tptwithr pt r2)
 | htSub :
@@ -112,7 +112,7 @@ with hasKind : context -> type -> kind -> Prop :=
     forall t1 t2 a k1 k2 c,
     hasKind c t1 k2 ->
     hasKind c t1 (karrow a k1 k2) ->
-    hasKind c (tapp t1 t2) (substKind k2 a t1)
+    hasKind c (tapp t1 t2) (substTypeInKind k2 a t1)
 
 (* Operation type well-formedness *)
 
@@ -122,9 +122,9 @@ with opTypeWellFormed : type -> typeId -> Prop :=
     opTypeWellFormed t2 a ->
     opTypeWellFormed (tptwithr (ptarrow t1 t2) r) a
 | wfForAll :
-    forall t a1 a2 r k,
+    forall t a1 a2 r k h,
     opTypeWellFormed t a2 ->
-    eqId a1 a2 = false ->
+    eqIdDec a1 a2 = right h ->
     opTypeWellFormed (tptwithr (ptforall a1 k t) r) a2
 | wfTWithEff :
     forall t a r,
