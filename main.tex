@@ -19,17 +19,21 @@
 %%%%%%%%%%%%
 
 \usepackage[colorlinks]{hyperref}
+\usepackage[framemethod=tikz]{mdframed} % The `tikz` thing allows us to have a transparent background
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{bussproofs}
 \usepackage{mathtools}
-\usepackage[framemethod=tikz]{mdframed} % The `tikz` thing allows us to have a transparent background
 \usepackage{stackengine} % For stacking axioms
 \usepackage{stmaryrd} % For \llbracket and \rrbracket
 
 %%%%%%%%%%
 % Macros %
 %%%%%%%%%%
+
+% Theorem styles
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
 
 % Misc
 \newcommand\anno[2]{#1 : #2} % chktex 26
@@ -407,4 +411,22 @@
       \caption{Subtyping}\label{fig:subtyping}
     \end{mdframed}
   \end{figure}
+
+  \begin{definition}[Effect row membership]
+    Let $\type \in \row$ be the smallest relation satisfying
+    \begin{enumerate}
+      \item $\type \in \rsingleton{\type}$
+      \item if $\type \in \row_1$ then $\type \in \runion{\row_1}{\row_2}$
+      \item if $\type \in \row_2$ then $\type \in \runion{\row_1}{\row_2}$.
+    \end{enumerate}
+  \end{definition}
+
+  \begin{theorem}[Effect row subtyping]
+    Given any two effect rows $\row_1, \row_2$, the following are equivalent:
+    \begin{enumerate}
+      \item $\subtype{\row_1}{\row_2}$
+      \item $\forall \type_1 \;.\; \type_1 \in \row_1$ implies $\exists \type_2 \;.\; \subtype{\type_1}{\type_2}$ and $\type_2 \in \row_2$.
+    \end{enumerate}
+  \end{theorem}
+
 \end{document}
