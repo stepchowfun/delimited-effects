@@ -20,7 +20,7 @@ lint:
 			else echo "No ChkTeX errors."; \
 		fi
 
-formalization: $(addprefix formalization/, syntax.vo judgments.vo subsumption.vo)
+formalization: $(addprefix formalization/, syntax.vo helpers.vo judgments.vo subsumption.vo)
 
 clean: clean-paper clean-formalization
 
@@ -55,7 +55,10 @@ main.pdf: main.tex
 formalization/syntax.vo: formalization/syntax.v
 	COQPATH="$$(pwd)/formalization" coqc formalization/syntax.v
 
-formalization/judgments.vo: $(addprefix formalization/, syntax.vo judgments.v)
+formalization/helpers.vo: $(addprefix formalization/, syntax.vo helpers.v)
+	COQPATH="$$(pwd)/formalization" coqc formalization/helpers.v
+
+formalization/judgments.vo: $(addprefix formalization/, syntax.vo helpers.vo judgments.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/judgments.v
 
 formalization/subsumption.vo: $(addprefix formalization/, syntax.vo judgments.vo subsumption.v)

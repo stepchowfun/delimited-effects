@@ -23,19 +23,6 @@ Proof.
     + apply stExchange.
 Qed.
 
-Inductive rowContains : row -> type -> Prop :=
-| rcSingleton :
-    forall t,
-    rowContains (rsingleton t) t
-| rcUnionLeft :
-    forall r1 r2 t,
-    rowContains r1 t ->
-    rowContains (runion r1 r2) t
-| rcUnionRight :
-    forall r1 r2 t,
-    rowContains r2 t ->
-    rowContains (runion r1 r2) t.
-
 Definition subset r1 r2 :=
   forall t1,
   rowContains r1 t1 ->

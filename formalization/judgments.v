@@ -1,4 +1,20 @@
 Require Import syntax.
+Require Import helpers.
+
+(* Effect row membership *)
+
+Inductive rowContains : row -> type -> Prop :=
+| rcSingleton :
+    forall t,
+    rowContains (rsingleton t) t
+| rcUnionLeft :
+    forall r1 r2 t,
+    rowContains r1 t ->
+    rowContains (runion r1 r2) t
+| rcUnionRight :
+    forall r1 r2 t,
+    rowContains r2 t ->
+    rowContains (runion r1 r2) t.
 
 (* Typing rules *)
 
@@ -7,7 +23,56 @@ Inductive hasType : context -> term -> type -> Prop :=
     forall e t c,
     lookupEVar c e = Some t ->
     hasType c e t
-(* TODO: Fill in the other rules here. *)
+| htAbs :
+    forall e x t1 t2 c,
+    hasType (ceextend c x t1) e t2 ->
+    hasKind c t1 ktype ->
+    lookupEVar c (evar x) = None ->
+    hasType c (eabs x t1 e) (tptwithx (ptarrow t1 t2) rempty)
+| htAppByV :
+    forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
+    hasType c e1 (tptwithx pt1 r1) ->
+    hasType c e2 (tptwithx (ptarrow (tptwithx pt2 r2) (tptwithx pt3 r3)) r4) ->
+    subtype (tptwithx pt1 rempty) (tptwithx pt2 r2) ->
+    hasType c (eappbv e2 e1) (tptwithx pt3 (runion (runion r1 r3) r4))
+| htAppByN :
+    forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
+    hasType c e1 (tptwithx pt1 r1) ->
+    hasType c e2 (tptwithx (ptarrow (tptwithx pt2 r2) (tptwithx pt3 r3)) r4) ->
+    subtype (tptwithx pt1 r1) (tptwithx pt2 r2) ->
+    hasType c (eappbn e2 e1) (tptwithx pt3 (runion r3 r4))
+| htTypeAbs :
+    forall e t a k c,
+    hasType (ctextend c a k) e t ->
+    lookupTVar c (tvar a) = None ->
+    hasType c (etabs a k e) (tptwithx (ptforall a k t) rempty)
+| htTypeApp :
+    forall e t1 t2 a k c,
+    hasType c e (tptwithx (ptforall a k t1) rempty) ->
+    hasKind c t2 k ->
+    hasType c (etapp e t2) (typeSubst t1 a t2)
+| htEffect :
+    forall e x t1 t2 a1 a2s a3 c,
+    opTypeWellFormed t1 a3 ->
+    hasKind (ctextend (ctextendAll c a2s) a3 (keffect a3 x t1)) t1 ktype ->
+    occurs a1 t2 = false ->
+    lookupTVar c (tvar a1) = None ->
+    lookupEVar c (evar x) = None ->
+    hasType (ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1) e t2 ->
+    hasType c (eeffect a1 (expandArgs a2s (keffect a3 x t1)) e) t2
+| htProvide :
+    forall e1 e2 x pt t1 t2 t3 a r1 r2 c,
+    hasType c e1 t1 ->
+    hasType c e2 (tptwithx pt r1) ->
+    hasKind c t2 (keffect a x t3) ->
+    subtype t1 (typeSubst t3 a t2) ->
+    (* TODO: ensure that r2 = r1 - {t2} *)
+    hasType c (eprovide t2 x e1 e2) (tptwithx pt r2)
+| htSub :
+    forall c e t1 t2,
+    hasType c e t1 ->
+    subtype t1 t2 ->
+    hasType c e t2
 
 (* Kinding rules *)
 
