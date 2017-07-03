@@ -100,11 +100,11 @@ Fixpoint substType (t1 : type) (a1 : typeId) (t2 : type) :=
                                             (substType t4 a1 t2)
                                         ) (substRow r a1 t2)
                      | ptforall a2 k t3 => tptwithr (
-                                            ptforall a2
-                                              (substKind k a1 t2)
-                                              (if eqId a1 a2
+                                             ptforall a2 (substKind k a1 t2) (
+                                               if eqId a1 a2
                                                then t3
-                                               else substType t3 a1 t2)
+                                               else substType t3 a1 t2
+                                             )
                                            ) (substRow r a1 t2)
                      end
   | trow r => trow (substRow r a1 t2)
