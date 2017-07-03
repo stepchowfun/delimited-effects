@@ -51,7 +51,7 @@ Fixpoint lookupTVar c1 t :=
 
 Fixpoint occursType (a1 : typeId) (t1 : type) :=
   match t1 with
-  | tptwithx pt r => orb (occursRow a1 r) (
+  | tptwithr pt r => orb (occursRow a1 r) (
                        match pt with
                        | ptarrow t2 t3 => orb
                                             (occursType a1 t2)
@@ -93,13 +93,13 @@ with occursKind (a1 : typeId) (k1 : kind) :=
 (* TODO: make substitution capture-avoiding *)
 Fixpoint substType (t1 : type) (a1 : typeId) (t2 : type) :=
   match t1 with
-  | tptwithx pt r => match pt with
-                     | ptarrow t3 t4 => tptwithx (
+  | tptwithr pt r => match pt with
+                     | ptarrow t3 t4 => tptwithr (
                                           ptarrow
                                             (substType t3 a1 t2)
                                             (substType t4 a1 t2)
                                         ) (substRow r a1 t2)
-                     | ptforall a2 k t3 => tptwithx (
+                     | ptforall a2 k t3 => tptwithr (
                                             ptforall a2
                                               (substKind k a1 t2)
                                               (if eqId a1 a2

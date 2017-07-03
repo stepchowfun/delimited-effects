@@ -28,27 +28,27 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType (ceextend c x t1) e t2 ->
     hasKind c t1 ktype ->
     lookupEVar c (evar x) = None ->
-    hasType c (eabs x t1 e) (tptwithx (ptarrow t1 t2) rempty)
+    hasType c (eabs x t1 e) (tptwithr (ptarrow t1 t2) rempty)
 | htAppByV :
     forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
-    hasType c e1 (tptwithx pt1 r1) ->
-    hasType c e2 (tptwithx (ptarrow (tptwithx pt2 r2) (tptwithx pt3 r3)) r4) ->
-    subtype (tptwithx pt1 rempty) (tptwithx pt2 r2) ->
-    hasType c (eappbv e2 e1) (tptwithx pt3 (runion (runion r1 r3) r4))
+    hasType c e1 (tptwithr pt1 r1) ->
+    hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
+    subtype (tptwithr pt1 rempty) (tptwithr pt2 r2) ->
+    hasType c (eappbv e2 e1) (tptwithr pt3 (runion (runion r1 r3) r4))
 | htAppByN :
     forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
-    hasType c e1 (tptwithx pt1 r1) ->
-    hasType c e2 (tptwithx (ptarrow (tptwithx pt2 r2) (tptwithx pt3 r3)) r4) ->
-    subtype (tptwithx pt1 r1) (tptwithx pt2 r2) ->
-    hasType c (eappbn e2 e1) (tptwithx pt3 (runion r3 r4))
+    hasType c e1 (tptwithr pt1 r1) ->
+    hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
+    subtype (tptwithr pt1 r1) (tptwithr pt2 r2) ->
+    hasType c (eappbn e2 e1) (tptwithr pt3 (runion r3 r4))
 | htTypeAbs :
     forall e t a k c,
     hasType (ctextend c a k) e t ->
     lookupTVar c (tvar a) = None ->
-    hasType c (etabs a k e) (tptwithx (ptforall a k t) rempty)
+    hasType c (etabs a k e) (tptwithr (ptforall a k t) rempty)
 | htTypeApp :
     forall e t1 t2 a k c,
-    hasType c e (tptwithx (ptforall a k t1) rempty) ->
+    hasType c e (tptwithr (ptforall a k t1) rempty) ->
     hasKind c t2 k ->
     hasType c (etapp e t2) (substType t1 a t2)
 | htEffect :
@@ -63,11 +63,11 @@ Inductive hasType : context -> term -> type -> Prop :=
 | htProvide :
     forall e1 e2 x pt t1 t2 t3 a r1 r2 c,
     hasType c e1 t1 ->
-    hasType c e2 (tptwithx pt r1) ->
+    hasType c e2 (tptwithr pt r1) ->
     hasKind c t2 (keffect a x t3) ->
     subtype t1 (substType t3 a t2) ->
     (* TODO: ensure that r2 = r1 - {t2} *)
-    hasType c (eprovide t2 x e1 e2) (tptwithx pt r2)
+    hasType c (eprovide t2 x e1 e2) (tptwithr pt r2)
 | htSub :
     forall c e t1 t2,
     hasType c e t1 ->
@@ -82,12 +82,12 @@ with hasKind : context -> type -> kind -> Prop :=
     hasKind c t1 ktype ->
     hasKind c t2 ktype ->
     hasKind c (trow r) krow ->
-    hasKind c (tptwithx (ptarrow t1 t2) r) ktype
+    hasKind c (tptwithr (ptarrow t1 t2) r) ktype
 | kForAll :
     forall t a r k c,
     hasKind (ctextend c a k) t ktype ->
     hasKind c (trow r) krow ->
-    hasKind c (tptwithx (ptforall a k t) r) ktype
+    hasKind c (tptwithr (ptforall a k t) r) ktype
 | kEmpty :
     forall c,
     hasKind c (trow rempty) krow
@@ -120,16 +120,16 @@ with opTypeWellFormed : type -> typeId -> Prop :=
 | wfArrow :
     forall t1 t2 a r,
     opTypeWellFormed t2 a ->
-    opTypeWellFormed (tptwithx (ptarrow t1 t2) r) a
+    opTypeWellFormed (tptwithr (ptarrow t1 t2) r) a
 | wfForAll :
     forall t a1 a2 r k,
     opTypeWellFormed t a2 ->
     eqId a1 a2 = false ->
-    opTypeWellFormed (tptwithx (ptforall a1 k t) r) a2
+    opTypeWellFormed (tptwithr (ptforall a1 k t) r) a2
 | wfTWithEff :
     forall t a r,
     subtype (trow (rsingleton (tvar a))) (trow r) ->
-    opTypeWellFormed (tptwithx t r) a
+    opTypeWellFormed (tptwithr t r) a
 
 (* Subtyping *)
 
@@ -147,12 +147,12 @@ with subtype : type -> type -> Prop :=
     subtype t3 t1 ->
     subtype t2 t4 ->
     subtype (trow r1) (trow r2) ->
-    subtype (tptwithx (ptarrow t1 t2) r1) (tptwithx (ptarrow t3 t4) r2)
+    subtype (tptwithr (ptarrow t1 t2) r1) (tptwithr (ptarrow t3 t4) r2)
 | stForAll :
     forall t1 t2 a r1 r2 k,
     subtype t1 t2 ->
     subtype (trow r1) (trow r2) ->
-    subtype (tptwithx (ptforall a k t1) r1) (tptwithx (ptforall a k t2) r2)
+    subtype (tptwithr (ptforall a k t1) r1) (tptwithr (ptforall a k t2) r2)
 | stEmpty :
     forall r,
     subtype (trow rempty) (trow r)

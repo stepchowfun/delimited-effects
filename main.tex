@@ -55,7 +55,7 @@
 
 % Types
 \newcommand\type{\sigma}
-\newcommand\tptwithx[2]{#1 \; ! \; #2} % chktex 26
+\newcommand\tptwithr[2]{#1 \; ! \; #2} % chktex 26
 \newcommand\tvar{\alpha}
 \newcommand\tabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\tapp[2]{#1 \; #2} % chktex 1 chktex 26
@@ -118,7 +118,7 @@
           & $\eprovide{\type}{\evar}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
-          & $\tptwithx{\properType}{\row}$ & proper type with effects \\
+          & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\row$ & effect row \\
           & $\tvar$ & type variable \\
           & $\tabs{\anno{\tvar}{\kind}}{\type}$ & operator abstraction \\
@@ -169,34 +169,34 @@
           \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
           \AxiomC{$\evar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \TrinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithx{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \TrinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithx{\properType_1}{\row_1}}$}
-            {$\tjudgment{\context}{\term_2}{\tptwithx{\parens{\ptarrow{\tptwithx{\properType_2}{\row_2}}{\tptwithx{\properType_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\tptwithx{\properType_1}{\rempty}}{\tptwithx{\properType_2}{\row_2}}$}}}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
+            {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
+            {$\subtype{\tptwithr{\properType_1}{\rempty}}{\tptwithr{\properType_2}{\row_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByValue})}
-        \UnaryInfC{$\tjudgment{\context}{\eappbv{\term_2}{\term_1}}{\tptwithx{\properType_3}{\runion{\runion{\row_1}{\row_3}}{\row_4}}}$}
+        \UnaryInfC{$\tjudgment{\context}{\eappbv{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\runion{\row_1}{\row_3}}{\row_4}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithx{\properType_1}{\row_1}}$}
-            {$\tjudgment{\context}{\term_2}{\tptwithx{\parens{\ptarrow{\tptwithx{\properType_2}{\row_2}}{\tptwithx{\properType_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\tptwithx{\properType_1}{\row_1}}{\tptwithx{\properType_2}{\row_2}}$}}}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
+            {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
+            {$\subtype{\tptwithr{\properType_1}{\row_1}}{\tptwithr{\properType_2}{\row_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByName})}
-        \UnaryInfC{$\tjudgment{\context}{\eappbn{\term_2}{\term_1}}{\tptwithx{\properType_3}{\runion{\row_3}{\row_4}}}$}
+        \UnaryInfC{$\tjudgment{\context}{\eappbn{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\row_3}{\row_4}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
           \AxiomC{$\tvar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
+        \BinaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \BinaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
@@ -215,11 +215,11 @@
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
-            {$\tjudgment{\context}{\term_2}{\tptwithx{\properType}{\row}}$}
+            {$\tjudgment{\context}{\term_2}{\tptwithr{\properType}{\row}}$}
             {$\tjudgment{\context}{\type_2}{\keffect{\tvar}{\evar}{\type_3}}$}
             {$\subtype{\type_1}{\sub{\type_3}{\tvar}{\type_2}}$}}}
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\type_2}{\evar}{\term_1}{\term_2}}}{\tptwithx{\properType}\rdiff{\row}{\rsingleton{\type_2}}}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\type_2}{\evar}{\term_1}{\term_2}}}{\tptwithr{\properType}\rdiff{\row}{\rsingleton{\type_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -246,14 +246,14 @@
           \AxiomC{$\tjudgment{\context}{\type_2}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-Arrow})}
-        \TrinaryInfC{$\tjudgment{\context}{\tptwithx{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\ktype}$}
+        \TrinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\ktype}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-ForAll})}
-        \BinaryInfC{$\tjudgment{\context}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}{\row}}{\ktype}$}
+        \BinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}{\row}}{\ktype}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -309,20 +309,20 @@
       \begin{prooftree}
           \AxiomC{$\opwellformed{\type_2}{\tvar}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\opwellformed{\tptwithx{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\tvar}$}
+        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\tvar}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\opwellformed{\type}{\tvar_2}$}
           \AxiomC{$\tvar_1 \neq \tvar_2$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\opwellformed{\tptwithx{\parens{\ptforall{\anno{\tvar_1}{\kind}}{\type}}}{\row}}{\tvar_2}$}
+        \BinaryInfC{$\opwellformed{\tptwithr{\parens{\ptforall{\anno{\tvar_1}{\kind}}{\type}}}{\row}}{\tvar_2}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\rsingleton{\tvar}}{\row}$}
         \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\opwellformed{\tptwithx{\properType}{\row}}{\tvar}$}
+        \UnaryInfC{$\opwellformed{\tptwithr{\properType}{\row}}{\tvar}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
@@ -355,14 +355,14 @@
           \AxiomC{$\subtype{\type_2}{\type_4}$}
           \AxiomC{$\subtype{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Arrow})}
-        \TrinaryInfC{$\subtype{\tptwithx{\parens{\ptarrow{\type_1}{\type_2}}}{\row_1}}{\tptwithx{\parens{\ptarrow{\type_3}{\type_4}}}{\row_2}}$}
+        \TrinaryInfC{$\subtype{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row_1}}{\tptwithr{\parens{\ptarrow{\type_3}{\type_4}}}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
           \AxiomC{$\subtype{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \BinaryInfC{$\subtype{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}{\row_1}}{\tptwithx{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_2}}}{\row_2}}$}
+        \BinaryInfC{$\subtype{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_2}}}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
