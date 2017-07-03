@@ -50,12 +50,12 @@ Inductive hasType : context -> term -> type -> Prop :=
     forall e t1 t2 a k c,
     hasType c e (tptwithx (ptforall a k t1) rempty) ->
     hasKind c t2 k ->
-    hasType c (etapp e t2) (typeSubst t1 a t2)
+    hasType c (etapp e t2) (substType t1 a t2)
 | htEffect :
     forall e x t1 t2 a1 a2s a3 c,
     opTypeWellFormed t1 a3 ->
     hasKind (ctextend (ctextendAll c a2s) a3 (keffect a3 x t1)) t1 ktype ->
-    occurs a1 t2 = false ->
+    occursType a1 t2 = false ->
     lookupTVar c (tvar a1) = None ->
     lookupEVar c (evar x) = None ->
     hasType (ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1) e t2 ->
@@ -65,7 +65,7 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e1 t1 ->
     hasType c e2 (tptwithx pt r1) ->
     hasKind c t2 (keffect a x t3) ->
-    subtype t1 (typeSubst t3 a t2) ->
+    subtype t1 (substType t3 a t2) ->
     (* TODO: ensure that r2 = r1 - {t2} *)
     hasType c (eprovide t2 x e1 e2) (tptwithx pt r2)
 | htSub :
