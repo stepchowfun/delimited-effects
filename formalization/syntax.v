@@ -74,26 +74,26 @@ Definition eqId {X : Set} (i1 : id X) (i2 : id X) : bool :=
     end
   end.
 
-Fixpoint lookupEVar (c1 : context) e :=
+Fixpoint lookupEVar c1 e :=
   match e with
   | evar i1 => match c1 with
                | cempty => None
                | ceextend c2 i2 t => if eqId i1 i2
                                      then Some t
                                      else lookupEVar c2 e
-               | ctextend c2 i2 k => lookupEVar c2 e
+               | ctextend c2 _ _ => lookupEVar c2 e
                end
   | _ => None
   end.
 
-Fixpoint lookupTVar (c1 : context) e :=
-  match e with
+Fixpoint lookupTVar c1 t :=
+  match t with
   | tvar i1 => match c1 with
                | cempty => None
-               | ceextend c2 i2 t => lookupTVar c2 e
+               | ceextend c2 _ _ => lookupTVar c2 t
                | ctextend c2 i2 k => if eqId i1 i2
                                      then Some k
-                                     else lookupTVar c2 e
+                                     else lookupTVar c2 t
                end
   | _ => None
   end.
