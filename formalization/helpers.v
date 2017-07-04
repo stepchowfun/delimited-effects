@@ -95,7 +95,8 @@ with freeTVarsInKind (k1 : kind) :=
   | ktype => nil
   | krow => nil
   | keffect a x t => remove eqIdDec a (freeTVarsInType t)
-  | karrow a k2 k3 => freeTVarsInKind k2 ++ remove eqIdDec a (freeTVarsInKind k3)
+  | karrow a k2 k3 =>
+    freeTVarsInKind k2 ++ remove eqIdDec a (freeTVarsInKind k3)
   end.
 
 Definition occursInType (a : typeId) (t : type) :=

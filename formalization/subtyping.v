@@ -166,7 +166,8 @@ Proof.
       t1 t4        (* tapp *)
     ]; auto.
     assert (exists r2, t2 = trow r2) as H5.
-    + apply rownessClosedUnderSubtype with (t1 := trow r1) (t2 := t2) (r1 := r1); auto.
+    + apply rownessClosedUnderSubtype
+      with (t1 := trow r1) (t2 := t2) (r1 := r1); auto.
     + destruct H5 as [r2 H5].
       rewrite H5 in H2.
       rewrite H5 in H4.
