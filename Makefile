@@ -1,6 +1,10 @@
 # Phony targets
 
-.PHONY: all paper lint formalization clean clean-paper clean-formalization docker-deps docker-build
+.PHONY: \
+  all \
+  paper lint formalization \
+  clean clean-paper clean-formalization \
+  docker-deps docker-build
 
 all: paper lint formalization
 
@@ -19,8 +23,15 @@ lint:
 		exit 1; \
 			else echo "No ChkTeX errors."; \
 		fi
+	./scripts/check-line-lengths.sh \
+	  .travis.yml \
+	  Makefile \
+	  docker/* \
+	  formalization/*.v \
+	  scripts/*
 
-formalization: $(addprefix formalization/, syntax.vo helpers.vo judgments.vo subtyping.vo)
+formalization: \
+  $(addprefix formalization/, syntax.vo helpers.vo judgments.vo subtyping.vo)
 
 clean: clean-paper clean-formalization
 
@@ -28,13 +39,23 @@ clean-paper:
 	rm -rf paper-build main.pdf
 
 clean-formalization:
-	rm -rf paper-build formalization/*.vo formalization/.*.vo.aux formalization/*.glob
+	rm -rf \
+	  paper-build \
+	  formalization/*.vo \
+	  formalization/.*.vo.aux \
+	  formalization/*.glob
 
 docker-deps:
-	docker build -f docker/Dockerfile-deps -t stephanmisc/delimited-effects:deps .
+	docker build \
+	  -f docker/Dockerfile-deps \
+	  -t stephanmisc/delimited-effects:deps \
+	  .
 
 docker-build:
-	docker build -f docker/Dockerfile-build -t stephanmisc/delimited-effects:build .
+	docker build \
+	  -f docker/Dockerfile-build \
+	  -t stephanmisc/delimited-effects:build \
+	  .
 
 # The paper
 
@@ -55,11 +76,14 @@ main.pdf: main.tex
 formalization/syntax.vo: formalization/syntax.v
 	COQPATH="$$(pwd)/formalization" coqc formalization/syntax.v
 
-formalization/helpers.vo: $(addprefix formalization/, syntax.vo helpers.v)
+formalization/helpers.vo: \
+  $(addprefix formalization/, syntax.vo helpers.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/helpers.v
 
-formalization/judgments.vo: $(addprefix formalization/, syntax.vo helpers.vo judgments.v)
+formalization/judgments.vo: \
+  $(addprefix formalization/, syntax.vo helpers.vo judgments.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/judgments.v
 
-formalization/subtyping.vo: $(addprefix formalization/, syntax.vo judgments.vo subtyping.v)
+formalization/subtyping.vo: \
+  $(addprefix formalization/, syntax.vo judgments.vo subtyping.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/subtyping.v

@@ -58,7 +58,9 @@ Inductive hasType : context -> term -> type -> Prop :=
     occursInType a1 t2 = false ->
     lookupTVar c (tvar a1) = None ->
     lookupEVar c (evar x) = None ->
-    hasType (ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1) e t2 ->
+    hasType (
+      ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1
+    ) e t2 ->
     hasType c (eeffect a1 (expandArgs a2s (keffect a3 x t1)) e) t2
 | htProvide :
     forall e1 e2 x pt t1 t2 t3 a r1 r2 c,
