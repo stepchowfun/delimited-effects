@@ -68,7 +68,9 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e2 (tptwithr pt r1) ->
     hasKind c t2 (keffect a x t3) ->
     subtype t1 (substTypeInType t3 a t2) ->
-    (* TODO: ensure that r2 = r1 - {t2} *)
+    ~(rowContains r2 t2) ->
+    subtype (trow (runion (rsingleton t2) r2)) (trow r1) ->
+    subtype (trow r1) (trow (runion (rsingleton t2) r2)) ->
     hasType c (eprovide t2 x e1 e2) (tptwithr pt r2)
 | htSub :
     forall c e t1 t2,
