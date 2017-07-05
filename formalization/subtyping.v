@@ -63,14 +63,11 @@ Proof.
     t1                                  | (* stRefl *)
     t1 t2 t3 H1 H2 H3 H4                | (* stTrans *)
     t1 t2 t3 t4 r1 r2 H1 H2 H3 H4 H5 H6 | (* stArrow *)
-    t1 t2 a1 r1 r2 k1 H1 H2 H3 H4       | (* stForAll *)
     r1                                  | (* stEmpty *)
     t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
     r1 r2                               | (* stWeaken *)
-    r1 r2                               | (* stExchange *)
-    t1 t2 a1 k1 H1 H2                   | (* stTypeAbs *)
-    t1 t2 t3 H1 H2                        (* stTypeApp *)
+    r1 r2                                 (* stExchange *)
   ].
   (* stRefl *)
   - intros r1 H1.
@@ -85,9 +82,6 @@ Proof.
   (* stArrow *)
   - intros r3 H7.
     inversion H7.
-  (* stForAll *)
-  - intros r3 H5.
-    inversion H5.
   (* stEmpty *)
   - intros r2.
     exists r1.
@@ -110,12 +104,6 @@ Proof.
   - intros r3 H1.
     exists (runion r2 r1).
     reflexivity.
-  (* stTypeAbs *)
-  - intros r1 H3.
-    inversion H3.
-  (* stTypeApp *)
-  - intros r1 H3.
-    inversion H3.
 Qed.
 
 Lemma subtypeImpliesSubsetAux :
@@ -134,22 +122,17 @@ Proof.
     t1                                  | (* stRefl *)
     t1 t2 t3 H1 H2 H3 H4                | (* stTrans *)
     t1 t2 t3 t4 r1 r2 H1 H2 H3 H4 H5 H6 | (* stArrow *)
-    t1 t2 a1 r1 r2 k1 H1 H2 H3 H4       | (* stForAll *)
     r1                                  | (* stEmpty *)
     t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
     r1 r2                               | (* stWeaken *)
-    r1 r2                               | (* stExchange *)
-    t1 t2 a1 k1 H1 H2                   | (* stTypeAbs *)
-    t1 t2 t3 H1 H2                        (* stTypeApp *)
+    r1 r2                                 (* stExchange *)
   ]; auto.
   (* stRefl *)
   - destruct t1 as [
       pt1 r1     | (* tptwithx *)
       r1         | (* trow *)
-      tid1       | (* tvar *)
-      tid1 k1 t1 | (* tabs *)
-      t1 t2        (* tapp *)
+      tid1         (* tvar *)
     ]; auto.
     unfold subset.
     intros t1 H1.
@@ -161,9 +144,7 @@ Proof.
   - induction t1 as [
       pt1 r1     | (* tptwithx *)
       r1         | (* trow *)
-      tid1       | (* tvar *)
-      tid1 k1 t1 | (* tabs *)
-      t1 t4        (* tapp *)
+      tid1         (* tvar *)
     ]; auto.
     assert (exists r2, t2 = trow r2) as H5.
     + apply rownessClosedUnderSubtype
@@ -197,9 +178,7 @@ Proof.
   - destruct t1 as [
       pt1 r3     | (* tptwithx *)
       r3         | (* trow *)
-      tid1       | (* tvar *)
-      tid1 k1 t1 | (* tabs *)
-      t1 t4        (* tapp *)
+      tid1         (* tvar *)
     ]; auto.
     unfold subset.
     intros t1 H5.

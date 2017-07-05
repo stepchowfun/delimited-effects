@@ -19,6 +19,9 @@ Inductive rowContains : row -> type -> Prop :=
 (* Typing rules *)
 
 Inductive hasType : context -> term -> type -> Prop :=
+| tUnit :
+    forall c,
+    hasType c eunit (tptwithr ptunit rempty)
 | tVar :
     forall e t c,
     lookupEVar c e = Some t ->
@@ -41,27 +44,17 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
     subtype (tptwithr pt1 r1) (tptwithr pt2 r2) ->
     hasType c (eappbn e2 e1) (tptwithr pt3 (runion r3 r4))
-| htTypeAbs :
-    forall e t a k c,
-    hasType (ctextend c a k) e t ->
-    lookupTVar c (tvar a) = None ->
-    hasType c (etabs a k e) (tptwithr (ptforall a k t) rempty)
-| htTypeApp :
-    forall e t1 t2 a k c,
-    hasType c e (tptwithr (ptforall a k t1) rempty) ->
-    hasKind c t2 k ->
-    hasType c (etapp e t2) (substTypeInType t1 a t2)
 | htEffect :
-    forall e x t1 t2 a1 a2s a3 c,
+    forall e x t1 t2 a1 a3 c,
     opTypeWellFormed t1 a3 ->
-    hasKind (ctextend (ctextendAll c a2s) a3 (keffect a3 x t1)) t1 ktype ->
+    hasKind (ctextend c a3 (keffect a3 x t1)) t1 ktype ->
     occursInType a1 t2 = false ->
     lookupTVar c (tvar a1) = None ->
     lookupEVar c (evar x) = None ->
     hasType (
-      ceextend (ctextend c a1 (expandArgs a2s (keffect a3 x t1))) x t1
+      ceextend (ctextend c a1 (keffect a3 x t1)) x t1
     ) e t2 ->
-    hasType c (eeffect a1 (expandArgs a2s (keffect a3 x t1)) e) t2
+    hasType c (eeffect a1 (keffect a3 x t1) e) t2
 | htProvide :
     forall e1 e2 x pt t1 t2 t3 a r1 r2 c,
     hasType c e1 t1 ->
@@ -81,17 +74,16 @@ Inductive hasType : context -> term -> type -> Prop :=
 (* Kinding rules *)
 
 with hasKind : context -> type -> kind -> Prop :=
+| kUnit :
+    forall r c,
+    hasKind c (trow r) krow ->
+    hasKind c (tptwithr ptunit r) ktype
 | kArrow :
     forall t1 t2 r c,
     hasKind c t1 ktype ->
     hasKind c t2 ktype ->
     hasKind c (trow r) krow ->
     hasKind c (tptwithr (ptarrow t1 t2) r) ktype
-| kForAll :
-    forall t a r k c,
-    hasKind (ctextend c a k) t ktype ->
-    hasKind c (trow r) krow ->
-    hasKind c (tptwithr (ptforall a k t) r) ktype
 | kEmpty :
     forall c,
     hasKind c (trow rempty) krow
@@ -108,15 +100,6 @@ with hasKind : context -> type -> kind -> Prop :=
     forall a k c,
     lookupTVar c a = Some k ->
     hasKind c a k
-| kAbs :
-    forall t a k1 k2 c,
-    hasKind (ctextend c a k1) t k2 ->
-    hasKind c (tabs a k1 t) (karrow a k1 k2)
-| kApp :
-    forall t1 t2 a k1 k2 c,
-    hasKind c t1 k2 ->
-    hasKind c t1 (karrow a k1 k2) ->
-    hasKind c (tapp t1 t2) (substTypeInKind k2 a t1)
 
 (* Operation type well-formedness *)
 
@@ -125,11 +108,6 @@ with opTypeWellFormed : type -> typeId -> Prop :=
     forall t1 t2 a r,
     opTypeWellFormed t2 a ->
     opTypeWellFormed (tptwithr (ptarrow t1 t2) r) a
-| wfForAll :
-    forall t a1 a2 r k h,
-    opTypeWellFormed t a2 ->
-    eqIdDec a1 a2 = right h ->
-    opTypeWellFormed (tptwithr (ptforall a1 k t) r) a2
 | wfTWithEff :
     forall t a r,
     subtype (trow (rsingleton (tvar a))) (trow r) ->
@@ -152,11 +130,6 @@ with subtype : type -> type -> Prop :=
     subtype t2 t4 ->
     subtype (trow r1) (trow r2) ->
     subtype (tptwithr (ptarrow t1 t2) r1) (tptwithr (ptarrow t3 t4) r2)
-| stForAll :
-    forall t1 t2 a r1 r2 k,
-    subtype t1 t2 ->
-    subtype (trow r1) (trow r2) ->
-    subtype (tptwithr (ptforall a k t1) r1) (tptwithr (ptforall a k t2) r2)
 | stEmpty :
     forall r,
     subtype (trow rempty) (trow r)
@@ -174,12 +147,4 @@ with subtype : type -> type -> Prop :=
     subtype (trow r1) (trow (runion r1 r2))
 | stExchange :
     forall r1 r2,
-    subtype (trow (runion r1 r2)) (trow (runion r2 r1))
-| stTypeAbs :
-    forall t1 t2 a k,
-    subtype t1 t2 ->
-    subtype (tabs a k t1) (tabs a k t2)
-| stTypeApp :
-    forall t1 t2 t3,
-    subtype t1 t2 ->
-    subtype (tapp t1 t3) (tapp t2 t3).
+    subtype (trow (runion r1 r2)) (trow (runion r2 r1)).

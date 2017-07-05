@@ -23,22 +23,6 @@ Proof.
       auto.
 Qed.
 
-Definition expandArgs (params : list (typeId * kind)) (k1 : kind) :=
-  fold_right (
-    fun (param : typeId * kind) k2 =>
-      match param with
-      | (a, k3) => karrow a k3 k2
-      end
-  ) k1 params.
-
-Definition ctextendAll (c1 : context) (types : list (typeId * kind)) :=
-  fold_left (
-    fun c2 (type : typeId * kind) =>
-      match type with
-      | (a, k2) => ctextend c2 a k2
-      end
-  ) types c1.
-
 Fixpoint lookupEVar c1 e :=
   match e with
   | evar x1 =>
@@ -73,14 +57,11 @@ Fixpoint freeTVarsInType (t1 : type) :=
   match t1 with
   | tptwithr pt r =>
     match pt with
+    | ptunit => nil
     | ptarrow t2 t3 => freeTVarsInType t2 ++ freeTVarsInType t3
-    | ptforall a k t2 =>
-      freeTVarsInKind k ++ (remove eqIdDec a (freeTVarsInType t2))
     end
   | trow r => freeTVarsInRow r
   | tvar a => a :: nil
-  | tabs a k t3 => freeTVarsInKind k ++ (remove eqIdDec a (freeTVarsInType t3))
-  | tapp t2 t3 => freeTVarsInType t2 ++ freeTVarsInType t3
   end
 
 with freeTVarsInRow (r : row) :=
@@ -95,8 +76,6 @@ with freeTVarsInKind (k1 : kind) :=
   | ktype => nil
   | krow => nil
   | keffect a x t => remove eqIdDec a (freeTVarsInType t)
-  | karrow a k2 k3 =>
-    freeTVarsInKind k2 ++ remove eqIdDec a (freeTVarsInKind k3)
   end.
 
 Definition occursInType (a : typeId) (t : type) :=
@@ -110,20 +89,12 @@ Fixpoint substTypeInType (t1 : type) (a1 : typeId) (t2 : type) :=
   match t1 with
   | tptwithr pt r =>
     match pt with
+    | ptunit => tptwithr ptunit (substTypeInRow r a1 t2)
     | ptarrow t3 t4 =>
       tptwithr (
         ptarrow
           (substTypeInType t3 a1 t2)
           (substTypeInType t4 a1 t2)
-      ) (substTypeInRow r a1 t2)
-    | ptforall a2 k t3 =>
-      tptwithr (
-        ptforall a2 (substTypeInKind k a1 t2) (
-          match eqIdDec a1 a2 with
-          | left _ => t3
-          | right _ => substTypeInType t3 a1 t2
-          end
-        )
       ) (substTypeInRow r a1 t2)
     end
   | trow r => trow (substTypeInRow r a1 t2)
@@ -132,12 +103,6 @@ Fixpoint substTypeInType (t1 : type) (a1 : typeId) (t2 : type) :=
     | left _ => t2
     | right _ => tvar a2
     end
-  | tabs a2 k t3 =>
-    match eqIdDec a1 a2 with
-    | left _ => tabs a2 (substTypeInKind k a1 t2) t3
-    | right _ => tabs a2 (substTypeInKind k a1 t2) (substTypeInType t3 a1 t2)
-    end
-  | tapp t3 t4 => tapp (substTypeInType t3 a1 t2) (substTypeInType t4 a1 t2)
   end
 
 with substTypeInRow (r1 : row) (a : typeId) (t1 : type) :=
@@ -155,11 +120,5 @@ with substTypeInKind (k1 : kind) (a1 : typeId) (t1 : type) :=
     match eqIdDec a1 a2 with
     | left _ => keffect a2 x t2
     | right _ => keffect a2 x (substTypeInType t2 a1 t1)
-    end
-  | karrow a2 k2 k3 =>
-    match eqIdDec a1 a2 with
-    | left _ => karrow a2 (substTypeInKind k2 a1 t1) k3
-    | right _ =>
-      karrow a2 (substTypeInKind k2 a1 t1) (substTypeInKind k3 a1 t1)
     end
   end.

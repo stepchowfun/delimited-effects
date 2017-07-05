@@ -14,12 +14,11 @@ Definition typeId := id tid.
 (* Terms *)
 
 Inductive term : Type :=
+| eunit : term
 | evar : termId -> term
 | eabs : termId -> type -> term -> term
 | eappbv : term -> term -> term
 | eappbn : term -> term -> term
-| etabs : typeId -> kind -> term -> term
-| etapp : term -> type -> term
 | eeffect : typeId -> kind -> term -> term
 | eprovide : type -> termId -> term -> term -> term
 
@@ -29,14 +28,12 @@ with type : Type :=
 | tptwithr : properType -> row -> type
 | trow : row -> type
 | tvar : typeId -> type
-| tabs : typeId -> kind -> type -> type
-| tapp : type -> type -> type
 
 (* Proper types *)
 
 with properType : Type :=
+| ptunit : properType
 | ptarrow : type -> type -> properType
-| ptforall : typeId -> kind -> type -> properType
 
 (* Effect rows *)
 
@@ -50,8 +47,7 @@ with row : Type :=
 with kind : Type :=
 | ktype : kind
 | krow : kind
-| keffect : typeId -> termId -> type -> kind
-| karrow : typeId -> kind -> kind -> kind.
+| keffect : typeId -> termId -> type -> kind.
 
 (* Type contexts *)
 

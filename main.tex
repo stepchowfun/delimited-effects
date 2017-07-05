@@ -44,6 +44,7 @@
 
 % Terms
 \newcommand\term{t}
+\newcommand\eunit{()}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\eappbv[2]{#1 \left\llbracket #2 \right\rrbracket_{\textsc{V}}} % chktex 1
@@ -62,6 +63,7 @@
 
 % Proper types
 \newcommand\properType{\tau}
+\newcommand\ptunit{1}
 \newcommand\ptarrow[2]{#1 \rightarrow #2} % chktex 1
 \newcommand\ptforall[2]{\forall #1 \; . \; #2} % chktex 1 chktex 26
 
@@ -108,12 +110,13 @@
       \begin{center}
         \begin{tabular}{l l l}
           $\term \Coloneqq $ & & terms: \\
+          & \color{blue} $\eunit$ & \color{blue} unit \\
           & $\evar$ & variable \\
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
           & $\eappbv{\term}{\term}$ & application by value \\
           & $\eappbn{\term}{\term}$ & application by name \\
-          & $\etabs{\anno{\tvar}{\kind}}{\term}$ & type abstraction \\
-          & $\etapp{\term}{\type}$ & type application \\
+          & \color{red} $\etabs{\anno{\tvar}{\kind}}{\term}$ & \color{red} type abstraction \\
+          & \color{red} $\etapp{\term}{\type}$ & \color{red} type application \\
           & $\eeffect{\tvar}{\kind}{\term}$ & effect declaration \\
           & $\eprovide{\type}{\evar}{\term}{\term}$ & effect definition \\
           \\
@@ -121,12 +124,13 @@
           & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\row$ & effect row \\
           & $\tvar$ & type variable \\
-          & $\tabs{\anno{\tvar}{\kind}}{\type}$ & operator abstraction \\
-          & $\tapp{\type}{\type}$ & operator application \\
+          & \color{red} $\tabs{\anno{\tvar}{\kind}}{\type}$ & \color{red} operator abstraction \\
+          & \color{red} $\tapp{\type}{\type}$ & \color{red} operator application \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
+          & \color{blue} $\ptunit$ & \color{blue} unit type \\
           & $\ptarrow{\type}{\type}$ & arrow type \\
-          & $\ptforall{\anno{\tvar}{\kind}}{\type}$ & quantified type \\
+          & \color{red} $\ptforall{\anno{\tvar}{\kind}}{\type}$ & \color{red} quantified type \\
           \\
           $\row \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
@@ -137,7 +141,7 @@
           & $\ktype$ & kind of proper types with effects \\
           & $\krow$ & kind of effect rows \\
           & $\keffect{\tvar}{\evar}{\type}$ & kind of effects \\
-          & $\karrow{\anno{\tvar}{\kind}}{\kind}$ & kind of operators \\
+          & \color{red} $\karrow{\anno{\tvar}{\kind}}{\kind}$ & \color{red} kind of operators \\
           \\
           $\context \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
@@ -157,6 +161,13 @@
       \end{center}
 
       \medskip
+
+      \begin{prooftree}
+        \color{blue}
+          \AxiomC{}
+        \RightLabel{(\textsc{T-Unit})}
+        \UnaryInfC{$\tjudgment{\context}{\eunit}{\tptwithr{\ptunit}{\rempty}}$}
+      \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\anno{\evar}{\type} \in \context$}
@@ -189,6 +200,7 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
           \AxiomC{$\tvar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
@@ -196,6 +208,7 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
@@ -204,13 +217,13 @@
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\tvar_3}$}
-            {$\tjudgment{\csextend{\csextend{\context}{\lstof{\anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
+            {$\tjudgment{\csextend{\csextend{\context}{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
             {$\tvar_1 \notin \type_2$}
             {$\tvar_1 \notin \dom{\context}$}
             {$\evar \notin \dom{\context}$}
-            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\tvar_1}{\karrow{\lstof{\anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}}}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}}}
+            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}}}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\tvar_1}{\karrow{\lstof{\anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}{\term}}}{\type_2}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}{\term}}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -242,6 +255,12 @@
       \medskip
 
       \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
+        \RightLabel{(\textsc{K-Unit})}
+        \UnaryInfC{$\tjudgment{\context}{\tptwithr{\ptunit}{\row}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
           \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
@@ -250,6 +269,7 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktype}$}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-ForAll})}
@@ -282,12 +302,14 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind_1}}}{\type}{\kind_2}$}
         \RightLabel{(\textsc{K-Abstraction})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\tabs{\anno{\tvar}{\kind_1}}{\type}}}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\tjudgment{\context}{\type_1}{\kind_1}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
         \RightLabel{(\textsc{K-Application})}
@@ -313,6 +335,7 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\opwellformed{\type}{\tvar_2}$}
           \AxiomC{$\tvar_1 \neq \tvar_2$}
         \RightLabel{(\textsc{WF-ForAll})}
@@ -359,6 +382,7 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\subtype{\type_1}{\type_2}$}
           \AxiomC{$\subtype{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
@@ -397,12 +421,14 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\subtype{\type_1}{\type_2}$}
         \RightLabel{(\textsc{ST-TypeAbstraction})}
         \UnaryInfC{$\subtype{\tabs{\anno{\tvar}{\kind}}{\type_1}}{\tabs{\anno{\tvar}{\kind}}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{$\subtype{\type_1}{\type_2}$}
           \AxiomC{$\subtype{\type_3}{\type_4}$}
           \AxiomC{$\subtype{\type_4}{\type_3}$}
@@ -411,12 +437,14 @@
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{}
         \RightLabel{(\textsc{ST-Beta1})}
         \UnaryInfC{$\subtype{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
+        \color{red} 
           \AxiomC{}
         \RightLabel{(\textsc{ST-Beta2})}
         \UnaryInfC{$\subtype{\sub{\type_1}{\tvar}{\type_2}}{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}$}
