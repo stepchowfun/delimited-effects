@@ -142,9 +142,9 @@ with subtype : type -> type -> Prop :=
     subtype (trow r1) t ->
     subtype (trow r2) t ->
     subtype (trow (runion r1 r2)) t
-| stWeaken :
+| stWeakenLeft :
     forall r1 r2,
     subtype (trow r1) (trow (runion r1 r2))
-| stExchange :
+| stWeakenRight :
     forall r1 r2,
-    subtype (trow (runion r1 r2)) (trow (runion r2 r1)).
+    subtype (trow r2) (trow (runion r1 r2)).

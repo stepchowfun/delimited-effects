@@ -1,6 +1,16 @@
 Require Import syntax.
 Require Import judgments.
 
+Theorem stExchange :
+  forall r1 r2,
+  subtype (trow (runion r1 r2)) (trow (runion r2 r1)).
+Proof.
+  intros r1 r2.
+  apply stUnion.
+  - apply stWeakenRight.
+  - apply stWeakenLeft.
+Qed.
+
 Theorem stAssoc :
   forall r1 r2 r3,
   subtype (trow (runion (runion r1 r2) r3)) (trow (runion r1 (runion r2 r3))).
@@ -8,19 +18,11 @@ Proof.
   intros r1 r2 r3.
   apply stUnion.
   - apply stUnion.
-    + apply stWeaken.
-    + apply stTrans with (t2 := trow (runion (runion r2 r3) r1)).
-      * apply stTrans with (t2 := trow (runion r2 r3)); apply stWeaken.
-      * apply stExchange.
-  - apply stTrans with (t2 := trow (runion (runion r2 r3) r1)).
+    + apply stWeakenLeft.
     + apply stTrans with (t2 := trow (runion r2 r3)).
-      * {
-        apply stTrans with (t2 := trow (runion r3 r2)).
-        - apply stWeaken.
-        - apply stExchange.
-      }
-      * apply stWeaken.
-    + apply stExchange.
+      * apply stWeakenLeft.
+      * apply stWeakenRight.
+  - apply stTrans with (t2 := trow (runion r2 r3)); apply stWeakenRight.
 Qed.
 
 Definition subset r1 r2 :=
@@ -66,7 +68,7 @@ Proof.
     r1                                  | (* stEmpty *)
     t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
-    r1 r2                               | (* stWeaken *)
+    r1 r2                               | (* stWeakenLeft *)
     r1 r2                                 (* stExchange *)
   ].
   (* stRefl *)
@@ -96,13 +98,13 @@ Proof.
     destruct H6 as [r4 H6].
     exists r4.
     auto.
-  (* stWeaken *)
+  (* stWeakenLeft *)
   - intros r3 H1.
     exists (runion r1 r2).
     reflexivity.
-  (* stExchange *)
+  (* stWeakenRight *)
   - intros r3 H1.
-    exists (runion r2 r1).
+    exists (runion r1 r2).
     reflexivity.
 Qed.
 
@@ -125,7 +127,7 @@ Proof.
     r1                                  | (* stEmpty *)
     t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
-    r1 r2                               | (* stWeaken *)
+    r1 r2                               | (* stWeakenLeft *)
     r1 r2                                 (* stExchange *)
   ]; auto.
   (* stRefl *)
@@ -193,7 +195,7 @@ Proof.
       auto.
     + set (H9 := H4 t1 H6).
       auto.
-  (* stWeaken *)
+  (* stWeakenLeft *)
   - unfold subset.
     intros t1 H1.
     exists t1.
@@ -201,17 +203,14 @@ Proof.
     + apply stRefl.
     + apply rcUnionLeft.
       auto.
-  (* stExchange *)
+  (* stWeakenRight *)
   - unfold subset.
     intros t1 H1.
     exists t1.
     split.
     + apply stRefl.
-    + inversion H1.
-      * apply rcUnionRight.
-        auto.
-      * apply rcUnionLeft.
-        auto.
+    + apply rcUnionRight.
+      auto.
 Qed.
 
 Lemma subtypeImpliesSubset :
@@ -283,7 +282,7 @@ Proof.
           rewrite H12 in H5. auto.
         - apply H2 in H10.
           assert (subtype (trow r1) (trow (runion r1 r3))).
-          + apply stWeaken.
+          + apply stWeakenLeft.
           + apply stTrans with (t2 := trow r1); auto.
       }
       * {
@@ -304,7 +303,7 @@ Proof.
         - apply H3 in H0.
           assert (subtype (trow r3) (trow (runion r1 r3))).
           + apply stTrans with (t2 := trow (runion r3 r1)).
-            * apply stWeaken.
+            * apply stWeakenLeft.
             * apply stExchange.
           + apply stTrans with (t2 := trow r3); auto.
       }
