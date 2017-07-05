@@ -410,14 +410,14 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-Weakening})}
+        \RightLabel{(\textsc{ST-WeakeningLeft})}
         \UnaryInfC{$\subtype{\row_1}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-Exchange})}
-        \UnaryInfC{$\subtype{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
+        \RightLabel{(\textsc{ST-WeakeningRight})}
+        \UnaryInfC{$\subtype{\row_2}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
