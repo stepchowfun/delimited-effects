@@ -200,7 +200,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
           \AxiomC{$\tvar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
@@ -208,7 +208,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
@@ -302,14 +302,14 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind_1}}}{\type}{\kind_2}$}
         \RightLabel{(\textsc{K-Abstraction})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\tabs{\anno{\tvar}{\kind_1}}{\type}}}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\tjudgment{\context}{\type_1}{\kind_1}$}
           \AxiomC{$\tjudgment{\context}{\type_2}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
         \RightLabel{(\textsc{K-Application})}
@@ -335,7 +335,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\opwellformed{\type}{\tvar_2}$}
           \AxiomC{$\tvar_1 \neq \tvar_2$}
         \RightLabel{(\textsc{WF-ForAll})}
@@ -382,7 +382,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
           \AxiomC{$\subtype{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
@@ -421,14 +421,14 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
         \RightLabel{(\textsc{ST-TypeAbstraction})}
         \UnaryInfC{$\subtype{\tabs{\anno{\tvar}{\kind}}{\type_1}}{\tabs{\anno{\tvar}{\kind}}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
           \AxiomC{$\subtype{\type_3}{\type_4}$}
           \AxiomC{$\subtype{\type_4}{\type_3}$}
@@ -437,14 +437,14 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Beta1})}
         \UnaryInfC{$\subtype{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red} 
+        \color{red}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Beta2})}
         \UnaryInfC{$\subtype{\sub{\type_1}{\tvar}{\type_2}}{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}$}
