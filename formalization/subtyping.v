@@ -1,5 +1,5 @@
 Require Import syntax.
-Require Import judgments.
+Require Import typing.
 
 Theorem stExchange :
   forall r1 r2,
