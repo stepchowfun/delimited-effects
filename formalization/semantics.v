@@ -24,7 +24,15 @@ Inductive step : term -> term -> Prop :=
   forall e1 e2 a k,
   step e1 e2 ->
   step (eeffect a k e1) (eeffect a k e2)
+| stepEffectVal :
+  forall a k v,
+  value v ->
+  step (eeffect a k v) v
 | stepProvide :
   forall e1 e2 e3 x t,
   step (substTermInTerm e1 x e3) e2 ->
-  step (eprovide t x e3 e1) (eprovide t x e3 e2).
+  step (eprovide t x e3 e1) (eprovide t x e3 e2)
+| stepProvideVal :
+  forall e x t v,
+  value v ->
+  step (eprovide t x e v) (substTermInTerm v x e).

@@ -123,6 +123,7 @@ with substTypeInKind (k1 : kind) (a1 : typeId) (t1 : type) :=
     end
   end.
 
+(* TODO: make substitution capture-avoiding *)
 Fixpoint substTermInTerm (e1 : term) (x1 : termId) (e2 : term) :=
   match e1 with
   | eunit => e1
