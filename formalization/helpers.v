@@ -27,13 +27,13 @@ Fixpoint lookupEVar c1 e :=
   match e with
   | evar x1 =>
     match c1 with
-    | cempty => None
-    | ceextend c2 x2 t =>
+    | tcempty => None
+    | tceextend c2 x2 t =>
       match eqIdDec x1 x2 with
       | left _ => Some t
       | right _ => lookupEVar c2 e
       end
-    | ctextend c2 _ _ => lookupEVar c2 e
+    | tctextend c2 _ _ => lookupEVar c2 e
     end
   | _ => None
   end.
@@ -42,9 +42,9 @@ Fixpoint lookupTVar c1 t :=
   match t with
   | tvar a1 =>
     match c1 with
-    | cempty => None
-    | ceextend c2 _ _ => lookupTVar c2 t
-    | ctextend c2 a2 k =>
+    | tcempty => None
+    | tceextend c2 _ _ => lookupTVar c2 t
+    | tctextend c2 a2 k =>
       match eqIdDec a1 a2 with
       | left _ => Some k
       | right _ => lookupTVar c2 t

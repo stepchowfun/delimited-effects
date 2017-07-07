@@ -18,7 +18,7 @@ Inductive rowContains : row -> type -> Prop :=
 
 (* Typing rules *)
 
-Inductive hasType : context -> term -> type -> Prop :=
+Inductive hasType : tcontext -> term -> type -> Prop :=
 | tUnit :
     forall c,
     hasType c eunit (tptwithr ptunit rempty)
@@ -28,7 +28,7 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e t
 | htAbs :
     forall e x t1 t2 c,
-    hasType (ceextend c x t1) e t2 ->
+    hasType (tceextend c x t1) e t2 ->
     hasKind c t1 ktype ->
     lookupEVar c (evar x) = None ->
     hasType c (eabs x t1 e) (tptwithr (ptarrow t1 t2) rempty)
@@ -47,12 +47,12 @@ Inductive hasType : context -> term -> type -> Prop :=
 | htEffect :
     forall e x t1 t2 a1 a3 c,
     opTypeWellFormed t1 a3 ->
-    hasKind (ctextend c a3 (keffect a3 x t1)) t1 ktype ->
+    hasKind (tctextend c a3 (keffect a3 x t1)) t1 ktype ->
     occursInType a1 t2 = false ->
     lookupTVar c (tvar a1) = None ->
     lookupEVar c (evar x) = None ->
     hasType (
-      ceextend (ctextend c a1 (keffect a3 x t1)) x t1
+      tceextend (tctextend c a1 (keffect a3 x t1)) x t1
     ) e t2 ->
     hasType c (eeffect a1 (keffect a3 x t1) e) t2
 | htProvide :
@@ -73,7 +73,7 @@ Inductive hasType : context -> term -> type -> Prop :=
 
 (* Kinding rules *)
 
-with hasKind : context -> type -> kind -> Prop :=
+with hasKind : tcontext -> type -> kind -> Prop :=
 | kUnit :
     forall r c,
     hasKind c (trow r) krow ->
