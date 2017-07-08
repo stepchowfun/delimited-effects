@@ -3,4 +3,7 @@ dist: trusty
 language: generic
 sudo: required
 services: docker
-script: ./scripts/deploy.sh
+script: make docker-build &&
+  if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
+    ./scripts/deploy.sh;
+  fi
