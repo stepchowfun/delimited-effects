@@ -40,10 +40,10 @@ clean-paper:
 
 clean-formalization:
 	rm -rf \
-	  paper-build \
+	  formalization/*.glob \
 	  formalization/*.vo \
 	  formalization/.*.vo.aux \
-	  formalization/*.glob
+	  paper-build
 
 docker-deps:
 	docker build \
