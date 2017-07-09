@@ -1,8 +1,0 @@
-# NOTE: If you change this file, you probably
-#       also want to change .gitignore.
-
-main.pdf
-paper-build
-formalization/*.vo
-formalization/*.vo.aux
-formalization/*.glob

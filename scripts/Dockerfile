@@ -5,6 +5,9 @@ RUN \
 
   # Install various packages.
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
+    # Make
+    build-essential \
+
     # Coq
     coq \
 

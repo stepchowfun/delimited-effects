@@ -1,8 +1,5 @@
-# NOTE: If you change this file, you probably
-#       also want to change .dockerignore.
-
 main.pdf
-paper-build
+.paper-build
 formalization/*.vo
 formalization/*.vo.aux
 formalization/*.glob

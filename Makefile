@@ -11,22 +11,21 @@ all: paper lint formalization
 paper: main.pdf
 
 lint:
-	OUTPUT="$$(lacheck main.tex)"; \
-		if [ -n "$$OUTPUT" ]; \
-			then echo "$$OUTPUT"; \
-		exit 1; \
-			else echo "No lacheck errors."; \
-		fi
-	OUTPUT="$$(chktex main.tex)"; \
-		if [ -n "$$OUTPUT" ]; \
-			then echo "$$OUTPUT"; \
-		exit 1; \
-			else echo "No ChkTeX errors."; \
-		fi
+	OUTPUT="$$(lacheck paper/main.tex)"; \
+	  if [ -n "$$OUTPUT" ]; \
+	    then echo "$$OUTPUT"; \
+	  exit 1; \
+	    else echo "No lacheck errors."; \
+	  fi
+	OUTPUT="$$(chktex paper/main.tex)"; \
+	  if [ -n "$$OUTPUT" ]; \
+	    then echo "$$OUTPUT"; \
+	  exit 1; \
+	    else echo "No ChkTeX errors."; \
+	  fi
 	./scripts/check-line-lengths.sh \
 	  .travis.yml \
 	  Makefile \
-	  docker/* \
 	  formalization/*.v \
 	  scripts/*
 
@@ -36,40 +35,46 @@ formalization: \
 clean: clean-paper clean-formalization
 
 clean-paper:
-	rm -rf paper-build main.pdf
+	rm -rf .paper-build main.pdf
 
 clean-formalization:
 	rm -rf \
 	  formalization/*.glob \
 	  formalization/*.vo \
 	  formalization/.*.vo.aux \
-	  paper-build
+	  .paper-build
 
 docker-deps:
 	docker build \
-	  -f docker/Dockerfile-deps \
+	  -f scripts/Dockerfile \
 	  -t stephanmisc/delimited-effects:deps \
 	  .
 
 docker-build:
-	docker build \
-	  -f docker/Dockerfile-build \
-	  -t stephanmisc/delimited-effects:build \
-	  .
+	docker run \
+	  --rm \
+	  -v $$(pwd):/root \
+	  stephanmisc/delimited-effects:deps \
+	  sh -c 'cd /root && make'
 
 # The paper
 
-main.pdf: main.tex
-	mkdir -p "paper-build"
-	pdflatex -interaction=nonstopmode -output-directory "paper-build" main.tex
+main.pdf: paper/main.tex
+	mkdir -p ".paper-build"
+	pdflatex \
+	  -interaction=nonstopmode \
+	  -output-directory ".paper-build" \
+	  paper/main.tex
 	while ( \
-		grep -qi \
-			'^LaTeX Warning: Label(s) may have changed' \
-			"paper-build/main.log" \
+	  grep -qi '^LaTeX Warning: Label(s) may have changed' \
+	    '.paper-build/main.log' \
 	) do \
-		pdflatex -interaction=nonstopmode -output-directory "paper-build" main.tex; \
+	  pdflatex \
+	    -interaction=nonstopmode \
+	    -output-directory ".paper-build" \
+	    paper/main.tex; \
 	done
-	mv paper-build/main.pdf .
+	mv .paper-build/main.pdf .
 
 # The formalization
 
