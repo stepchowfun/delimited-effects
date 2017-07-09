@@ -51,7 +51,13 @@ with kind : Type :=
 
 (* Type contexts *)
 
-Inductive context : Type :=
-| cempty : context
-| ceextend : context -> termId -> type -> context
-| ctextend : context -> typeId -> kind -> context.
+Inductive tcontext : Type :=
+| tcempty : tcontext
+| tceextend : tcontext -> termId -> type -> tcontext
+| tctextend : tcontext -> typeId -> kind -> tcontext.
+
+(* Dynamic context *)
+
+Inductive dcontext : Type :=
+| dcempty : dcontext
+| dcextend : dcontext -> termId -> term -> dcontext.

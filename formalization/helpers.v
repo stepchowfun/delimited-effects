@@ -27,13 +27,13 @@ Fixpoint lookupEVar c1 e :=
   match e with
   | evar x1 =>
     match c1 with
-    | cempty => None
-    | ceextend c2 x2 t =>
+    | tcempty => None
+    | tceextend c2 x2 t =>
       match eqIdDec x1 x2 with
       | left _ => Some t
       | right _ => lookupEVar c2 e
       end
-    | ctextend c2 _ _ => lookupEVar c2 e
+    | tctextend c2 _ _ => lookupEVar c2 e
     end
   | _ => None
   end.
@@ -42,9 +42,9 @@ Fixpoint lookupTVar c1 t :=
   match t with
   | tvar a1 =>
     match c1 with
-    | cempty => None
-    | ceextend c2 _ _ => lookupTVar c2 t
-    | ctextend c2 a2 k =>
+    | tcempty => None
+    | tceextend c2 _ _ => lookupTVar c2 t
+    | tctextend c2 a2 k =>
       match eqIdDec a1 a2 with
       | left _ => Some k
       | right _ => lookupTVar c2 t
@@ -121,4 +121,32 @@ with substTypeInKind (k1 : kind) (a1 : typeId) (t1 : type) :=
     | left _ => keffect a2 x t2
     | right _ => keffect a2 x (substTypeInType t2 a1 t1)
     end
+  end.
+
+(* TODO: make substitution capture-avoiding *)
+Fixpoint substTermInTerm (e1 : term) (x1 : termId) (e2 : term) :=
+  match e1 with
+  | eunit => e1
+  | evar x2 =>
+    match eqIdDec x1 x2 with
+    | left _ => e2
+    | right _ => e1
+    end
+  | eabs x2 t e3 =>
+    match eqIdDec x1 x2 with
+    | left _ => e1
+    | right _ => eabs x2 t (substTermInTerm e3 x1 e2)
+    end
+  | eappbv e3 e4 =>
+    eappbv (substTermInTerm e3 x1 e2) (substTermInTerm e4 x1 e2)
+  | eappbn e3 e4 =>
+    eappbn (substTermInTerm e3 x1 e2) (substTermInTerm e4 x1 e2)
+  | eeffect a1 (keffect a2 x2 t) e3 =>
+    match eqIdDec x1 x2 with
+    | left _ => e1
+    | right _ => eeffect a1 (keffect a2 x2 t) (substTermInTerm e3 x1 e2)
+    end
+  | eprovide t x2 e3 e4 =>
+    eprovide t x2 (substTermInTerm e3 x1 e2) (substTermInTerm e4 x1 e2)
+  | _ => e1
   end.

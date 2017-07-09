@@ -30,7 +30,14 @@ lint:
 	  scripts/*
 
 formalization: \
-  $(addprefix formalization/, syntax.vo helpers.vo judgments.vo subtyping.vo)
+  $(addprefix       \
+    formalization/, \
+    syntax.vo       \
+    helpers.vo      \
+    typing.vo       \
+    subtyping.vo    \
+    semantics.vo    \
+  )
 
 clean: clean-paper clean-formalization
 
@@ -85,10 +92,14 @@ formalization/helpers.vo: \
   $(addprefix formalization/, syntax.vo helpers.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/helpers.v
 
-formalization/judgments.vo: \
-  $(addprefix formalization/, syntax.vo helpers.vo judgments.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/judgments.v
+formalization/typing.vo: \
+  $(addprefix formalization/, syntax.vo helpers.vo typing.v)
+	COQPATH="$$(pwd)/formalization" coqc formalization/typing.v
 
 formalization/subtyping.vo: \
-  $(addprefix formalization/, syntax.vo judgments.vo subtyping.v)
+  $(addprefix formalization/, syntax.vo typing.vo subtyping.v)
 	COQPATH="$$(pwd)/formalization" coqc formalization/subtyping.v
+
+formalization/semantics.vo: \
+  $(addprefix formalization/, syntax.vo helpers.vo semantics.v)
+	COQPATH="$$(pwd)/formalization" coqc formalization/semantics.v
