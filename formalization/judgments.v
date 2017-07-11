@@ -30,7 +30,6 @@ Inductive hasType : context -> term -> type -> Prop :=
     forall e x t1 t2 c,
     hasType (ceextend c x t1) e t2 ->
     hasKind c t1 ktype ->
-    lookupEVar c (evar x) = None ->
     hasType c (eabs x t1 e) (tptwithr (ptarrow t1 t2) rempty)
 | htAppByV :
     forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
@@ -49,8 +48,6 @@ Inductive hasType : context -> term -> type -> Prop :=
     opTypeWellFormed t1 a3 ->
     hasKind (ctextend c a3 (keffect a3 x t1)) t1 ktype ->
     occursInType a1 t2 = false ->
-    lookupTVar c (tvar a1) = None ->
-    lookupEVar c (evar x) = None ->
     hasType (
       ceextend (ctextend c a1 (keffect a3 x t1)) x t1
     ) e t2 ->
