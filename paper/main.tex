@@ -86,6 +86,7 @@
 \newcommand\cempty{\varnothing_{\context}}
 \newcommand\ceextend[2]{#1, #2}
 \newcommand\csextend[2]{#1, #2}
+\newcommand\clookup[2]{#1\parens{#2}}
 
 % Judgements
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
@@ -170,7 +171,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\anno{\evar}{\type} \in \context$}
+          \AxiomC{$\clookup{\context}{\evar} = \type$}
         \RightLabel{(\textsc{T-Variable})}
         \UnaryInfC{$\tjudgment{\context}{\evar}{\type}$}
       \end{prooftree}
@@ -178,9 +179,8 @@
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ceextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
           \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
-          \AxiomC{$\evar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \TrinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \BinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -202,9 +202,8 @@
       \begin{prooftree}
         \color{red}
           \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
-          \AxiomC{$\tvar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -217,10 +216,8 @@
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\tvar_3}$}
-            {$\tjudgment{\csextend{\csextend{\context}{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
             {$\tvar_1 \notin \type_2$}
-            {$\tvar_1 \notin \dom{\context}$}
-            {$\evar \notin \dom{\context}$}
+            {$\tjudgment{\csextend{\csextend{\context}{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
             {$\tjudgment{\ceextend{\csextend{\context}{\anno{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}}}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}{\term}}}{\type_2}$}
@@ -296,7 +293,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\anno{\tvar}{\kind} \in \context$}
+          \AxiomC{$\clookup{\context}{\tvar} = \kind$}
         \RightLabel{(\textsc{K-Variable})}
         \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
       \end{prooftree}

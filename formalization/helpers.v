@@ -19,8 +19,7 @@ Proof.
       intros H2.
       inversion H2.
       contradiction.
-    + apply right.
-      auto.
+    + auto.
 Qed.
 
 Fixpoint lookupEVar c1 e :=
