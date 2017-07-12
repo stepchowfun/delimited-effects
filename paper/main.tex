@@ -232,13 +232,6 @@
         \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\type_2}{\evar}{\term_1}{\term_2}}}{\tptwithr{\properType}\rdiff{\row}{\rsingleton{\type_2}}}$}
       \end{prooftree}
 
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\type_1}$}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
-        \RightLabel{(\textsc{T-Subsumption})}
-        \BinaryInfC{$\tjudgment{\context}{\term}{\type_2}$}
-      \end{prooftree}
-
       \caption{Typing rules}\label{fig:typing_rules}
     \end{mdframed}
   \end{figure}
@@ -252,6 +245,7 @@
       \medskip
 
       \begin{prooftree}
+        \color{blue}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-Unit})}
         \UnaryInfC{$\tjudgment{\context}{\tptwithr{\ptunit}{\row}}{\ktype}$}
@@ -368,6 +362,13 @@
           \AxiomC{$\subtype{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Transitivity})}
         \BinaryInfC{$\subtype{\type_1}{\type_3}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+        \color{blue}
+          \AxiomC{$\subtype{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{ST-Unit})}
+        \UnaryInfC{$\subtype{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
