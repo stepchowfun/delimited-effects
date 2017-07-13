@@ -244,12 +244,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\tvar_3}$}
-            {$\tvar_1 \notin \freevars{\type_2}$}
-            {$\tjudgment{\csextend{\csextend{\context}{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
-            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}}}{\anno{\evar}{\tptwithr{\parens{\ptforall{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\sub{\type_1}{\tvar_3}{\tapp{\tvar_1}{\lstof{\color{red}\tvar_2^i}}}}}}{\rempty}}}}{\term}{\type_2}$}}}
+          \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\evar_2}$}
+            {$\evar_1 \notin \freevars{\type_2}$}
+            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\color{red}\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\color{red} \tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\color{red}\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}{\term}}}{\type_2}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\color{red}\tvar^i} }{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}{\term}}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
