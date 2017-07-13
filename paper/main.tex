@@ -254,10 +254,10 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\properType}{\row}}$}
-            {$\tjudgment{\context}{\type_2}{\keffect{\tvar}{\evar}{\type_3}}$}
+            {$\tjudgment{\context}{\term_3}{\teffect{\evar_2}{\evar_1}{\type_3}}$}
             {$\subtype{\type_1}{\sub{\type_3}{\tvar}{\type_2}}$}}}
         \RightLabel{(\textsc{T-Provide})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\type_2}{\evar}{\term_1}{\term_2}}}{\tptwithr{\properType}{\parens{\rdiff{\row}{\rsingleton{\type_2}}}}}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\term_3}{\evar_1}{\term_1}{\term_2}}}{\tptwithr{\properType}\rdiff{\row}{\rsingleton{\term_3}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
