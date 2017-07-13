@@ -75,6 +75,7 @@
 \newcommand\tvar{\alpha}
 \newcommand\tabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
 \newcommand\tapp[2]{#1 \; #2} % chktex 1 chktex 26
+\newcommand\teffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle} % chktex 1 chktex 26
 
 % Proper types
 \newcommand\properType{\tau}
@@ -154,38 +155,29 @@
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
           & $\eappbv{\term}{\term}$ & application by value \\
           & $\eappbn{\term}{\term}$ & application by name \\
-          & \color{red} $\etabs{\anno{\tvar}{\kind}}{\term}$ & \color{red} type abstraction \\
+          & \color{red} $\etabs{\tvar}{\term}$ & \color{red} type abstraction \\
           & \color{red} $\etapp{\term}{\type}$ & \color{red} type application \\
-          & $\eeffect{\tvar}{\kind}{\term}$ & effect declaration \\
-          & $\eprovide{\type}{\evar}{\term}{\term}$ & effect definition \\
+          & $\eeffect{\evar}{\type}{\term}$ & effect declaration \\
+          & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tptwithr{\properType}{\row}$ & proper type with effects \\
-          & $\row$ & effect row \\
           & $\tvar$ & type variable \\
-          & \color{red} $\tabs{\anno{\tvar}{\kind}}{\type}$ & \color{red} operator abstraction \\
-          & \color{red} $\tapp{\type}{\type}$ & \color{red} operator application \\
+          & $\teffect{\evar}{\evar}{\type}$ & type of an effect \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
           & $\ptunit$ & unit type \\
           & $\ptarrow{\type}{\type}$ & arrow type \\
-          & \color{red} $\ptforall{\anno{\tvar}{\kind}}{\type}$ & \color{red} quantified type \\
+          & \color{red} $\ptforall{\tvar}{\type}$ & \color{red} quantified type \\
           \\
           $\row \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
-          & $\rsingleton{\type}$ & singleton effect row \\
+          & $\rsingleton{\term}$ & singleton effect row \\
           & $\runion{\row}{\row}$ & effect row union \\
-          \\
-          $\kind \Coloneqq $ & & kinds: \\
-          & $\ktype$ & kind of proper types with effects \\
-          & $\krow$ & kind of effect rows \\
-          & $\keffect{\tvar}{\evar}{\type}$ & kind of effects \\
-          & \color{red} $\karrow{\anno{\tvar}{\kind}}{\kind}$ & \color{red} kind of operators \\
           \\
           $\context \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
           & $\ceextend{\context}{\anno{\evar}{\type}}$ & term variable binding \\
-          & $\csextend{\context}{\anno{\tvar}{\kind}}$ & type variable binding \\
         \end{tabular}
       \end{center}
 
