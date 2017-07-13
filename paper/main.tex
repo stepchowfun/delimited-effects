@@ -55,6 +55,7 @@
 \newcommand\lstof[1]{\overline{#1}}
 \newcommand\parens[1]{\left( #1 \right)} % chktex 37
 \newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
+\newcommand\freevars[1]{\text{free}\parens{#1}}
 
 % Terms
 \newcommand\term{t}
@@ -252,7 +253,7 @@
 
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\tvar_3}$}
-            {$\tvar_1 \notin \type_2$}
+            {$\tvar_1 \notin \freevars{\type_2}$}
             {$\tjudgment{\csextend{\csextend{\context}{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}}{\anno{\tvar_3}{\keffect{\tvar_3}{\evar}{\type_1}}}}{\type_1}{\ktype}$}
             {$\tjudgment{\ceextend{\csextend{\context}{\anno{\tvar_1}{\karrow{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\keffect{\tvar_3}{\evar}{\type_1}}}}}{\anno{\evar}{\ptforall{\lstof{\color{red} \anno{\tvar_2^i}{\kind^i}}}{\sub{\type_1}{\tvar_3}{\tapp{\tvar_1}{\lstof{\color{red}\tvar_2^i}}}}}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
