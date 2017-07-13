@@ -1,31 +1,45 @@
-%%%%%%%%%%%%%%%%%%%%%
-% Document settings %
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document settings and packages %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \documentclass[12pt]{article}
-\usepackage[margin=1in]{geometry} % Just for setting the margin
 
-\title{Delimited effects}
-\date{}
+\usepackage[framemethod=tikz]{mdframed} % For figures (`tikz` allows us to have a transparent background)
+\usepackage[margin=1in]{geometry} % For setting the margin
+\usepackage{amssymb} % For \varnothing
+\usepackage{bussproofs} % For inference rules
+\usepackage{listings} % For source code
+\usepackage{mathtools} % For \Coloneqq
+\usepackage{stackengine} % For stacking axioms
+\usepackage{stmaryrd} % For \llbracket and \rrbracket
+\usepackage{inconsolata} % Monospace font
+\usepackage[T1]{fontenc} % The font encoding
 
-% Add a "Draft" watermark to the background
+% Add a "Draft" watermark to the background.
 \usepackage{draftwatermark}
 \SetWatermarkText{\textsc{Draft}}
 \SetWatermarkScale{3}
 \SetWatermarkLightness{0.9}
 
-%%%%%%%%%%%%
-% Packages %
-%%%%%%%%%%%%
+\title{Delimited effects}
+\date{}
 
-\usepackage[colorlinks]{hyperref}
-\usepackage[framemethod=tikz]{mdframed} % The `tikz` thing allows us to have a transparent background
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{bussproofs}
-\usepackage{mathtools}
-\usepackage{stackengine} % For stacking axioms
-\usepackage{stmaryrd} % For \llbracket and \rrbracket
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Source code formatting %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{purple}{RGB}{127, 0, 181}
+
+\lstdefinelanguage{gram}{morekeywords={effect, provide}}
+
+\lstset{
+  aboveskip=\bigskipamount,
+  basicstyle=\ttfamily,
+  belowskip=\bigskipamount,
+  keepspaces=true,
+  keywordstyle=\bfseries\color{purple},
+  language=gram,
+}
 
 %%%%%%%%%%
 % Macros %
@@ -106,12 +120,35 @@
 
   \section{Introduction}
 
+  The system we describe in this paper is motivated by the observation that a variety of seemingly orthogonal ideas in programming languages are variations on a common theme: tracking predicates in the type system without requiring the explicit threading of witnesses through the program at the term level. A sufficiently smart inference algorithm frees the programmer from the ceremony of annotating types and propagating predicates. There's no shortage of examples of this theme: type classes, implicit parameters, algebraic effects, etc. In this paper, we generalize these ideas by a single language construct, which we call \emph{delimited effects}.
+
+  \begin{lstlisting}[gobble=4]
+    effect IO
+      getLine   : String ! IO
+      printLine : String -> () ! IO
+  \end{lstlisting}
+
+  \begin{lstlisting}[gobble=4]
+    effect Monoid a
+      mempty  : a ! Monoid a
+      mappend : a -> a -> a ! Monoid a
+  \end{lstlisting}
+
+  Our primary contributions are:
+
+  \begin{itemize}
+    \item We give the syntax, semantics, and typing rules for our system.
+    \item We prove that the typing rules are sound with respect to the semantics.
+    \item We provide one of many possible type inference algorithms for the system.
+    \item We provide several diverse examples of programming language features which are generalized by our system.
+  \end{itemize}
+
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
         \begin{tabular}{l l l}
           $\term \Coloneqq $ & & terms: \\
-          & \color{blue} $\eunit$ & \color{blue} unit \\
+          & $\eunit$ & unit \\
           & $\evar$ & variable \\
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
           & $\eappbv{\term}{\term}$ & application by value \\
@@ -129,7 +166,7 @@
           & \color{red} $\tapp{\type}{\type}$ & \color{red} operator application \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
-          & \color{blue} $\ptunit$ & \color{blue} unit type \\
+          & $\ptunit$ & unit type \\
           & $\ptarrow{\type}{\type}$ & arrow type \\
           & \color{red} $\ptforall{\anno{\tvar}{\kind}}{\type}$ & \color{red} quantified type \\
           \\
@@ -164,7 +201,6 @@
       \medskip
 
       \begin{prooftree}
-        \color{blue}
           \AxiomC{}
         \RightLabel{(\textsc{T-Unit})}
         \UnaryInfC{$\tjudgment{\context}{\eunit}{\tptwithr{\ptunit}{\rempty}}$}
@@ -245,7 +281,6 @@
       \medskip
 
       \begin{prooftree}
-        \color{blue}
           \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
         \RightLabel{(\textsc{K-Unit})}
         \UnaryInfC{$\tjudgment{\context}{\tptwithr{\ptunit}{\row}}{\ktype}$}
@@ -365,7 +400,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{blue}
           \AxiomC{$\subtype{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Unit})}
         \UnaryInfC{$\subtype{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}

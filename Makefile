@@ -11,18 +11,6 @@ all: paper lint formalization
 paper: main.pdf
 
 lint:
-	OUTPUT="$$(lacheck paper/main.tex)"; \
-	  if [ -n "$$OUTPUT" ]; \
-	    then echo "$$OUTPUT"; \
-	  exit 1; \
-	    else echo "No lacheck errors."; \
-	  fi
-	OUTPUT="$$(chktex paper/main.tex)"; \
-	  if [ -n "$$OUTPUT" ]; \
-	    then echo "$$OUTPUT"; \
-	  exit 1; \
-	    else echo "No ChkTeX errors."; \
-	  fi
 	./scripts/check-line-lengths.sh \
 	  .travis.yml \
 	  Makefile \
