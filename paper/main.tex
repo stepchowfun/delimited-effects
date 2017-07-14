@@ -345,13 +345,13 @@
       \begin{prooftree}
           \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
           \AxiomC{$\subsumes{\context}{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{ST-Transitivity})}
+        \RightLabel{(\textsc{RS-Transitivity})}
         \BinaryInfC{$\subsumes{\context}{\row_1}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-Empty})}
+        \RightLabel{(\textsc{RS-Empty})}
         \UnaryInfC{$\subsumes{\context}{\rempty}{\row}$}
       \end{prooftree}
 
@@ -359,26 +359,26 @@
           \AxiomC{$\tjudgment{\context}{\term_1}{\type_1}$}
           \AxiomC{$\tjudgment{\context}{\term_2}{\type_2}$}
           \AxiomC{$\subsumes{\context}{\type_1}{\type_2}$}
-        \RightLabel{(\textsc{ST-Singleton})}
+        \RightLabel{(\textsc{RS-Singleton})}
         \TrinaryInfC{$\subsumes{\context}{\rsingleton{\term_1}}{\rsingleton{\term_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subsumes{\context}{\row_1}{\row_3}$}
           \AxiomC{$\subsumes{\context}{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{ST-Union})}
+        \RightLabel{(\textsc{RS-Union})}
         \BinaryInfC{$\subsumes{\context}{\runion{\row_1}{\row_2}}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-WeakeningLeft})}
+        \RightLabel{(\textsc{RS-WeakeningLeft})}
         \UnaryInfC{$\subsumes{\context}{\row_1}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-WeakeningRight})}
+        \RightLabel{(\textsc{RS-WeakeningRight})}
         \UnaryInfC{$\subsumes{\context}{\row_2}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
