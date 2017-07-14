@@ -343,6 +343,12 @@
       \medskip
 
       \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{RS-Reflexivity})}
+        \UnaryInfC{$\subsumes{\context}{\row}{\row}$}
+      \end{prooftree}
+
+      \begin{prooftree}
           \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
           \AxiomC{$\subsumes{\context}{\row_2}{\row_3}$}
         \RightLabel{(\textsc{RS-Transitivity})}
