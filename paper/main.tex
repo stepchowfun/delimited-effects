@@ -266,29 +266,28 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\opwellformed{\type}{\tvar}$}
+        \framebox{$\opwellformed{\type}{\evar}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\opwellformed{\type_2}{\tvar}$}
+          \AxiomC{$\opwellformed{\type_2}{\evar}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\tvar}$}
+        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
         \color{red}
-          \AxiomC{$\opwellformed{\type}{\tvar_2}$}
-          \AxiomC{$\tvar_1 \neq \tvar_2$}
+          \AxiomC{$\opwellformed{\type}{\evar}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\opwellformed{\tptwithr{\parens{\ptforall{\anno{\tvar_1}{\kind}}{\type}}}{\row}}{\tvar_2}$}
+        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptforall{\tvar}{\type}}}{\row}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\rsingleton{\tvar}}{\row}$}
+          \AxiomC{$\subtype{\rsingleton{\evar}}{\row}$}
         \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\opwellformed{\tptwithr{\properType}{\row}}{\tvar}$}
+        \UnaryInfC{$\opwellformed{\tptwithr{\properType}{\row}}{\evar}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
