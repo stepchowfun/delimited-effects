@@ -230,17 +230,16 @@
 
       \begin{prooftree}
         \color{red}
-          \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\tvar}{\term}}}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
         \color{red}
-          \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}}{\rempty}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \BinaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
+        \UnaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_1}}{\sub{\type_2}{\tvar}{\type_1}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -255,86 +254,12 @@
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\properType}{\row}}$}
             {$\tjudgment{\context}{\term_3}{\teffect{\evar_2}{\evar_1}{\type_3}}$}
-            {$\subtype{\type_1}{\sub{\type_3}{\tvar}{\type_2}}$}}}
+            {$\subtype{\type_1}{\sub{\type_3}{\evar_2}{\term_3}}$}}}
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\term_3}{\evar_1}{\term_1}{\term_2}}}{\tptwithr{\properType}\rdiff{\row}{\rsingleton{\term_3}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
-        \framebox{$\tjudgment{\context}{\type}{\kind}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
-        \RightLabel{(\textsc{K-Unit})}
-        \UnaryInfC{$\tjudgment{\context}{\tptwithr{\ptunit}{\row}}{\ktype}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\ktype}$}
-          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
-        \RightLabel{(\textsc{K-Arrow})}
-        \TrinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\ktype}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktype}$}
-          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
-        \RightLabel{(\textsc{K-ForAll})}
-        \BinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}{\row}}{\ktype}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{}
-        \RightLabel{(\textsc{K-EmptyEffectRow})}
-        \UnaryInfC{$\tjudgment{\context}{\rempty}{\krow}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\keffect{\tvar}{\evar}{\type_2}}$}
-        \RightLabel{(\textsc{K-SingletonEffectRow})}
-        \UnaryInfC{$\tjudgment{\context}{\rsingleton{\type_1}}{\krow}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\row_1}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\row_2}{\krow}$}
-        \RightLabel{(\textsc{K-EffectRowUnion})}
-        \BinaryInfC{$\tjudgment{\context}{\runion{\row_1}{\row_2}}{\krow}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\clookup{\context}{\tvar} = \kind$}
-        \RightLabel{(\textsc{K-Variable})}
-        \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{$\tjudgment{\csextend{\context}{\anno{\tvar}{\kind_1}}}{\type}{\kind_2}$}
-        \RightLabel{(\textsc{K-Abstraction})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\tabs{\anno{\tvar}{\kind_1}}{\type}}}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\kind_1}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\karrow{\anno{\tvar}{\kind_1}}{\kind_2}}$}
-        \RightLabel{(\textsc{K-Application})}
-        \BinaryInfC{$\tjudgment{\context}{\tapp{\type_2}{\type_1}}{\sub{\kind_2}{\tvar}{\type_1}}$}
-      \end{prooftree}
-
-      \caption{Kinding rules}\label{fig:kinding_rules}
     \end{mdframed}
   \end{figure}
 
