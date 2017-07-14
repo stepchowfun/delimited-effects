@@ -90,13 +90,6 @@
 \newcommand\runion[2]{#1, #2}
 \newcommand\rdiff[2]{#1 \; - \; #2} % chktex 8
 
-% Kinds
-\newcommand\kind{\kappa}
-\newcommand\ktype{\ast}
-\newcommand\krow{\diamond} % chktex 26
-\newcommand\keffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle} % chktex 1 chktex 26
-\newcommand\karrow[2]{\parens{#1} \rightarrow #2} % chktex 1
-
 % Type contexts
 \newcommand\context{\Gamma}
 \newcommand\cempty{\varnothing_{\context}}
@@ -108,6 +101,7 @@
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
 \newcommand\opwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
 \newcommand\subtype[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\subsumes[2]{#1 \; \sqsubseteq \; #2} % chktex 1
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -207,9 +201,8 @@
 
       \begin{prooftree}
           \AxiomC{$\tjudgment{\ceextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -316,15 +309,15 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Unit})}
-        \UnaryInfC{$\subtype{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\type_3}{\type_1}$}
           \AxiomC{$\subtype{\type_2}{\type_4}$}
-          \AxiomC{$\subtype{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Arrow})}
         \TrinaryInfC{$\subtype{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row_1}}{\tptwithr{\parens{\ptarrow{\type_3}{\type_4}}}{\row_2}}$}
       \end{prooftree}
@@ -332,73 +325,62 @@
       \begin{prooftree}
         \color{red}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
-          \AxiomC{$\subtype{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \BinaryInfC{$\subtype{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_2}}}{\row_2}}$}
+        \BinaryInfC{$\subtype{\tptwithr{\parens{\ptforall{\tvar}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}{\row_2}}$}
+      \end{prooftree}
+
+      \caption{Subtyping}\label{fig:subtyping}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\subsumes{\row}{\row}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\subsumes{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\row_2}{\row_3}$}
+        \RightLabel{(\textsc{ST-Transitivity})}
+        \BinaryInfC{$\subsumes{\row_1}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Empty})}
-        \UnaryInfC{$\subtype{\rempty}{\row}$}
+        \UnaryInfC{$\subsumes{\rempty}{\row}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
+          \AxiomC{$\subsumes{\term_1}{\term_2}$}
         \RightLabel{(\textsc{ST-Singleton})}
-        \UnaryInfC{$\subtype{\rsingleton{\type_1}}{\rsingleton{\type_2}}$}
+        \UnaryInfC{$\subsumes{\rsingleton{\term_1}}{\rsingleton{\term_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\row_1}{\row_3}$}
-          \AxiomC{$\subtype{\row_2}{\row_3}$}
+          \AxiomC{$\subsumes{\row_1}{\row_3}$}
+          \AxiomC{$\subsumes{\row_2}{\row_3}$}
         \RightLabel{(\textsc{ST-Union})}
-        \BinaryInfC{$\subtype{\runion{\row_1}{\row_2}}{\row_3}$}
+        \BinaryInfC{$\subsumes{\runion{\row_1}{\row_2}}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningLeft})}
-        \UnaryInfC{$\subtype{\row_1}{\runion{\row_1}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\row_1}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningRight})}
-        \UnaryInfC{$\subtype{\row_2}{\runion{\row_1}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\row_2}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
-        \RightLabel{(\textsc{ST-TypeAbstraction})}
-        \UnaryInfC{$\subtype{\tabs{\anno{\tvar}{\kind}}{\type_1}}{\tabs{\anno{\tvar}{\kind}}{\type_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
-          \AxiomC{$\subtype{\type_3}{\type_4}$}
-          \AxiomC{$\subtype{\type_4}{\type_3}$}
-        \RightLabel{(\textsc{ST-TypeApplication})}
-        \TrinaryInfC{$\subtype{\tapp{\type_1}{\type_3}}{\tapp{\type_2}{\type_4}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{}
-        \RightLabel{(\textsc{ST-Beta1})}
-        \UnaryInfC{$\subtype{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-        \color{red}
-          \AxiomC{}
-        \RightLabel{(\textsc{ST-Beta2})}
-        \UnaryInfC{$\subtype{\sub{\type_1}{\tvar}{\type_2}}{\tapp{\parens{\tabs{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}$}
-      \end{prooftree}
-
-      \caption{Subtyping}\label{fig:subtyping}
+      \caption{Effect row subsumption}\label{fig:subsumption}
     \end{mdframed}
   \end{figure}
 
@@ -414,8 +396,8 @@
   \begin{theorem}[Effect row subtyping]
     Given any two effect rows $\row_1, \row_2$, the following are equivalent:
     \begin{enumerate}
-      \item $\subtype{\row_1}{\row_2}$
-      \item $\forall \type_1 \;.\; \type_1 \in \row_1 \implies \exists \type_2 \;.\; \subtype{\type_1}{\type_2} \wedge \type_2 \in \row_2$.
+      \item $\subsumes{\row_1}{\row_2}$
+      \item $\forall \type_1 \;.\; \type_1 \in \row_1 \implies \exists \type_2 \;.\; \subsumes{\type_1}{\type_2} \wedge \type_2 \in \row_2$.
     \end{enumerate}
   \end{theorem}
 
