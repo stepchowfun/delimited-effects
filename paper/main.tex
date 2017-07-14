@@ -99,9 +99,9 @@
 
 % Judgements
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
-\newcommand\opwellformed[2]{#1 \; \triangleright \; #2} % chktex 1
-\newcommand\subtype[2]{#1 \; \sqsubseteq \; #2} % chktex 1
-\newcommand\subsumes[2]{#1 \; \sqsubseteq \; #2} % chktex 1
+\newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3} % chktex 1
+\newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3} % chktex 1
+\newcommand\subsumes[3]{#1 \vdash #2 \; \sqsubseteq \; #3} % chktex 1
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -208,7 +208,7 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\tptwithr{\properType_1}{\rempty}}{\tptwithr{\properType_2}{\row_2}}$}}}
+            {$\subtype{\context}{\tptwithr{\properType_1}{\rempty}}{\tptwithr{\properType_2}{\row_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByValue})}
         \UnaryInfC{$\tjudgment{\context}{\eappbv{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\runion{\row_1}{\row_3}}{\row_4}}}$}
       \end{prooftree}
@@ -216,7 +216,7 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\tptwithr{\properType_1}{\row_1}}{\tptwithr{\properType_2}{\row_2}}$}}}
+            {$\subtype{\context}{\tptwithr{\properType_1}{\row_1}}{\tptwithr{\properType_2}{\row_2}}$}}}
         \RightLabel{(\textsc{T-ApplicationByName})}
         \UnaryInfC{$\tjudgment{\context}{\eappbn{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\row_3}{\row_4}}}$}
       \end{prooftree}
@@ -236,7 +236,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\opwellformed{\type_1}{\evar_2}$}
+          \AxiomC{\Shortstack[c]{{$\opwellformed{\context}{\type_1}{\evar_2}$}
             {$\evar_1 \notin \freevars{\type_2}$}
             {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\color{red}\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\color{red} \tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\color{red}\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
@@ -247,7 +247,7 @@
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\properType}{\row}}$}
             {$\tjudgment{\context}{\term_3}{\teffect{\evar_2}{\evar_1}{\type_3}}$}
-            {$\subtype{\type_1}{\sub{\type_3}{\evar_2}{\term_3}}$}}}
+            {$\subtype{\context}{\type_1}{\sub{\type_3}{\evar_2}{\term_3}}$}}}
         \RightLabel{(\textsc{T-Provide})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\eprovide{\term_3}{\evar_1}{\term_1}{\term_2}}}{\tptwithr{\properType}\rdiff{\row}{\rsingleton{\term_3}}}$}
       \end{prooftree}
@@ -259,28 +259,28 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\opwellformed{\type}{\evar}$}
+        \framebox{$\opwellformed{\context}{\type}{\evar}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\opwellformed{\type_2}{\evar}$}
+          \AxiomC{$\opwellformed{\context}{\type_2}{\evar}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\evar}$}
+        \UnaryInfC{$\opwellformed{\context}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
         \color{red}
-          \AxiomC{$\opwellformed{\type}{\evar}$}
+          \AxiomC{$\opwellformed{\context}{\type}{\evar}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \UnaryInfC{$\opwellformed{\tptwithr{\parens{\ptforall{\tvar}{\type}}}{\row}}{\evar}$}
+        \UnaryInfC{$\opwellformed{\context}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}{\row}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\rsingleton{\evar}}{\row}$}
+          \AxiomC{$\subtype{\context}{\rsingleton{\evar}}{\row}$}
         \RightLabel{(\textsc{WF-TypeWithEffects})}
-        \UnaryInfC{$\opwellformed{\tptwithr{\properType}{\row}}{\evar}$}
+        \UnaryInfC{$\opwellformed{\context}{\tptwithr{\properType}{\row}}{\evar}$}
       \end{prooftree}
 
       \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
@@ -290,7 +290,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\subtype{\type}{\type}$}
+        \framebox{$\subtype{\context}{\type}{\type}$}
       \end{center}
 
       \medskip
@@ -298,36 +298,36 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Reflexivity})}
-        \UnaryInfC{$\subtype{\type}{\type}$}
+        \UnaryInfC{$\subtype{\context}{\type}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
-          \AxiomC{$\subtype{\type_2}{\type_3}$}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\context}{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Transitivity})}
-        \BinaryInfC{$\subtype{\type_1}{\type_3}$}
+        \BinaryInfC{$\subtype{\context}{\type_1}{\type_3}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subsumes{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Unit})}
-        \UnaryInfC{$\subsumes{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\context}{\tptwithr{\ptunit}{\row_1}}{\tptwithr{\ptunit}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\type_3}{\type_1}$}
-          \AxiomC{$\subtype{\type_2}{\type_4}$}
-          \AxiomC{$\subsumes{\row_1}{\row_2}$}
+          \AxiomC{$\subtype{\context}{\type_3}{\type_1}$}
+          \AxiomC{$\subtype{\context}{\type_2}{\type_4}$}
+          \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-Arrow})}
-        \TrinaryInfC{$\subtype{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row_1}}{\tptwithr{\parens{\ptarrow{\type_3}{\type_4}}}{\row_2}}$}
+        \TrinaryInfC{$\subtype{\context}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row_1}}{\tptwithr{\parens{\ptarrow{\type_3}{\type_4}}}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
         \color{red}
-          \AxiomC{$\subtype{\type_1}{\type_2}$}
-          \AxiomC{$\subsumes{\row_1}{\row_2}$}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \BinaryInfC{$\subtype{\tptwithr{\parens{\ptforall{\tvar}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}{\row_2}}$}
+        \BinaryInfC{$\subtype{\context}{\tptwithr{\parens{\ptforall{\tvar}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}{\row_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
@@ -337,47 +337,49 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\subsumes{\row}{\row}$}
+        \framebox{$\subsumes{\context}{\row}{\row}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\subsumes{\row_1}{\row_2}$}
-          \AxiomC{$\subsumes{\row_2}{\row_3}$}
+          \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
+          \AxiomC{$\subsumes{\context}{\row_2}{\row_3}$}
         \RightLabel{(\textsc{ST-Transitivity})}
-        \BinaryInfC{$\subsumes{\row_1}{\row_3}$}
+        \BinaryInfC{$\subsumes{\context}{\row_1}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Empty})}
-        \UnaryInfC{$\subsumes{\rempty}{\row}$}
+        \UnaryInfC{$\subsumes{\context}{\rempty}{\row}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subsumes{\term_1}{\term_2}$}
+          \AxiomC{$\tjudgment{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\tjudgment{\context}{\term_2}{\type_2}$}
+          \AxiomC{$\subsumes{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{ST-Singleton})}
-        \UnaryInfC{$\subsumes{\rsingleton{\term_1}}{\rsingleton{\term_2}}$}
+        \TrinaryInfC{$\subsumes{\context}{\rsingleton{\term_1}}{\rsingleton{\term_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subsumes{\row_1}{\row_3}$}
-          \AxiomC{$\subsumes{\row_2}{\row_3}$}
+          \AxiomC{$\subsumes{\context}{\row_1}{\row_3}$}
+          \AxiomC{$\subsumes{\context}{\row_2}{\row_3}$}
         \RightLabel{(\textsc{ST-Union})}
-        \BinaryInfC{$\subsumes{\runion{\row_1}{\row_2}}{\row_3}$}
+        \BinaryInfC{$\subsumes{\context}{\runion{\row_1}{\row_2}}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningLeft})}
-        \UnaryInfC{$\subsumes{\row_1}{\runion{\row_1}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\context}{\row_1}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningRight})}
-        \UnaryInfC{$\subsumes{\row_2}{\runion{\row_1}{\row_2}}$}
+        \UnaryInfC{$\subsumes{\context}{\row_2}{\runion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \caption{Effect row subsumption}\label{fig:subsumption}
@@ -396,8 +398,8 @@
   \begin{theorem}[Effect row subtyping]
     Given any two effect rows $\row_1, \row_2$, the following are equivalent:
     \begin{enumerate}
-      \item $\subsumes{\row_1}{\row_2}$
-      \item $\forall \type_1 \;.\; \type_1 \in \row_1 \implies \exists \type_2 \;.\; \subsumes{\type_1}{\type_2} \wedge \type_2 \in \row_2$.
+      \item $\subsumes{\context}{\row_1}{\row_2}$
+      \item $\forall \type_1 \;.\; \type_1 \in \row_1 \implies \exists \type_2 \;.\; \subsumes{\context}{\type_1}{\type_2} \wedge \type_2 \in \row_2$.
     \end{enumerate}
   \end{theorem}
 
