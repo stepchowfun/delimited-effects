@@ -19,7 +19,7 @@
 \usepackage{draftwatermark}
 \SetWatermarkText{\textsc{Draft}}
 \SetWatermarkScale{3}
-\SetWatermarkLightness{0.9}
+\SetWatermarkLightness{0.975}
 
 \title{Delimited effects}
 \date{}
@@ -50,45 +50,45 @@
 \newtheorem{theorem}{Theorem}
 
 % Misc
-\newcommand\anno[2]{#1 : #2} % chktex 26
+\newcommand\anno[2]{#1 : #2}
 \newcommand\dom[1]{\text{dom}\parens{#1}}
 \newcommand\lstof[1]{\overline{#1}}
-\newcommand\parens[1]{\left( #1 \right)} % chktex 37
-\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]} % chktex 1
+\newcommand\parens[1]{\left( #1 \right)}
+\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]}
 \newcommand\freevars[1]{\text{free}\parens{#1}}
 
 % Terms
 \newcommand\term{t}
 \newcommand\eunit{()}
 \newcommand\evar{x}
-\newcommand\eabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\eappbv[2]{#1 \left\llbracket #2 \right\rrbracket_{\textsc{V}}} % chktex 1
-\newcommand\eappbn[2]{#1 \left\llbracket #2 \right\rrbracket_{\textsc{N}}} % chktex 1
-\newcommand\etabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\eabs[2]{\lambda #1 \; . \; #2}
+\newcommand\eappbv[2]{#1 \; #2}
+\newcommand\eappbn[2]{#1 \left\llbracket #2 \right\rrbracket}
+\newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
 \newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
 \newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\type{\sigma}
-\newcommand\tptwithr[2]{#1 \; ! \; #2} % chktex 26
+\newcommand\tptwithr[2]{#1 \; ! \; #2}
 \newcommand\tvar{\alpha}
-\newcommand\tabs[2]{\lambda #1 \; . \; #2} % chktex 1 chktex 26
-\newcommand\tapp[2]{#1 \; #2} % chktex 1 chktex 26
-\newcommand\teffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle} % chktex 1 chktex 26
+\newcommand\tabs[2]{\lambda #1 \; . \; #2}
+\newcommand\tapp[2]{#1 \; #2}
+\newcommand\teffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle}
 
 % Proper types
 \newcommand\properType{\tau}
 \newcommand\ptunit{1}
-\newcommand\ptarrow[2]{#1 \rightarrow #2} % chktex 1
-\newcommand\ptforall[2]{\forall #1 \; . \; #2} % chktex 1 chktex 26
+\newcommand\ptarrow[2]{#1 \rightarrow #2}
+\newcommand\ptforall[2]{\forall #1 \; . \; #2}
 
 % Effect rows
 \newcommand\row{\varepsilon}
 \newcommand\rempty{\varnothing_{\row}}
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1, #2}
-\newcommand\rdiff[2]{#1 \; - \; #2} % chktex 8
+\newcommand\rdiff[2]{#1 \; - \; #2}
 
 % Type contexts
 \newcommand\context{\Gamma}
@@ -98,10 +98,10 @@
 \newcommand\clookup[2]{#1\parens{#2}}
 
 % Judgements
-\newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}} % chktex 1
-\newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3} % chktex 1
-\newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3} % chktex 1
-\newcommand\subsumes[3]{#1 \vdash #2 \; \sqsubseteq \; #3} % chktex 1
+\newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}}
+\newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3}
+\newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
+\newcommand\subsumes[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -118,6 +118,17 @@
 
   The system we describe in this paper is motivated by the observation that a variety of seemingly orthogonal ideas in programming languages are variations on a common theme: tracking predicates in the type system without requiring the explicit threading of witnesses through the program at the term level. A sufficiently smart inference algorithm frees the programmer from the ceremony of annotating types and propagating predicates. There's no shortage of examples of this theme: type classes, implicit parameters, algebraic effects, etc. In this paper, we generalize these ideas by a single language construct, which we call \emph{delimited effects}.
 
+  Our primary contributions are:
+
+  \begin{itemize}
+    \item We give the syntax, semantics, and typing rules for our system.
+    \item We prove that the typing rules are sound with respect to the semantics.
+    \item We provide one of many possible type inference algorithms for the system.
+    \item We provide several diverse examples of programming language features which are generalized by our system.
+  \end{itemize}
+
+  \section{Overview}
+
   \begin{lstlisting}[gobble=4]
     effect IO
       getLine   : String ! IO
@@ -130,15 +141,6 @@
       mappend : a -> a -> a ! Monoid a
   \end{lstlisting}
 
-  Our primary contributions are:
-
-  \begin{itemize}
-    \item We give the syntax, semantics, and typing rules for our system.
-    \item We prove that the typing rules are sound with respect to the semantics.
-    \item We provide one of many possible type inference algorithms for the system.
-    \item We provide several diverse examples of programming language features which are generalized by our system.
-  \end{itemize}
-
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
@@ -149,8 +151,8 @@
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
           & $\eappbv{\term}{\term}$ & application by value \\
           & $\eappbn{\term}{\term}$ & application by name \\
-          & \color{red} $\etabs{\tvar}{\term}$ & \color{red} type abstraction \\
-          & \color{red} $\etapp{\term}{\type}$ & \color{red} type application \\
+          & $\etabs{\tvar}{\term}$ & type abstraction \\
+          & $\etapp{\term}{\type}$ & type application \\
           & $\eeffect{\evar}{\type}{\term}$ & effect declaration \\
           & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
@@ -162,7 +164,7 @@
           $\properType \Coloneqq$ & & proper types: \\
           & $\ptunit$ & unit type \\
           & $\ptarrow{\type}{\type}$ & arrow type \\
-          & \color{red} $\ptforall{\tvar}{\type}$ & \color{red} quantified type \\
+          & $\ptforall{\tvar}{\type}$ & quantified type \\
           \\
           $\row \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
@@ -222,14 +224,12 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red}
           \AxiomC{$\tjudgment{\context}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
         \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\tvar}{\term}}}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red}
           \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}}{\rempty}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \UnaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_1}}{\sub{\type_2}{\tvar}{\type_1}}$}
@@ -238,9 +238,9 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\opwellformed{\context}{\type_1}{\evar_2}$}
             {$\evar_1 \notin \freevars{\type_2}$}
-            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\color{red}\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\color{red} \tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\color{red}\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
+            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
         \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\color{red}\tvar^i} }{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}{\term}}}{\type_2}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i} }{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}{\term}}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -271,7 +271,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red}
           \AxiomC{$\opwellformed{\context}{\type}{\evar}$}
         \RightLabel{(\textsc{WF-ForAll})}
         \UnaryInfC{$\opwellformed{\context}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}{\row}}{\evar}$}
@@ -323,7 +322,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \color{red}
           \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
           \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
