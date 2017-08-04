@@ -24,7 +24,6 @@ docker run \
   -v $(pwd):/root \
   stephanmisc/delimited-effects:deps \
   sh -c \
-    "cd /root && \
-    aws s3 cp --acl public-read \
+    "aws s3 cp --acl public-read \
       /root/main.pdf \
       $S3_DESTINATION"
