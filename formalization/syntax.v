@@ -17,8 +17,7 @@ Inductive term : Type :=
 | eunit : term
 | evar : termId -> term
 | eabs : termId -> type -> term -> term
-| eappbv : term -> term -> term
-| eappbn : term -> term -> term
+| eapp : term -> term -> term
 | eeffect : typeId -> kind -> term -> term
 | eprovide : type -> termId -> term -> term -> term
 

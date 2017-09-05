@@ -31,18 +31,12 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType (ceextend c x t1) e t2 ->
     hasKind c t1 ktype ->
     hasType c (eabs x t1 e) (tptwithr (ptarrow t1 t2) rempty)
-| htAppByV :
-    forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
-    hasType c e1 (tptwithr pt1 r1) ->
-    hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
-    subtype (tptwithr pt1 rempty) (tptwithr pt2 r2) ->
-    hasType c (eappbv e2 e1) (tptwithr pt3 (runion (runion r1 r3) r4))
-| htAppByN :
+| htApp :
     forall e1 e2 pt1 pt2 pt3 r1 r2 r3 r4 c,
     hasType c e1 (tptwithr pt1 r1) ->
     hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
     subtype (tptwithr pt1 r1) (tptwithr pt2 r2) ->
-    hasType c (eappbn e2 e1) (tptwithr pt3 (runion r3 r4))
+    hasType c (eapp e2 e1) (tptwithr pt3 (runion r3 r4))
 | htEffect :
     forall e x t1 t2 a1 a3 c,
     opTypeWellFormed t1 a3 ->
