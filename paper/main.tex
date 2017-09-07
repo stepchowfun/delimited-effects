@@ -62,8 +62,7 @@
 \newcommand\eunit{()}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2}
-\newcommand\eappbv[2]{#1 \; #2}
-\newcommand\eappbn[2]{#1 \left\llbracket #2 \right\rrbracket}
+\newcommand\eapp[2]{#1 \; #2}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
 \newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
@@ -149,8 +148,7 @@
           & $\eunit$ & unit \\
           & $\evar$ & variable \\
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
-          & $\eappbv{\term}{\term}$ & application by value \\
-          & $\eappbn{\term}{\term}$ & application by name \\
+          & $\eapp{\term}{\term}$ & application \\
           & $\etabs{\tvar}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
           & $\eeffect{\evar}{\type}{\term}$ & effect declaration \\
@@ -210,17 +208,9 @@
       \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\context}{\tptwithr{\properType_1}{\rempty}}{\tptwithr{\properType_2}{\row_2}}$}}}
-        \RightLabel{(\textsc{T-ApplicationByValue})}
-        \UnaryInfC{$\tjudgment{\context}{\eappbv{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\runion{\row_1}{\row_3}}{\row_4}}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\tptwithr{\properType_1}{\row_1}}$}
-            {$\tjudgment{\context}{\term_2}{\tptwithr{\parens{\ptarrow{\tptwithr{\properType_2}{\row_2}}{\tptwithr{\properType_3}{\row_3}}}}{\row_4}}$}
             {$\subtype{\context}{\tptwithr{\properType_1}{\row_1}}{\tptwithr{\properType_2}{\row_2}}$}}}
-        \RightLabel{(\textsc{T-ApplicationByName})}
-        \UnaryInfC{$\tjudgment{\context}{\eappbn{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\row_3}{\row_4}}}$}
+        \RightLabel{(\textsc{T-Application})}
+        \UnaryInfC{$\tjudgment{\context}{\eapp{\term_2}{\term_1}}{\tptwithr{\properType_3}{\runion{\row_3}{\row_4}}}$}
       \end{prooftree}
 
       \begin{prooftree}
