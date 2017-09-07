@@ -124,10 +124,6 @@ with subtype : type -> type -> Prop :=
 | stEmpty :
     forall r,
     subtype (trow rempty) (trow r)
-| stSingleton :
-    forall t1 t2,
-    subtype t1 t2 ->
-    subtype (trow (rsingleton t1)) (trow (rsingleton t2))
 | stUnion :
     forall t r1 r2,
     subtype (trow r1) t ->

@@ -25,11 +25,7 @@ Proof.
   - apply stTrans with (t2 := trow (runion r2 r3)); apply stWeakenRight.
 Qed.
 
-Definition subset r1 r2 :=
-  forall t1,
-  rowContains r1 t1 ->
-  exists t2,
-  (subtype t1 t2 /\ rowContains r2 t2).
+Definition subset r1 r2 := forall t, rowContains r1 t -> rowContains r2 t.
 
 Lemma subsetTrans :
   forall r1 r2 r3,
@@ -41,15 +37,8 @@ Proof.
   unfold subset in *.
   intros t1 H3.
   set (H4 := H1 t1 H3).
-  destruct H4 as [t2 H4].
-  destruct H4 as [H4 H5].
-  set (H6 := H2 t2 H5).
-  destruct H6 as [t3 H6].
-  destruct H6 as [H6 H7].
-  exists t3.
-  split.
-  - apply stTrans with (t2 := t2); auto.
-  - auto.
+  set (H5 := H2 t1 H4).
+  auto.
 Qed.
 
 Lemma rownessClosedUnderSubtype :
@@ -66,7 +55,6 @@ Proof.
     t1 t2 t3 H1 H2 H3 H4                | (* stTrans *)
     t1 t2 t3 t4 r1 r2 H1 H2 H3 H4 H5 H6 | (* stArrow *)
     r1                                  | (* stEmpty *)
-    t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
     r1 r2                               | (* stWeakenLeft *)
     r1 r2                                 (* stExchange *)
@@ -87,10 +75,6 @@ Proof.
   (* stEmpty *)
   - intros r2.
     exists r1.
-    reflexivity.
-  (* stSingleton *)
-  - intros r1 H3.
-    exists (rsingleton t2).
     reflexivity.
   (* stUnion *)
   - intros r3 H5.
@@ -125,7 +109,6 @@ Proof.
     t1 t2 t3 H1 H2 H3 H4                | (* stTrans *)
     t1 t2 t3 t4 r1 r2 H1 H2 H3 H4 H5 H6 | (* stArrow *)
     r1                                  | (* stEmpty *)
-    t1 t2 H1 H2                         | (* stSingleton *)
     t1 r1 r2 H1 H2 H3 H4                | (* stUnion *)
     r1 r2                               | (* stWeakenLeft *)
     r1 r2                                 (* stExchange *)
@@ -138,10 +121,7 @@ Proof.
     ]; auto.
     unfold subset.
     intros t1 H1.
-    exists t1.
-    split.
-    + apply stRefl.
-    + auto.
+    auto.
   (* stTrans *)
   - induction t1 as [
       pt1 r1     | (* tptwithx *)
@@ -159,23 +139,7 @@ Proof.
   (* stEmpty *)
   - unfold subset.
     intros t1 H1.
-    exists t1.
-    split.
-    + apply stRefl.
-    + inversion H1.
-  (* stSingleton *)
-  - unfold subset.
-    intros t3 H3.
-    exists t2.
-    inversion H3 as [
-      t4 H4 H5 | (* rcSingleton *)
-               | (* rcUnionLeft *)
-                 (* rcUnionRight *)
-    ].
-    split.
-    + rewrite H5 in H1.
-      auto.
-    + apply rcSingleton.
+    inversion H1.
   (* stUnion *)
   - destruct t1 as [
       pt1 r3     | (* tptwithx *)
@@ -198,19 +162,13 @@ Proof.
   (* stWeakenLeft *)
   - unfold subset.
     intros t1 H1.
-    exists t1.
-    split.
-    + apply stRefl.
-    + apply rcUnionLeft.
-      auto.
+    apply rcUnionLeft.
+    auto.
   (* stWeakenRight *)
   - unfold subset.
     intros t1 H1.
-    exists t1.
-    split.
-    + apply stRefl.
-    + apply rcUnionRight.
-      auto.
+    apply rcUnionRight.
+    auto.
 Qed.
 
 Lemma subtypeImpliesSubset :
@@ -240,101 +198,60 @@ Proof.
   - induction r2 as [
                   | (* rempty *)
       t2          | (* rsingleton *)
-      r1 H2 r3 H3   (* runion *)
+      r1 H2 r2 H3   (* runion *)
     ].
     (* rempty *)
-    + set (H2 := H1 t1).
-      set (H3 := H2 (rcSingleton t1)).
-      destruct H3 as [t2 H3].
-      destruct H3 as [t3 H3].
-      inversion H3.
+    + set (H2 := H1 t1 (rcSingleton t1)).
+      inversion H2.
     (* rsingleton *)
-    + set (H2 := H1 t1).
-      set (H3 := H2 (rcSingleton t1)).
-      destruct H3 as [t3 H3].
-      destruct H3 as [t4 H3].
-      inversion H3.
-      apply stSingleton. auto.
+    + set (H2 := H1 t1 (rcSingleton t1)).
+      inversion H2.
+      apply stRefl.
     (* runion *)
-    + set (H4 := H1 t1).
-      set (H5 := H4 (rcSingleton t1)).
-      destruct H5 as [t2 H5].
-      destruct H5 as [H5 H6].
-      inversion H6 as [
-        t4 H7 H8          | (* rcSingleton *)
-        r2 r4 t4 H7 H8 H9 | (* rcUnionLeft *)
-        r2 r4 t4 H7 H8 H9   (* rcUnionRight *)
+    + set (H4 := H1 t1 (rcSingleton t1)).
+      inversion H4 as [
+        t2 H5 H6          | (* rcSingleton *)
+        r3 r4 t2 H5 H6 H7 | (* rcUnionLeft *)
+        r3 r4 t2 H5 H6 H7   (* rcUnionRight *)
       ].
       * {
-        assert (
-          forall t2 : type,
-          rowContains (rsingleton t1) t2 ->
-          exists t3 : type,
-          subtype t2 t3 /\ rowContains r1 t3
-        ) as H10.
-        - intros t5 H10.
-          exists t2.
-          inversion H10 as [
-            t6 H11 H12           | (* rcSingleton *)
-            r5 r6 t6 H11 H12 H13 | (* rcUnionLeft *)
-            r5 r6 t6 H11 H12 H13   (* rcUnionRight *)
+        apply stTrans with (t2 := trow r1).
+        - apply H2.
+          intros t3 H8.
+          inversion H8 as [
+            t4 H9 H10          | (* rcSingleton *)
+            r5 r6 t4 H9 H10 H11 | (* rcUnionLeft *)
+            r5 r6 t4 H9 H10 H11   (* rcUnionRight *)
           ].
-          rewrite H12 in H5. auto.
-        - apply H2 in H10.
-          assert (subtype (trow r1) (trow (runion r1 r3))).
-          + apply stWeakenLeft.
-          + apply stTrans with (t2 := trow r1); auto.
+          rewrite <- H10.
+          auto.
+        - apply stWeakenLeft.
       }
       * {
-        assert (
-          forall t2 : type,
-          rowContains (rsingleton t1) t2 ->
-          exists t3 : type,
-          subtype t2 t3 /\ rowContains r3 t3
-        ).
-        - intros t5 H10.
-          exists t2.
-          inversion H10 as [
-            t6 H11 H12           | (* rcSingleton *)
-            r5 r6 t6 H11 H12 H13 | (* rcUnionLeft *)
-            r5 r6 t6 H11 H12 H13   (* rcUnionRight *)
+        apply stTrans with (t2 := trow r2).
+        - apply H3.
+          intros t3 H8.
+          inversion H8 as [
+            t4 H9 H10          | (* rcSingleton *)
+            r5 r6 t4 H9 H10 H11 | (* rcUnionLeft *)
+            r5 r6 t4 H9 H10 H11   (* rcUnionRight *)
           ].
-          rewrite H12 in H5. auto.
-        - apply H3 in H0.
-          assert (subtype (trow r3) (trow (runion r1 r3))).
-          + apply stTrans with (t2 := trow (runion r3 r1)).
-            * apply stWeakenLeft.
-            * apply stExchange.
-          + apply stTrans with (t2 := trow r3); auto.
+          rewrite <- H10.
+          auto.
+        - apply stWeakenRight.
       }
   (* runion *)
-  - assert (
-      forall t1 : type,
-      rowContains r1 t1 ->
-      exists t2 : type,
-      subtype t1 t2 /\ rowContains r2 t2
-    ) as H4.
-    + intros t1 H5.
-      set (H6 := H1 t1).
-      assert (rowContains (runion r1 r3) t1) as H7.
-      * apply rcUnionLeft. auto.
-      * set (H8 := H6 H7).
-        auto.
-    + assert (
-        forall t1 : type,
-        rowContains r3 t1 ->
-        exists t2 : type,
-        subtype t1 t2 /\ rowContains r2 t2
-      ) as H5.
-      * {
-        intros t1 H5.
-        set (H6 := H1 t1).
-        assert (rowContains (runion r1 r3) t1) as H7.
-        - apply rcUnionRight. auto.
-        - set (H8 := H6 H7).
-          auto.
-      }
-      * apply stUnion; auto.
+  - apply stUnion.
+    + apply H2.
+      intros t1 H4.
+      apply H1.
+      apply rcUnionLeft.
+      auto.
+    + apply H3.
+      intros t1 H4.
+      apply H1.
+      apply rcUnionRight.
+      auto.
 Qed.
 
 Theorem effectRowSubtyping :
