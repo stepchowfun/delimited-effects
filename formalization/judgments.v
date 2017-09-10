@@ -37,15 +37,6 @@ Inductive hasType : context -> term -> type -> Prop :=
     hasType c e2 (tptwithr (ptarrow (tptwithr pt2 r2) (tptwithr pt3 r3)) r4) ->
     subtype (tptwithr pt1 r1) (tptwithr pt2 r2) ->
     hasType c (eapp e2 e1) (tptwithr pt3 (runion r3 r4))
-| htEffect :
-    forall e x t1 t2 a1 a3 c,
-    opTypeWellFormed t1 a3 ->
-    hasKind (ctextend c a3 (keffect a3 x t1)) t1 ktype ->
-    occursInType a1 t2 = false ->
-    hasType (
-      ceextend (ctextend c a1 (keffect a3 x t1)) x t1
-    ) e t2 ->
-    hasType c (eeffect a1 (keffect a3 x t1) e) t2
 | htProvide :
     forall e1 e2 x pt t1 t2 t3 a r1 r2 c,
     hasType c e1 t1 ->

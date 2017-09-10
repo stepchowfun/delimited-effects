@@ -225,14 +225,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\opwellformed{\context}{\type_1}{\evar_2}$}
-            {$\evar_1 \notin \freevars{\type_2}$}
-            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
-        \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i} }{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}{\term}}}{\type_2}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
             {$\tjudgment{\context}{\term_2}{\tptwithr{\properType}{\row}}$}
             {$\tjudgment{\context}{\term_3}{\teffect{\evar_2}{\evar_1}{\type_3}}$}
