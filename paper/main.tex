@@ -151,13 +151,12 @@
           & $\eapp{\term}{\term}$ & application \\
           & $\etabs{\tvar}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
-          & $\eeffect{\evar}{\type}{\term}$ & effect declaration \\
           & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\tvar$ & type variable \\
-          & $\teffect{\evar}{\evar}{\type}$ & type of an effect \\
+          & $\row$ & effect row \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
           & $\ptunit$ & unit type \\
