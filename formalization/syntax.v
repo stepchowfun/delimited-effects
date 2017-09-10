@@ -18,7 +18,6 @@ Inductive term : Type :=
 | evar : termId -> term
 | eabs : termId -> type -> term -> term
 | eapp : term -> term -> term
-| eeffect : typeId -> kind -> term -> term
 | eprovide : type -> termId -> term -> term -> term
 
 (* Types *)

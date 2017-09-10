@@ -151,13 +151,12 @@
           & $\eapp{\term}{\term}$ & application \\
           & $\etabs{\tvar}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
-          & $\eeffect{\evar}{\type}{\term}$ & effect declaration \\
           & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\tvar$ & type variable \\
-          & $\teffect{\evar}{\evar}{\type}$ & type of an effect \\
+          & $\row$ & effect row \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
           & $\ptunit$ & unit type \\
@@ -223,14 +222,6 @@
           \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}}{\rempty}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \UnaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_1}}{\sub{\type_2}{\tvar}{\type_1}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\opwellformed{\context}{\type_1}{\evar_2}$}
-            {$\evar_1 \notin \freevars{\type_2}$}
-            {$\tjudgment{\ceextend{\csextend{\context}{\anno{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}}}{\anno{\evar_3}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i}}{\sub{\type_1}{\evar_2}{\etapp{\evar_1}{\lstof{\tvar^i}}}}}}}{\rempty}}}{\term}{\type_2}$}}}
-        \RightLabel{(\textsc{T-Effect})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eeffect{\evar_1}{\tptwithr{\parens{\ptforall{\lstof{\tvar^i} }{\teffect{\evar_2}{\evar_3}{\type_1}}}}{\rempty}}{\term}}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
