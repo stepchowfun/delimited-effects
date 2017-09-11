@@ -65,13 +65,12 @@
 \newcommand\eapp[2]{#1 \; #2}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
-\newcommand\eeffect[3]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{in} \; #3}
 \newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\type{\sigma}
-\newcommand\tptwithr[2]{#1 \; ! \; #2}
 \newcommand\tvar{\alpha}
+\newcommand\tptwithr[2]{#1 \; ! \; #2}
 \newcommand\tabs[2]{\lambda #1 \; . \; #2}
 \newcommand\tapp[2]{#1 \; #2}
 \newcommand\teffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle}
@@ -89,11 +88,15 @@
 \newcommand\runion[2]{#1, #2}
 \newcommand\rdiff[2]{#1 \; - \; #2}
 
+% Kinds
+\newcommand\kind{\kappa}
+\newcommand\ktype{\ast}
+\newcommand\krow{\diamond}
+
 % Type contexts
 \newcommand\context{\Gamma}
 \newcommand\cempty{\varnothing_{\context}}
-\newcommand\ceextend[2]{#1, #2}
-\newcommand\csextend[2]{#1, #2}
+\newcommand\cextend[2]{#1, #2}
 \newcommand\clookup[2]{#1\parens{#2}}
 
 % Judgements
@@ -149,28 +152,33 @@
           & $\evar$ & variable \\
           & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
           & $\eapp{\term}{\term}$ & application \\
-          & $\etabs{\tvar}{\term}$ & type abstraction \\
+          & $\etabs{\anno{\tvar}{\kind}}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
           & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
-          & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\tvar$ & type variable \\
+          & $\tptwithr{\properType}{\row}$ & proper type with effects \\
           & $\row$ & effect row \\
           \\
           $\properType \Coloneqq$ & & proper types: \\
           & $\ptunit$ & unit type \\
           & $\ptarrow{\type}{\type}$ & arrow type \\
-          & $\ptforall{\tvar}{\type}$ & quantified type \\
+          & $\ptforall{\anno{\tvar}{\kind}}{\type}$ & quantified type \\
           \\
           $\row \Coloneqq$ & & effect rows: \\
           & $\rempty$ & empty effect row \\
           & $\rsingleton{\term}$ & singleton effect row \\
           & $\runion{\row}{\row}$ & effect row union \\
           \\
+          $\kind \Coloneqq$ & & kinds: \\
+          & $\ktype$ & kind of proper types with effects \\
+          & $\krow$ & kind of effect rows \\
+          \\
           $\context \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
-          & $\ceextend{\context}{\anno{\evar}{\type}}$ & term variable binding \\
+          & $\cextend{\context}{\anno{\evar}{\type}}$ & term variable binding \\
+          & $\cextend{\context}{\anno{\tvar}{\kind}}$ & type variable binding \\
         \end{tabular}
       \end{center}
 
@@ -199,9 +207,10 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\ceextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
+          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
+          \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \BinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -213,15 +222,16 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\type}$}
+          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\tvar}{\term}}}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}}{\rempty}$}
+        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}}{\rempty}$}
+          \AxiomC{$\tjudgment{\context}{\term}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
+          \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \UnaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_1}}{\sub{\type_2}{\tvar}{\type_1}}$}
+        \BinaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -234,6 +244,64 @@
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\tjudgment{\context}{\type}{\kind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
+        \RightLabel{(\textsc{K-Unit})}
+        \UnaryInfC{$\tjudgment{\context}{\tptwithr{\ptunit}{\row}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\type_1}{\ktype}$}
+          \AxiomC{$\tjudgment{\context}{\type_2}{\ktype}$}
+          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
+        \RightLabel{(\textsc{K-Arrow})}
+        \TrinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptarrow{\type_1}{\type_2}}}{\row}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktype}$}
+          \AxiomC{$\tjudgment{\context}{\row}{\krow}$}
+        \RightLabel{(\textsc{K-ForAll})}
+        \BinaryInfC{$\tjudgment{\context}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}{\row}}{\ktype}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-EmptyEffectRow})}
+        \UnaryInfC{$\tjudgment{\context}{\rempty}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-SingletonEffectRow})}
+        \UnaryInfC{$\tjudgment{\context}{\rsingleton{\type_1}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\row_1}{\krow}$}
+          \AxiomC{$\tjudgment{\context}{\row_2}{\krow}$}
+        \RightLabel{(\textsc{K-EffectRowUnion})}
+        \BinaryInfC{$\tjudgment{\context}{\runion{\row_1}{\row_2}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\clookup{\context}{\tvar} = \kind$}
+        \RightLabel{(\textsc{K-Variable})}
+        \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
+      \end{prooftree}
+
+      \caption{Kinding rules}\label{fig:kinding_rules}
     \end{mdframed}
   \end{figure}
 
@@ -254,7 +322,7 @@
       \begin{prooftree}
           \AxiomC{$\opwellformed{\context}{\type}{\evar}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \UnaryInfC{$\opwellformed{\context}{\tptwithr{\parens{\ptforall{\tvar}{\type}}}{\row}}{\evar}$}
+        \UnaryInfC{$\opwellformed{\context}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type}}}{\row}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -306,7 +374,7 @@
           \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
           \AxiomC{$\subsumes{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \BinaryInfC{$\subtype{\context}{\tptwithr{\parens{\ptforall{\tvar}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\tvar}{\type_2}}}{\row_2}}$}
+        \BinaryInfC{$\subtype{\context}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_1}}}{\row_1}}{\tptwithr{\parens{\ptforall{\anno{\tvar}{\kind}}{\type_2}}}{\row_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
