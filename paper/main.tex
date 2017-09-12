@@ -97,8 +97,8 @@
 \newcommand\clookup[2]{#1\parens{#2}}
 
 % Effect map
-\newcommand\effectMap{\Delta}
-\newcommand\emempty{\varnothing_{\effectMap}}
+\newcommand\effectmap{\Delta}
+\newcommand\emempty{\varnothing_{\effectmap}}
 \newcommand\emmap[2]{#1 \mapsto #2}
 \newcommand\emextend[2]{#1, #2}
 
@@ -178,9 +178,10 @@
           & $\cempty$ & empty context \\
           & $\cextend{\context}{\anno{\evar}{\type}}$ & term variable binding \\
           & $\cextend{\context}{\anno{\tvar}{\kind}}$ & type variable binding \\
-          $\effectMap \Coloneqq$ & & effect map: \\
+          \\
+          $\effectmap \Coloneqq$ & & effect map: \\
           & $\emempty$ & empty effect map \\
-          & $\emextend{\effectMap}{\emmap{\effect}{\anno{\evar}{\type}}}$ & term variable binding \\
+          & $\emextend{\effectmap}{\emmap{\effect}{\anno{\evar}{\type}}}$ & effect binding \\
         \end{tabular}
       \end{center}
 
