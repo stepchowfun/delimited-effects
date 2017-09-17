@@ -404,13 +404,14 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\tjudgment{\context}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{K-Arrow})}
-        \UnaryInfC{$\tjudgment{\context}{\tarrow{\type}{\type}}{\kpt}$}
+        \BinaryInfC{$\tjudgment{\context}{\tarrow{\type_1}{\type_2}}{\kpt}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{K-ForAll})}
         \UnaryInfC{$\tjudgment{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kpt}$}
       \end{prooftree}
