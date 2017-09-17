@@ -159,7 +159,7 @@
           & $\etapp{\term}{\type}$ & type application \\
           & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
           \\
-          $\type \Coloneqq$ & & types and type components: \\
+          $\type \Coloneqq$ & & types: \\
           & $\tvar$ & type variable \\
           & $\twitht{\type}{\type}$ & type with effects \\
           & $\tunit$ & unit type \\
@@ -170,9 +170,9 @@
           & $\runion{\type}{\type}$ & effect row union \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
-          & $\kpt$ & kind of a type without effects \\
+          & $\kpt$ & kind of a proper type \\
           & $\krow$ & kind of an effect row \\
-          & $\ktwitht$ & kind of a type with effects \\
+          & $\ktwitht$ & kind of a proper type with effects \\
           \\
           $\context \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
@@ -217,11 +217,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\twitht{\type_1}{\row_1}}$}
-            {$\tjudgment{\context}{\term_2}{\twitht{\parens{\tarrow{\twitht{\type_2}{\row_2}}{\twitht{\type_3}{\row_3}}}}{\row_4}}$}
-            {$\subtype{\context}{\twitht{\type_1}{\row_1}}{\twitht{\type_2}{\row_2}}$}}}
+          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
+            {$\tjudgment{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\row_1}}}}{\row_2}}$}
+            {$\subtype{\context}{\type_1}{\type_2}$}}}
         \RightLabel{(\textsc{T-Application})}
-        \UnaryInfC{$\tjudgment{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\row_3}{\row_4}}}$}
+        \UnaryInfC{$\tjudgment{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\row_1}{\row_2}}}$}
       \end{prooftree}
 
       \begin{prooftree}
