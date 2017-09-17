@@ -390,6 +390,50 @@
         \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
       \end{prooftree}
 
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\type_1}{\kpt}$}
+          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+        \RightLabel{(\textsc{K-TypeWithEffects})}
+        \BinaryInfC{$\tjudgment{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-Unit})}
+        \UnaryInfC{$\tjudgment{\context}{\tunit}{\kpt}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-Arrow})}
+        \UnaryInfC{$\tjudgment{\context}{\tarrow{\type}{\type}}{\kpt}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-ForAll})}
+        \UnaryInfC{$\tjudgment{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kpt}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-EmptyRow})}
+        \UnaryInfC{$\tjudgment{\context}{\rempty}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-SingletonRow})}
+        \UnaryInfC{$\tjudgment{\context}{\rsingleton{\effect}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\tjudgment{\context}{\type_1}{\krow}$}
+          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+        \RightLabel{(\textsc{K-UnionRow})}
+        \BinaryInfC{$\tjudgment{\context}{\runion{\type_1}{\type_2}}{\krow}$}
+      \end{prooftree}
+
       \caption{Kinding rules}\label{fig:subsumption}
     \end{mdframed}
   \end{figure}
