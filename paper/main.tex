@@ -368,19 +368,19 @@
   \end{figure}
 
   \begin{definition}[Effect row membership]
-    Let $\type_1 \in \type_2$ where $\hastype{\context}{\type_2}{\krow}$ be the smallest relation satisfying
+    Let $\type_1 \in \type_2$ where $\hastype{\context}{\type_2}{\krow}$ be the smallest relation satisfying:
     \begin{enumerate}
       \item $\type \in \rsingleton{\type}$
-      \item if $\type_1 \in \type_2$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_2}{\krow}$ and $\hastype{\context}{\type_3}{\krow}$
-      \item if $\type_1 \in \type_3$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_2}{\krow}$ and $\hastype{\context}{\type_3}{\krow}$
+      \item if $\type_1 \in \type_2$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
+      \item if $\type_1 \in \type_3$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
     \end{enumerate}
   \end{definition}
 
   \begin{theorem}[Effect row subtyping]
-    Given any two types $\type_1, \type_2$, where $\hastype{\context}{\type_1}{\krow}$ and $\hastype{\context}{\type_2}{\krow}$ the following are equivalent:
+    Given any two types $\type_1, \type_2$ where $\hastype{\context}{\type_1}{\krow}$ and $\hastype{\context}{\type_2}{\krow}$, the following are equivalent:
     \begin{enumerate}
       \item $\subtype{\context}{\type_1}{\type_2}$
-      \item $\forall \type \;.\; \type \in \type_1 \implies \type \in \type_2$.
+      \item $\forall \type \;.\; \type \in \type_1 \implies \type \in \type_2$
     \end{enumerate}
   \end{theorem}
 
