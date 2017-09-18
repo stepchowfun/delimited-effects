@@ -77,6 +77,7 @@
 \newcommand\rempty{\varnothing_{\type}}
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1, #2}
+\newcommand\rdiff[2]{#1 \; - \; #2}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -210,11 +211,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\hastype{\context}{\term_1}{\type_1}$}
-            {$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
-            {$\subtype{\context}{\type_1}{\type_2}$}}}
+          \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{T-Application})}
-        \UnaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\type_4}{\type_5}}}$}
+        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\type_4}{\type_5}}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -228,6 +229,15 @@
           \AxiomC{$\hastype{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\substitute{\type_1}{\tvar}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\twitht{\type_2}{\type_3}}$}
+          \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type_4}$}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_4}$}
+        \RightLabel{(\textsc{T-Provide})}
+        \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\twitht{\type_2}{\rdiff{\type_3}{\rsingleton{\effect}}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
