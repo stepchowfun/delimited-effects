@@ -51,12 +51,9 @@
 
 % Misc
 \newcommand\anno[2]{#1 : #2}
-\newcommand\dom[1]{\text{dom}\parens{#1}}
-\newcommand\freevars[1]{\text{free}\parens{#1}}
-\newcommand\lookup[2]{#1\parens{#2}}
-\newcommand\lstof[1]{\overline{#1}}
+\newcommand\apply[2]{#1\parens{#2}}
 \newcommand\parens[1]{\left( #1 \right)}
-\newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]}
+\newcommand\substitute[3]{#1 \left[ #2 \mapsto #3 \right]}
 
 % Terms
 \newcommand\term{t}
@@ -75,14 +72,11 @@
 \newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2}
 \newcommand\tforall[2]{\forall #1 \; . \; #2}
-\newcommand\teffect[3]{\mu #1 \; . \; \left\langle\anno{#2}{#3}\right\rangle}
 
 % Effect rows
-\newcommand\effect{\varepsilon}
 \newcommand\rempty{\varnothing_{\type}}
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1, #2}
-\newcommand\rdiff[2]{#1 \; - \; #2}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -96,13 +90,14 @@
 \newcommand\cextend[2]{#1, #2}
 
 % Effect map
+\newcommand\effect{\varepsilon}
 \newcommand\effectmap{\Delta}
 \newcommand\emempty{\varnothing_{\effectmap}}
 \newcommand\emmap[2]{#1 \mapsto #2}
 \newcommand\emextend[2]{#1, #2}
 
 % Judgements
-\newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}}
+\newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3}
 \newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
 
@@ -190,7 +185,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\tjudgment{\context}{\term}{\type}$}
+        \framebox{$\hastype{\context}{\term}{\type}$}
       \end{center}
 
       \medskip
@@ -198,41 +193,41 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{T-Unit})}
-        \UnaryInfC{$\tjudgment{\context}{\eunit}{\twitht{\tunit}{\rempty}}$}
+        \UnaryInfC{$\hastype{\context}{\eunit}{\twitht{\tunit}{\rempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\lookup{\context}{\evar} = \type$}
+          \AxiomC{$\apply{\context}{\evar} = \type$}
         \RightLabel{(\textsc{T-Variable})}
-        \UnaryInfC{$\tjudgment{\context}{\evar}{\type}$}
+        \UnaryInfC{$\hastype{\context}{\evar}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\tjudgment{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\term_1}{\type_1}$}
-            {$\tjudgment{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
+          \AxiomC{\Shortstack[c]{{$\hastype{\context}{\term_1}{\type_1}$}
+            {$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
             {$\subtype{\context}{\type_1}{\type_2}$}}}
         \RightLabel{(\textsc{T-Application})}
-        \UnaryInfC{$\tjudgment{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\type_4}{\type_5}}}$}
+        \UnaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\type_4}{\type_5}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\tjudgment{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
+        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\kind}$}
+          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \BinaryInfC{$\tjudgment{\context}{\etapp{\term}{\type_2}}{\sub{\type_1}{\tvar}{\type_2}}$}
+        \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\substitute{\type_1}{\tvar}{\type_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -249,25 +244,25 @@
 
       \begin{prooftree}
           \AxiomC{$\opwellformed{\context}{\type_2}{\evar}$}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\context}{\type_3}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_3}{\krow}$}
         \RightLabel{(\textsc{WF-Arrow})}
         \QuaternaryInfC{$\opwellformed{\context}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\type_3}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\opwellformed{\context}{\type_1}{\evar}$}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{WF-ForAll})}
         \TrinaryInfC{$\opwellformed{\context}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\evar}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\context}{\rsingleton{\evar}}{\type_2}$}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{WF-PureTypeWithEffects})}
         \TrinaryInfC{$\opwellformed{\context}{\twitht{\type_1}{\type_2}}{\evar}$}
       \end{prooftree}
@@ -349,60 +344,60 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\tjudgment{\context}{\type}{\kind}$}
+        \framebox{$\hastype{\context}{\type}{\kind}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\lookup{\context}{\tvar} = \kind$}
+          \AxiomC{$\apply{\context}{\tvar} = \kind$}
         \RightLabel{(\textsc{K-Variable})}
-        \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
+        \UnaryInfC{$\hastype{\context}{\tvar}{\kind}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\kpt}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\kpt}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{K-TypeWithEffects})}
-        \BinaryInfC{$\tjudgment{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
+        \BinaryInfC{$\hastype{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-Unit})}
-        \UnaryInfC{$\tjudgment{\context}{\tunit}{\kpt}$}
+        \UnaryInfC{$\hastype{\context}{\tunit}{\kpt}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{K-Arrow})}
-        \BinaryInfC{$\tjudgment{\context}{\tarrow{\type_1}{\type_2}}{\kpt}$}
+        \BinaryInfC{$\hastype{\context}{\tarrow{\type_1}{\type_2}}{\kpt}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{K-ForAll})}
-        \UnaryInfC{$\tjudgment{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kpt}$}
+        \UnaryInfC{$\hastype{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kpt}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-EmptyRow})}
-        \UnaryInfC{$\tjudgment{\context}{\rempty}{\krow}$}
+        \UnaryInfC{$\hastype{\context}{\rempty}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\lookup{\effectmap}{\effect} = \anno{\evar}{\type}$}
+          \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type}$}
         \RightLabel{(\textsc{K-SingletonRow})}
-        \UnaryInfC{$\tjudgment{\context}{\rsingleton{\effect}}{\krow}$}
+        \UnaryInfC{$\hastype{\context}{\rsingleton{\effect}}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{K-UnionRow})}
-        \BinaryInfC{$\tjudgment{\context}{\runion{\type_1}{\type_2}}{\krow}$}
+        \BinaryInfC{$\hastype{\context}{\runion{\type_1}{\type_2}}{\krow}$}
       \end{prooftree}
 
       \caption{Kinding rules}\label{fig:subsumption}
@@ -410,16 +405,16 @@
   \end{figure}
 
   \begin{definition}[Effect row membership]
-    Let $\type_1 \in \type_2$ where $\tjudgment{\context}{\type_2}{\krow}$ be the smallest relation satisfying
+    Let $\type_1 \in \type_2$ where $\hastype{\context}{\type_2}{\krow}$ be the smallest relation satisfying
     \begin{enumerate}
       \item $\type \in \rsingleton{\type}$
-      \item if $\type_1 \in \type_2$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\tjudgment{\context}{\type_2}{\krow}$ and $\tjudgment{\context}{\type_3}{\krow}$
-      \item if $\type_1 \in \type_3$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\tjudgment{\context}{\type_2}{\krow}$ and $\tjudgment{\context}{\type_3}{\krow}$
+      \item if $\type_1 \in \type_2$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_2}{\krow}$ and $\hastype{\context}{\type_3}{\krow}$
+      \item if $\type_1 \in \type_3$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_2}{\krow}$ and $\hastype{\context}{\type_3}{\krow}$
     \end{enumerate}
   \end{definition}
 
   \begin{theorem}[Effect row subtyping]
-    Given any two types $\type_1, \type_2$, where $\tjudgment{\context}{\type_1}{\krow}$ and $\tjudgment{\context}{\type_2}{\krow}$ the following are equivalent:
+    Given any two types $\type_1, \type_2$, where $\hastype{\context}{\type_1}{\krow}$ and $\hastype{\context}{\type_2}{\krow}$ the following are equivalent:
     \begin{enumerate}
       \item $\subtype{\context}{\type_1}{\type_2}$
       \item $\forall \type \;.\; \type \in \type_1 \implies \type \in \type_2$.
