@@ -52,10 +52,11 @@
 % Misc
 \newcommand\anno[2]{#1 : #2}
 \newcommand\dom[1]{\text{dom}\parens{#1}}
+\newcommand\freevars[1]{\text{free}\parens{#1}}
+\newcommand\lookup[2]{#1\parens{#2}}
 \newcommand\lstof[1]{\overline{#1}}
 \newcommand\parens[1]{\left( #1 \right)}
 \newcommand\sub[3]{#1 \left[ #2 \mapsto #3 \right]}
-\newcommand\freevars[1]{\text{free}\parens{#1}}
 
 % Terms
 \newcommand\term{t}
@@ -94,7 +95,6 @@
 \newcommand\context{\Gamma}
 \newcommand\cempty{\varnothing_{\context}}
 \newcommand\cextend[2]{#1, #2}
-\newcommand\clookup[2]{#1\parens{#2}}
 
 % Effect map
 \newcommand\effectmap{\Delta}
@@ -204,7 +204,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\clookup{\context}{\evar} = \type$}
+          \AxiomC{$\lookup{\context}{\evar} = \type$}
         \RightLabel{(\textsc{T-Variable})}
         \UnaryInfC{$\tjudgment{\context}{\evar}{\type}$}
       \end{prooftree}
@@ -385,7 +385,7 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\clookup{\context}{\tvar} = \kind$}
+          \AxiomC{$\lookup{\context}{\tvar} = \kind$}
         \RightLabel{(\textsc{K-Variable})}
         \UnaryInfC{$\tjudgment{\context}{\tvar}{\kind}$}
       \end{prooftree}
@@ -423,7 +423,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{}
+          \AxiomC{$\lookup{\effectmap}{\effect} = \anno{\evar}{\type}$}
         \RightLabel{(\textsc{K-SingletonRow})}
         \UnaryInfC{$\tjudgment{\context}{\rsingleton{\effect}}{\krow}$}
       \end{prooftree}
