@@ -237,43 +237,6 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\opwellformed{\context}{\type}{\evar}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\opwellformed{\context}{\type_2}{\evar}$}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_3}{\krow}$}
-        \RightLabel{(\textsc{WF-Arrow})}
-        \QuaternaryInfC{$\opwellformed{\context}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\type_3}}{\evar}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\opwellformed{\context}{\type_1}{\evar}$}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
-        \RightLabel{(\textsc{WF-ForAll})}
-        \TrinaryInfC{$\opwellformed{\context}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}{\type_2}}{\evar}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\rsingleton{\evar}}{\type_2}$}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
-        \RightLabel{(\textsc{WF-PureTypeWithEffects})}
-        \TrinaryInfC{$\opwellformed{\context}{\twitht{\type_1}{\type_2}}{\evar}$}
-      \end{prooftree}
-
-      \caption{Operation type well-formedness}\label{fig:operation_type_well_formedness}
-    \end{mdframed}
-  \end{figure}
-
-  \begin{figure}
-    \begin{mdframed}[backgroundcolor=none]
-      \begin{center}
         \framebox{$\subtype{\context}{\type}{\type}$}
       \end{center}
 
