@@ -63,7 +63,7 @@
 \newcommand\eapp[2]{#1 \; #2}
 \newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
-\newcommand\eprovide[4]{\textbf{provide} \; #1 \; \textbf{with} \; #2 = #3 \; \textbf{in} \; #4}
+\newcommand\eprovide[3]{\textbf{provide} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
 
 % Types
 \newcommand\type{\tau}
@@ -150,7 +150,7 @@
           & $\eapp{\term}{\term}$ & application \\
           & $\etabs{\anno{\tvar}{\kind}}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
-          & $\eprovide{\term}{\evar}{\term}{\term}$ & effect definition \\
+          & $\eprovide{\effect}{\term}{\term}$ & effect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tvar$ & type variable \\
