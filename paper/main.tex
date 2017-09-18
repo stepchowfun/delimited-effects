@@ -105,7 +105,6 @@
 \newcommand\tjudgment[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3}
 \newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
-\newcommand\subsumes[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -299,60 +298,48 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subsumes{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
-        \RightLabel{(\textsc{ST-Unit})}
-        \TrinaryInfC{$\subsumes{\context}{\twitht{\tunit}{\type_1}}{\twitht{\tunit}{\type_2}}$}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\subtype{\context}{\type_2}{\type_4}$}
+        \RightLabel{(\textsc{ST-TypeWithEffects})}
+        \BinaryInfC{$\subtype{\context}{\twitht{\type_1}{\type_2}}{\twitht{\type_3}{\type_4}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\type_5}{\krow}$}
-            {$\tjudgment{\context}{\type_6}{\krow}$}
-            {$\subtype{\context}{\type_3}{\type_1}$}
-            {$\subtype{\context}{\type_2}{\type_4}$}
-            {$\subsumes{\context}{\type_5}{\type_6}$}}}
+          \AxiomC{$\subtype{\context}{\type_3}{\type_1}$}
+          \AxiomC{$\subtype{\context}{\type_2}{\type_4}$}
         \RightLabel{(\textsc{ST-Arrow})}
-        \UnaryInfC{$\subtype{\context}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\type_5}}{\twitht{\parens{\tarrow{\type_3}{\type_4}}}{\type_6}}$}
+        \BinaryInfC{$\subtype{\context}{\tarrow{\type_1}{\type_2}}{\tarrow{\type_3}{\type_4}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\subsumes{\context}{\type_3}{\type_4}$}
-          \AxiomC{$\tjudgment{\context}{\type_3}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\type_4}{\krow}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \QuaternaryInfC{$\subtype{\context}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}{\type_3}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_2}}}{\type_4}}$}
+        \UnaryInfC{$\subtype{\context}{\tforall{\anno{\tvar}{\kind}}{\type_1}}{\tforall{\anno{\tvar}{\kind}}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type}{\krow}$}
+          \AxiomC{}
         \RightLabel{(\textsc{ST-Empty})}
-        \UnaryInfC{$\subsumes{\context}{\rempty}{\type}$}
+        \UnaryInfC{$\subtype{\context}{\rempty}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{{$\tjudgment{\context}{\type_1}{\krow}$}
-            {$\tjudgment{\context}{\type_2}{\krow}$}
-            {$\tjudgment{\context}{\type_3}{\krow}$}
-            {$\subsumes{\context}{\type_1}{\type_3}$}
-            {$\subsumes{\context}{\type_2}{\type_3}$}}}
+          \AxiomC{$\subtype{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\subtype{\context}{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Union})}
-        \UnaryInfC{$\subsumes{\context}{\runion{\type_1}{\type_2}}{\type_3}$}
+        \BinaryInfC{$\subtype{\context}{\runion{\type_1}{\type_2}}{\type_3}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningLeft})}
-        \BinaryInfC{$\subsumes{\context}{\type_1}{\runion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\context}{\type_1}{\runion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\tjudgment{\context}{\type_1}{\krow}$}
-          \AxiomC{$\tjudgment{\context}{\type_2}{\krow}$}
+          \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningRight})}
-        \BinaryInfC{$\subsumes{\context}{\type_2}{\runion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\context}{\type_2}{\runion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
@@ -434,7 +421,7 @@
   \begin{theorem}[Effect row subtyping]
     Given any two types $\type_1, \type_2$, where $\tjudgment{\context}{\type_1}{\krow}$ and $\tjudgment{\context}{\type_2}{\krow}$ the following are equivalent:
     \begin{enumerate}
-      \item $\subsumes{\context}{\type_1}{\type_2}$
+      \item $\subtype{\context}{\type_1}{\type_2}$
       \item $\forall \type \;.\; \type \in \type_1 \implies \type \in \type_2$.
     \end{enumerate}
   \end{theorem}
