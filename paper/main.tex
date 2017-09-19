@@ -386,7 +386,7 @@
   \begin{theorem}[Effect row subtyping]
     For any $\context, \type_1, \type_2$, the following are equivalent:
     \begin{enumerate}
-      \item $\hastype{\context}{\type_1}{\krow} \; \wedge \; \hastype{\context}{\type_2}{\krow} \; \wedge \; \subtype{\type_1}{\type_2}$
+      \item if $\hastype{\context}{\type_1}{\krow}$ and $\hastype{\context}{\type_2}{\krow}$ then $\subtype{\type_1}{\type_2}$
       \item $\forall \type \;.\; \context \vdash \type \in \type_1 \implies \context \vdash \type \in \type_2$
     \end{enumerate}
   \end{theorem}
