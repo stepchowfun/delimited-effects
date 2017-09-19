@@ -98,6 +98,7 @@
 % Judgements
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\subtype[2]{#1 \; \sqsubseteq \; #2}
+\newcommand\wellformed[1]{#1 \; \text{well-formed}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -371,6 +372,36 @@
       \end{prooftree}
 
       \caption{Kinding rules}\label{fig:subsumption}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\wellformed{\emmap{\effect}{\anno{\evar}{\type}}}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
+        \RightLabel{(\textsc{WF-Unit})}
+        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type_2}}}$}
+        \RightLabel{(\textsc{WF-Arrow})}
+        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type}}}$}
+        \RightLabel{(\textsc{WF-ForAll})}
+        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
+      \end{prooftree}
+
+      \caption{Effect well-formedness}\label{fig:effect_well_formedness}
     \end{mdframed}
   \end{figure}
 
