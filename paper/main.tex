@@ -72,16 +72,14 @@
 \newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2}
 \newcommand\tforall[2]{\forall #1 \; . \; #2}
-
-% Effect rows
-\newcommand\rempty{\varnothing_{\type}}
-\newcommand\rsingleton[1]{\left\{ #1 \right\}}
-\newcommand\runion[2]{#1, #2}
-\newcommand\rdiff[2]{#1 \; - \; #2}
+\newcommand\tempty{\varnothing_{\type}}
+\newcommand\tsingleton[1]{\left\{ #1 \right\}}
+\newcommand\tunion[2]{#1, #2}
+\newcommand\tdiff[2]{#1 \; - \; #2}
 
 % Kinds
 \newcommand\kind{\kappa}
-\newcommand\kpt{\circ}
+\newcommand\kproper{\circ}
 \newcommand\krow{\diamond}
 \newcommand\ktwitht{\ast}
 
@@ -99,7 +97,6 @@
 
 % Judgements
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
-\newcommand\opwellformed[3]{#1 \vdash #2 \; \triangleright \; #3}
 \newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -159,12 +156,12 @@
           & $\tunit$ & unit type \\
           & $\tarrow{\type}{\type}$ & arrow type \\
           & $\tforall{\anno{\tvar}{\kind}}{\type}$ & quantified type \\
-          & $\rempty$ & empty effect row \\
-          & $\rsingleton{\effect}$ & singleton effect row \\
-          & $\runion{\type}{\type}$ & effect row union \\
+          & $\tempty$ & empty effect row \\
+          & $\tsingleton{\effect}$ & singleton effect row \\
+          & $\tunion{\type}{\type}$ & effect row union \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
-          & $\kpt$ & kind of a proper type \\
+          & $\kproper$ & kind of a proper type \\
           & $\krow$ & kind of an effect row \\
           & $\ktwitht$ & kind of a proper type with effects \\
           \\
@@ -194,7 +191,7 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{T-Unit})}
-        \UnaryInfC{$\hastype{\context}{\eunit}{\twitht{\tunit}{\rempty}}$}
+        \UnaryInfC{$\hastype{\context}{\eunit}{\twitht{\tunit}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -207,7 +204,7 @@
           \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}}{\rempty}$}
+        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}}{\tempty}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -215,17 +212,17 @@
           \AxiomC{$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
           \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{T-Application})}
-        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\runion{\type_4}{\type_5}}}$}
+        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\tunion{\type_4}{\type_5}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}}{\rempty}$}
+        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}}{\tempty}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}}{\rempty}$}
+          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}}{\tempty}$}
           \AxiomC{$\hastype{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\substitute{\type_1}{\tvar}{\type_2}}$}
@@ -237,7 +234,7 @@
           \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type_4}$}
           \AxiomC{$\subtype{\context}{\type_1}{\type_4}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\twitht{\type_2}{\rdiff{\type_3}{\rsingleton{\effect}}}}$}
+        \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\twitht{\type_2}{\tdiff{\type_3}{\tsingleton{\effect}}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -288,26 +285,26 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Empty})}
-        \UnaryInfC{$\subtype{\context}{\rempty}{\type}$}
+        \UnaryInfC{$\subtype{\context}{\tempty}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\subtype{\context}{\type_1}{\type_3}$}
           \AxiomC{$\subtype{\context}{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Union})}
-        \BinaryInfC{$\subtype{\context}{\runion{\type_1}{\type_2}}{\type_3}$}
+        \BinaryInfC{$\subtype{\context}{\tunion{\type_1}{\type_2}}{\type_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningLeft})}
-        \UnaryInfC{$\subtype{\context}{\type_1}{\runion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\context}{\type_1}{\tunion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningRight})}
-        \UnaryInfC{$\subtype{\context}{\type_2}{\runion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\context}{\type_2}{\tunion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
@@ -329,7 +326,7 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\type_1}{\kpt}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{K-TypeWithEffects})}
         \BinaryInfC{$\hastype{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
@@ -338,39 +335,39 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-Unit})}
-        \UnaryInfC{$\hastype{\context}{\tunit}{\kpt}$}
+        \UnaryInfC{$\hastype{\context}{\tunit}{\kproper}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{K-Arrow})}
-        \BinaryInfC{$\hastype{\context}{\tarrow{\type_1}{\type_2}}{\kpt}$}
+        \BinaryInfC{$\hastype{\context}{\tarrow{\type_1}{\type_2}}{\kproper}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{K-ForAll})}
-        \UnaryInfC{$\hastype{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kpt}$}
+        \UnaryInfC{$\hastype{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kproper}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-EmptyRow})}
-        \UnaryInfC{$\hastype{\context}{\rempty}{\krow}$}
+        \UnaryInfC{$\hastype{\context}{\tempty}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type}$}
         \RightLabel{(\textsc{K-SingletonRow})}
-        \UnaryInfC{$\hastype{\context}{\rsingleton{\effect}}{\krow}$}
+        \UnaryInfC{$\hastype{\context}{\tsingleton{\effect}}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\type_1}{\krow}$}
           \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
         \RightLabel{(\textsc{K-UnionRow})}
-        \BinaryInfC{$\hastype{\context}{\runion{\type_1}{\type_2}}{\krow}$}
+        \BinaryInfC{$\hastype{\context}{\tunion{\type_1}{\type_2}}{\krow}$}
       \end{prooftree}
 
       \caption{Kinding rules}\label{fig:subsumption}
@@ -380,9 +377,9 @@
   \begin{definition}[Effect row membership]
     Let $\type_1 \in \type_2$ where $\hastype{\context}{\type_2}{\krow}$ be the smallest relation satisfying:
     \begin{enumerate}
-      \item $\type \in \rsingleton{\type}$
-      \item if $\type_1 \in \type_2$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
-      \item if $\type_1 \in \type_3$ then $\type_1 \in \runion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
+      \item $\type \in \tsingleton{\type}$
+      \item if $\type_1 \in \type_2$ then $\type_1 \in \tunion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
+      \item if $\type_1 \in \type_3$ then $\type_1 \in \tunion{\type_2}{\type_3}$, where $\hastype{\context}{\type_3}{\krow}$
     \end{enumerate}
   \end{definition}
 
