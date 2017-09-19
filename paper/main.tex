@@ -265,7 +265,7 @@
       \begin{prooftree}
           \AxiomC{$\subtype{\type_1}{\type_3}$}
           \AxiomC{$\subtype{\type_2}{\type_4}$}
-        \RightLabel{(\textsc{ST-TypeWithEffects})}
+        \RightLabel{(\textsc{ST-ProperTypeWithEffects})}
         \BinaryInfC{$\subtype{\twitht{\type_1}{\type_2}}{\twitht{\type_3}{\type_4}}$}
       \end{prooftree}
 
@@ -328,7 +328,7 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
-        \RightLabel{(\textsc{K-TypeWithEffects})}
+        \RightLabel{(\textsc{K-ProperTypeWithEffects})}
         \BinaryInfC{$\hastype{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
       \end{prooftree}
 
