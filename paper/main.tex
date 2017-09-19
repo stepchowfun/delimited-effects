@@ -97,7 +97,7 @@
 
 % Judgements
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
-\newcommand\subtype[3]{#1 \vdash #2 \; \sqsubseteq \; #3}
+\newcommand\subtype[2]{#1 \; \sqsubseteq \; #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -210,7 +210,7 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
           \AxiomC{$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\type_1}{\type_2}$}
         \RightLabel{(\textsc{T-Application})}
         \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\tunion{\type_4}{\type_5}}}$}
       \end{prooftree}
@@ -232,7 +232,7 @@
           \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
           \AxiomC{$\hastype{\context}{\term_2}{\twitht{\type_2}{\type_3}}$}
           \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type_4}$}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_4}$}
+          \AxiomC{$\subtype{\type_1}{\type_4}$}
         \RightLabel{(\textsc{T-Provide})}
         \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\twitht{\type_2}{\tdiff{\type_3}{\tsingleton{\effect}}}}$}
       \end{prooftree}
@@ -244,7 +244,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\subtype{\context}{\type}{\type}$}
+        \framebox{$\subtype{\type}{\type}$}
       \end{center}
 
       \medskip
@@ -252,59 +252,59 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Reflexivity})}
-        \UnaryInfC{$\subtype{\context}{\type}{\type}$}
+        \UnaryInfC{$\subtype{\type}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\subtype{\context}{\type_2}{\type_3}$}
+          \AxiomC{$\subtype{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Transitivity})}
-        \BinaryInfC{$\subtype{\context}{\type_1}{\type_3}$}
+        \BinaryInfC{$\subtype{\type_1}{\type_3}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\subtype{\context}{\type_2}{\type_4}$}
+          \AxiomC{$\subtype{\type_1}{\type_3}$}
+          \AxiomC{$\subtype{\type_2}{\type_4}$}
         \RightLabel{(\textsc{ST-TypeWithEffects})}
-        \BinaryInfC{$\subtype{\context}{\twitht{\type_1}{\type_2}}{\twitht{\type_3}{\type_4}}$}
+        \BinaryInfC{$\subtype{\twitht{\type_1}{\type_2}}{\twitht{\type_3}{\type_4}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\type_3}{\type_1}$}
-          \AxiomC{$\subtype{\context}{\type_2}{\type_4}$}
+          \AxiomC{$\subtype{\type_3}{\type_1}$}
+          \AxiomC{$\subtype{\type_2}{\type_4}$}
         \RightLabel{(\textsc{ST-Arrow})}
-        \BinaryInfC{$\subtype{\context}{\tarrow{\type_1}{\type_2}}{\tarrow{\type_3}{\type_4}}$}
+        \BinaryInfC{$\subtype{\tarrow{\type_1}{\type_2}}{\tarrow{\type_3}{\type_4}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\type_1}{\type_2}$}
         \RightLabel{(\textsc{ST-ForAll})}
-        \UnaryInfC{$\subtype{\context}{\tforall{\anno{\tvar}{\kind}}{\type_1}}{\tforall{\anno{\tvar}{\kind}}{\type_2}}$}
+        \UnaryInfC{$\subtype{\tforall{\anno{\tvar}{\kind}}{\type_1}}{\tforall{\anno{\tvar}{\kind}}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-Empty})}
-        \UnaryInfC{$\subtype{\context}{\tempty}{\type}$}
+        \UnaryInfC{$\subtype{\tempty}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\subtype{\context}{\type_2}{\type_3}$}
+          \AxiomC{$\subtype{\type_1}{\type_3}$}
+          \AxiomC{$\subtype{\type_2}{\type_3}$}
         \RightLabel{(\textsc{ST-Union})}
-        \BinaryInfC{$\subtype{\context}{\tunion{\type_1}{\type_2}}{\type_3}$}
+        \BinaryInfC{$\subtype{\tunion{\type_1}{\type_2}}{\type_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningLeft})}
-        \UnaryInfC{$\subtype{\context}{\type_1}{\tunion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\type_1}{\tunion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{ST-WeakeningRight})}
-        \UnaryInfC{$\subtype{\context}{\type_2}{\tunion{\type_1}{\type_2}}$}
+        \UnaryInfC{$\subtype{\type_2}{\tunion{\type_1}{\type_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
@@ -386,7 +386,7 @@
   \begin{theorem}[Effect row subtyping]
     Given any two types $\type_1, \type_2$ where $\hastype{\context}{\type_1}{\krow}$ and $\hastype{\context}{\type_2}{\krow}$, the following are equivalent:
     \begin{enumerate}
-      \item $\subtype{\context}{\type_1}{\type_2}$
+      \item $\subtype{\type_1}{\type_2}$
       \item $\forall \type \;.\; \type \in \type_1 \implies \type \in \type_2$
     \end{enumerate}
   \end{theorem}
