@@ -378,7 +378,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\type}}}$}
+        \framebox{$\wellformed{\context}{\emmap{\effect}{\type}}$}
       \end{center}
 
       \medskip
@@ -387,22 +387,22 @@
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
           \AxiomC{$\hastype{\context}{\type}{\krow}$}
         \RightLabel{(\textsc{WF-Unit})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\tunit}{\type}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\type_2}}}$}
+          \AxiomC{$\wellformed{\context}{\emmap{\effect}{\type_2}}$}
           \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
+        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\anno{\evar}{\type}}}$}
+          \AxiomC{$\wellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\type}}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}$}
       \end{prooftree}
 
       \caption{Effect well-formedness}\label{fig:effect_well_formedness}
