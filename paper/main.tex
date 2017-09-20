@@ -385,20 +385,24 @@
 
       \begin{prooftree}
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
+          \AxiomC{$\hastype{\context_0}{\type}{\krow}$}
         \RightLabel{(\textsc{WF-Unit})}
-        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
+        \BinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type_2}}}$}
+          \AxiomC{$\hastype{\context_0}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context_0}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
+        \TrinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type}}}$}
+          \AxiomC{$\hastype{\cextend{\context_0}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \UnaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
+        \BinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
       \end{prooftree}
 
       \caption{Effect well-formedness}\label{fig:effect_well_formedness}
