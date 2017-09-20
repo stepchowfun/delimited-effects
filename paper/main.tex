@@ -98,7 +98,7 @@
 % Judgements
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\subtype[2]{#1 \; \sqsubseteq \; #2}
-\newcommand\wellformed[1]{#1 \; \text{well-formed}}
+\newcommand\wellformed[2]{#1 \vdash #2 \; \text{well-formed}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -378,31 +378,31 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\wellformed{\emmap{\effect}{\anno{\evar}{\type}}}$}
+        \framebox{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\type}}}$}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
-          \AxiomC{$\hastype{\context_0}{\type}{\krow}$}
+          \AxiomC{$\hastype{\context}{\type}{\krow}$}
         \RightLabel{(\textsc{WF-Unit})}
-        \BinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\tunit}{\type}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type_2}}}$}
-          \AxiomC{$\hastype{\context_0}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context_0}{\type_2}{\ktwitht}$}
+          \AxiomC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\type_2}}}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
         \RightLabel{(\textsc{WF-Arrow})}
-        \TrinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
+        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\emmap{\effect}{\anno{\evar}{\type}}}$}
-          \AxiomC{$\hastype{\cextend{\context_0}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
+          \AxiomC{$\wellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\anno{\evar}{\type}}}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
         \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\wellformed{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\anno{\evar}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}}$}
       \end{prooftree}
 
       \caption{Effect well-formedness}\label{fig:effect_well_formedness}
