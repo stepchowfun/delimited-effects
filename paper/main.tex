@@ -64,11 +64,12 @@
 \newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
 \newcommand\eprovide[3]{\textbf{provide} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
+\newcommand\ecoprovide[3]{\textbf{coprovide} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
 
 % Types
 \newcommand\type{\tau}
 \newcommand\tvar{\alpha}
-\newcommand\twitht[2]{#1 \; ! \; #2}
+\newcommand\tembellished[3]{{#1}^{#2}_{#3}}
 \newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2}
 \newcommand\tforall[2]{\forall #1 \; . \; #2}
@@ -81,7 +82,7 @@
 \newcommand\kind{\kappa}
 \newcommand\kproper{\circ}
 \newcommand\krow{\diamond}
-\newcommand\ktwitht{\ast}
+\newcommand\ktembellished{\ast}
 
 % Type contexts
 \newcommand\context{\Gamma}
@@ -90,8 +91,10 @@
 
 % Effect map
 \newcommand\effect{\varepsilon}
-\newcommand\effectmap{\Delta}
+\newcommand\effectmap{E}
+\newcommand\coeffectmap{\Delta}
 \newcommand\emempty{\varnothing_{\effectmap}}
+\newcommand\ecomempty{\varnothing_{\coeffectmap}}
 \newcommand\emmap[2]{#1 \mapsto #2}
 \newcommand\emextend[2]{#1, #2}
 
@@ -150,10 +153,11 @@
           & $\etabs{\anno{\tvar}{\kind}}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
           & $\eprovide{\effect}{\term}{\term}$ & effect definition \\
+          & $\ecoprovide{\effect}{\term}{\term}$ & coeffect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tvar$ & type variable \\
-          & $\twitht{\type}{\type}$ & type with effects \\
+          & $\tembellished{\type}{\type}{\type}$ & embellished type \\
           & $\tunit$ & unit type \\
           & $\tarrow{\type}{\type}$ & arrow type \\
           & $\tforall{\anno{\tvar}{\kind}}{\type}$ & quantified type \\
@@ -164,7 +168,7 @@
           $\kind \Coloneqq$ & & kinds: \\
           & $\kproper$ & kind of a proper type \\
           & $\krow$ & kind of an effect row \\
-          & $\ktwitht$ & kind of a proper type with effects \\
+          & $\ktembellished$ & kind of an embellished type \\
           \\
           $\context \Coloneqq$ & & contexts: \\
           & $\cempty$ & empty context \\
@@ -174,6 +178,10 @@
           $\effectmap \Coloneqq$ & & effect map: \\
           & $\emempty$ & empty effect map \\
           & $\emextend{\effectmap}{\emmap{\effect}{\anno{\evar}{\type}}}$ & effect binding \\
+          \\
+          $\coeffectmap \Coloneqq$ & & coeffect map: \\
+          & $\ecomempty$ & empty coeffect map \\
+          & $\emextend{\coeffectmap}{\emmap{\effect}{\anno{\evar}{\type}}}$ & coeffect binding \\
         \end{tabular}
       \end{center}
 
@@ -192,7 +200,7 @@
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{T-Unit})}
-        \UnaryInfC{$\hastype{\context}{\eunit}{\twitht{\tunit}{\tempty}}$}
+        \UnaryInfC{$\hastype{\context}{\eunit}{\tembellished{\tunit}{\tempty}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -202,40 +210,49 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktembellished}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}$}
+        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tembellished{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
-          \AxiomC{$\hastype{\context}{\term_2}{\twitht{\parens{\tarrow{\type_2}{\twitht{\type_3}{\type_4}}}}{\type_5}}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\type_2}{\tembellished{\type_3}{\type_4}{\type_6}}}}{\type_5}{\type_7}}$}
           \AxiomC{$\subtype{\type_1}{\type_2}$}
         \RightLabel{(\textsc{T-Application})}
-        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\twitht{\type_3}{\tunion{\type_4}{\type_5}}}$}
+        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\type_3}{\tunion{\type_4}{\type_5}}{\tunion{\type_6}{\type_7}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}$}
+        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}{\tempty}}$}
+        \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\tembellished{\type_1}{\type_3}{\type_5}}}}{\type_4}{\type_6}}$}
           \AxiomC{$\hastype{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\substitute{\type_1}{\tvar}{\type_2}}$}
+        \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\tembellished{\substitute{\type_1}{\tvar}{\type_2}}{\tunion{\substitute{\type_3}{\tvar}{\type_2}}{\type_4}}{\tunion{\substitute{\type_5}{\tvar}{\type_2}}{\type_6}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
-          \AxiomC{$\hastype{\context}{\term_2}{\twitht{\type_2}{\type_3}}$}
-          \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type_4}$}
-          \AxiomC{$\subtype{\type_1}{\type_4}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\type_3}{\type_4}}$}
+          \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type_5}$}
+          \AxiomC{$\subtype{\type_1}{\type_5}$}
         \RightLabel{(\textsc{T-Provide})}
-        \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\twitht{\type_2}{\tdiff{\type_3}{\tsingleton{\effect}}}}$}
+        \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\tembellished{\type_2}{\tdiff{\type_3}{\tsingleton{\effect}}}{\type_4}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\type_3}{\type_4}}$}
+          \AxiomC{$\apply{\coeffectmap}{\effect} = \anno{\evar}{\type_5}$}
+          \AxiomC{$\subtype{\type_1}{\type_5}$}
+        \RightLabel{(\textsc{T-CoProvide})}
+        \QuaternaryInfC{$\hastype{\context}{\ecoprovide{\effect}{\term_1}{\term_2}}{\tembellished{\type_2}{\type_3}{\tunion{\type_4}{\effect}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -264,10 +281,11 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\subtype{\type_1}{\type_3}$}
-          \AxiomC{$\subtype{\type_2}{\type_4}$}
-        \RightLabel{(\textsc{ST-ProperTypeWithEffects})}
-        \BinaryInfC{$\subtype{\twitht{\type_1}{\type_2}}{\twitht{\type_3}{\type_4}}$}
+          \AxiomC{$\subtype{\type_1}{\type_2}$}
+          \AxiomC{$\subtype{\type_3}{\type_4}$}
+          \AxiomC{$\subtype{\type_6}{\type_5}$}
+        \RightLabel{(\textsc{ST-EmbellishedType})}
+        \TrinaryInfC{$\subtype{\tembellished{\type_1}{\type_3}{\type_5}}{\tembellished{\type_2}{\type_4}{\type_6}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -329,8 +347,9 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\krow}$}
-        \RightLabel{(\textsc{K-ProperTypeWithEffects})}
-        \BinaryInfC{$\hastype{\context}{\twitht{\type_1}{\type_2}}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_3}{\krow}$}
+        \RightLabel{(\textsc{K-EmbellishedType})}
+        \TrinaryInfC{$\hastype{\context}{\tembellished{\type_1}{\type_2}{\type_3}}{\ktembellished}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -340,14 +359,14 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktembellished}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
         \RightLabel{(\textsc{K-Arrow})}
         \BinaryInfC{$\hastype{\context}{\tarrow{\type_1}{\type_2}}{\kproper}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktembellished}$}
         \RightLabel{(\textsc{K-ForAll})}
         \UnaryInfC{$\hastype{\context}{\tforall{\anno{\tvar}{\kind}}{\type}}{\kproper}$}
       \end{prooftree}
@@ -386,26 +405,45 @@
       \begin{prooftree}
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
           \AxiomC{$\hastype{\context}{\type}{\krow}$}
-        \RightLabel{(\textsc{WF-Unit})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\tunit}{\type}}}$}
+        \RightLabel{(\textsc{EWF-Unit})}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\tunit}{\type}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\wellformed{\context}{\emmap{\effect}{\type_2}}$}
-          \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
-          \AxiomC{$\hastype{\context}{\type_2}{\ktwitht}$}
-        \RightLabel{(\textsc{WF-Arrow})}
-        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}}$}
+          \AxiomC{$\hastype{\context}{\type_1}{\ktembellished}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
+        \RightLabel{(\textsc{EWF-Arrow})}
+        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\wellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\type}}$}
-          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktwitht}$}
-        \RightLabel{(\textsc{WF-ForAll})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}}$}
+          \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktembellished}$}
+        \RightLabel{(\textsc{EWF-ForAll})}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \caption{Effect well-formedness}\label{fig:effect_well_formedness}
+    \end{mdframed}
+  \end{figure}
+
+  \begin{figure}
+    \begin{mdframed}[backgroundcolor=none]
+      \begin{center}
+        \framebox{$\wellformed{\context}{\emmap{\effect}{\type}}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
+          \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
+        \RightLabel{(\textsc{CWF-Arrow})}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\effect}}}{\type_2}}}{\tempty}{\tempty}}}$}
+      \end{prooftree}
+
+      \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
     \end{mdframed}
   \end{figure}
 
