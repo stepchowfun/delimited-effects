@@ -205,7 +205,7 @@
           \AxiomC{$\hastype{\context}{\type_1}{\ktwitht}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\type_1}}}{\term}{\type_2}$}
         \RightLabel{(\textsc{T-Abstraction})}
-        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}}{\tempty}$}
+        \BinaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\twitht{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -219,11 +219,11 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\term}{\type}$}
         \RightLabel{(\textsc{T-TypeAbstraction})}
-        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}}{\tempty}$}
+        \UnaryInfC{$\hastype{\context}{\parens{\etabs{\anno{\tvar}{\kind}}{\term}}}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}}{\tempty}$}
+          \AxiomC{$\hastype{\context}{\term}{\twitht{\parens{\tforall{\anno{\tvar}{\kind}}{\type_1}}}{\tempty}}$}
           \AxiomC{$\hastype{\context}{\type_2}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
         \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type_2}}{\substitute{\type_1}{\tvar}{\type_2}}$}
