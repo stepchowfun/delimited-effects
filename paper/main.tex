@@ -406,7 +406,7 @@
       \begin{prooftree}
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
           \AxiomC{$\hastype{\context}{\type}{\krow}$}
-        \RightLabel{(\textsc{EWF-Unit})}
+        \RightLabel{(\textsc{WFE-Unit})}
         \BinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\tunit}{\type}{\tempty}}}$}
       \end{prooftree}
 
@@ -414,14 +414,14 @@
           \AxiomC{$\ewellformed{\context}{\emmap{\effect}{\type_2}}$}
           \AxiomC{$\hastype{\context}{\type_1}{\ktembellished}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
-        \RightLabel{(\textsc{EWF-Arrow})}
+        \RightLabel{(\textsc{WFE-Arrow})}
         \TrinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\ewellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\type}}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktembellished}$}
-        \RightLabel{(\textsc{EWF-ForAll})}
+        \RightLabel{(\textsc{WFE-ForAll})}
         \BinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
@@ -440,7 +440,7 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
-        \RightLabel{(\textsc{CWF-Arrow})}
+        \RightLabel{(\textsc{WFC-Arrow})}
         \BinaryInfC{$\ecowellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\effect}}}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
