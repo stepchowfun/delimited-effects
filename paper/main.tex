@@ -101,7 +101,8 @@
 % Judgements
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\subtype[2]{#1 \; \sqsubseteq \; #2}
-\newcommand\wellformed[2]{#1 \vdash #2 \; \text{well-formed}}
+\newcommand\ewellformed[2]{#1 \vdash #2 \; \text{well-formed effect}}
+\newcommand\ecowellformed[2]{#1 \vdash #2 \; \text{well-formed coeffect}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -397,7 +398,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\wellformed{\context}{\emmap{\effect}{\type}}$}
+        \framebox{$\ewellformed{\context}{\emmap{\effect}{\type}}$}
       \end{center}
 
       \medskip
@@ -406,22 +407,22 @@
           \AxiomC{$\subtype{\tsingleton{\effect}}{\type}$}
           \AxiomC{$\hastype{\context}{\type}{\krow}$}
         \RightLabel{(\textsc{EWF-Unit})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\tunit}{\type}{\tempty}}}$}
+        \BinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\tunit}{\type}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\context}{\emmap{\effect}{\type_2}}$}
+          \AxiomC{$\ewellformed{\context}{\emmap{\effect}{\type_2}}$}
           \AxiomC{$\hastype{\context}{\type_1}{\ktembellished}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
         \RightLabel{(\textsc{EWF-Arrow})}
-        \TrinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}{\tempty}}}$}
+        \TrinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\wellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\type}}$}
+          \AxiomC{$\ewellformed{\cextend{\context}{\anno{\tvar}{\kind}}}{\emmap{\effect}{\type}}$}
           \AxiomC{$\hastype{\cextend{\context}{\anno{\tvar}{\kind}}}{\type}{\ktembellished}$}
         \RightLabel{(\textsc{EWF-ForAll})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}{\tempty}}}$}
+        \BinaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\type}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \caption{Effect well-formedness}\label{fig:effect_well_formedness}
@@ -431,7 +432,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\wellformed{\context}{\emmap{\effect}{\type}}$}
+        \framebox{$\ecowellformed{\context}{\emmap{\effect}{\type}}$}
       \end{center}
 
       \medskip
@@ -440,7 +441,7 @@
           \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
         \RightLabel{(\textsc{CWF-Arrow})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\effect}}}{\type_2}}}{\tempty}{\tempty}}}$}
+        \BinaryInfC{$\ecowellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\effect}}}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
