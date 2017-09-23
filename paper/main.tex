@@ -91,6 +91,7 @@
 
 % Effect map
 \newcommand\effect{\varepsilon}
+\newcommand\coeffect{\delta}
 \newcommand\effectmap{E}
 \newcommand\coeffectmap{\Delta}
 \newcommand\emempty{\varnothing_{\effectmap}}
@@ -153,7 +154,7 @@
           & $\etabs{\anno{\tvar}{\kind}}{\term}$ & type abstraction \\
           & $\etapp{\term}{\type}$ & type application \\
           & $\eprovide{\effect}{\term}{\term}$ & effect definition \\
-          & $\ecoprovide{\effect}{\term}{\term}$ & coeffect definition \\
+          & $\ecoprovide{\coeffect}{\term}{\term}$ & coeffect definition \\
           \\
           $\type \Coloneqq$ & & types: \\
           & $\tvar$ & type variable \\
@@ -163,6 +164,7 @@
           & $\tforall{\anno{\tvar}{\kind}}{\type}$ & quantified type \\
           & $\tempty$ & empty effect row \\
           & $\tsingleton{\effect}$ & singleton effect row \\
+          & $\tsingleton{\coeffect}$ & singleton coeffect row \\
           & $\tunion{\type}{\type}$ & effect row union \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
@@ -181,7 +183,7 @@
           \\
           $\coeffectmap \Coloneqq$ & & coeffect map: \\
           & $\ecomempty$ & empty coeffect map \\
-          & $\emextend{\coeffectmap}{\emmap{\effect}{\anno{\evar}{\type}}}$ & coeffect binding \\
+          & $\emextend{\coeffectmap}{\emmap{\coeffect}{\anno{\evar}{\type}}}$ & coeffect binding \\
         \end{tabular}
       \end{center}
 
@@ -249,10 +251,10 @@
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\term_1}{\type_1}$}
           \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\type_3}{\type_4}}$}
-          \AxiomC{$\apply{\coeffectmap}{\effect} = \anno{\evar}{\type_5}$}
+          \AxiomC{$\apply{\coeffectmap}{\coeffect} = \anno{\evar}{\type_5}$}
           \AxiomC{$\subtype{\type_1}{\type_5}$}
         \RightLabel{(\textsc{T-CoProvide})}
-        \QuaternaryInfC{$\hastype{\context}{\ecoprovide{\effect}{\term_1}{\term_2}}{\tembellished{\type_2}{\type_3}{\tunion{\type_4}{\effect}}}$}
+        \QuaternaryInfC{$\hastype{\context}{\ecoprovide{\coeffect}{\term_1}{\term_2}}{\tembellished{\type_2}{\type_3}{\tunion{\type_4}{\coeffect}}}$}
       \end{prooftree}
 
       \caption{Typing rules}\label{fig:typing_rules}
@@ -379,8 +381,14 @@
 
       \begin{prooftree}
           \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\type}$}
-        \RightLabel{(\textsc{K-SingletonRow})}
+        \RightLabel{(\textsc{K-SingletonEffectRow})}
         \UnaryInfC{$\hastype{\context}{\tsingleton{\effect}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\apply{\coeffectmap}{\coeffect} = \anno{\evar}{\type}$}
+        \RightLabel{(\textsc{K-SingletonCoeffectRow})}
+        \UnaryInfC{$\hastype{\context}{\tsingleton{\coeffect}}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -431,7 +439,7 @@
   \begin{figure}
     \begin{mdframed}[backgroundcolor=none]
       \begin{center}
-        \framebox{$\wellformed{\context}{\emmap{\effect}{\type}}$}
+        \framebox{$\wellformed{\context}{\emmap{\coeffect}{\type}}$}
       \end{center}
 
       \medskip
@@ -440,7 +448,7 @@
           \AxiomC{$\hastype{\context}{\type_1}{\kproper}$}
           \AxiomC{$\hastype{\context}{\type_2}{\ktembellished}$}
         \RightLabel{(\textsc{CWF-Arrow})}
-        \BinaryInfC{$\wellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\effect}}}{\type_2}}}{\tempty}{\tempty}}}$}
+        \BinaryInfC{$\wellformed{\context}{\emmap{\coeffect}{\tembellished{\parens{\tarrow{\tembellished{\type_1}{\tempty}{\tsingleton{\coeffect}}}{\type_2}}}{\tempty}{\tempty}}}$}
       \end{prooftree}
 
       \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
