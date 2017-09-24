@@ -222,10 +222,10 @@
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\term_1}{\embellished_1}$}
-          \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\embellished_2}{\tembellished{\proper}{\row_1}{\row_3}}}}{\row_2}{\row_4}}$}
+          \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\embellished_2}{\embellished_3}}}{\tempty}{\tempty}}$}
           \AxiomC{$\subtype{\embellished_1}{\embellished_2}$}
         \RightLabel{(\textsc{T-Application})}
-        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper}{\tunion{\row_1}{\row_2}}{\tunion{\row_3}{\row_4}}}$}
+        \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\embellished_3}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -235,10 +235,10 @@
       \end{prooftree}
 
       \begin{prooftree}
-        \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\tembellished{\proper}{\row_1}{\row_3}}}}{\row_2}{\row_4}}$}
+        \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\anno{\tvar}{\kind}}{\embellished}}}{\tempty}{\tempty}}$}
           \AxiomC{$\hastype{\context}{\type}{\kind}$}
         \RightLabel{(\textsc{T-TypeApplication})}
-        \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type}}{\tembellished{\substitute{\proper}{\tvar}{\type}}{\tunion{\substitute{\row_1}{\tvar}{\type}}{\row_2}}{\tunion{\substitute{\row_3}{\tvar}{\type}}{\row_4}}}$}
+        \BinaryInfC{$\hastype{\context}{\etapp{\term}{\type}}{\substitute{\embellished}{\tvar}{\type}}$}
       \end{prooftree}
 
       \begin{prooftree}
