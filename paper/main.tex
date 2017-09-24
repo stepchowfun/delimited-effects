@@ -79,7 +79,7 @@
 \newcommand\tempty{\varnothing_{\row}}
 \newcommand\tsingleton[1]{\left\{ #1 \right\}}
 \newcommand\tunion[2]{#1, #2}
-\newcommand\tdiff[2]{#1 \; - \; #2}
+\newcommand\tdiff[2]{#1 - #2}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -168,6 +168,7 @@
           & $\tempty$ & empty effect row \\
           & $\tsingleton{\effect}$ & singleton effect row \\
           & $\tunion{\row}{\row}$ & effect row union \\
+          & $\tdiff{\row}{\row}$ & effect row difference \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
           & $\kproper$ & kind of a proper type \\
@@ -314,20 +315,32 @@
       \begin{prooftree}
           \AxiomC{$\subtype{\row_1}{\row_3}$}
           \AxiomC{$\subtype{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{ST-Union})}
+        \RightLabel{(\textsc{ST-UnionLeft})}
         \BinaryInfC{$\subtype{\tunion{\row_1}{\row_2}}{\row_3}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-WeakeningLeft})}
+        \RightLabel{(\textsc{ST-UnionRight1})}
         \UnaryInfC{$\subtype{\row_1}{\tunion{\row_1}{\row_2}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{ST-WeakeningRight})}
+        \RightLabel{(\textsc{ST-UnionRight2})}
         \UnaryInfC{$\subtype{\row_2}{\tunion{\row_1}{\row_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-DifferenceLeft})}
+        \UnaryInfC{$\subtype{\tdiff{\row_1}{\row_2}}{\row_1}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\subtype{\tunion{\row_1}{\row_2}}{\row_3}$}
+        \RightLabel{(\textsc{ST-DifferenceRight})}
+        \UnaryInfC{$\subtype{\row_1}{\tdiff{\row_3}{\row_2}}$}
       \end{prooftree}
 
       \caption{Subtyping}\label{fig:subtyping}
@@ -377,21 +390,28 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{K-EmptyRow})}
+        \RightLabel{(\textsc{K-Empty})}
         \UnaryInfC{$\hastype{\context}{\tempty}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\embellished}$}
-        \RightLabel{(\textsc{K-SingletonRow})}
+        \RightLabel{(\textsc{K-Singleton})}
         \UnaryInfC{$\hastype{\context}{\tsingleton{\effect}}{\krow}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hastype{\context}{\row_1}{\krow}$}
           \AxiomC{$\hastype{\context}{\row_2}{\krow}$}
-        \RightLabel{(\textsc{K-UnionRow})}
+        \RightLabel{(\textsc{K-Union})}
         \BinaryInfC{$\hastype{\context}{\tunion{\row_1}{\row_2}}{\krow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hastype{\context}{\row_1}{\krow}$}
+          \AxiomC{$\hastype{\context}{\row_2}{\krow}$}
+        \RightLabel{(\textsc{K-Difference})}
+        \BinaryInfC{$\hastype{\context}{\tdiff{\row_1}{\row_2}}{\krow}$}
       \end{prooftree}
 
       \caption{Kinding rules}\label{fig:subsumption}
@@ -452,11 +472,12 @@
   \end{figure}
 
   \begin{definition}[Effect row membership]
-    Let $\context \vdash \row_1 \in \row_2$ be the smallest relation satisfying:
+    Let $\context \vdash \effect \in \row$ be the smallest relation satisfying:
     \begin{enumerate}
       \item if $\hastype{\context}{\tsingleton{\effect}}{\krow}$ then $\effect \in \tsingleton{\effect}$
-      \item if $\context \vdash \effect \in \row_2$ and $\hastype{\context}{\row_2}{\krow}$ then $\effect \in \tunion{\row_2}{\row_3}$
-      \item if $\context \vdash \effect \in \row_3$ and $\hastype{\context}{\row_2}{\krow}$ then $\effect \in \tunion{\row_2}{\row_3}$
+      \item if $\context \vdash \effect \in \row_1$ and $\hastype{\context}{\row_2}{\krow}$ then $\effect \in \tunion{\row_1}{\row_2}$
+      \item if $\context \vdash \effect \in \row_2$ and $\hastype{\context}{\row_1}{\krow}$ then $\effect \in \tunion{\row_1}{\row_2}$
+      \item if $\context \vdash \effect \in \row_1$ and $\hastype{\context}{\row_2}{\krow}$ and not $\context \vdash \effect \in \row_2$ then $\effect \in \tdiff{\row_1}{\row_2}$
     \end{enumerate}
   \end{definition}
 
