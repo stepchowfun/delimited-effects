@@ -1,3 +1,5 @@
+override COQ_SOURCES := $(shell find formalization/*.v -type f) \
+
 # Phony targets
 
 .PHONY: \
@@ -17,8 +19,7 @@ lint:
 	  formalization/*.v \
 	  scripts/*
 
-formalization: \
-  $(addprefix formalization/, syntax.vo helpers.vo judgments.vo subtyping.vo)
+formalization: $(patsubst %.v,%.vo,$(COQ_SOURCES))
 
 clean: clean-paper clean-formalization
 
@@ -68,15 +69,3 @@ main.pdf: paper/main.tex
 
 formalization/syntax.vo: formalization/syntax.v
 	COQPATH="$$(pwd)/formalization" coqc formalization/syntax.v
-
-formalization/helpers.vo: \
-  $(addprefix formalization/, syntax.vo helpers.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/helpers.v
-
-formalization/judgments.vo: \
-  $(addprefix formalization/, syntax.vo helpers.vo judgments.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/judgments.v
-
-formalization/subtyping.vo: \
-  $(addprefix formalization/, syntax.vo judgments.vo subtyping.v)
-	COQPATH="$$(pwd)/formalization" coqc formalization/subtyping.v
