@@ -343,6 +343,18 @@
         \UnaryInfC{$\subtype{\row_1}{\tdiff{\row_3}{\row_2}}$}
       \end{prooftree}
 
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-Distribute1})}
+        \UnaryInfC{$\subtype{\tunion{\parens{\tdiff{\row_1}{\row_3}}}{\parens{\tdiff{\row_2}{\row_3}}}}{\tdiff{\parens{\tunion{\row_1}{\row_2}}}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{ST-Distribute2})}
+        \UnaryInfC{$\subtype{\tdiff{\parens{\tunion{\row_1}{\row_2}}}{\row_3}}{\tunion{\parens{\tdiff{\row_1}{\row_3}}}{\parens{\tdiff{\row_2}{\row_3}}}}$}
+      \end{prooftree}
+
       \caption{Subtyping}\label{fig:subtyping}
     \end{mdframed}
   \end{figure}
