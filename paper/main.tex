@@ -227,11 +227,12 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term_1}{\embellished_1}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\embellished_2}{\embellished_3}}}{\tempty}{\tempty}}$}
-              \AxiomC{$\subtype{\embellished_1}{\embellished_2}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper}{\row_3}{\row_4}}{\embellished_3}}}{\tempty}{\tempty}}$}
+              \AxiomC{$\subtype{\row_1}{\row_3}$}
+              \AxiomC{$\subtype{\row_4}{\row_2}$}
             \RightLabel{(\textsc{T-Application})}
-            \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\embellished_3}$}
+            \QuaternaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\embellished_3}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -288,27 +289,6 @@
               \AxiomC{$\subtype{\type_2}{\type_3}$}
             \RightLabel{(\textsc{ST-Transitivity})}
             \BinaryInfC{$\subtype{\type_1}{\type_3}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\subtype{\proper_1}{\proper_2}$}
-              \AxiomC{$\subtype{\row_1}{\row_2}$}
-              \AxiomC{$\subtype{\row_4}{\row_3}$}
-            \RightLabel{(\textsc{ST-EmbellishedType})}
-            \TrinaryInfC{$\subtype{\tembellished{\proper_1}{\row_1}{\row_3}}{\tembellished{\proper_2}{\row_2}{\row_4}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\subtype{\embellished_3}{\embellished_1}$}
-              \AxiomC{$\subtype{\embellished_2}{\embellished_4}$}
-            \RightLabel{(\textsc{ST-Arrow})}
-            \BinaryInfC{$\subtype{\tarrow{\embellished_1}{\embellished_2}}{\tarrow{\embellished_3}{\embellished_4}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\subtype{\embellished_1}{\embellished_2}$}
-            \RightLabel{(\textsc{ST-ForAll})}
-            \UnaryInfC{$\subtype{\tforall{\anno{\tvar}{\kind}}{\embellished_1}}{\tforall{\anno{\tvar}{\kind}}{\embellished_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
