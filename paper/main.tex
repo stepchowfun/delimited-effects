@@ -223,8 +223,16 @@
               \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{\row_3}{\row_4}}{\tembellished{\proper_2}{\row_5}{\row_6}}}}{\rempty}{\rempty}}$}
               \AxiomC{$\contained{\row_1}{\row_3}$}
               \AxiomC{$\contained{\row_4}{\row_2}$}
-            \RightLabel{(\textsc{T-Application})}
+            \RightLabel{(\textsc{T-ApplicationByName})}
             \QuaternaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{\rempty}{\row_4}}{\tembellished{\proper_2}{\row_3}{\rempty}}}}{\rempty}{\rempty}}$}
+              \AxiomC{$\contained{\row_4}{\row_2}$}
+            \RightLabel{(\textsc{T-ApplicationByValue})}
+            \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\runion{\row_1}{\row_3}}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -252,27 +260,23 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\row_1}{\row_2}}$}
-                {$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\row_4}}$}
-                {$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
-                {$\contained{\row_3}{\row_1}$}
-                {$\contained{\row_2}{\row_4}$}
-              }}
+              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\row_4}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
+              \AxiomC{$\contained{\row_3}{\row_1}$}
+              \AxiomC{$\contained{\row_2}{\row_4}$}
             \RightLabel{(\textsc{T-Provide})}
-            \UnaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\rdiff{\row_5}{\rsingleton{\effect}}}{\row_6}}$}
+            \QuinaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\rdiff{\row_5}{\rsingleton{\effect}}}{\row_6}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\apply{\coeffectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\row_1}{\row_2}}$}
-                {$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\row_4}}$}
-                {$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
-                {$\contained{\row_3}{\row_1}$}
-                {$\contained{\row_2}{\row_4}$}
-              }}
+              \AxiomC{$\apply{\coeffectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\row_4}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
+              \AxiomC{$\contained{\row_3}{\row_1}$}
+              \AxiomC{$\contained{\row_2}{\row_4}$}
             \RightLabel{(\textsc{T-CoProvide})}
-            \UnaryInfC{$\hastype{\context}{\ecoprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\row_5}{\runion{\row_6}{\rsingleton{\effect}}}}$}
+            \QuinaryInfC{$\hastype{\context}{\ecoprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\row_5}{\runion{\row_6}{\rsingleton{\effect}}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}
@@ -402,10 +406,6 @@
       \end{figure}
 
     \subsection{Metatheory}
-
-      \subsubsection{Effect and coeffect propagation}
-
-        \[ \anno{\text{propagate}}{\tforall{\tvar_1, \tvar_2, \rvar_1, \rvar_2}{\tarrow{\parens{\tarrow{\tembellished{\tvar_1}{\rempty}{\rvar_2}}{\tembellished{\tvar_2}{\rvar_1}{\rempty}}}}{\tarrow{\tembellished{\tvar_1}{\rvar_1}{\rvar_2}}{\tembellished{\tvar_2}{\rvar_1}{\rvar_2}}}}} \]
 
       \subsubsection{Soundness of effect row subtyping}
 
