@@ -413,9 +413,9 @@
           Let $\effect \in \row$ be the smallest relation satisfying:
           \begin{enumerate}
             \item $\effect \in \rsingleton{\effect}$
-            \item if $\effect \in \row_1$ then $\effect \in \runion{\row_1}{\row_2}$
-            \item if $\effect \in \row_2$ then $\effect \in \runion{\row_1}{\row_2}$
-            \item if $\effect \in \row_1$ and not $\effect \in \row_2$ then $\effect \in \rdiff{\row_1}{\row_2}$
+            \item $\effect \in \row_1 \implies \effect \in \runion{\row_1}{\row_2}$
+            \item $\effect \in \row_2 \implies \effect \in \runion{\row_1}{\row_2}$
+            \item $\parens{\effect \in \row_1} \wedge \neg \parens{\effect \in \row_2} \implies \effect \in \rdiff{\row_1}{\row_2}$
           \end{enumerate}
         \end{definition}
 
