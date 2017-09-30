@@ -75,11 +75,6 @@
 \newcommand\tarrow[2]{#1 \rightarrow #2}
 \newcommand\tforall[2]{\forall #1 \; . \; #2}
 
-% Type contexts
-\newcommand\context{\Gamma}
-\newcommand\cempty{\varnothing_{\context}}
-\newcommand\cextend[2]{#1, #2}
-
 % Rows
 \newcommand\row{\varepsilon}
 \newcommand\rvar{\nu}
@@ -87,6 +82,11 @@
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1 \cup #2}
 \newcommand\rdiff[2]{#1 \setminus #2}
+
+% Type contexts
+\newcommand\context{\Gamma}
+\newcommand\cempty{\varnothing_{\context}}
+\newcommand\cextend[2]{#1, #2}
 
 % Effect map
 \newcommand\effect{e}
@@ -161,18 +161,18 @@
               & $\eprovide{\effect}{\term}{\term}$ & effect definition \\
               & $\ecoprovide{\effect}{\term}{\term}$ & coeffect definition \\
               \\
+              $\proper \Coloneqq$ & & proper types: \\
+              & $\tvar$ & type variable \\
+              & $\tunit$ & unit type \\
+              & $\tarrow{\tembellished{\proper}{\row}{\row}}{\tembellished{\proper}{\row}{\row}}$ & arrow type \\
+              & $\tforall{\tvar}{\tembellished{\proper}{\row}{\row}}$ & quantified type \\
+              \\
               $\row \Coloneqq$ & & rows: \\
               & $\rvar$ & row variable \\
               & $\rempty$ & empty row \\
               & $\rsingleton{\effect}$ & singleton row \\
               & $\runion{\row}{\row}$ & row union \\
               & $\rdiff{\row}{\row}$ & row difference \\
-              \\
-              $\proper \Coloneqq$ & & proper types: \\
-              & $\tvar$ & type variable \\
-              & $\tunit$ & unit type \\
-              & $\tarrow{\tembellished{\proper}{\row}{\row}}{\tembellished{\proper}{\row}{\row}}$ & arrow type \\
-              & $\tforall{\tvar}{\tembellished{\proper}{\row}{\row}}$ & quantified type \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cempty$ & empty context \\
