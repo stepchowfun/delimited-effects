@@ -5,6 +5,7 @@ Require Import Coq.Strings.String.
 Module Type Identifiers.
   Parameter termId : Type.
   Parameter typeId : Type.
+  Parameter rowId : Type.
   Parameter effectId : Type.
   Axiom termIdEqDec :
     forall (id1 id2 : termId), {id1 = id2} + {id1 <> id2}.
@@ -22,48 +23,63 @@ Import IdentifiersInstance.
 Inductive term : Type :=
 | eunit : term
 | evar : termId -> term
-| eabs : termId -> type -> term -> term
+| eabs : termId -> properType -> row -> term -> term
 | eapp : term -> term -> term
-| etabs : typeId -> kind -> term -> term
-| etapp : term -> type -> term
+| etabs : typeId -> term -> term
+| etapp : term -> properType -> term
+| erabs : rowId -> term -> term
+| erapp : term -> row -> term
+| eprovide : effectId -> term -> term -> term
+| ecoprovide : effectId -> term -> term -> term
 
-(* Types *)
+(* Proper types *)
 
-with type : Type :=
-| tvar : typeId -> type
-| tembellished : type -> type -> type -> type
-| tunit : type
-| tarrow : type -> type -> type
-| tforall : typeId -> kind -> type -> type
-| tempty : type
-| tsingleton : effectId -> type
-| tunion : type -> type -> type
-| tdiff : type -> type -> type
+with properType : Type :=
+| tvar : typeId -> properType
+| tunit : properType
+| tarrow : properType -> row -> properType -> row -> properType
+| ttforall : typeId -> properType -> row -> row -> properType
+| trforall : rowId -> properType -> row -> row -> properType
 
-(* Kinds *)
+(* Rows *)
 
-with kind : Type :=
-| kproper : kind
-| krow : kind
-| kembellished : kind.
+with row : Type :=
+| rvar : rowId -> row
+| rempty : row
+| rsingleton : effectId -> row
+| runion : row -> row -> row
+| rdiff : row -> row -> row.
 
 (* Type contexts *)
 
 Inductive context : Type :=
 | cempty : context
-| ceextend : context -> termId -> type -> context
-| ctextend : context -> typeId -> kind -> context.
+| ceextend : context -> termId -> properType -> row -> row -> context.
 
 (* Effect map *)
 
 Inductive effectMap : Type :=
 | emempty : effectMap
-| emextend : effectMap -> effectId -> termId -> type -> effectMap.
+| emextend :
+  effectMap ->
+  effectId ->
+  termId ->
+  properType ->
+  row ->
+  row ->
+  effectMap.
 
 (* Coeffect map *)
 
 Inductive coeffectMap : Type :=
 | cmempty : coeffectMap
-| cmextend : coeffectMap -> effectId -> termId -> type -> coeffectMap.
+| cmextend :
+  coeffectMap ->
+  effectId ->
+  termId ->
+  properType ->
+  row ->
+  row ->
+  coeffectMap.
 
 End Syntax.
