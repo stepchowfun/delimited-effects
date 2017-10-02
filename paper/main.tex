@@ -297,6 +297,20 @@
           \end{prooftree}
 
           \begin{prooftree}
+              \AxiomC{$\requiv{\row_1}{\row_3}$}
+              \AxiomC{$\requiv{\row_2}{\row_4}$}
+            \RightLabel{(\textsc{R-UnionRewrite})}
+            \BinaryInfC{$\requiv{\runion{\row_1}{\row_2}}{\runion{\row_3}{\row_4}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\requiv{\row_1}{\row_3}$}
+              \AxiomC{$\requiv{\row_2}{\row_4}$}
+            \RightLabel{(\textsc{R-DifferenceRewrite})}
+            \BinaryInfC{$\requiv{\rdiff{\row_1}{\row_2}}{\rdiff{\row_3}{\row_4}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{R-UnionIdentity})}
             \UnaryInfC{$\requiv{\runion{\row}{\rempty}}{\row}$}
@@ -304,20 +318,8 @@
 
           \begin{prooftree}
               \AxiomC{}
-            \RightLabel{(\textsc{R-DifferenceIdentity})}
-            \UnaryInfC{$\requiv{\rdiff{\row}{\rempty}}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
             \RightLabel{(\textsc{R-UnionIdempotency})}
             \UnaryInfC{$\requiv{\runion{\row}{\row}}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-DifferenceDomination})}
-            \UnaryInfC{$\requiv{\rdiff{\row}{\row}}{\rempty}$}
           \end{prooftree}
 
           \begin{prooftree}
