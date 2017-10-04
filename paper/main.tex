@@ -220,10 +220,10 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}{\runion{\row_3}{\row_4}}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_4}}{\tembellished{\proper_2}{\row_2}{}}}}{\rempty}{\rempty}}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}{\runion{\row_4}{\row_5}}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_5}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\rempty}}$}
             \RightLabel{(\textsc{T-Application})}
-            \BinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\runion{\row_1}{\row_2}}{\runion{\row_3}{\row_4}}}$}
+            \BinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}{\runion{\row_4}{\row_5}}}$}
           \end{prooftree}
 
           \begin{prooftree}
