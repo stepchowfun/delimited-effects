@@ -233,9 +233,9 @@
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row}{}}}}{\rempty}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row_1}{}}}}{\row_2}{\rempty}}$}
             \RightLabel{(\textsc{T-TypeApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\row}{\rempty}}{\tvar}{\proper_1}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\runion{\row_1}{\row_2}}{\rempty}}{\tvar}{\proper_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -245,9 +245,9 @@
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_2}{}}}}{\rempty}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\rempty}}$}
             \RightLabel{(\textsc{T-RowApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\proper}{\row_2}{\rempty}}{\rvar}{\row_1}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\proper}{\runion{\row_2}{\row_3}}{\rempty}}{\rvar}{\row_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
