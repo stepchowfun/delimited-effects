@@ -245,9 +245,9 @@
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_2}{}}}}{\rempty}{\rempty}}$}
             \RightLabel{(\textsc{T-RowApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_3}}{\substitute{\tembellished{\proper}{\row_1}{\rempty}}{\rvar}{\row_3}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\proper}{\row_2}{\rempty}}{\rvar}{\row_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
