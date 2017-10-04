@@ -100,8 +100,8 @@
 % Judgments
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\requiv[2]{#1 \; \sim \; #2}
-\newcommand\ewellformed[2]{#1 \vdash #2 \; \text{well-formed effect}}
-\newcommand\ecowellformed[2]{#1 \vdash #2 \; \text{well-formed coeffect}}
+\newcommand\ewellformed[1]{#1 \; \text{well-formed effect}}
+\newcommand\ecowellformed[1]{#1 \; \text{well-formed coeffect}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -354,27 +354,27 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
+            \framebox{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\effect \in \row$}
+              \AxiomC{$\effect \in \row_1$}
             \RightLabel{(\textsc{WFE-Unit})}
-            \UnaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\tunit}{\row}{\rempty}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\tunit}{\row_1}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\proper_2}{\row_3}{\row_4}}}$}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper_2}{\row_2}{\rempty}}}$}
             \RightLabel{(\textsc{WFE-Arrow})}
-            \UnaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{\row_1}{\row_2}}{\tembellished{\proper_2}{\row_3}{\row_4}}}}{\rempty}{\rempty}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_4}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\proper}{\row_1}{\row_2}}}$}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
             \RightLabel{(\textsc{WFE-ForAll})}
-            \UnaryInfC{$\ewellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{\row_2}}}}{\rempty}{\rempty}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
@@ -384,15 +384,15 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\ecowellformed{\context}{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
+            \framebox{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{}
+              \AxiomC{$\effect \in \row_1$}
             \RightLabel{(\textsc{WFC-Arrow})}
-            \UnaryInfC{$\ecowellformed{\context}{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{\rempty}{\rsingleton{\effect}}}{\tembellished{\proper}{\row_1}{\row_2}}}}{\rempty}{\rempty}}}$}
+            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{}{\row_1}}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\row_4}}}$}
           \end{prooftree}
 
           \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
