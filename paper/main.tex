@@ -165,8 +165,8 @@
               & $\tvar$ & type variable \\
               & $\tunit$ & unit type \\
               & $\tarrow{\tembellished{\proper}{}{\row}}{\tembellished{\proper}{\row}{}}$ & arrow type \\
-              & $\tforall{\tvar}{\tembellished{\proper}{\row}{\row}}$ & type-quantified type \\
-              & $\tforall{\rvar}{\tembellished{\proper}{\row}{\row}}$ & row-quantified type \\
+              & $\tforall{\tvar}{\tembellished{\proper}{\row}{}}$ & type-quantified type \\
+              & $\tforall{\rvar}{\tembellished{\proper}{\row}{}}$ & row-quantified type \\
               \\
               $\row \Coloneqq$ & & rows: \\
               & $\rvar$ & row variable \\
@@ -227,27 +227,27 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}{\rempty}}$}
             \RightLabel{(\textsc{T-TypeAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\tvar}{\term}}}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{\row_2}}}}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\tvar}{\term}}}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row_1}{\row_2}}}}{\rempty}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row}{}}}}{\rempty}{\rempty}}$}
             \RightLabel{(\textsc{T-TypeApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\row_1}{\row_2}}{\tvar}{\proper_1}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\row}{\rempty}}{\tvar}{\proper_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row_1}{\row_2}}$}
+              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}{\rempty}}$}
             \RightLabel{(\textsc{T-RowAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\rvar}{\term}}}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{\row_2}}}}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\rvar}{\term}}}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{\row_2}}}}{\rempty}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
             \RightLabel{(\textsc{T-RowApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_3}}{\substitute{\tembellished{\proper}{\row_1}{\row_2}}{\rvar}{\row_3}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_3}}{\substitute{\tembellished{\proper}{\row_1}{\rempty}}{\rvar}{\row_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
