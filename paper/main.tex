@@ -15,6 +15,7 @@
 \usepackage{mathtools} % For \Coloneqq
 \usepackage{stackengine} % For stacking axioms
 \usepackage{stmaryrd} % For \llbracket and \rrbracket
+\usepackage{xcolor}
 
 % Add a "Draft" watermark to the background.
 \usepackage{draftwatermark}
@@ -65,10 +66,9 @@
 \newcommand\etabs[2]{\lambda #1 \; . \; #2}
 \newcommand\etapp[2]{#1 \; #2}
 \newcommand\eprovide[3]{\textbf{provide} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
-\newcommand\ecoprovide[3]{\textbf{coprovide} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
 
 % Types
-\newcommand\tembellished[3]{{#1}^{#2}_{#3}}
+\newcommand\tembellished[2]{{#1}^{\color{violet}{#2}}}
 \newcommand\proper{\tau}
 \newcommand\tvar{\alpha}
 \newcommand\tunit{1}
@@ -91,9 +91,7 @@
 % Effect map
 \newcommand\effect{e}
 \newcommand\effectmap{E}
-\newcommand\coeffectmap{\Delta}
 \newcommand\emempty{\varnothing_{\effectmap}}
-\newcommand\ecomempty{\varnothing_{\coeffectmap}}
 \newcommand\emmap[2]{#1 \mapsto #2}
 \newcommand\emextend[2]{#1, #2}
 
@@ -101,7 +99,6 @@
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\requiv[2]{#1 \; \sim \; #2}
 \newcommand\ewellformed[1]{#1 \; \text{well-formed effect}}
-\newcommand\ecowellformed[1]{#1 \; \text{well-formed coeffect}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -152,21 +149,20 @@
               $\term \Coloneqq $ & & terms: \\
               & $\eunit$ & unit \\
               & $\evar$ & variable \\
-              & $\eabs{\anno{\evar}{\tembellished{\proper}{}{\row}}}{\term}$ & abstraction \\
+              & $\eabs{\anno{\evar}{\proper}}{\term}$ & abstraction \\
               & $\eapp{\term}{\term}$ & application \\
               & $\etabs{\tvar}{\term}$ & type abstraction \\
               & $\etapp{\term}{\proper}$ & type application \\
               & $\etabs{\rvar}{\term}$ & row abstraction \\
               & $\etapp{\term}{\row}$ & row application \\
               & $\eprovide{\effect}{\term}{\term}$ & effect definition \\
-              & $\ecoprovide{\effect}{\term}{\term}$ & coeffect definition \\
               \\
               $\proper \Coloneqq$ & & proper types: \\
               & $\tvar$ & type variable \\
               & $\tunit$ & unit type \\
-              & $\tarrow{\tembellished{\proper}{}{\row}}{\tembellished{\proper}{\row}{}}$ & arrow type \\
-              & $\tforall{\tvar}{\tembellished{\proper}{\row}{}}$ & type-quantified type \\
-              & $\tforall{\rvar}{\tembellished{\proper}{\row}{}}$ & row-quantified type \\
+              & $\tarrow{\proper}{\tembellished{\proper}{\row}}$ & arrow type \\
+              & $\tforall{\tvar}{\tembellished{\proper}{\row}}$ & type-quantified type \\
+              & $\tforall{\rvar}{\tembellished{\proper}{\row}}$ & row-quantified type \\
               \\
               $\row \Coloneqq$ & & rows: \\
               & $\rvar$ & row variable \\
@@ -177,15 +173,11 @@
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cempty$ & empty context \\
-              & $\cextend{\context}{\anno{\evar}{\tembellished{\proper}{\row}{\row}}}$ & variable binding \\
+              & $\cextend{\context}{\anno{\evar}{\tembellished{\proper}{\row}}}$ & variable binding \\
               \\
               $\effectmap \Coloneqq$ & & effect map: \\
               & $\emempty$ & empty effect map \\
-              & $\emextend{\effectmap}{\emmap{\effect}{\anno{\evar}{\tembellished{\proper}{\row}{\row}}}}$ & effect binding \\
-              \\
-              $\coeffectmap \Coloneqq$ & & coeffect map: \\
-              & $\ecomempty$ & empty coeffect map \\
-              & $\emextend{\coeffectmap}{\emmap{\effect}{\anno{\evar}{\tembellished{\proper}{\row}{\row}}}}$ & coeffect binding \\
+              & $\emextend{\effectmap}{\emmap{\effect}{\anno{\evar}{\tembellished{\proper}{\row}}}}$ & effect binding \\
             \end{tabular}
           \end{center}
 
@@ -196,7 +188,7 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hastype{\context}{\term}{\tembellished{\proper}{\row}{\row}}$}
+            \framebox{$\hastype{\context}{\term}{\tembellished{\proper}{\row}}$}
           \end{center}
 
           \medskip
@@ -204,66 +196,58 @@
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{T-Unit})}
-            \UnaryInfC{$\hastype{\context}{\eunit}{\tembellished{\tunit}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\eunit}{\tembellished{\tunit}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\evar} = \tembellished{\proper}{\row_1}{\row_2}$}
+              \AxiomC{$\apply{\context}{\evar} = \tembellished{\proper}{\row}$}
             \RightLabel{(\textsc{T-Variable})}
-            \UnaryInfC{$\hastype{\context}{\evar}{\tembellished{\proper}{\row_1}{\row_2}}$}
+            \UnaryInfC{$\hastype{\context}{\evar}{\tembellished{\proper}{\row}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\tembellished{\proper_1}{\rempty}{\row_1}}}}{\term}{\tembellished{\proper_2}{\row_2}{\row_3}}$}
+              \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\tembellished{\proper_1}{\rempty}}}}{\term}{\tembellished{\proper_2}{\row}}$}
             \RightLabel{(\textsc{T-Abstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\tembellished{\proper_1}{}{\row_1}}}{\term}}}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\proper_1}}{\term}}}{\tembellished{\parens{\tarrow{\proper_1}{\tembellished{\proper_2}{\row_2}}}}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}{\runion{\row_4}{\row_5}}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_4}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_6}}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\proper_1}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}}$}
             \RightLabel{(\textsc{T-Application})}
-            \BinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}{\runion{\row_4}{\row_5}}}$}
+            \BinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\proper_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}{\rempty}}$}
+              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}}$}
             \RightLabel{(\textsc{T-TypeAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\tvar}{\term}}}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\tvar}{\term}}}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row}}}}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row_1}{}}}}{\row_2}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper_2}{\row_1}}}}{\row_2}}$}
             \RightLabel{(\textsc{T-TypeApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\runion{\row_1}{\row_2}}{\rempty}}{\tvar}{\proper_1}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\proper_1}}{\substitute{\tembellished{\proper_2}{\runion{\row_1}{\row_2}}}{\tvar}{\proper_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}{\rempty}}$}
+              \AxiomC{$\hastype{\context}{\term}{\tembellished{\proper}{\row}}$}
             \RightLabel{(\textsc{T-RowAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\rvar}{\term}}}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row}{}}}}{\rempty}{\rempty}}$}
+            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\rvar}{\term}}}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row}}}}{\rempty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\rempty}}$}
+            \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_2}}}}{\row_3}}$}
             \RightLabel{(\textsc{T-RowApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\proper}{\runion{\row_2}{\row_3}}{\rempty}}{\rvar}{\row_1}}$}
+            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\proper}{\runion{\row_2}{\row_3}}}{\rvar}{\row_1}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\runion{\row_1}{\row_3}}{\row_2}}$}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\runion{\row_2}{\row_4}}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
+              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\runion{\row_1}{\row_3}}}$}
+              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_1}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_2}}$}
             \RightLabel{(\textsc{T-Provide})}
-            \TrinaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\rdiff{\row_5}{\rsingleton{\effect}}}{\row_6}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\apply{\coeffectmap}{\effect} = \anno{\evar}{\tembellished{\proper_1}{\runion{\row_1}{\row_3}}{\row_2}}$}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\proper_1}{\row_3}{\runion{\row_2}{\row_4}}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\proper_2}{\row_5}{\row_6}}$}
-            \RightLabel{(\textsc{T-CoProvide})}
-            \TrinaryInfC{$\hastype{\context}{\ecoprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\row_5}{\runion{\row_6}{\rsingleton{\effect}}}}$}
+            \TrinaryInfC{$\hastype{\context}{\eprovide{\effect}{\term_1}{\term_2}}{\tembellished{\proper_2}{\rdiff{\row_2}{\rsingleton{\effect}}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}
@@ -354,90 +338,54 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
+            \framebox{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row}}}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\effect \in \row_1$}
+              \AxiomC{$\effect \in \row$}
             \RightLabel{(\textsc{WFE-Unit})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\tunit}{\row_1}{\row_2}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\tunit}{\row}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\effect \in \row_3$}
+              \AxiomC{$\effect \in \row_2$}
             \RightLabel{(\textsc{WFE-Arrow1})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_4}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\proper_1}{\tembellished{\proper_2}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper_2}{\row_2}{\rempty}}}$}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper_2}{\row_1}}}$}
             \RightLabel{(\textsc{WFE-Arrow2})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_4}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\proper_1}{\tembellished{\proper_2}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\effect \in \row_2$}
             \RightLabel{(\textsc{WFE-ForAll1})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}}}$}
             \RightLabel{(\textsc{WFE-ForAll2})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\effect \in \row_2$}
             \RightLabel{(\textsc{WFE-ForAll3})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}}}$}
             \RightLabel{(\textsc{WFE-ForAll4})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
-        \end{mdframed}
-      \end{figure}
-
-      \begin{figure}[H]
-        \begin{mdframed}[backgroundcolor=none]
-          \begin{center}
-            \framebox{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row}{\row}}}$}
-          \end{center}
-
-          \medskip
-
-          \begin{prooftree}
-              \AxiomC{$\effect \in \row_1$}
-            \RightLabel{(\textsc{WFC-Arrow1})}
-            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{}{\row_1}}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\row_4}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_2}{\rempty}}}$}
-            \RightLabel{(\textsc{WFC-Arrow2})}
-            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{}{\row_1}}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\row_4}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
-            \RightLabel{(\textsc{WFC-ForAll1})}
-            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
-            \RightLabel{(\textsc{WFC-ForAll2})}
-            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
-          \end{prooftree}
-
-          \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
         \end{mdframed}
       \end{figure}
 
