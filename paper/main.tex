@@ -366,15 +366,39 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper_2}{\row_2}{\rempty}}}$}
-            \RightLabel{(\textsc{WFE-Arrow})}
+              \AxiomC{$\effect \in \row_3$}
+            \RightLabel{(\textsc{WFE-Arrow1})}
             \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_4}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
-            \RightLabel{(\textsc{WFE-ForAll})}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper_2}{\row_2}{\rempty}}}$}
+            \RightLabel{(\textsc{WFE-Arrow2})}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper_1}{}{\row_1}}{\tembellished{\proper_2}{\row_2}{}}}}{\row_3}{\row_4}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\effect \in \row_2$}
+            \RightLabel{(\textsc{WFE-ForAll1})}
             \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+            \RightLabel{(\textsc{WFE-ForAll2})}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\effect \in \row_2$}
+            \RightLabel{(\textsc{WFE-ForAll3})}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+            \RightLabel{(\textsc{WFE-ForAll4})}
+            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
@@ -391,8 +415,26 @@
 
           \begin{prooftree}
               \AxiomC{$\effect \in \row_1$}
-            \RightLabel{(\textsc{WFC-Arrow})}
+            \RightLabel{(\textsc{WFC-Arrow1})}
             \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{}{\row_1}}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\row_4}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_2}{\rempty}}}$}
+            \RightLabel{(\textsc{WFC-Arrow2})}
+            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\tembellished{\proper}{}{\row_1}}{\tembellished{\proper}{\row_2}{}}}}{\row_3}{\row_4}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+            \RightLabel{(\textsc{WFC-ForAll1})}
+            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\ecowellformed{\emmap{\effect}{\tembellished{\proper}{\row_1}{\rempty}}}$}
+            \RightLabel{(\textsc{WFC-ForAll2})}
+            \UnaryInfC{$\ecowellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\proper}{\row_1}{}}}}{\row_2}{\row_3}}}$}
           \end{prooftree}
 
           \caption{Coeffect well-formedness}\label{fig:coeffect_well_formedness}
