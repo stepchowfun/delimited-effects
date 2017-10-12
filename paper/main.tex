@@ -303,6 +303,12 @@
 
           \begin{prooftree}
               \AxiomC{}
+            \RightLabel{(\textsc{R-DifferenceIdentity})}
+            \UnaryInfC{$\requiv{\rdiff{\row}{\rempty}}{\row}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
             \RightLabel{(\textsc{R-UnionIdempotency})}
             \UnaryInfC{$\requiv{\runion{\row}{\row}}{\row}$}
           \end{prooftree}
@@ -329,6 +335,12 @@
               \AxiomC{}
             \RightLabel{(\textsc{R-Distributivity})}
             \UnaryInfC{$\requiv{\rdiff{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\parens{\rdiff{\row_1}{\row_3}}}{\parens{\rdiff{\row_2}{\row_3}}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{R-DifferenceCombination})}
+            \UnaryInfC{$\requiv{\rdiff{\parens{\rdiff{\row_1}{\row_2}}}{\row_3}}{\rdiff{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
           \end{prooftree}
 
           \caption{Row equivalence}\label{fig:row_equivalence}
