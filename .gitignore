@@ -1,5 +1,6 @@
-main.pdf
 .paper-build
+formalization/*.glob
 formalization/*.vo
 formalization/*.vo.aux
-formalization/*.glob
+implementation/.stack-work/*
+main.pdf
