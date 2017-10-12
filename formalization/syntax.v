@@ -60,12 +60,6 @@ Inductive context : Type :=
 
 Inductive effectMap : Type :=
 | emempty : effectMap
-| emextend :
-  effectMap ->
-  effectId ->
-  termId ->
-  type ->
-  row ->
-  effectMap.
+| emextend : effectMap -> effectId -> termId -> type -> row -> effectMap.
 
 End Syntax.
