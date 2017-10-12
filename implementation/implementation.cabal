@@ -5,9 +5,9 @@ version:             0.1.0.0
 homepage:            https://github.com/stepchowfun/implementation#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Stephan Boyer
-maintainer:          stephan@stephanboyer.com
-copyright:           (c) 2017 Stephan Boyer
+author:              Stephan Boyer and Esther Wang
+maintainer:          stephan@stephanboyer.com and esther.wang@airbnb.com
+copyright:           (c) 2017 Stephan Boyer and Esther Wang
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
