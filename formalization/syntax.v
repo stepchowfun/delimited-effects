@@ -23,10 +23,10 @@ Import IdentifiersInstance.
 Inductive term : Type :=
 | eunit : term
 | evar : termId -> term
-| eabs : termId -> properType -> row -> term -> term
+| eabs : termId -> type -> term -> term
 | eapp : term -> term -> term
 | etabs : typeId -> term -> term
-| etapp : term -> properType -> term
+| etapp : term -> type -> term
 | erabs : rowId -> term -> term
 | erapp : term -> row -> term
 | eprovide : effectId -> term -> term -> term
@@ -34,12 +34,12 @@ Inductive term : Type :=
 
 (* Proper types *)
 
-with properType : Type :=
-| tvar : typeId -> properType
-| tunit : properType
-| tarrow : properType -> row -> properType -> row -> properType
-| ttforall : typeId -> properType -> row -> row -> properType
-| trforall : rowId -> properType -> row -> row -> properType
+with type : Type :=
+| tvar : typeId -> type
+| tunit : type
+| tarrow : type -> type -> row -> type
+| ttforall : typeId -> type -> row -> type
+| trforall : rowId -> type -> row -> type
 
 (* Rows *)
 
@@ -54,7 +54,7 @@ with row : Type :=
 
 Inductive context : Type :=
 | cempty : context
-| ceextend : context -> termId -> properType -> row -> row -> context.
+| ceextend : context -> termId -> type -> row -> context.
 
 (* Effect map *)
 
@@ -64,22 +64,8 @@ Inductive effectMap : Type :=
   effectMap ->
   effectId ->
   termId ->
-  properType ->
-  row ->
+  type ->
   row ->
   effectMap.
-
-(* Coeffect map *)
-
-Inductive coeffectMap : Type :=
-| cmempty : coeffectMap
-| cmextend :
-  coeffectMap ->
-  effectId ->
-  termId ->
-  properType ->
-  row ->
-  row ->
-  coeffectMap.
 
 End Syntax.
