@@ -4,11 +4,11 @@ override COQ_SOURCES := $(shell find formalization/*.v -type f) \
 
 .PHONY: \
   all \
-  paper lint formalization \
-  clean clean-paper clean-formalization \
+  paper lint formalization implementation \
+  clean clean-paper clean-formalization clean-implementation \
   docker-deps docker-build
 
-all: paper lint formalization
+all: paper lint formalization implementation
 
 paper: main.pdf
 
@@ -21,7 +21,12 @@ lint:
 
 formalization: $(patsubst %.v,%.vo,$(COQ_SOURCES))
 
-clean: clean-paper clean-formalization
+implementation:
+	cd implementation && stack setup --allow-different-user && \
+	  stack build --allow-different-user && \
+	  stack test --allow-different-user
+
+clean: clean-paper clean-formalization clean-implementation
 
 clean-paper:
 	rm -rf .paper-build main.pdf
@@ -33,6 +38,9 @@ clean-formalization:
 	  formalization/.*.vo.aux \
 	  .paper-build
 
+clean-implementation:
+	rm -rf implementation/.stack-work
+
 docker-deps:
 	docker build \
 	  -f scripts/Dockerfile \
@@ -42,9 +50,10 @@ docker-deps:
 docker-build:
 	docker run \
 	  --rm \
-	  -v $$(pwd):/root \
+	  --ulimit nofile=65536:65536 \
+	  --volume $$(pwd):/root/delimited-effects \
 	  stephanmisc/delimited-effects:deps \
-	  sh -c 'cd /root && make'
+	  sh -c 'cd /root/delimited-effects && make'
 
 # The paper
 
