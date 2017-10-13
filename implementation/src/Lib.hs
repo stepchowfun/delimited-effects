@@ -3,7 +3,8 @@ module Lib (
   rowEquiv
 ) where
 
-data Row a = REmpty
+data Row a = RVar String
+           | REmpty
            | RSingleton a
            | RUnion (Row a) (Row a)
            | RDifference (Row a) (Row a)
