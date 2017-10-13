@@ -30,7 +30,6 @@ Inductive term : Type :=
 | erabs : rowId -> term -> term
 | erapp : term -> row -> term
 | eprovide : effectId -> term -> term -> term
-| ecoprovide : effectId -> term -> term -> term
 
 (* Proper types *)
 
