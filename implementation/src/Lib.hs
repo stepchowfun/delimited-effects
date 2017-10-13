@@ -1,6 +1,12 @@
-module Lib
-    ( someFunc
-    ) where
+module Lib (
+  Row,
+  rowEquiv
+) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+data Row a = REmpty
+           | RSingleton a
+           | RUnion (Row a) (Row a)
+           | RDifference (Row a) (Row a)
+
+rowEquiv :: Eq a => Row a -> Row a -> Bool
+rowEquiv x y = undefined
