@@ -20,12 +20,12 @@ variables = [VariableV, VariableW, VariableX, VariableY, VariableZ]
 instance Arbitrary Variable where
   arbitrary = elements variables
 
-data Context = Context {
-    getV :: Row Effect Variable,
-    getW :: Row Effect Variable,
-    getX :: Row Effect Variable,
-    getY :: Row Effect Variable,
-    getZ :: Row Effect Variable
+data Context = Context
+  { getV :: Row Effect Variable
+  , getW :: Row Effect Variable
+  , getX :: Row Effect Variable
+  , getY :: Row Effect Variable
+  , getZ :: Row Effect Variable
   } deriving (Eq, Show)
 
 instance Arbitrary Context where
@@ -69,10 +69,12 @@ contains e (RDifference x y) = contains e x && not (contains e y)
 
 spec :: [Context] -> Row Effect Variable -> Row Effect Variable -> Bool
 spec cs x y =
-  let r1 = foldl' substitute x cs
-      r2 = foldl' substitute y cs
-  in not (closed r1) || not (closed r2) ||
-     rowEquiv x y == all (\e -> contains e r1 == contains e r2) effects
+  let
+    r1 = foldl' substitute x cs
+    r2 = foldl' substitute y cs
+  in
+    not (closed r1) || not (closed r2) ||
+      rowEquiv x y == all (\e -> contains e r1 == contains e r2) effects
 
 main :: IO ()
 main = hspec $ modifyMaxSuccess (const 1000000) $ do

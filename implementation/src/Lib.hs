@@ -2,11 +2,12 @@ module Lib (Row(..), rowEquiv) where
 
 import Test.QuickCheck (Arbitrary, Gen, arbitrary, choose, oneof, shrink)
 
-data Row a b = RVar b
-             | REmpty
-             | RSingleton a
-             | RUnion (Row a b) (Row a b)
-             | RDifference (Row a b) (Row a b)
+data Row a b
+  = RVar b
+  | REmpty
+  | RSingleton a
+  | RUnion (Row a b) (Row a b)
+  | RDifference (Row a b) (Row a b)
   deriving (Eq, Show)
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Row a b) where
