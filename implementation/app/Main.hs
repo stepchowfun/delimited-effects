@@ -1,6 +1,6 @@
-module Main where
+module Main (main) where
 
-import Lib (rowEquiv)
+import Lib ()
 
 main :: IO ()
 main = putStrLn "Hello, World!"
