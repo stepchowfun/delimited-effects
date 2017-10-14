@@ -2,7 +2,7 @@ import Data.List (foldl')
 import Lib (Row(..), rowEquiv)
 import Test.Hspec (describe, hspec, it, pending)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
-import Test.QuickCheck (Arbitrary, arbitrary, elements, property)
+import Test.QuickCheck (Arbitrary, arbitrary, elements, property, shrink)
 
 data Effect = EffectA | EffectB | EffectC | EffectD | EffectE
   deriving (Eq, Show)
@@ -35,6 +35,10 @@ instance Arbitrary Context where
     arbitrary <*>
     arbitrary <*>
     arbitrary
+  shrink c = [
+      Context v' w' x' y' z' |
+      (v', w', x', y', z') <- shrink (getV c, getW c, getX c, getY c, getZ c)
+    ]
 
 closed :: Row a b -> Bool
 closed (RVar x) = False
