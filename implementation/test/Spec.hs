@@ -1,4 +1,5 @@
 import Data.List (foldl')
+import Data.Stream (Stream(..), head, tail)
 import Lib (Row(..), rowEquiv)
 import Test.Hspec (describe, hspec, it, pending)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
@@ -67,14 +68,38 @@ contains e (RSingleton x) = x == e
 contains e (RUnion x y) = contains e x || contains e y
 contains e (RDifference x y) = contains e x && not (contains e y)
 
-spec :: [Context] -> Row Effect Variable -> Row Effect Variable -> Bool
+-- QuickCheck has a bug where it tries to print the arguments for a failed
+-- test case, even if they are infinite (which causes the program to hang).
+-- We use infinite Streams, so we need a newtype wrapper to work around this
+-- QuickCheck bug. We define a special Show instance which returns only a
+-- prefix of the (infinite) representation of the Stream.
+newtype ContextStream = ContextStream (Stream Context)
+
+instance Arbitrary ContextStream where
+  arbitrary = ContextStream <$> (Cons <$> arbitrary <*> arbitrary)
+
+instance Show ContextStream where
+  show (ContextStream s) = take 1024 (show s) ++ "..."
+
+csHead :: ContextStream -> Context
+csHead (ContextStream s) = Data.Stream.head s
+
+csTail :: ContextStream -> ContextStream
+csTail (ContextStream s) = ContextStream (Data.Stream.tail s)
+
+subUntilClosed :: ContextStream -> Row Effect Variable -> Row Effect Variable
+subUntilClosed cs x = fst $ until
+  (closed . fst)
+  (\(r, s) -> (substitute r (csHead s), csTail s))
+  (x, cs)
+
+spec :: ContextStream -> Row Effect Variable -> Row Effect Variable -> Bool
 spec cs x y =
   let
-    r1 = foldl' substitute x cs
-    r2 = foldl' substitute y cs
+    r1 = subUntilClosed cs x
+    r2 = subUntilClosed cs y
   in
-    not (closed r1) || not (closed r2) ||
-      rowEquiv x y == all (\e -> contains e r1 == contains e r2) effects
+    rowEquiv r1 r2 == all (\e -> contains e r1 == contains e r2) effects
 
 main :: IO ()
 main = hspec $ modifyMaxSuccess (const 1000000) $ do
