@@ -75,8 +75,15 @@ contains e (RDifference x y) = contains e x && not (contains e y)
 -- prefix of the (infinite) representation of the Stream.
 newtype ContextStream = ContextStream (Stream Context)
 
+streamShrink :: Arbitrary s => Int -> Stream s -> [Stream s]
+streamShrink n s = if n == 0 then [] else do
+  t <- [s] ++ streamShrink (n - 1) (Data.Stream.tail s)
+  h <- shrink (Data.Stream.head s)
+  return (Cons h t)
+
 instance Arbitrary ContextStream where
   arbitrary = ContextStream <$> (Cons <$> arbitrary <*> arbitrary)
+  shrink (ContextStream s) = ContextStream <$> streamShrink 8 s
 
 instance Show ContextStream where
   show (ContextStream s) = take 1024 (show s) ++ "..."
