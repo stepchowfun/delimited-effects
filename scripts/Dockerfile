@@ -13,8 +13,8 @@ FROM debian:stretch
 #   - Install GHC. The resolver specified in this command must match the one in
 #       implementation/stack.yaml to ensure that we install the version of GHC
 #       that the implementation uses.
-#   - Free up some space by removing the package lists, now that the packages are
-#       installed.
+#   - Free up some space by removing the package lists, now that the packages
+#       are installed.
 #   - Free up 2G of disk space by deleting documentation for the packages.
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
