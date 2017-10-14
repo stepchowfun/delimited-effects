@@ -14,10 +14,23 @@ paper: main.pdf
 
 lint:
 	./scripts/check-line-lengths.sh \
-	  .travis.yml \
-	  Makefile \
-	  formalization/*.v \
-	  scripts/*
+	  $(shell \
+	    find . \
+	      -type d \( \
+	        -path ./.git -o \
+	        -path ./.github -o \
+	        -path ./.paper-build -o \
+	        -path ./implementation/.stack-work \
+	      \) -prune -o \
+	      \( \
+		-name '*.hs' -o \
+		-name '*.sh' -o \
+		-name '*.v' -o \
+		-name '*.yml' -o \
+		-name 'Dockerfile' -o \
+		-name 'Makefile' \
+	      \) -print \
+	  )
 
 formalization: $(patsubst %.v,%.vo,$(COQ_SOURCES))
 
