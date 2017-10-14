@@ -29,13 +29,12 @@ data Context = Context {
   } deriving (Eq, Show)
 
 instance Arbitrary Context where
-  arbitrary = do
-    v <- arbitrary
-    w <- arbitrary
-    x <- arbitrary
-    y <- arbitrary
-    z <- arbitrary
-    return $ Context v w x y z
+  arbitrary = Context <$>
+    arbitrary <*>
+    arbitrary <*>
+    arbitrary <*>
+    arbitrary <*>
+    arbitrary
 
 closed :: Row a b -> Bool
 closed (RVar x) = False
