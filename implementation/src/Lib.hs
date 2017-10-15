@@ -1,6 +1,6 @@
 module Lib (Row(..), equivalent) where
 
-import Test.QuickCheck (Arbitrary, Gen, arbitrary, choose, oneof, shrink)
+import Test.QuickCheck (Arbitrary, arbitrary, oneof, shrink)
 
 data Row a b
   = RVar b
@@ -18,9 +18,9 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Row a b) where
     , RUnion <$> arbitrary <*> arbitrary
     , RDifference <$> arbitrary <*> arbitrary
     ]
-  shrink (RVar x) = []
+  shrink (RVar _) = []
   shrink REmpty = []
-  shrink (RSingleton x) = []
+  shrink (RSingleton _) = []
   shrink (RUnion x y) = [x, y] ++ [RUnion x' y' | (x', y') <- shrink (x, y)]
   shrink (RDifference x y) = [x] ++
     [RDifference x' y' | (x', y') <- shrink (x, y)]
