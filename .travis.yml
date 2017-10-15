@@ -2,6 +2,9 @@ os: linux
 dist: trusty
 language: generic
 sudo: required
+cache:
+  directories:
+  - implementation/.stack-work
 services: docker
 script: make docker-build &&
   if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
