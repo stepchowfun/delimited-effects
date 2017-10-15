@@ -1,4 +1,4 @@
-module Lib (Row(..), rowEquiv) where
+module Lib (Row(..), equivalent) where
 
 import Test.QuickCheck (Arbitrary, Gen, arbitrary, choose, oneof, shrink)
 
@@ -25,5 +25,8 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Row a b) where
   shrink (RDifference x y) = [x] ++
     [RDifference x' y' | (x', y') <- shrink (x, y)]
 
-rowEquiv :: (Eq a, Eq b) => Row a b -> Row a b -> Bool
-rowEquiv x y = True
+normalize :: (Ord a, Ord b) => Row a b -> Row a b
+normalize = error "Not yet implemented"
+
+equivalent :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
+equivalent x y = normalize x == normalize y

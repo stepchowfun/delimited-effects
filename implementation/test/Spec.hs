@@ -1,12 +1,12 @@
 import Data.List (foldl')
 import Data.Stream (Stream(..), head, tail)
-import Lib (Row(..), rowEquiv)
+import Lib (Row(..), equivalent)
 import Test.Hspec (describe, hspec, it, pending)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (Arbitrary, arbitrary, elements, property, shrink)
 
 data Effect = EffectA | EffectB | EffectC | EffectD | EffectE
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 effects = [EffectA, EffectB, EffectC, EffectD, EffectE]
 
@@ -14,7 +14,7 @@ instance Arbitrary Effect where
   arbitrary = elements effects
 
 data Variable = VariableV | VariableW | VariableX | VariableY | VariableZ
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 variables = [VariableV, VariableW, VariableX, VariableY, VariableZ]
 
@@ -106,10 +106,10 @@ spec cs x y =
     r1 = subUntilClosed cs x
     r2 = subUntilClosed cs y
   in
-    rowEquiv r1 r2 == all (\e -> contains e r1 == contains e r2) effects
+    equivalent r1 r2 == all (\e -> contains e r1 == contains e r2) effects
 
 main :: IO ()
 main = hspec $ modifyMaxSuccess (const 1000000) $ do
-  describe "rowEquiv" $ do
+  describe "equivalent" $ do
     it "returns True iff the rows contain the same set of effects for any \
       \substitution" $ pending -- property spec
