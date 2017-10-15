@@ -63,7 +63,6 @@ docker-deps:
 docker-build:
 	docker run \
 	  --rm \
-	  --ulimit nofile=65536:65536 \
 	  --volume $$(pwd):/root/delimited-effects \
 	  stephanmisc/delimited-effects:deps \
 	  sh -c 'cd /root/delimited-effects && make'
