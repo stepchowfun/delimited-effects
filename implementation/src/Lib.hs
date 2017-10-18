@@ -1,7 +1,6 @@
 module Lib (Row(..), equivalent) where
 
 import Data.List (delete, nub, sort)
-import Test.QuickCheck (Arbitrary, arbitrary, oneof, shrink)
 
 -- A row denotes some set of effects. Rows may contain variables which stand
 -- for other rows.
@@ -12,22 +11,6 @@ data Row a b
   | RUnion (Row a b) (Row a b)
   | RDifference (Row a b) (Row a b)
   deriving (Eq, Show)
-
--- This instance allows us to generate random rows for testing purposes.
-instance (Arbitrary a, Arbitrary b) => Arbitrary (Row a b) where
-  arbitrary = oneof
-    [ RVariable <$> arbitrary
-    , pure REmpty
-    , RSingleton <$> arbitrary
-    , RUnion <$> arbitrary <*> arbitrary
-    , RDifference <$> arbitrary <*> arbitrary
-    ]
-  shrink (RVariable _) = []
-  shrink REmpty = []
-  shrink (RSingleton _) = []
-  shrink (RUnion x y) = [x, y] ++ [RUnion x' y' | (x', y') <- shrink (x, y)]
-  shrink (RDifference x y) = [x] ++
-    [RDifference x' y' | (x', y') <- shrink (x, y)]
 
 -- To determine whether two rows are equivalent, we first convert them into
 -- propositional formulae by embedding them into a Boolean ring. Then
@@ -40,6 +23,16 @@ data BooleanRing a b
   | BAAnd (BooleanRing a b) (BooleanRing a b)
   | BAXor (BooleanRing a b) (BooleanRing a b)
   deriving (Eq, Show)
+
+-- This function converts a row into a propositional formula.
+embed :: Row a b -> BooleanRing a b
+embed (RVariable x) = BAVariable x
+embed REmpty = BAFalse
+embed (RSingleton x) = BASingleton x
+embed (RUnion x y) =
+  BAXor (embed x) (BAXor (embed y) (BAAnd (embed x) (embed y)))
+embed (RDifference x y) =
+  BAXor (embed x) (BAAnd (embed x) (embed y))
 
 -- In order to find a canonical form for a propositional formula, we need to
 -- sort the elements.  Note that the constants (true/false) are defined to come
@@ -63,36 +56,30 @@ instance (Ord a, Ord b) => Ord (BooleanRing a b) where
   compare (BAAnd _ _) BATrue = GT
   compare (BAAnd _ _) (BAVariable _) = GT
   compare (BAAnd _ _) (BASingleton _) = GT
-  compare (BAAnd x y) (BAAnd w v) = case compare x w of
-    LT -> LT
-    EQ -> compare y v
-    GT -> GT
+  compare (BAAnd x y) (BAAnd w v) =
+    case compare x w of
+      LT -> LT
+      EQ -> compare y v
+      GT -> GT
   compare (BAAnd _ _) _ = LT
   compare (BAXor _ _) BAFalse = GT
   compare (BAXor _ _) BATrue = GT
   compare (BAXor _ _) (BAVariable _) = GT
   compare (BAXor _ _) (BASingleton _) = GT
   compare (BAXor _ _) (BAAnd _ _) = GT
-  compare (BAXor x y) (BAXor w v) = case compare x w of
-    LT -> LT
-    EQ -> compare y v
-    GT -> GT
-
--- This function converts a row into a propositional formula.
-embed :: Row a b -> BooleanRing a b
-embed (RVariable x) = BAVariable x
-embed REmpty = BAFalse
-embed (RSingleton x) = BASingleton x
-embed (RUnion x y) =
-  BAXor (embed x) (BAXor (embed y) (BAAnd (embed x) (embed y)))
-embed (RDifference x y) =
-  BAXor (embed x) (BAAnd (embed x) (embed y))
+  compare (BAXor x y) (BAXor w v) =
+    case compare x w of
+      LT -> LT
+      EQ -> compare y v
+      GT -> GT
 
 -- This function removes identical pairs of elements from a list. Note that
 -- this is different from deduplication. The input is assumed to be sorted.
 elimPairs :: Eq a => [a] -> [a]
 elimPairs (x : y : xs) =
-  if x == y then elimPairs xs else x : elimPairs (y : xs)
+  if x == y
+  then elimPairs xs
+  else x : elimPairs (y : xs)
 elimPairs (x : xs) = x : elimPairs xs
 elimPairs [] = []
 
@@ -109,16 +96,18 @@ normalize (BAVariable x) = [[BAVariable x]]
 normalize (BASingleton x) = [[BASingleton x]]
 normalize BAFalse = []
 normalize BATrue = [[BATrue]]
-normalize (BAAnd x y) = do
-  p <- normalize x
-  q <- normalize y
-  let conjunction = nub (sort (p ++ q))
-  if countSingletons conjunction > 1
-  then return [BAFalse]
-  else return $ case conjunction of
-    (BAFalse : _) -> [BAFalse]
-    (BATrue : xs) -> xs
-    xs -> xs
+normalize (BAAnd x y) =
+  do
+    p <- normalize x
+    q <- normalize y
+    let conjunction = nub (sort (p ++ q))
+    if countSingletons conjunction > 1
+    then return [BAFalse]
+    else return $
+      case conjunction of
+        (BAFalse : _) -> [BAFalse]
+        (BATrue : xs) -> xs
+        xs -> xs
 normalize (BAXor x y) =
   delete [BAFalse] (elimPairs (sort ((normalize x) ++ (normalize y))))
 
