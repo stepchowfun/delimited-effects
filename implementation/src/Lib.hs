@@ -22,7 +22,7 @@ data BooleanRing a b
   | BATrue
   | BAAnd (BooleanRing a b) (BooleanRing a b)
   | BAXor (BooleanRing a b) (BooleanRing a b)
-  deriving (Eq, Show)
+  deriving Eq
 
 -- This function converts a row into a propositional formula.
 embed :: Row a b -> BooleanRing a b
@@ -80,7 +80,7 @@ elimPairs (x : y : xs) =
   if x == y
   then elimPairs xs
   else x : elimPairs (y : xs)
-elimPairs (x : xs) = x : elimPairs xs
+elimPairs (x : []) = x : []
 elimPairs [] = []
 
 -- This function counts the number of singletons in a list.
@@ -97,19 +97,18 @@ normalize (BASingleton x) = [[BASingleton x]]
 normalize BAFalse = []
 normalize BATrue = [[BATrue]]
 normalize (BAAnd x y) =
-  do
-    p <- normalize x
-    q <- normalize y
-    let conjunction = nub (sort (p ++ q))
-    if countSingletons conjunction > 1
-    then return [BAFalse]
-    else return $
-      case conjunction of
-        (BAFalse : _) -> [BAFalse]
-        (BATrue : xs) -> xs
-        xs -> xs
+  do p <- normalize x
+     q <- normalize y
+     let conjunction = nub (sort (p ++ q))
+     if countSingletons conjunction > 1
+     then return [BAFalse]
+     else return $
+       case conjunction of
+         (BAFalse : _) -> [BAFalse]
+         (BATrue : xs) -> xs
+         xs -> xs
 normalize (BAXor x y) =
-  delete [BAFalse] (elimPairs (sort ((normalize x) ++ (normalize y))))
+  delete [BAFalse] (elimPairs (sort (normalize x ++ normalize y)))
 
 -- Finally, this is the actual decision procedure for row equivalence.
 equivalent :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
