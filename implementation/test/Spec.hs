@@ -27,7 +27,7 @@ data Context = Context
   , getX :: Row Variable Effect
   , getY :: Row Variable Effect
   , getZ :: Row Variable Effect
-  } deriving (Eq, Show)
+  } deriving Show
 
 newtype ClosedContext = ClosedContext Context
   deriving Show
