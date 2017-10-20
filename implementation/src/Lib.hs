@@ -16,58 +16,58 @@ data Row a b
 -- propositional formulae by embedding them into a Boolean ring. Then
 -- equivalence is just equality of algebraic normal forms.
 data BooleanRing a b
-  = BAVariable a
-  | BASingleton b
-  | BAFalse
-  | BATrue
-  | BAAnd (BooleanRing a b) (BooleanRing a b)
-  | BAXor (BooleanRing a b) (BooleanRing a b)
+  = BRVariable a
+  | BRSingleton b
+  | BRFalse
+  | BRTrue
+  | BRAnd (BooleanRing a b) (BooleanRing a b)
+  | BRXor (BooleanRing a b) (BooleanRing a b)
   deriving Eq
 
 -- This function converts a row into a propositional formula.
 embed :: Row a b -> BooleanRing a b
-embed (RVariable x) = BAVariable x
-embed REmpty = BAFalse
-embed (RSingleton x) = BASingleton x
+embed (RVariable x) = BRVariable x
+embed REmpty = BRFalse
+embed (RSingleton x) = BRSingleton x
 embed (RUnion x y) =
-  BAXor (embed x) (BAXor (embed y) (BAAnd (embed x) (embed y)))
+  BRXor (embed x) (BRXor (embed y) (BRAnd (embed x) (embed y)))
 embed (RDifference x y) =
-  BAXor (embed x) (BAAnd (embed x) (embed y))
+  BRXor (embed x) (BRAnd (embed x) (embed y))
 
 -- In order to find a canonical form for a propositional formula, we need to
 -- sort the elements.  Note that the constants (true/false) are defined to come
 -- first; this allows us to efficiently remove them in the end after sorting.
 instance (Ord a, Ord b) => Ord (BooleanRing a b) where
-  compare BAFalse BAFalse = EQ
-  compare BAFalse _ = LT
-  compare BATrue BAFalse = GT
-  compare BATrue BATrue = EQ
-  compare BATrue _ = LT
-  compare (BAVariable _) BAFalse = GT
-  compare (BAVariable _) BATrue = GT
-  compare (BAVariable x) (BAVariable y) = compare x y
-  compare (BAVariable _) _ = LT
-  compare (BASingleton _) BAFalse = GT
-  compare (BASingleton _) BATrue = GT
-  compare (BASingleton _) (BAVariable _) = GT
-  compare (BASingleton x) (BASingleton y) = compare x y
-  compare (BASingleton _) _ = LT
-  compare (BAAnd _ _) BAFalse = GT
-  compare (BAAnd _ _) BATrue = GT
-  compare (BAAnd _ _) (BAVariable _) = GT
-  compare (BAAnd _ _) (BASingleton _) = GT
-  compare (BAAnd x y) (BAAnd w v) =
+  compare BRFalse BRFalse = EQ
+  compare BRFalse _ = LT
+  compare BRTrue BRFalse = GT
+  compare BRTrue BRTrue = EQ
+  compare BRTrue _ = LT
+  compare (BRVariable _) BRFalse = GT
+  compare (BRVariable _) BRTrue = GT
+  compare (BRVariable x) (BRVariable y) = compare x y
+  compare (BRVariable _) _ = LT
+  compare (BRSingleton _) BRFalse = GT
+  compare (BRSingleton _) BRTrue = GT
+  compare (BRSingleton _) (BRVariable _) = GT
+  compare (BRSingleton x) (BRSingleton y) = compare x y
+  compare (BRSingleton _) _ = LT
+  compare (BRAnd _ _) BRFalse = GT
+  compare (BRAnd _ _) BRTrue = GT
+  compare (BRAnd _ _) (BRVariable _) = GT
+  compare (BRAnd _ _) (BRSingleton _) = GT
+  compare (BRAnd x y) (BRAnd w v) =
     case compare x w of
       LT -> LT
       EQ -> compare y v
       GT -> GT
-  compare (BAAnd _ _) _ = LT
-  compare (BAXor _ _) BAFalse = GT
-  compare (BAXor _ _) BATrue = GT
-  compare (BAXor _ _) (BAVariable _) = GT
-  compare (BAXor _ _) (BASingleton _) = GT
-  compare (BAXor _ _) (BAAnd _ _) = GT
-  compare (BAXor x y) (BAXor w v) =
+  compare (BRAnd _ _) _ = LT
+  compare (BRXor _ _) BRFalse = GT
+  compare (BRXor _ _) BRTrue = GT
+  compare (BRXor _ _) (BRVariable _) = GT
+  compare (BRXor _ _) (BRSingleton _) = GT
+  compare (BRXor _ _) (BRAnd _ _) = GT
+  compare (BRXor x y) (BRXor w v) =
     case compare x w of
       LT -> LT
       EQ -> compare y v
@@ -85,30 +85,30 @@ elimPairs [] = []
 
 -- This function counts the number of singletons in a list.
 countSingletons :: [BooleanRing a b] -> Integer
-countSingletons ((BASingleton _) : xs) = 1 + countSingletons xs
+countSingletons ((BRSingleton _) : xs) = 1 + countSingletons xs
 countSingletons (_ : xs) = countSingletons xs
 countSingletons [] = 0
 
 -- This function converts a propositional formula into algebraic normal form,
 -- suitable for comparison.
 normalize :: (Ord a, Ord b) => BooleanRing a b -> [[BooleanRing a b]]
-normalize (BAVariable x) = [[BAVariable x]]
-normalize (BASingleton x) = [[BASingleton x]]
-normalize BAFalse = []
-normalize BATrue = [[BATrue]]
-normalize (BAAnd x y) =
+normalize (BRVariable x) = [[BRVariable x]]
+normalize (BRSingleton x) = [[BRSingleton x]]
+normalize BRFalse = []
+normalize BRTrue = [[BRTrue]]
+normalize (BRAnd x y) =
   do p <- normalize x
      q <- normalize y
      let conjunction = nub (sort (p ++ q))
      if countSingletons conjunction > 1
-     then return [BAFalse]
+     then return [BRFalse]
      else return $
        case conjunction of
-         (BAFalse : _) -> [BAFalse]
-         (BATrue : xs) -> xs
+         (BRFalse : _) -> [BRFalse]
+         (BRTrue : xs) -> xs
          xs -> xs
-normalize (BAXor x y) =
-  delete [BAFalse] (elimPairs (sort (normalize x ++ normalize y)))
+normalize (BRXor x y) =
+  delete [BRFalse] (elimPairs (sort (normalize x ++ normalize y)))
 
 -- Finally, this is the actual decision procedure for row equivalence.
 equivalent :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
