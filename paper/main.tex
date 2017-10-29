@@ -107,17 +107,6 @@
 
   \section{Introduction}
 
-    The system we describe in this paper is motivated by the observation that a variety of seemingly orthogonal ideas in programming languages are variations on a common theme: tracking predicates in the type system without requiring the explicit threading of witnesses through the program at the term level. A sufficiently smart inference algorithm frees the programmer from the ceremony of annotating types and propagating predicates. There's no shortage of examples of this theme: type classes, implicit parameters, algebraic effects, etc. In this paper, we generalize these ideas by a single language construct, which we call \emph{delimited effects}.
-
-    Our primary contributions are:
-
-    \begin{itemize}
-      \item We give the syntax, semantics, and typing rules for our system.
-      \item We prove that the typing rules are sound with respect to the semantics.
-      \item We provide one of many possible type inference algorithms for the system.
-      \item We provide several diverse examples of programming language features which are generalized by our system.
-    \end{itemize}
-
     \iffalse
       \begin{lstlisting}[gobble=4]
         effect IO
