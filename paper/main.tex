@@ -97,7 +97,6 @@
 
 % Judgments
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
-\newcommand\requiv[2]{#1 \; \sim \; #2}
 \newcommand\ewellformed[1]{#1 \; \text{well-formed effect}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -257,99 +256,6 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\requiv{\row}{\row}$}
-          \end{center}
-
-          \medskip
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-Reflexivity})}
-            \UnaryInfC{$\requiv{\row}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\requiv{\row_1}{\row_2}$}
-            \RightLabel{(\textsc{R-Symmetry})}
-            \UnaryInfC{$\requiv{\row_2}{\row_1}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\requiv{\row_1}{\row_2}$}
-              \AxiomC{$\requiv{\row_2}{\row_3}$}
-            \RightLabel{(\textsc{R-Transitivity})}
-            \BinaryInfC{$\requiv{\row_1}{\row_3}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\requiv{\row_1}{\row_3}$}
-              \AxiomC{$\requiv{\row_2}{\row_4}$}
-            \RightLabel{(\textsc{R-UnionRewrite})}
-            \BinaryInfC{$\requiv{\runion{\row_1}{\row_2}}{\runion{\row_3}{\row_4}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\requiv{\row_1}{\row_3}$}
-              \AxiomC{$\requiv{\row_2}{\row_4}$}
-            \RightLabel{(\textsc{R-DifferenceRewrite})}
-            \BinaryInfC{$\requiv{\rdiff{\row_1}{\row_2}}{\rdiff{\row_3}{\row_4}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-UnionIdentity})}
-            \UnaryInfC{$\requiv{\runion{\row}{\rempty}}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-DifferenceIdentity})}
-            \UnaryInfC{$\requiv{\rdiff{\row}{\rempty}}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-UnionIdempotency})}
-            \UnaryInfC{$\requiv{\runion{\row}{\row}}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-UnionAssociativity})}
-            \UnaryInfC{$\requiv{\runion{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-UnionCommutativity})}
-            \UnaryInfC{$\requiv{\runion{\row_1}{\row_2}}{\runion{\row_2}{\row_1}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-DifferenceDomination})}
-            \UnaryInfC{$\requiv{\rdiff{\row_1}{\parens{\runion{\row_1}{\row_2}}}}{\rempty}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-Distributivity})}
-            \UnaryInfC{$\requiv{\rdiff{\parens{\runion{\row_1}{\row_2}}}{\row_3}}{\runion{\parens{\rdiff{\row_1}{\row_3}}}{\parens{\rdiff{\row_2}{\row_3}}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{R-DifferenceCombination})}
-            \UnaryInfC{$\requiv{\rdiff{\parens{\rdiff{\row_1}{\row_2}}}{\row_3}}{\rdiff{\row_1}{\parens{\runion{\row_2}{\row_3}}}}$}
-          \end{prooftree}
-
-          \caption{Row equivalence}\label{fig:row_equivalence}
-        \end{mdframed}
-      \end{figure}
-
-      \begin{figure}[H]
-        \begin{mdframed}[backgroundcolor=none]
-          \begin{center}
             \framebox{$\ewellformed{\emmap{\effect}{\tembellished{\type}{\row}}}$}
           \end{center}
 
@@ -400,27 +306,5 @@
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
         \end{mdframed}
       \end{figure}
-
-    \subsection{Metatheory}
-
-      \subsubsection{Effect rows}
-
-        \begin{definition}[Effect row membership]
-          Let $\effect \in \row$ be the smallest relation satisfying:
-          \begin{enumerate}
-            \item $\effect \in \rsingleton{\effect}$
-            \item $\effect \in \row_1 \implies \effect \in \runion{\row_1}{\row_2}$
-            \item $\effect \in \row_2 \implies \effect \in \runion{\row_1}{\row_2}$
-            \item $\parens{\effect \in \row_1} \wedge \neg \parens{\effect \in \row_2} \implies \effect \in \rdiff{\row_1}{\row_2}$
-          \end{enumerate}
-        \end{definition}
-
-        \begin{theorem}[Soundness of effect row equivalence]
-          For any $\row_1, \row_2$ not containing any row variables, the following are equivalent:
-          \begin{enumerate}
-            \item $\requiv{\row_1}{\row_2}$
-            \item $\forall \effect \;.\; \effect \in \row_1 \iff \effect \in \row_2$
-          \end{enumerate}
-        \end{theorem}
 
 \end{document}
