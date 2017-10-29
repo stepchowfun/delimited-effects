@@ -63,21 +63,16 @@
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2}
 \newcommand\eapp[2]{#1 \; #2}
-\newcommand\etabs[2]{\lambda #1 \; . \; #2}
-\newcommand\etapp[2]{#1 \; #2}
 \newcommand\eprovide[4]{\textbf{provide} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\tembellished[2]{{#1}^{\textcolor{violet}{#2}}}
 \newcommand\type{\tau}
-\newcommand\tvar{\alpha}
 \newcommand\tunit{1}
 \newcommand\tarrow[2]{#1 \rightarrow #2}
-\newcommand\tforall[2]{\forall #1 \; . \; #2}
 
 % Rows
 \newcommand\row{\varepsilon}
-\newcommand\rvar{\nu}
 \newcommand\rempty{\varnothing_{\row}}
 \newcommand\rsingleton[1]{\left\{ #1 \right\}}
 \newcommand\runion[2]{#1 \cup #2}
@@ -150,21 +145,13 @@
               & $\evar$ & variable \\
               & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
               & $\eapp{\term}{\term}$ & application \\
-              & $\etabs{\tvar}{\term}$ & type abstraction \\
-              & $\etapp{\term}{\type}$ & type application \\
-              & $\etabs{\rvar}{\term}$ & row abstraction \\
-              & $\etapp{\term}{\row}$ & row application \\
               & $\eprovide{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
               \\
               $\type \Coloneqq$ & & types: \\
-              & $\tvar$ & type variable \\
               & $\tunit$ & unit type \\
               & $\tarrow{\type}{\tembellished{\type}{\row}}$ & arrow type \\
-              & $\tforall{\tvar}{\tembellished{\type}{\row}}$ & type-quantified type \\
-              & $\tforall{\rvar}{\tembellished{\type}{\row}}$ & row-quantified type \\
               \\
               $\row \Coloneqq$ & & rows: \\
-              & $\rvar$ & row variable \\
               & $\rempty$ & empty row \\
               & $\rsingleton{\effect}$ & singleton row \\
               & $\runion{\row}{\row}$ & row union \\
@@ -218,30 +205,6 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\type}{\row}}$}
-            \RightLabel{(\textsc{T-TypeAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\tvar}{\term}}}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\type}{\row}}}}{\rempty}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\type_2}{\row_1}}}}{\row_2}}$}
-            \RightLabel{(\textsc{T-TypeApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\type_1}}{\substitute{\tembellished{\type_2}{\runion{\row_1}{\row_2}}}{\tvar}{\type_1}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\type}{\row}}$}
-            \RightLabel{(\textsc{T-RowAbstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\etabs{\rvar}{\term}}}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\type}{\row}}}}{\rempty}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\type}{\row_2}}}}{\row_3}}$}
-            \RightLabel{(\textsc{T-RowApplication})}
-            \UnaryInfC{$\hastype{\context}{\etapp{\term}{\row_1}}{\substitute{\tembellished{\type}{\runion{\row_2}{\row_3}}}{\rvar}{\row_1}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
               \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\type_1}{\row_1}}$}
               \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\row_2}}$}
               \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\substitute{\type_1}{\effect_i}{\effect}}{\runion{\substitute{\row_1}{\effect_i}{\effect}}{\row_3}}}$}
@@ -277,30 +240,6 @@
               \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\type_2}{\row_1}}}$}
             \RightLabel{(\textsc{WFE-Arrow2})}
             \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_1}}}}{\row_2}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\effect \in \row_2$}
-            \RightLabel{(\textsc{WFE-ForAll1})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\type}{\row_1}}}}{\row_2}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\type}{\row_1}}}$}
-            \RightLabel{(\textsc{WFE-ForAll2})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\tvar}{\tembellished{\type}{\row_1}}}}{\row_2}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\effect \in \row_2$}
-            \RightLabel{(\textsc{WFE-ForAll3})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\type}{\row_1}}}}{\row_2}}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\type}{\row_1}}}$}
-            \RightLabel{(\textsc{WFE-ForAll4})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tforall{\rvar}{\tembellished{\type}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
