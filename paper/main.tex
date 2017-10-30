@@ -59,7 +59,7 @@
 
 % Terms
 \newcommand\term{t}
-\newcommand\eunit{()}
+\newcommand\eunit{\texttt{()}}
 \newcommand\evar{x}
 \newcommand\eabs[2]{\lambda #1 \; . \; #2}
 \newcommand\eapp[2]{#1 \; #2}
@@ -91,6 +91,10 @@
 \newcommand\emextend[2]{#1, #2}
 
 % Judgments
+\newcommand\subrowsym{\sqsubseteq}
+\newcommand\subtypesym{\leq}
+\newcommand\subrow[2]{#1 \subrowsym #2}
+\newcommand\subtype[2]{#1 \subtypesym #2}
 \newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\ewellformed[1]{#1 \; \text{well-formed effect}}
 
@@ -123,7 +127,7 @@
 
   \section{Overview}
 
-    \subsection{Syntax and semantics}
+    \subsection{Syntax}
 
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
@@ -160,6 +164,39 @@
         \end{mdframed}
       \end{figure}
 
+    \subsection{Subtyping}
+
+      An effect row $\row$ models a set of effects $\effect$ constructed by a finite number of unions and relative complements. We define a relation $\subrowsym$ for modeling set inclusion on effect rows.
+
+      \begin{figure}[H]
+        \begin{mdframed}[backgroundcolor=none]
+          \begin{center}
+            \framebox{$\subtype{\tembellished{\type}{\row}}{\tembellished{\type}{\row}}$}
+          \end{center}
+
+          \medskip
+
+          \begin{prooftree}
+              \AxiomC{$\subrow{\row_1}{\row_2}$}
+            \RightLabel{(\textsc{ST-Unit})}
+            \UnaryInfC{$\subtype{\tembellished{\tunit}{\row_1}}{\tembellished{\tunit}{\row_2}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\subtype{\type_3}{\type_1}$}
+              \AxiomC{$\subtype{\type_2}{\type_4}$}
+              \AxiomC{$\subrow{\row_1}{\row_3}$}
+              \AxiomC{$\subrow{\row_2}{\row_4}$}
+            \RightLabel{(\textsc{ST-Arrow})}
+            \QuaternaryInfC{$\subtype{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_1}}}}{\row_2}}{\tembellished{\parens{\tarrow{\type_3}{\tembellished{\type_4}{\row_3}}}}{\row_4}}$}
+          \end{prooftree}
+
+          \caption{Subtyping rules}\label{fig:subtyping_rules}
+        \end{mdframed}
+      \end{figure}
+
+    \subsection{Typing}
+
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
@@ -188,17 +225,19 @@
 
           \begin{prooftree}
               \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\type_1}{\row_1}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_2}{}}}}{\row_3}}$}
+              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\type_3}{\tembellished{\type_2}{\row_2}{}}}}{\row_3}}$}
+              \AxiomC{$\subtype{\tembellished{\type_1}{\rempty}}{\tembellished{\type_3}{\rempty}}$}
             \RightLabel{(\textsc{T-Application})}
-            \BinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\type_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}}$}
+            \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\type_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\type_1}{\row_1}}$}
               \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\row_2}}$}
-              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\substitute{\type_1}{\effect_i}{\effect}}{\runion{\substitute{\row_1}{\effect_i}{\effect}}{\row_3}}}$}
+              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\type_3}{\row_3}}$}
+              \AxiomC{$\subtype{\tembellished{\substitute{\type_1}{\effect_i}{\effect}}{\substitute{\row_1}{\effect_i}{\effect}}}{\tembellished{\type_3}{\row_3}}$}
             \RightLabel{(\textsc{T-Provide})}
-            \TrinaryInfC{$\hastype{\context}{\eprovide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tembellished{\type_2}{\runion{\parens{\rdiff{\row_2}{\rsingleton{\effect}}}}{\effect_i}}}$}
+            \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tembellished{\type_2}{\runion{\parens{\rdiff{\row_2}{\rsingleton{\effect}}}}{\effect_i}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}
