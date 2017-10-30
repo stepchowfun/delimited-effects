@@ -1,6 +1,6 @@
 import Data.List (foldl')
 import Data.Stream (Stream(..), head, tail)
-import Lib (Row(..), equivalent)
+import Lib (Row(..), subrow)
 import Test.Hspec (describe, hspec, it, pending)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck
@@ -124,13 +124,12 @@ specForward :: ClosedContext ->
 specForward (ClosedContext c) x y =
   let r1 = substitute c x
       r2 = substitute c y
-  in all (\e -> contains e r1 == contains e r2) effects ||
-     not (equivalent x y)
+  in all (\e -> not (contains e r1) || contains e r2) effects ||
+     not (subrow x y)
 
 specReverse :: Row Variable Effect -> Row Variable Effect -> Bool
 specReverse p q =
-  allOccur p ||
-  allOccur q ||
+  allOccur (RUnion p q) ||
   not
     ( all id
       ( do v <- effects
@@ -146,17 +145,17 @@ specReverse p q =
            let c = Context v' w' x' y' z'
            let r1 = substitute c p
            let r2 = substitute c q
-           return (all (\e -> contains e r1 == contains e r2) effects)
+           return (all (\e -> not (contains e r1) || contains e r2) effects)
       )
     ) ||
-  equivalent p q
+  subrow p q
 
 main :: IO ()
 main = hspec $ do
-  describe "equivalent" $ do
+  describe "subrow" $ do
     modifyMaxSuccess (const 1000) $
-      it "returns False for any two rows if they contain different effects \
+      it "returns False for x <= y if x includes effects not in y \
         \after some closed substitution" $ property specForward
     modifyMaxSuccess (const 100000) $
-      it "returns True for any two rows if they contain the same effects \
+      it "returns True for x <= y if y includes all effects in x \
         \after all possible singleton substitutions" $ property specReverse
