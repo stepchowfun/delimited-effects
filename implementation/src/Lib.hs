@@ -1,4 +1,4 @@
-module Lib (Row(..), equivalent) where
+module Lib (Row(..), subrow) where
 
 import Data.List (delete, nub, sort)
 
@@ -12,8 +12,8 @@ data Row a b
   | RDifference (Row a b) (Row a b)
   deriving (Eq, Show)
 
--- To determine whether two rows are equivalent, we first convert them into
--- propositional formulae by embedding them into a Boolean ring. Then
+-- To determine whether one row contains another, we first convert the rows
+-- into propositional formulae by embedding them into a Boolean ring. Then
 -- equivalence is just equality of algebraic normal forms.
 data BooleanRing a b
   = BRVariable a
@@ -110,6 +110,6 @@ normalize (BRAnd x y) =
 normalize (BRXor x y) =
   delete [BRFalse] (elimPairs (sort (normalize x ++ normalize y)))
 
--- Finally, this is the actual decision procedure for row equivalence.
-equivalent :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
-equivalent x y = normalize (embed x) == normalize (embed y)
+-- Finally, this is the actual subrow decision procedure.
+subrow :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
+subrow x y = normalize (embed (RDifference x y)) == normalize (embed REmpty)
