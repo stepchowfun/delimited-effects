@@ -17,7 +17,7 @@ data Row a b
 -- equivalence is just equality of algebraic normal forms.
 data BooleanRing a b
   = BRVariable a
-  | BRSingleton b
+  | BRAtom b
   | BRFalse
   | BRTrue
   | BRAnd (BooleanRing a b) (BooleanRing a b)
@@ -28,7 +28,7 @@ data BooleanRing a b
 embed :: Row a b -> BooleanRing a b
 embed (RVariable x) = BRVariable x
 embed REmpty = BRFalse
-embed (RSingleton x) = BRSingleton x
+embed (RSingleton x) = BRAtom x
 embed (RUnion x y) =
   BRXor (embed x) (BRXor (embed y) (BRAnd (embed x) (embed y)))
 embed (RDifference x y) =
@@ -47,15 +47,15 @@ instance (Ord a, Ord b) => Ord (BooleanRing a b) where
   compare (BRVariable _) BRTrue = GT
   compare (BRVariable x) (BRVariable y) = compare x y
   compare (BRVariable _) _ = LT
-  compare (BRSingleton _) BRFalse = GT
-  compare (BRSingleton _) BRTrue = GT
-  compare (BRSingleton _) (BRVariable _) = GT
-  compare (BRSingleton x) (BRSingleton y) = compare x y
-  compare (BRSingleton _) _ = LT
+  compare (BRAtom _) BRFalse = GT
+  compare (BRAtom _) BRTrue = GT
+  compare (BRAtom _) (BRVariable _) = GT
+  compare (BRAtom x) (BRAtom y) = compare x y
+  compare (BRAtom _) _ = LT
   compare (BRAnd _ _) BRFalse = GT
   compare (BRAnd _ _) BRTrue = GT
   compare (BRAnd _ _) (BRVariable _) = GT
-  compare (BRAnd _ _) (BRSingleton _) = GT
+  compare (BRAnd _ _) (BRAtom _) = GT
   compare (BRAnd x y) (BRAnd w v) =
     case compare x w of
       LT -> LT
@@ -65,7 +65,7 @@ instance (Ord a, Ord b) => Ord (BooleanRing a b) where
   compare (BRXor _ _) BRFalse = GT
   compare (BRXor _ _) BRTrue = GT
   compare (BRXor _ _) (BRVariable _) = GT
-  compare (BRXor _ _) (BRSingleton _) = GT
+  compare (BRXor _ _) (BRAtom _) = GT
   compare (BRXor _ _) (BRAnd _ _) = GT
   compare (BRXor x y) (BRXor w v) =
     case compare x w of
@@ -85,7 +85,7 @@ elimPairs [] = []
 
 -- This function counts the number of singletons in a list.
 countSingletons :: [BooleanRing a b] -> Integer
-countSingletons ((BRSingleton _) : xs) = 1 + countSingletons xs
+countSingletons ((BRAtom _) : xs) = 1 + countSingletons xs
 countSingletons (_ : xs) = countSingletons xs
 countSingletons [] = 0
 
@@ -93,7 +93,7 @@ countSingletons [] = 0
 -- suitable for comparison.
 normalize :: (Ord a, Ord b) => BooleanRing a b -> [[BooleanRing a b]]
 normalize (BRVariable x) = [[BRVariable x]]
-normalize (BRSingleton x) = [[BRSingleton x]]
+normalize (BRAtom x) = [[BRAtom x]]
 normalize BRFalse = []
 normalize BRTrue = [[BRTrue]]
 normalize (BRAnd x y) =
