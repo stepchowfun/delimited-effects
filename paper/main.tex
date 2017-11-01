@@ -90,6 +90,14 @@
 \newcommand\emEmpty{\varnothing_{\effectMap}}
 \newcommand\emExtend[2]{#1, #2}
 
+% Boolean rings
+\newcommand\brSym{\mathcal{R}}
+\newcommand\brEmbed[1]{\mathcal{R}(#1)}
+\newcommand\brUniq[1]{\mathcal{S}(#1)}
+\newcommand\brPlus[2]{#1 \oplus #2}
+\newcommand\brTimes[2]{#1 #2}
+\newcommand\brVar{e}
+
 % Judgments
 \newcommand\subrowSym{\sqsubseteq}
 \newcommand\subtypeSym{\leq}
@@ -167,6 +175,25 @@
     \subsection{Subtyping}
 
       An effect row $\row$ models a set of effects $\effect$ constructed by a finite number of unions and relative complements. We define a relation $\subrowSym$ for modeling set inclusion on effect rows.
+
+      For any two rows $\row_1$, $\row_2$, $\row_1 \subrowSym \row_2$ if and only if $\brEmbed{\rDiff{\row_1}{\row_2}}\brUniq{\rDiff{\row_1}{\row_2}} = \brEmbed{\rEmpty}$. $\brEmbed{\row}$ is defined as follows:
+
+      \begin{enumerate}
+      \item $\brEmbed{\rEmpty} = 0$
+      \item $\brEmbed{\rSingleton{\effect_i}} = \brVar_i$
+      \item $\brEmbed{\rUnion{\row_1}{\row_2}} = \brPlus{\brPlus{\brEmbed{\row_1}}{\brEmbed{\row_2}}}{\brTimes{\brEmbed{\row_1}}{\brEmbed{\row_2}}}$
+      \item $\brEmbed{\rDiff{\row_1}{\row_2}} = \brPlus{\brEmbed{\row_1}}{\brTimes{\brEmbed{\row_1}}{\brEmbed{\row_2}}}$
+      \end{enumerate}
+
+      $\row$ is modeled as a series of operations in a boolean ring, where singleton effect rows are uniquely mapped to boolean variables.
+
+      $\brUniq{\row}$ is a boolean term which evaluates to 1 if and only if for all boolean variables derived from distinct singletons in $\row$, at most one variable is 1. Let $\brVar_1 \ldots \brVar_n$ be the boolean variables which occur in $\brEmbed{\row}$.
+
+      $$\brUniq{\row} = $$
+
+      The boolean equation defining $\subrowSym$ can be solved in exponential time.
+
+        \subsubsection{Logical equivalence to set inclusion}
 
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
