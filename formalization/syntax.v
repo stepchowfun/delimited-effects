@@ -1,64 +1,53 @@
-Require Import Coq.Strings.String.
+Require Import Coq.Lists.List.
 
 (* Identifiers *)
 
 Module Type Identifiers.
   Parameter termId : Type.
-  Parameter typeId : Type.
-  Parameter rowId : Type.
   Parameter effectId : Type.
   Axiom termIdEqDec :
     forall (id1 id2 : termId), {id1 = id2} + {id1 <> id2}.
-  Axiom typeIdEqDec :
-    forall (id1 id2 : typeId), {id1 = id2} + {id1 <> id2}.
   Axiom effectIdEqDec :
     forall (id1 id2 : effectId), {id1 = id2} + {id1 <> id2}.
 End Identifiers.
 
+(* Syntax *)
+
 Module Syntax (IdentifiersInstance : Identifiers).
-Import IdentifiersInstance.
+  Import IdentifiersInstance.
 
-(* Terms *)
+  (* Terms *)
 
-Inductive term : Type :=
-| eunit : term
-| evar : termId -> term
-| eabs : termId -> type -> term -> term
-| eapp : term -> term -> term
-| etabs : typeId -> term -> term
-| etapp : term -> type -> term
-| erabs : rowId -> term -> term
-| erapp : term -> row -> term
-| eprovide : effectId -> term -> term -> term
+  Inductive term : Type :=
+  | eUnit : term
+  | eVar : termId -> term
+  | eAbs : termId -> type -> term -> term
+  | eApp : term -> term -> term
+  | eProvide : effectId -> list effectId -> term -> term -> term
 
-(* Proper types *)
+  (* Proper types *)
 
-with type : Type :=
-| tvar : typeId -> type
-| tunit : type
-| tarrow : type -> type -> row -> type
-| ttforall : typeId -> type -> row -> type
-| trforall : rowId -> type -> row -> type
+  with type : Type :=
+  | tUnit : type
+  | tArrow : type -> type -> row -> type
 
-(* Rows *)
+  (* Rows *)
 
-with row : Type :=
-| rvar : rowId -> row
-| rempty : row
-| rsingleton : effectId -> row
-| runion : row -> row -> row
-| rdiff : row -> row -> row.
+  with row : Type :=
+  | rEmpty : row
+  | rSingleton : effectId -> row
+  | rUnion : row -> row -> row
+  | rDiff : row -> row -> row.
 
-(* Type contexts *)
+  (* Type contexts *)
 
-Inductive context : Type :=
-| cempty : context
-| ceextend : context -> termId -> type -> row -> context.
+  Inductive context : Type :=
+  | cEmpty : context
+  | cExtend : context -> termId -> type -> row -> context.
 
-(* Effect map *)
+  (* Effect map *)
 
-Inductive effectMap : Type :=
-| emempty : effectMap
-| emextend : effectMap -> effectId -> termId -> type -> row -> effectMap.
-
+  Inductive effectMap : Type :=
+  | emEmpty : effectMap
+  | emExtend : effectMap -> effectId -> termId -> type -> row -> effectMap.
 End Syntax.
