@@ -3,29 +3,26 @@ module Lib (Row(..), subrow) where
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-data Row a b
-  = RVariable a
-  | REmpty
-  | RSingleton b
-  | RUnion (Row a b) (Row a b)
-  | RDifference (Row a b) (Row a b)
+data Row a
+  = REmpty
+  | RSingleton a
+  | RUnion (Row a) (Row a)
+  | RDifference (Row a) (Row a)
   deriving (Eq, Show)
 
-data BooleanRing a b
-  = BRAtom a
-  | BRExclusiveAtom b -- At most one exclusive atom may be true
+data BooleanRing a
+  = BRExclusiveAtom a -- At most one exclusive atom may be true
   | BRFalse
   | BRTrue
-  | BRAnd (BooleanRing a b) (BooleanRing a b)
-  | BRXor (BooleanRing a b) (BooleanRing a b)
+  | BRAnd (BooleanRing a) (BooleanRing a)
+  | BRXor (BooleanRing a) (BooleanRing a)
   deriving (Eq, Ord)
 
-isExclusiveAtom :: BooleanRing a b -> Bool
+isExclusiveAtom :: BooleanRing a -> Bool
 isExclusiveAtom (BRExclusiveAtom _) = True
 isExclusiveAtom _ = False
 
-embed :: Row a b -> BooleanRing a b
-embed (RVariable x) = BRAtom x
+embed :: Row a -> BooleanRing a
 embed REmpty = BRFalse
 embed (RSingleton x) = BRExclusiveAtom x
 embed (RUnion x y) =
@@ -39,9 +36,7 @@ toggleMembership z s =
   then Set.delete z s
   else Set.insert z s
 
-normalize :: (Ord a, Ord b) => BooleanRing a b -> Set (Set (BooleanRing a b))
-normalize (BRAtom x) =
-  Set.singleton (Set.singleton (BRAtom x))
+normalize :: Ord a => BooleanRing a -> Set (Set (BooleanRing a))
 normalize (BRExclusiveAtom x) =
   Set.singleton (Set.singleton (BRExclusiveAtom x))
 normalize BRFalse = Set.empty
@@ -55,5 +50,5 @@ normalize (BRAnd x y) = foldr toggleMembership Set.empty $
      else return conjunction
 normalize (BRXor x y) = Set.foldr toggleMembership (normalize x) (normalize y)
 
-subrow :: (Ord a, Ord b) => Row a b -> Row a b -> Bool
+subrow :: Ord a => Row a -> Row a -> Bool
 subrow x y = normalize (embed (RDifference x y)) == normalize (embed REmpty)

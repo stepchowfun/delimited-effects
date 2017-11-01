@@ -59,44 +59,44 @@
 
 % Terms
 \newcommand\term{t}
-\newcommand\eunit{\texttt{()}}
-\newcommand\evar{x}
-\newcommand\eabs[2]{\lambda #1 \; . \; #2}
-\newcommand\eapp[2]{#1 \; #2}
-\newcommand\eprovide[4]{\textbf{provide} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
+\newcommand\eUnit{\texttt{()}}
+\newcommand\eVar{x}
+\newcommand\eAbs[2]{\lambda #1 \; . \; #2}
+\newcommand\eApp[2]{#1 \; #2}
+\newcommand\eProvide[4]{\textbf{provide} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
 
 % Types
-\newcommand\tembellished[2]{{#1}^{\textcolor{violet}{#2}}}
 \newcommand\type{\tau}
-\newcommand\tunit{1}
-\newcommand\tarrow[2]{#1 \rightarrow #2}
+\newcommand\tUnit{1}
+\newcommand\tArrow[2]{#1 \rightarrow #2}
+\newcommand\tEmbellished[2]{{#1}^{\textcolor{violet}{#2}}}
 
 % Rows
 \newcommand\row{\varepsilon}
-\newcommand\rempty{\varnothing_{\row}}
-\newcommand\rsingleton[1]{\left\{ #1 \right\}}
-\newcommand\runion[2]{#1 \cup #2}
-\newcommand\rdiff[2]{#1 \setminus #2}
+\newcommand\rEmpty{\varnothing_{\row}}
+\newcommand\rSingleton[1]{\left\{ #1 \right\}}
+\newcommand\rUnion[2]{#1 \cup #2}
+\newcommand\rDiff[2]{#1 \setminus #2}
 
 % Type contexts
 \newcommand\context{\Gamma}
-\newcommand\cempty{\varnothing_{\context}}
-\newcommand\cextend[2]{#1, #2}
+\newcommand\cEmpty{\varnothing_{\context}}
+\newcommand\cExtend[2]{#1, #2}
 
 % Effect map
 \newcommand\effect{e}
-\newcommand\effectmap{E}
-\newcommand\emempty{\varnothing_{\effectmap}}
-\newcommand\emmap[2]{#1 \mapsto #2}
-\newcommand\emextend[2]{#1, #2}
+\newcommand\effectMap{E}
+\newcommand\emMap[2]{#1 \mapsto #2}
+\newcommand\emEmpty{\varnothing_{\effectMap}}
+\newcommand\emExtend[2]{#1, #2}
 
 % Judgments
-\newcommand\subrowsym{\sqsubseteq}
-\newcommand\subtypesym{\leq}
-\newcommand\subrow[2]{#1 \subrowsym #2}
-\newcommand\subtype[2]{#1 \subtypesym #2}
-\newcommand\hastype[3]{#1 \vdash \anno{#2}{#3}}
-\newcommand\ewellformed[1]{#1 \; \text{well-formed effect}}
+\newcommand\subrowSym{\sqsubseteq}
+\newcommand\subtypeSym{\leq}
+\newcommand\subrow[2]{#1 \subrowSym #2}
+\newcommand\subtype[2]{#1 \subtypeSym #2}
+\newcommand\hasType[3]{#1 \vdash \anno{#2}{#3}}
+\newcommand\eWellFormed[1]{#1 \; \text{well-formed effect}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -134,29 +134,29 @@
           \begin{center}
             \begin{tabular}{l l l}
               $\term \Coloneqq $ & & terms: \\
-              & $\eunit$ & unit \\
-              & $\evar$ & variable \\
-              & $\eabs{\anno{\evar}{\type}}{\term}$ & abstraction \\
-              & $\eapp{\term}{\term}$ & application \\
-              & $\eprovide{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
+              & $\eUnit$ & unit \\
+              & $\eVar$ & variable \\
+              & $\eAbs{\anno{\eVar}{\type}}{\term}$ & abstraction \\
+              & $\eApp{\term}{\term}$ & application \\
+              & $\eProvide{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
               \\
               $\type \Coloneqq$ & & types: \\
-              & $\tunit$ & unit type \\
-              & $\tarrow{\type}{\tembellished{\type}{\row}}$ & arrow type \\
+              & $\tUnit$ & unit type \\
+              & $\tArrow{\type}{\tEmbellished{\type}{\row}}$ & arrow type \\
               \\
               $\row \Coloneqq$ & & rows: \\
-              & $\rempty$ & empty row \\
-              & $\rsingleton{\effect}$ & singleton row \\
-              & $\runion{\row}{\row}$ & row union \\
-              & $\rdiff{\row}{\row}$ & row difference \\
+              & $\rEmpty$ & empty row \\
+              & $\rSingleton{\effect}$ & singleton row \\
+              & $\rUnion{\row}{\row}$ & row union \\
+              & $\rDiff{\row}{\row}$ & row difference \\
               \\
               $\context \Coloneqq$ & & contexts: \\
-              & $\cempty$ & empty context \\
-              & $\cextend{\context}{\anno{\evar}{\tembellished{\type}{\row}}}$ & variable binding \\
+              & $\cEmpty$ & empty context \\
+              & $\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type}{\row}}}$ & variable binding \\
               \\
-              $\effectmap \Coloneqq$ & & effect map: \\
-              & $\emempty$ & empty effect map \\
-              & $\emextend{\effectmap}{\emmap{\effect}{\anno{\evar}{\tembellished{\type}{\row}}}}$ & effect binding \\
+              $\effectMap \Coloneqq$ & & effect map: \\
+              & $\emEmpty$ & empty effect map \\
+              & $\emExtend{\effectMap}{\emMap{\effect}{\anno{\eVar}{\tEmbellished{\type}{\row}}}}$ & effect binding \\
             \end{tabular}
           \end{center}
 
@@ -166,12 +166,12 @@
 
     \subsection{Subtyping}
 
-      An effect row $\row$ models a set of effects $\effect$ constructed by a finite number of unions and relative complements. We define a relation $\subrowsym$ for modeling set inclusion on effect rows.
+      An effect row $\row$ models a set of effects $\effect$ constructed by a finite number of unions and relative complements. We define a relation $\subrowSym$ for modeling set inclusion on effect rows.
 
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\subtype{\tembellished{\type}{\row}}{\tembellished{\type}{\row}}$}
+            \framebox{$\subtype{\tEmbellished{\type}{\row}}{\tEmbellished{\type}{\row}}$}
           \end{center}
 
           \medskip
@@ -179,7 +179,7 @@
           \begin{prooftree}
               \AxiomC{$\subrow{\row_1}{\row_2}$}
             \RightLabel{(\textsc{ST-Unit})}
-            \UnaryInfC{$\subtype{\tembellished{\tunit}{\row_1}}{\tembellished{\tunit}{\row_2}}$}
+            \UnaryInfC{$\subtype{\tEmbellished{\tUnit}{\row_1}}{\tEmbellished{\tUnit}{\row_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -188,7 +188,7 @@
               \AxiomC{$\subrow{\row_1}{\row_3}$}
               \AxiomC{$\subrow{\row_2}{\row_4}$}
             \RightLabel{(\textsc{ST-Arrow})}
-            \QuaternaryInfC{$\subtype{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_1}}}}{\row_2}}{\tembellished{\parens{\tarrow{\type_3}{\tembellished{\type_4}{\row_3}}}}{\row_4}}$}
+            \QuaternaryInfC{$\subtype{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_4}{\row_3}}}}{\row_4}}$}
           \end{prooftree}
 
           \caption{Subtyping rules}\label{fig:subtyping_rules}
@@ -200,7 +200,7 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hastype{\context}{\term}{\tembellished{\type}{\row}}$}
+            \framebox{$\hasType{\context}{\term}{\tEmbellished{\type}{\row}}$}
           \end{center}
 
           \medskip
@@ -208,36 +208,36 @@
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{T-Unit})}
-            \UnaryInfC{$\hastype{\context}{\eunit}{\tembellished{\tunit}{\rempty}}$}
+            \UnaryInfC{$\hasType{\context}{\eUnit}{\tEmbellished{\tUnit}{\rEmpty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\evar} = \tembellished{\type}{\row}$}
+              \AxiomC{$\apply{\context}{\eVar} = \tEmbellished{\type}{\row}$}
             \RightLabel{(\textsc{T-Variable})}
-            \UnaryInfC{$\hastype{\context}{\evar}{\tembellished{\type}{\row}}$}
+            \UnaryInfC{$\hasType{\context}{\eVar}{\tEmbellished{\type}{\row}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\cextend{\context}{\anno{\evar}{\tembellished{\type_1}{\rempty}}}}{\term}{\tembellished{\type_2}{\row_2}}$}
+              \AxiomC{$\hasType{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type_1}{\rEmpty}}}}{\term}{\tEmbellished{\type_2}{\row_2}}$}
             \RightLabel{(\textsc{T-Abstraction})}
-            \UnaryInfC{$\hastype{\context}{\parens{\eabs{\anno{\evar}{\type_1}}{\term}}}{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_2}}}}{\rempty}}$}
+            \UnaryInfC{$\hasType{\context}{\parens{\eAbs{\anno{\eVar}{\type_1}}{\term}}}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_2}}}}{\rEmpty}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\type_1}{\row_1}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\parens{\tarrow{\type_3}{\tembellished{\type_2}{\row_2}{}}}}{\row_3}}$}
-              \AxiomC{$\subtype{\tembellished{\type_1}{\rempty}}{\tembellished{\type_3}{\rempty}}$}
+              \AxiomC{$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
+              \AxiomC{$\hasType{\context}{\term_2}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_2}{\row_2}{}}}}{\row_3}}$}
+              \AxiomC{$\subtype{\tEmbellished{\type_1}{\rEmpty}}{\tEmbellished{\type_3}{\rEmpty}}$}
             \RightLabel{(\textsc{T-Application})}
-            \TrinaryInfC{$\hastype{\context}{\eapp{\term_2}{\term_1}}{\tembellished{\type_2}{\runion{\runion{\row_1}{\row_2}}{\row_3}}}$}
+            \TrinaryInfC{$\hasType{\context}{\eApp{\term_2}{\term_1}}{\tEmbellished{\type_2}{\rUnion{\rUnion{\row_1}{\row_2}}{\row_3}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hastype{\context}{\term_1}{\tembellished{\type_1}{\row_1}}$}
-              \AxiomC{$\hastype{\context}{\term_2}{\tembellished{\type_2}{\row_2}}$}
-              \AxiomC{$\apply{\effectmap}{\effect} = \anno{\evar}{\tembellished{\type_3}{\row_3}}$}
-              \AxiomC{$\subtype{\tembellished{\substitute{\type_1}{\effect_i}{\effect}}{\substitute{\row_1}{\effect_i}{\effect}}}{\tembellished{\type_3}{\row_3}}$}
+              \AxiomC{$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
+              \AxiomC{$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
+              \AxiomC{$\apply{\effectMap}{\effect} = \anno{\eVar}{\tEmbellished{\type_3}{\row_3}}$}
+              \AxiomC{$\subtype{\tEmbellished{\substitute{\type_1}{\effect_i}{\effect}}{\substitute{\row_1}{\effect_i}{\effect}}}{\tEmbellished{\type_3}{\row_3}}$}
             \RightLabel{(\textsc{T-Provide})}
-            \QuaternaryInfC{$\hastype{\context}{\eprovide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tembellished{\type_2}{\runion{\parens{\rdiff{\row_2}{\rsingleton{\effect}}}}{\effect_i}}}$}
+            \QuaternaryInfC{$\hasType{\context}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}
@@ -247,7 +247,7 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\ewellformed{\emmap{\effect}{\tembellished{\type}{\row}}}$}
+            \framebox{$\eWellFormed{\emMap{\effect}{\tEmbellished{\type}{\row}}}$}
           \end{center}
 
           \medskip
@@ -255,19 +255,19 @@
           \begin{prooftree}
               \AxiomC{$\effect \in \row$}
             \RightLabel{(\textsc{WFE-Unit})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\tunit}{\row}}}$}
+            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\tUnit}{\row}}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\effect \in \row_2$}
             \RightLabel{(\textsc{WFE-Arrow1})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_1}}}}{\row_2}}}$}
+            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\ewellformed{\emmap{\effect}{\tembellished{\type_2}{\row_1}}}$}
+              \AxiomC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\type_2}{\row_1}}}$}
             \RightLabel{(\textsc{WFE-Arrow2})}
-            \UnaryInfC{$\ewellformed{\emmap{\effect}{\tembellished{\parens{\tarrow{\type_1}{\tembellished{\type_2}{\row_1}}}}{\row_2}}}$}
+            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
