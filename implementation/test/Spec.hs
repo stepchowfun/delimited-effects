@@ -50,17 +50,32 @@ contains e (RDifference x y) = contains e x && not (contains e y)
 contained :: Row Effect -> Row Effect -> Bool
 contained x y = all (\e -> not (contains e x) || contains e y) effects
 
+occurs :: Effect -> Row Effect -> Bool
+occurs e REmpty = False
+occurs e (RSingleton x) = x == e
+occurs e (RUnion x y) = occurs e x || occurs e y
+occurs e (RDifference x y) = occurs e x || occurs e y
+
+allOccur :: Row Effect -> Bool
+allOccur x = all (\e -> occurs e x) effects
+
 -- The QuickCheck specs
 
 specContainedImpliesSubrow :: Row Effect -> Row Effect -> Bool
-specContainedImpliesSubrow x y = not (contained x y) || subrow x y
+specContainedImpliesSubrow x y =
+  allOccur (RUnion x y) ||
+  not (contained x y) ||
+  subrow x y
 
 specSubrowImpliesContained :: Row Effect -> Row Effect -> Bool
-specSubrowImpliesContained x y = not (subrow x y) || contained x y
+specSubrowImpliesContained x y =
+  allOccur (RUnion x y) ||
+  not (subrow x y) ||
+  contained x y
 
 main :: IO ()
 main = hspec $ do
-  describe "subrow" $ do
+  describe "subrow" $ modifyMaxSuccess (const 100000) $ do
     it "returns True for x <= y if x contains all the effects in y" $
       property specContainedImpliesSubrow
     it "returns True for x <= y implies x contains all the effects in y" $
