@@ -1,4 +1,4 @@
-module RowSpec (rowSpec) where
+module SubrowSpec (subrowSpec) where
 
 import Data.List (foldl')
 import Data.Stream (Stream(..), head, tail)
@@ -12,8 +12,7 @@ import Test.QuickCheck
   , oneof
   , property
   , shrink
-  , suchThat
-  )
+  , suchThat )
 
 -- Types
 
@@ -75,8 +74,8 @@ specSubrowImpliesContained x y =
   not (subrow x y) ||
   contained x y
 
-rowSpec :: Spec
-rowSpec = describe "subrow" $ modifyMaxSuccess (const 100000) $ do
+subrowSpec :: Spec
+subrowSpec = describe "subrow" $ modifyMaxSuccess (const 100000) $ do
   it "returns True for x <= y if x contains all the effects in y" $
     property specContainedImpliesSubrow
   it "returns True for x <= y implies x contains all the effects in y" $
