@@ -1,7 +1,9 @@
+module RowSpec (rowSpec) where
+
 import Data.List (foldl')
 import Data.Stream (Stream(..), head, tail)
 import Lib (Row(..), subrow)
-import Test.Hspec (describe, hspec, it, pending)
+import Test.Hspec (Spec, describe, it, pending)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck
   ( Arbitrary
@@ -73,10 +75,9 @@ specSubrowImpliesContained x y =
   not (subrow x y) ||
   contained x y
 
-main :: IO ()
-main = hspec $ do
-  describe "subrow" $ modifyMaxSuccess (const 100000) $ do
-    it "returns True for x <= y if x contains all the effects in y" $
-      property specContainedImpliesSubrow
-    it "returns True for x <= y implies x contains all the effects in y" $
-      property specSubrowImpliesContained
+rowSpec :: Spec
+rowSpec = describe "subrow" $ modifyMaxSuccess (const 100000) $ do
+  it "returns True for x <= y if x contains all the effects in y" $
+    property specContainedImpliesSubrow
+  it "returns True for x <= y implies x contains all the effects in y" $
+    property specSubrowImpliesContained
