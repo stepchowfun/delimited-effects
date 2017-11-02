@@ -1,5 +1,8 @@
-import RowSpec (rowSpec)
+import SubrowSpec (subrowSpec)
+import SyntaxSpec (syntaxSpec)
 import Test.Hspec (hspec)
 
 main :: IO ()
-main = hspec rowSpec
+main = hspec $ do
+  subrowSpec
+  syntaxSpec

@@ -1,14 +1,8 @@
-module Row (Row(..), subrow) where
+module Subrow (subrow) where
 
 import Data.Set (Set)
+import Syntax (Row(..))
 import qualified Data.Set as Set
-
-data Row a
-  = REmpty
-  | RSingleton a
-  | RUnion (Row a) (Row a)
-  | RDifference (Row a) (Row a)
-  deriving (Eq, Show)
 
 data BooleanRing a
   = BRExclusiveAtom a -- At most one exclusive atom may be true
