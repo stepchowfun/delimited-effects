@@ -16,6 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Lib
+  other-modules:       Row
   build-depends:       base >= 4.7 && < 5
                      , containers
                      , QuickCheck
@@ -32,7 +33,8 @@ executable implementation-exe
 test-suite implementation-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Spec.hs
+  main-is:             LibSpec.hs
+  other-modules:       RowSpec
   build-depends:       base
                      , implementation
                      , hspec
