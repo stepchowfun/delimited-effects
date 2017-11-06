@@ -41,7 +41,7 @@ specSubrowImpliesContained r1 r2 =
   contained r1 r2
 
 subrowSpec :: Spec
-subrowSpec = modifyMaxSuccess (const 100000) $ describe "subrow" $ do
+subrowSpec = modifyMaxSuccess (const 1000000) $ describe "subrow" $ do
   it "returns True for r1 <= r2 if r2 contains all the effects in r1" $
     property specContainedImpliesSubrow
   it "returns True for r1 <= r2 implies r2 contains all the effects in r1" $

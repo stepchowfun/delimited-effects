@@ -51,7 +51,7 @@ specEffectMapExtendAfterLookup em z1 z2 =
     Nothing -> True
 
 syntaxSpec :: Spec
-syntaxSpec = modifyMaxSuccess (const 10) $ do
+syntaxSpec = modifyMaxSuccess (const 1000000) $ do
   describe "contextLookup" $ do
     it "contextLookup (CExtend c x t r) x == Just (t, r)" $
       property specContextLookupAfterExtend
