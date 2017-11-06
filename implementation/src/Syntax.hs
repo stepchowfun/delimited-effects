@@ -24,10 +24,12 @@ data Term a b -- Metavariable: e
   | EAbs a (Type b) (Term a b)
   | EApp (Term a b) (Term a b)
   | EProvide b [b] (Term a b) (Term a b)
+  deriving (Eq, Show)
 
 data Type a -- Metavariable: t
   = TUnit
   | TArrow (Type a) (Type a) (Maybe (Row a))
+  deriving (Eq, Show)
 
 data Row a -- Metavariable: r
   = REmpty
@@ -39,10 +41,12 @@ data Row a -- Metavariable: r
 data Context a b -- Metavariable: c
   = CEmpty
   | CExtend (Context a b) a (Type b) (Row b)
+  deriving (Eq, Show)
 
 data EffectMap a b -- Metavariable: em
   = EMEmpty
   | EMExtend (EffectMap a b) b a (Type b) (Row b)
+  deriving (Eq, Show)
 
 -- Arbitrary instances
 
@@ -64,7 +68,7 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
 instance Arbitrary a => Arbitrary (Type a) where
   arbitrary = oneof
     [ pure TUnit
-    , TArrow <$> arbitrary <*> arbitrary <*> arbitrary ]
+    , TArrow <$> arbitrary <*> arbitrary <*> (Just <$> arbitrary) ]
   shrink TUnit = []
   shrink (TArrow t1 t2 r) =
     [TArrow t1' t2' r' | (t1', t2', r') <- shrink (t1, t2, r)]
