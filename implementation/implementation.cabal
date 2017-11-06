@@ -37,6 +37,7 @@ test-suite implementation-test
   main-is:             LibSpec.hs
   other-modules:       SubrowSpec
                      , SyntaxSpec
+                     , Types
   build-depends:       base
                      , implementation
                      , hspec
