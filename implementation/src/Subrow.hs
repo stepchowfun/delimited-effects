@@ -18,31 +18,33 @@ isExclusiveAtom _ = False
 
 embed :: Row a -> BooleanRing a
 embed REmpty = BRFalse
-embed (RSingleton x) = BRExclusiveAtom x
-embed (RUnion x y) =
-  BRXor (embed x) (BRXor (embed y) (BRAnd (embed x) (embed y)))
-embed (RDifference x y) =
-  BRXor (embed x) (BRAnd (embed x) (embed y))
+embed (RSingleton z) = BRExclusiveAtom z
+embed (RUnion r1 r2) =
+  BRXor (embed r1) (BRXor (embed r2) (BRAnd (embed r1) (embed r2)))
+embed (RDifference r1 r2) =
+  BRXor (embed r1) (BRAnd (embed r1) (embed r2))
 
 toggleMembership :: Ord a => a -> Set a -> Set a
-toggleMembership z s =
-  if Set.member z s
-  then Set.delete z s
-  else Set.insert z s
+toggleMembership x s =
+  if Set.member x s
+  then Set.delete x s
+  else Set.insert x s
 
 normalize :: Ord a => BooleanRing a -> Set (Set (BooleanRing a))
-normalize (BRExclusiveAtom x) =
-  Set.singleton (Set.singleton (BRExclusiveAtom x))
+normalize (BRExclusiveAtom r1) =
+  Set.singleton (Set.singleton (BRExclusiveAtom r1))
 normalize BRFalse = Set.empty
 normalize BRTrue = Set.singleton Set.empty
-normalize (BRAnd x y) = foldr toggleMembership Set.empty $
-  do p <- Set.toList (normalize x)
-     q <- Set.toList (normalize y)
-     let conjunction = Set.union p q
+normalize (BRAnd r1 r2) = foldr toggleMembership Set.empty $
+  do r1' <- Set.toList (normalize r1)
+     r2' <- Set.toList (normalize r2)
+     let conjunction = Set.union r1' r2'
      if Set.size (Set.filter isExclusiveAtom conjunction) > 1
      then []
      else return conjunction
-normalize (BRXor x y) = Set.foldr toggleMembership (normalize x) (normalize y)
+normalize (BRXor r1 r2) =
+  Set.foldr toggleMembership (normalize r1) (normalize r2)
 
 subrow :: Ord a => Row a -> Row a -> Bool
-subrow x y = normalize (embed (RDifference x y)) == normalize (embed REmpty)
+subrow r1 r2 =
+  normalize (embed (RDifference r1 r2)) == normalize (embed REmpty)

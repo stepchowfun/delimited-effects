@@ -37,7 +37,7 @@ formalization: $(patsubst %.v,%.vo,$(COQ_SOURCES))
 implementation:
 	cd implementation && \
 	  stack build --pedantic --install-ghc --allow-different-user && \
-	  stack test --allow-different-user
+	  stack test --pedantic --install-ghc --allow-different-user
 
 clean: clean-paper clean-formalization clean-implementation
 
