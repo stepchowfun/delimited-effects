@@ -10,7 +10,7 @@ module Syntax
 import Test.QuickCheck
   ( Arbitrary
   , arbitrary
-  , oneof
+  , frequency
   , shrink )
 
 -- Data types
@@ -51,12 +51,12 @@ data EffectMap a b -- Metavariable: em
 -- Arbitrary instances
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
-  arbitrary = oneof
-    [ pure EUnit
-    , EVar <$> arbitrary
-    , EAbs <$> arbitrary <*> arbitrary <*> arbitrary
-    , EApp <$> arbitrary <*> arbitrary
-    , EProvide <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary ]
+  arbitrary = frequency
+    [ (5, pure EUnit)
+    , (5, EVar <$> arbitrary)
+    , (4, EAbs <$> arbitrary <*> arbitrary <*> arbitrary)
+    , (2, EApp <$> arbitrary <*> arbitrary)
+    , (2, EProvide <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink EUnit = []
   shrink (EVar _) = []
   shrink (EAbs x e1 e2) =
@@ -66,19 +66,19 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
     [EProvide z' zs' e1' e2' | (z', zs', e1', e2') <- shrink (z, zs, e1, e2)]
 
 instance Arbitrary a => Arbitrary (Type a) where
-  arbitrary = oneof
-    [ pure TUnit
-    , TArrow <$> arbitrary <*> arbitrary <*> (Just <$> arbitrary) ]
+  arbitrary = frequency
+    [ (8, pure TUnit)
+    , (3, TArrow <$> arbitrary <*> arbitrary <*> (Just <$> arbitrary)) ]
   shrink TUnit = []
   shrink (TArrow t1 t2 r) =
     [TArrow t1' t2' r' | (t1', t2', r') <- shrink (t1, t2, r)]
 
 instance Arbitrary a => Arbitrary (Row a) where
-  arbitrary = oneof
-    [ pure REmpty
-    , RSingleton <$> arbitrary
-    , RUnion <$> arbitrary <*> arbitrary
-    , RDifference <$> arbitrary <*> arbitrary ]
+  arbitrary = frequency
+    [ (5, pure REmpty)
+    , (5, RSingleton <$> arbitrary)
+    , (3, RUnion <$> arbitrary <*> arbitrary)
+    , (3, RDifference <$> arbitrary <*> arbitrary) ]
   shrink REmpty = []
   shrink (RSingleton _) = []
   shrink (RUnion r1 r2) =
@@ -87,22 +87,22 @@ instance Arbitrary a => Arbitrary (Row a) where
     [r1] ++ [RDifference r1' r2' | (r1', r2') <- shrink (r1, r2)]
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Context a b) where
-  arbitrary = oneof
-    [ pure CEmpty
-    , CExtend <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary ]
+  arbitrary = frequency
+    [ (1, pure CEmpty)
+    , (3, CExtend <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink CEmpty = []
   shrink (CExtend c x t r) =
     [CExtend c' x' t' r' | (c', x', t', r') <- shrink (c, x, t, r)]
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (EffectMap a b) where
-  arbitrary = oneof
-    [ pure EMEmpty
-    , EMExtend
+  arbitrary = frequency
+    [ (1, pure EMEmpty)
+    , (3, EMExtend
         <$> arbitrary
         <*> arbitrary
         <*> arbitrary
         <*> arbitrary
-        <*> arbitrary ]
+        <*> arbitrary) ]
   shrink EMEmpty = []
   shrink (EMExtend c z x t r) =
     [EMExtend c' z' x' t' r' | (c', z', x', t', r') <- shrink (c, z, x, t, r)]
