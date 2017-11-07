@@ -51,14 +51,14 @@ specEffectMapExtendAfterLookup em z1 z2 =
     Nothing -> True
 
 syntaxSpec :: Spec
-syntaxSpec = modifyMaxSuccess (const 1000000) $ do
+syntaxSpec = modifyMaxSuccess (const 100000) $ do
   describe "contextLookup" $ do
-    it "contextLookup (CExtend c x t r) x == Just (t, r)" $
+    it "contextLookup (CExtend c x t r) x == Just (t, r)" $ do
       property specContextLookupAfterExtend
-    it "CExtend em z t r == CExtend (contextLookup em z) z t r" $
+    it "CExtend em z t r == CExtend (contextLookup em z) z t r" $ do
       property specContextExtendAfterLookup
   describe "effectMapLookup" $ do
-    it "effectMapLookup (EMExtend em z x t r) x == Just (x, t, r)" $
+    it "effectMapLookup (EMExtend em z x t r) x == Just (x, t, r)" $ do
       property specEffectMapLookupAfterExtend
-    it "EMExtend em z x t r == EMExtend (effectMapLookup em z) z x t r" $
+    it "EMExtend em z x t r == EMExtend (effectMapLookup em z) z x t r" $ do
       property specEffectMapExtendAfterLookup

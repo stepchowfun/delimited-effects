@@ -6,9 +6,11 @@ module Lib (
   , Type(..)
   , contextLookup
   , effectMapLookup
-  , subrow ) where
+  , subrow
+  , subtype ) where
 
 import Subrow (subrow)
+import Subtype (subtype)
 import Syntax (
     Term(..)
   , Context(..)

@@ -183,12 +183,11 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\subtype{\type_3}{\type_1}$}
-              \AxiomC{$\subtype{\type_2}{\type_4}$}
-              \AxiomC{$\subrow{\row_1}{\row_3}$}
+              \AxiomC{$\subtype{\tEmbellished{\type_3}{\rEmpty}}{\tEmbellished{\type_1}{\rEmpty}}$}
+              \AxiomC{$\subtype{\tEmbellished{\type_2}{\row_1}}{\tEmbellished{\type_4}{\row_3}}$}
               \AxiomC{$\subrow{\row_2}{\row_4}$}
             \RightLabel{(\textsc{ST-Arrow})}
-            \QuaternaryInfC{$\subtype{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_4}{\row_3}}}}{\row_4}}$}
+            \TrinaryInfC{$\subtype{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_4}{\row_3}}}}{\row_4}}$}
           \end{prooftree}
 
           \caption{Subtyping rules}\label{fig:subtyping_rules}
