@@ -1,4 +1,5 @@
 import SubrowSpec (subrowSpec)
+import SubtypeSpec (subtypeSpec)
 import SyntaxSpec (syntaxSpec)
 import Test.Hspec (hspec)
 
@@ -7,4 +8,5 @@ import Test.Hspec (hspec)
 main :: IO ()
 main = hspec $ do
   subrowSpec
+  subtypeSpec
   syntaxSpec
