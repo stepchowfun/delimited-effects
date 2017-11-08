@@ -1,9 +1,9 @@
 module Syntax
-  ( Term(..)
-  , Type(..)
-  , Row(..)
-  , Context(..)
+  ( Context(..)
   , EffectMap(..)
+  , Row(..)
+  , Term(..)
+  , Type(..)
   , contextLookup
   , effectMapLookup ) where
 
