@@ -1,8 +1,8 @@
 module Subtype (subtype) where
 
 import Data.Maybe (fromJust)
-import Syntax (Row(..), Type(..))
 import Subrow (subrow)
+import Syntax (Row(..), Type(..))
 
 -- This function assumes there are no missing rows in the types.
 subtype :: Ord a => Type a -> Row a -> Type a -> Row a -> Bool

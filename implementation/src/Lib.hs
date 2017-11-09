@@ -1,8 +1,8 @@
-module Lib (
-    Term(..)
-  , Context(..)
+module Lib
+  ( Context(..)
   , EffectMap(..)
   , Row(..)
+  , Term(..)
   , Type(..)
   , contextLookup
   , effectMapLookup
@@ -11,11 +11,11 @@ module Lib (
 
 import Subrow (subrow)
 import Subtype (subtype)
-import Syntax (
-    Term(..)
-  , Context(..)
+import Syntax
+  ( Context(..)
   , EffectMap(..)
   , Row(..)
+  , Term(..)
   , Type(..)
   , contextLookup
   , effectMapLookup )
