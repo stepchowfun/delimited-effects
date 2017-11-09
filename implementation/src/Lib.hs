@@ -4,15 +4,22 @@ module Lib
   , Row(..)
   , Term(..)
   , Type(..)
+  , checkTypeAndRow
+  , checkTypeInferRow
   , contextLookup
   , effectMapLookup
-  , infer
+  , inferTypeAndRow
+  , inferTypeCheckRow
   , subrow
   , substituteEffectsInRow
   , substituteEffectsInType
   , subtype ) where
 
-import Inference (infer)
+import Inference
+  ( checkTypeAndRow
+  , checkTypeInferRow
+  , inferTypeAndRow
+  , inferTypeCheckRow )
 import Subrow (subrow)
 import Subtype (subtype)
 import Syntax
