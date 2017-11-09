@@ -7,6 +7,7 @@ import Lib
   , Term(..)
   , Type(..)
   , infer
+  , subrow
   , subtype )
 import Test.Hspec (Expectation, Spec, describe, it, shouldBe)
 import Types (Effect(..), Variable(..))
@@ -21,7 +22,9 @@ specTypeCheck e t1 r1 =
   let c = CEmpty :: Context Variable Effect
       em = EMEmpty :: EffectMap Variable Effect
   in case infer c em e Nothing Nothing of
-    Just (t2, r2) -> subtype t2 r2 t1 r1 `shouldBe` True
+    Just (t2, r2) -> do
+      subtype t2 t1 `shouldBe` True
+      subrow r2 r1 `shouldBe` True
     _ -> True `shouldBe` False
 
 inferenceSpec :: Spec

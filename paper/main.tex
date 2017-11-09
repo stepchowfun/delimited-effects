@@ -171,23 +171,23 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\subtype{\tEmbellished{\type}{\row}}{\tEmbellished{\type}{\row}}$}
+            \framebox{$\subtype{\type}{\type}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\subrow{\row_1}{\row_2}$}
+              \AxiomC{}
             \RightLabel{(\textsc{ST-Unit})}
-            \UnaryInfC{$\subtype{\tEmbellished{\tUnit}{\row_1}}{\tEmbellished{\tUnit}{\row_2}}$}
+            \UnaryInfC{$\subtype{\tUnit}{\tUnit}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\subtype{\tEmbellished{\type_3}{\rEmpty}}{\tEmbellished{\type_1}{\rEmpty}}$}
-              \AxiomC{$\subtype{\tEmbellished{\type_2}{\row_1}}{\tEmbellished{\type_4}{\row_3}}$}
-              \AxiomC{$\subrow{\row_2}{\row_4}$}
+              \AxiomC{$\subtype{\type_3}{\type_1}$}
+              \AxiomC{$\subtype{\type_2}{\type_4}$}
+              \AxiomC{$\subrow{\row_1}{\row_2}$}
             \RightLabel{(\textsc{ST-Arrow})}
-            \TrinaryInfC{$\subtype{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_4}{\row_3}}}}{\row_4}}$}
+            \TrinaryInfC{$\subtype{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}{\tArrow{\type_3}{\tEmbellished{\type_4}{\row_2}}}$}
           \end{prooftree}
 
           \caption{Subtyping rules}\label{fig:subtyping_rules}
@@ -225,18 +225,21 @@
           \begin{prooftree}
               \AxiomC{$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
               \AxiomC{$\hasType{\context}{\term_2}{\tEmbellished{\parens{\tArrow{\type_3}{\tEmbellished{\type_2}{\row_2}{}}}}{\row_3}}$}
-              \AxiomC{$\subtype{\tEmbellished{\type_1}{\rEmpty}}{\tEmbellished{\type_3}{\rEmpty}}$}
+              \AxiomC{$\subtype{\type_1}{\type_3}$}
             \RightLabel{(\textsc{T-Application})}
             \TrinaryInfC{$\hasType{\context}{\eApp{\term_2}{\term_1}}{\tEmbellished{\type_2}{\rUnion{\rUnion{\row_1}{\row_2}}{\row_3}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
-              \AxiomC{$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
-              \AxiomC{$\apply{\effectMap}{\effect} = \anno{\eVar}{\tEmbellished{\type_3}{\row_3}}$}
-              \AxiomC{$\subtype{\tEmbellished{\substitute{\type_1}{\effect_i}{\effect}}{\substitute{\row_1}{\effect_i}{\effect}}}{\tEmbellished{\type_3}{\row_3}}$}
+              \AxiomC{\Shortstack[c]{
+                {$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
+                {$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
+                {$\subtype{\substitute{\type_1}{\effect_i}{\effect}}{\type_3}$}
+                {$\subrow{\substitute{\row_1}{\effect_i}{\effect}}{\row_3}$}
+                {$\apply{\effectMap}{\effect} = \anno{\eVar}{\tEmbellished{\type_3}{\row_3}}$}
+              }}
             \RightLabel{(\textsc{T-Provide})}
-            \QuaternaryInfC{$\hasType{\context}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
+            \UnaryInfC{$\hasType{\context}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}
