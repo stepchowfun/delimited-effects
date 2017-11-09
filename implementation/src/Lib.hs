@@ -6,9 +6,13 @@ module Lib
   , Type(..)
   , contextLookup
   , effectMapLookup
+  , infer
   , subrow
+  , substituteEffectsInRow
+  , substituteEffectsInType
   , subtype ) where
 
+import Inference (infer)
 import Subrow (subrow)
 import Subtype (subtype)
 import Syntax
@@ -18,4 +22,6 @@ import Syntax
   , Term(..)
   , Type(..)
   , contextLookup
-  , effectMapLookup )
+  , effectMapLookup
+  , substituteEffectsInRow
+  , substituteEffectsInType )

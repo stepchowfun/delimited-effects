@@ -5,13 +5,16 @@ module Syntax
   , Term(..)
   , Type(..)
   , contextLookup
-  , effectMapLookup ) where
+  , effectMapLookup
+  , substituteEffectsInRow
+  , substituteEffectsInType ) where
 
 import Test.QuickCheck
   ( Arbitrary
   , arbitrary
   , frequency
   , shrink )
+import qualified Data.Map.Lazy as Map
 
 -- Data types
 
@@ -21,14 +24,15 @@ import Test.QuickCheck
 data Term a b -- Metavariable: e
   = EUnit
   | EVar a
-  | EAbs a (Type b) (Term a b)
+  | EAbs a (Term a b)
   | EApp (Term a b) (Term a b)
   | EProvide b [b] (Term a b) (Term a b)
+  | EAnno (Term a b) (Type b) (Row b)
   deriving (Eq, Show)
 
 data Type a -- Metavariable: t
   = TUnit
-  | TArrow (Type a) (Type a) (Maybe (Row a))
+  | TArrow (Type a) (Type a) (Row a)
   deriving (Eq, Show)
 
 data Row a -- Metavariable: r
@@ -54,21 +58,22 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
   arbitrary = frequency
     [ (5, pure EUnit)
     , (5, EVar <$> arbitrary)
-    , (4, EAbs <$> arbitrary <*> arbitrary <*> arbitrary)
+    , (4, EAbs <$> arbitrary <*> arbitrary)
     , (2, EApp <$> arbitrary <*> arbitrary)
-    , (2, EProvide <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary) ]
+    , (2, EProvide <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary)
+    , (4, EAnno <$> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink EUnit = []
   shrink (EVar _) = []
-  shrink (EAbs x e1 e2) =
-    [EAbs x' e1' e2' | (x', e1', e2') <- shrink (x, e1, e2)]
+  shrink (EAbs x e) = [EAbs x' e' | (x', e') <- shrink (x, e)]
   shrink (EApp e1 e2) = [EApp e1' e2' | (e1', e2') <- shrink (e1, e2)]
   shrink (EProvide z zs e1 e2) =
     [EProvide z' zs' e1' e2' | (z', zs', e1', e2') <- shrink (z, zs, e1, e2)]
+  shrink (EAnno e t r) = [EAnno e' t' r' | (e', t', r') <- shrink (e, t, r)]
 
 instance Arbitrary a => Arbitrary (Type a) where
   arbitrary = frequency
     [ (8, pure TUnit)
-    , (3, TArrow <$> arbitrary <*> arbitrary <*> (Just <$> arbitrary)) ]
+    , (3, TArrow <$> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink TUnit = []
   shrink (TArrow t1 t2 r) =
     [TArrow t1' t2' r' | (t1', t2', r') <- shrink (t1, t2, r)]
@@ -122,3 +127,22 @@ effectMapLookup (EMExtend em z1 x t r) z2 =
   if z1 == z2
   then Just (x, t, r)
   else effectMapLookup em z2
+
+substituteEffectsInRow :: Ord a => Map.Map a a -> Row a -> Row a
+substituteEffectsInRow _ REmpty = REmpty
+substituteEffectsInRow s (RSingleton z1) =
+  case Map.lookup z1 s of
+    Just z2 -> RSingleton z2
+    Nothing -> RSingleton z1
+substituteEffectsInRow s (RUnion r1 r2) =
+  RUnion (substituteEffectsInRow s r1) (substituteEffectsInRow s r2)
+substituteEffectsInRow s (RDifference r1 r2) =
+  RDifference (substituteEffectsInRow s r1) (substituteEffectsInRow s r2)
+
+substituteEffectsInType :: Ord a => Map.Map a a -> Type a -> Type a
+substituteEffectsInType _ TUnit = TUnit
+substituteEffectsInType s (TArrow t1 t2 r) =
+  TArrow
+    (substituteEffectsInType s t1)
+    (substituteEffectsInType s t2)
+    (substituteEffectsInRow s r)
