@@ -59,7 +59,8 @@ infer c em (EProvide z1 zs e1 e2) Nothing Nothing =
          substitutedType = substituteEffectsInType substitution t1
          substitutedRow = substituteEffectsInRow substitution r1
      (_, t2, r2) <- effectMapLookup em z1
-     assert (subtype substitutedType substitutedRow t2 r2)
+     assert (subtype substitutedType t2)
+     assert (subrow substitutedRow r2)
      (t3, r3) <- infer c em e2 Nothing Nothing
      return (t3, (addEffectsToRow (RDifference r3 (RSingleton z1)) zs))
 -- EAnno
@@ -67,7 +68,7 @@ infer c em (EAnno e t r) Nothing Nothing = infer c em e (Just t) (Just r)
 -- Subsumption
 infer c em e (Just t1) Nothing =
   do (t2, r) <- infer c em e Nothing Nothing
-     assert (subtype t2 REmpty t1 REmpty)
+     assert (subtype t2 t1)
      return (t1, r)
 infer c em e Nothing (Just r1) =
   do (t, r2) <- infer c em e Nothing Nothing
@@ -76,10 +77,11 @@ infer c em e Nothing (Just r1) =
 infer c em e (Just t1) (Just r1) =
   if all (== Nothing)
     [ do (_, r2) <- infer c em e (Just t1) Nothing
-         assert (subtype t1 r2 t1 r1)
+         assert (subrow r2 r1)
     , do (t2, _) <- infer c em e Nothing (Just r1)
-         assert (subtype t2 r1 t1 r1)
+         assert (subtype t2 t1)
     , do (t2, r2) <- infer c em e Nothing Nothing
-         assert (subtype t2 r2 t1 r1) ]
+         assert (subtype t2 t1)
+         assert (subrow r2 r1) ]
   then Nothing
   else Just (t1, r1)

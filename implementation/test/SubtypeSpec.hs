@@ -1,6 +1,6 @@
 module SubtypeSpec (subtypeSpec) where
 
-import Lib (Row(..), Type(..), subrow, subtype)
+import Lib (Type(..), subtype)
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (property)
@@ -8,17 +8,18 @@ import Types (Effect(..))
 
 -- The QuickCheck specs
 
-specMonotonicity :: Type Effect
-                 -> Row Effect
-                 -> Type Effect
-                 -> Row Effect
-                 -> Bool
-specMonotonicity t1 r1 t2 r2 =
-     not (subtype t1 REmpty t2 REmpty || t1 == t2)
-  || not (subrow r1 r2)
-  || subtype t1 r1 t2 r2
+specReflexivity :: Type Effect -> Type Effect -> Bool
+specReflexivity t1 t2 = not (t1 == t2) || subtype t1 t2
+
+specTransitivity :: Type Effect -> Type Effect -> Type Effect -> Bool
+specTransitivity t1 t2 t3 =
+     not (subtype t1 t2)
+  || not (subtype t2 t3)
+  || subtype t1 t3
 
 subtypeSpec :: Spec
 subtypeSpec = modifyMaxSuccess (const 100000) $ describe "subtype" $ do
-  it "is monotonic with respect to nested subtypes or subrows" $ do
-    property specMonotonicity
+  it "is a reflexive relation" $ do
+    property specReflexivity
+  it "is a transitive relation" $ do
+    property specTransitivity
