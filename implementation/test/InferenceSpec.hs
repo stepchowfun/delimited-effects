@@ -20,7 +20,7 @@ specTypeCheck :: Term Variable Effect
               -> Expectation
 specTypeCheck e t1 r1 =
   let c = CEmpty :: Context Variable Effect
-      em = EMEmpty :: EffectMap Variable Effect
+      em = EMEmpty :: EffectMap Effect
   in case inferTypeAndRow c em e of
     Just (t2, r2) -> do
       subtype t2 t1 `shouldBe` True

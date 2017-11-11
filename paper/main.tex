@@ -55,7 +55,7 @@
 \newcommand\anno[2]{#1 : #2}
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\parens[1]{\left( #1 \right)}
-\newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
+\newcommand\substitute[3]{#1 \left[ #2 \mapsto #3 \right]}
 
 % Terms
 \newcommand\term{t}
@@ -96,7 +96,7 @@
 % Effect map
 \newcommand\effect{e}
 \newcommand\effectMap{E}
-\newcommand\emMap[2]{#1 \mapsto #2}
+\newcommand\emMap[2]{#1 :: #2}
 \newcommand\emEmpty{\varnothing_{\effectMap}}
 \newcommand\emExtend[2]{#1, #2}
 
@@ -166,7 +166,7 @@
               \\
               $\effectMap \Coloneqq$ & & effect map: \\
               & $\emEmpty$ & empty effect map \\
-              & $\emExtend{\effectMap}{\emMap{\effect}{\anno{\eVar}{\tEmbellished{\type}{\row}}}}$ & effect binding \\
+              & $\emExtend{\effectMap}{\emMap{\effect}{\tEmbellished{\type}{\row}}}$ & effect binding \\
             \end{tabular}
           \end{center}
 
@@ -263,9 +263,9 @@
               \AxiomC{\Shortstack[c]{
                 {$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
                 {$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
-                {$\subtype{\type_1}{\substitute{\type_3}{\effect}{\effect_i}}$}
-                {$\subrow{\row_1}{\substitute{\row_3}{\effect}{\effect_i}}$}
-                {$\apply{\effectMap}{\effect} = \anno{\eVar}{\tEmbellished{\type_3}{\row_3}}$}
+                {$\subtype{\type_1}{\substitute{\type_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
+                {$\subrow{\row_1}{\substitute{\row_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
+                {$\apply{\effectMap}{\effect} = \tEmbellished{\type_3}{\row_3}$}
               }}
             \RightLabel{(\textsc{T-Provide})}
             \UnaryInfC{$\hasType{\context}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
