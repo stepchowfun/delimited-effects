@@ -32,7 +32,7 @@ addEffectsToRow r (x : xs) = RUnion (RSingleton x) (addEffectsToRow r xs)
 
 inferTypeAndRow :: (Ord a, Ord b)
                 => Context a b
-                -> EffectMap b
+                -> EffectMap a b
                 -> Term a b
                 -> Maybe (Type b, Row b)
 inferTypeAndRow _ _ EUnit = return (TUnit, REmpty)
@@ -46,9 +46,10 @@ inferTypeAndRow c em (EApp e1 e2) =
             return (t3, (RUnion r1 (RUnion r2 r3)))
        _ -> Nothing
 inferTypeAndRow c em (EProvide z zs e1 e2) =
-  do (t1, r1) <- inferTypeAndRow c em e1
+  do x <- effectMapLookup em z
+     (t1, r1) <- inferTypeAndRow c em e1
      (t2, r2) <- inferTypeAndRow c em e2
-     (t3, r3) <- effectMapLookup em z
+     (t3, r3) <- contextLookup c x
      let substitution = Map.singleton z (addEffectsToRow REmpty zs)
          substitutedType = substituteEffectsInType substitution t3
          substitutedRow = substituteEffectsInRow substitution r3
@@ -63,7 +64,7 @@ inferTypeAndRow c em (EAnno e t r) =
 
 inferTypeCheckRow :: (Ord a, Ord b)
                   => Context a b
-                  -> EffectMap b
+                  -> EffectMap a b
                   -> Term a b
                   -> Row b
                   -> Maybe (Type b)
@@ -76,7 +77,7 @@ inferTypeCheckRow c em e r1 =
 
 checkTypeInferRow :: (Ord a, Ord b)
                   => Context a b
-                  -> EffectMap b
+                  -> EffectMap a b
                   -> Term a b
                   -> Type b
                   -> Maybe (Row b)
@@ -93,7 +94,7 @@ checkTypeInferRow c em e t1 =
 
 checkTypeAndRow :: (Ord a, Ord b)
                 => Context a b
-                -> EffectMap b
+                -> EffectMap a b
                 -> Term a b
                 -> Type b
                 -> Row b
