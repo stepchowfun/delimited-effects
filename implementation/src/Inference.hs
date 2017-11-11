@@ -45,16 +45,16 @@ inferTypeAndRow c em (EApp e1 e2) =
          do r3 <- checkTypeInferRow c em e2 t2
             return (t3, (RUnion r1 (RUnion r2 r3)))
        _ -> Nothing
-inferTypeAndRow c em (EProvide z1 zs e1 e2) =
+inferTypeAndRow c em (EProvide z zs e1 e2) =
   do (t1, r1) <- inferTypeAndRow c em e1
-     let substitution = Map.fromList [ (z2, z1) | z2 <- zs ]
-         substitutedType = substituteEffectsInType substitution t1
-         substitutedRow = substituteEffectsInRow substitution r1
-     (_, t2, r2) <- effectMapLookup em z1
-     assert (subtype substitutedType t2)
-     assert (subrow substitutedRow r2)
-     (t3, r3) <- inferTypeAndRow c em e2
-     return (t3, (addEffectsToRow (RDifference r3 (RSingleton z1)) zs))
+     (t2, r2) <- inferTypeAndRow c em e2
+     (_, t3, r3) <- effectMapLookup em z
+     let substitution = Map.singleton z (addEffectsToRow REmpty zs)
+         substitutedType = substituteEffectsInType substitution t3
+         substitutedRow = substituteEffectsInRow substitution r3
+     assert (subtype t1 substitutedType)
+     assert (subrow r1 substitutedRow)
+     return (t2, (addEffectsToRow (RDifference r2 (RSingleton z)) zs))
 inferTypeAndRow c em (EAnno e t r) =
   do checkTypeAndRow c em e t r
      return (t, r)
