@@ -96,7 +96,7 @@
 % Effect map
 \newcommand\effect{e}
 \newcommand\effectMap{E}
-\newcommand\emMap[2]{#1 :: #2}
+\newcommand\emMap[2]{#1 \mapsto #2}
 \newcommand\emEmpty{\varnothing_{\effectMap}}
 \newcommand\emExtend[2]{#1, #2}
 
@@ -106,7 +106,7 @@
 \newcommand\subrow[2]{#1 \subrowSym #2}
 \newcommand\subtype[2]{#1 \subtypeSym #2}
 \newcommand\hasType[3]{#1 \vdash \anno{#2}{#3}}
-\newcommand\eWellFormed[1]{#1 \; \text{well-formed effect}}
+\newcommand\eWellFormed[2]{#1 \vdash #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -166,7 +166,7 @@
               \\
               $\effectMap \Coloneqq$ & & effect map: \\
               & $\emEmpty$ & empty effect map \\
-              & $\emExtend{\effectMap}{\emMap{\effect}{\tEmbellished{\type}{\row}}}$ & effect binding \\
+              & $\emExtend{\effectMap}{\emMap{\effect}{\eVar}}$ & effect binding \\
             \end{tabular}
           \end{center}
 
@@ -263,9 +263,9 @@
               \AxiomC{\Shortstack[c]{
                 {$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
                 {$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
+                {$\hasType{\context}{\apply{\effectMap}{\effect}}{\tEmbellished{\type_3}{\row_3}}$}
                 {$\subtype{\type_1}{\substitute{\type_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
                 {$\subrow{\row_1}{\substitute{\row_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
-                {$\apply{\effectMap}{\effect} = \tEmbellished{\type_3}{\row_3}$}
               }}
             \RightLabel{(\textsc{T-Provide})}
             \UnaryInfC{$\hasType{\context}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
@@ -278,27 +278,30 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\eWellFormed{\emMap{\effect}{\tEmbellished{\type}{\row}}}$}
+            \framebox{$\eWellFormed{\context}{\emMap{\effect}{\eVar}}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\effect \in \row$}
+              \AxiomC{$\hasType{\context}{\eVar}{\tEmbellished{\tUnit}{\row}}$}
+              \AxiomC{$\subrow{\rSingleton{\effect}}{\row}$}
             \RightLabel{(\textsc{WFE-Unit})}
-            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\tUnit}{\row}}}$}
+            \BinaryInfC{$\eWellFormed{\context}{\emMap{\effect}{\eVar}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\effect \in \row_2$}
+              \AxiomC{$\hasType{\context}{\eVar}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}$}
+              \AxiomC{$\subrow{\rSingleton{\effect}}{\row_2}$}
             \RightLabel{(\textsc{WFE-Arrow1})}
-            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}$}
+            \BinaryInfC{$\eWellFormed{\context}{\emMap{\effect}{\eVar}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\type_2}{\row_1}}}$}
+              \AxiomC{$\hasType{\context}{\eVar_1}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}$}
+              \AxiomC{$\eWellFormed{\cExtend{\context}{\anno{\eVar_2}{\tEmbellished{\type_2}{\row_1}}}}{\emMap{\effect}{\eVar_2}}$}
             \RightLabel{(\textsc{WFE-Arrow2})}
-            \UnaryInfC{$\eWellFormed{\emMap{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}$}
+            \BinaryInfC{$\eWellFormed{\context}{\emMap{\effect}{\eVar_1}}$}
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}

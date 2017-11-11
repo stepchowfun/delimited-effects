@@ -47,9 +47,9 @@ data Context a b -- Metavariable: c
   | CExtend (Context a b) a (Type b) (Row b)
   deriving (Eq, Show)
 
-data EffectMap a -- Metavariable: em
+data EffectMap a b -- Metavariable: em
   = EMEmpty
-  | EMExtend (EffectMap a) a (Type a) (Row a)
+  | EMExtend (EffectMap a b) b a
   deriving (Eq, Show)
 
 -- Arbitrary instances
@@ -99,17 +99,16 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Context a b) where
   shrink (CExtend c x t r) =
     [CExtend c' x' t' r' | (c', x', t', r') <- shrink (c, x, t, r)]
 
-instance Arbitrary a => Arbitrary (EffectMap a) where
+instance (Arbitrary a, Arbitrary b) => Arbitrary (EffectMap a b) where
   arbitrary = frequency
     [ (1, pure EMEmpty)
     , (3, EMExtend
         <$> arbitrary
         <*> arbitrary
-        <*> arbitrary
         <*> arbitrary) ]
   shrink EMEmpty = []
-  shrink (EMExtend c z t r) =
-    [EMExtend c' z' t' r' | (c', z', t', r') <- shrink (c, z, t, r)]
+  shrink (EMExtend c z x) =
+    [EMExtend c' z' x' | (c', z', x') <- shrink (c, z, x)]
 
 -- Helper functions
 
@@ -120,11 +119,11 @@ contextLookup (CExtend c x1 t r) x2 =
   then Just (t, r)
   else contextLookup c x2
 
-effectMapLookup :: Eq a => EffectMap a -> a -> Maybe (Type a, Row a)
+effectMapLookup :: Eq b => EffectMap a b -> b -> Maybe a
 effectMapLookup EMEmpty _ = Nothing
-effectMapLookup (EMExtend em z1 t r) z2 =
+effectMapLookup (EMExtend em z1 x) z2 =
   if z1 == z2
-  then Just (t, r)
+  then Just x
   else effectMapLookup em z2
 
 substituteEffectsInRow :: Ord a => Map.Map a (Row a) -> Row a -> Row a
