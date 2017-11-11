@@ -128,18 +128,18 @@ effectMapLookup (EMExtend em z1 x t r) z2 =
   then Just (x, t, r)
   else effectMapLookup em z2
 
-substituteEffectsInRow :: Ord a => Map.Map a a -> Row a -> Row a
+substituteEffectsInRow :: Ord a => Map.Map a (Row a) -> Row a -> Row a
 substituteEffectsInRow _ REmpty = REmpty
-substituteEffectsInRow s (RSingleton z1) =
-  case Map.lookup z1 s of
-    Just z2 -> RSingleton z2
-    Nothing -> RSingleton z1
+substituteEffectsInRow s (RSingleton z) =
+  case Map.lookup z s of
+    Just r -> r
+    Nothing -> RSingleton z
 substituteEffectsInRow s (RUnion r1 r2) =
   RUnion (substituteEffectsInRow s r1) (substituteEffectsInRow s r2)
 substituteEffectsInRow s (RDifference r1 r2) =
   RDifference (substituteEffectsInRow s r1) (substituteEffectsInRow s r2)
 
-substituteEffectsInType :: Ord a => Map.Map a a -> Type a -> Type a
+substituteEffectsInType :: Ord a => Map.Map a (Row a) -> Type a -> Type a
 substituteEffectsInType _ TUnit = TUnit
 substituteEffectsInType s (TArrow t1 t2 r) =
   TArrow
