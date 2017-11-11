@@ -263,8 +263,8 @@
               \AxiomC{\Shortstack[c]{
                 {$\hasType{\context}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
                 {$\hasType{\context}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
-                {$\subtype{\substitute{\type_1}{\effect_i}{\effect}}{\type_3}$}
-                {$\subrow{\substitute{\row_1}{\effect_i}{\effect}}{\row_3}$}
+                {$\subtype{\type_1}{\substitute{\type_3}{\effect}{\effect_i}}$}
+                {$\subrow{\row_1}{\substitute{\row_3}{\effect}{\effect_i}}$}
                 {$\apply{\effectMap}{\effect} = \anno{\eVar}{\tEmbellished{\type_3}{\row_3}}$}
               }}
             \RightLabel{(\textsc{T-Provide})}
