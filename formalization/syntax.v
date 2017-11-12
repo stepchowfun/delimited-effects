@@ -1,5 +1,3 @@
-Require Import Coq.Lists.List.
-
 (* Identifiers *)
 
 Module Type Identifiers.
@@ -21,9 +19,10 @@ Module Syntax (IdentifiersInstance : Identifiers).
   Inductive term : Type :=
   | eUnit : term
   | eVar : termId -> term
-  | eAbs : termId -> type -> term -> term
+  | eAbs : termId -> term -> term
   | eApp : term -> term -> term
-  | eHandle : effectId -> list effectId -> term -> term -> term
+  | eHandle : effectId -> row -> term -> term -> term
+  | eAnno : term -> type -> row -> term
 
   (* Proper types *)
 

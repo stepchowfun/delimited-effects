@@ -55,9 +55,9 @@
 \newcommand\anno[2]{#1 : #2}
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\parens[1]{\left( #1 \right)}
-\newcommand\substitute[3]{#1 \left[ #2 \mapsto #3 \right]}
+\newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
 \makeatletter
-\renewcommand{\boxed}[1]{\text{\fboxsep=.2em\fbox{\m@th$\displaystyle#1$}}}
+\renewcommand{\boxed}[1]{\text{\kern 0.1em\fboxsep=.2em\fbox{\m@th$\displaystyle#1$}\kern 0.1em}}
 \makeatother
 
 % Terms
@@ -106,10 +106,11 @@
 
 % Judgments
 \newcommand\subrowSym{\sqsubseteq}
-\newcommand\subtypeSym{\leq}
 \newcommand\subrow[2]{#1 \subrowSym #2}
+\newcommand\subtypeSym{\leq}
 \newcommand\subtype[2]{#1 \subtypeSym #2}
 \newcommand\hasType[5]{#1; #2 \vdash \anno{#3}{\tEmbellished{#4}{#5}}}
+\newcommand\infer[1]{\boxed{#1}}
 \newcommand\initWellFormed[2]{#1; #2 \; \text{initial}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -147,12 +148,12 @@
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
             \begin{tabular}{l l l}
-              $\term \Coloneqq $ & & terms: \\
+              $\term \Coloneqq$ & & terms: \\
               & $\eUnit$ & unit \\
               & $\eVar$ & variable \\
               & $\eAbs{\eVar}{\term}$ & abstraction \\
               & $\eApp{\term}{\term}$ & application \\
-              & $\eHandle{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
+              & $\eHandle{\effect}{\row}{\term}{\term}$ & effect definition \\
               & $\eAnno{\term}{\type}{\row}$ & annotation \\
               \\
               $\type \Coloneqq$ & & types: \\
@@ -224,7 +225,7 @@
             \TrinaryInfC{$\subtype{\tArrow{\type_1}{\type_2}{\row_1}}{\tArrow{\type_3}{\type_4}{\row_2}}$}
           \end{prooftree}
 
-          \caption{Subtyping rules}\label{fig:subtyping_rules}
+          \caption{Subtyping}\label{fig:subtyping_rules}
         \end{mdframed}
       \end{figure}
 
@@ -233,50 +234,122 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hasType{\context}{\effectMap}{\term}{\type}{\row}$}
+            \framebox{
+              $\hasType{\context}{\effectMap}{\term}{\type}{\row}$
+              \qquad
+              $\hasType{\context}{\effectMap}{\term}{\infer{\type}}{\row}$
+              \qquad
+              $\hasType{\context}{\effectMap}{\term}{\type}{\infer{\row}}$
+              \qquad
+              $\hasType{\context}{\effectMap}{\term}{\infer{\type}}{\infer{\row}}$
+            }
           \end{center}
 
           \medskip
 
-          \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{T-Unit})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\eUnit}{\tUnit}{\rEmpty}$}
-          \end{prooftree}
+          \begin{minipage}[t]{0.49\textwidth}
+
+            \begin{prooftree}
+                \AxiomC{}
+              \RightLabel{(\textsc{T-Unit})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\eUnit}{\infer{\tUnit}}{\infer{\rEmpty}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\apply{\context}{\eVar} = \tEmbellished{\type}{\row}$}
+              \RightLabel{(\textsc{T-Var})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\eVar}{\infer{\type}}{\infer{\row}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\cExtend{\context}{\eVar}{\type_1}{\rEmpty}}{\effectMap}{\term}{\type_2}{\row_2}$}
+              \RightLabel{(\textsc{T-Abs})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_1}{\type_2}{\row_2}}}{\infer{\rEmpty}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\hasType{\context}{\effectMap}{\term_2}{\infer{\parens{\tArrow{\type_1}{\type_2}{\row_2}}}}{\infer{\row_3}}$}
+                  {$\hasType{\context}{\effectMap}{\term_1}{\type_1}{\infer{\row_1}}$}
+                }}
+              \RightLabel{(\textsc{T-App})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\eApp{\term_2}{\term_1}}{\infer{\type_2}}{\infer{\rUnion{\rUnion{\row_1}{\row_2}}{\row_3}}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\type}{\row}$}
+              \RightLabel{(\textsc{T-Anno})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}{\row}}}{\infer{\type}}{\infer{\row}}$}
+            \end{prooftree}
+
+          \end{minipage}
+          \begin{minipage}[t]{0.49\textwidth}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\infer{\type}}{\infer{\row_1}}$}
+                \AxiomC{$\subrow{\row_1}{\row_2}$}
+              \RightLabel{(\textsc{T-Sub1})}
+              \BinaryInfC{$\hasType{\context}{\effectMap}{\term}{\infer{\type}}{\row_2}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\infer{\type_1}}{\infer{\row}}$}
+                \AxiomC{$\subtype{\type_1}{\type_2}$}
+              \RightLabel{(\textsc{T-Sub2})}
+              \BinaryInfC{$\hasType{\context}{\effectMap}{\term}{\type_2}{\infer{\row}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\infer{\type_1}}{\row}$}
+                \AxiomC{$\subtype{\type_1}{\type_2}$}
+              \RightLabel{(\textsc{T-Sub3})}
+              \BinaryInfC{$\hasType{\context}{\effectMap}{\term}{\type_2}{\row}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\type}{\infer{\row_1}}$}
+                \AxiomC{$\subrow{\row_1}{\row_2}$}
+              \RightLabel{(\textsc{T-Sub4})}
+              \BinaryInfC{$\hasType{\context}{\effectMap}{\term}{\type}{\row_2}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\hasType{\context}{\effectMap}{\term}{\infer{\type_1}}{\infer{\row_1}}$}
+                  {$\subtype{\type_1}{\type_2}$}
+                  {$\subrow{\row_1}{\row_2}$}
+                }}
+              \RightLabel{(\textsc{T-Sub5})}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\term}{\type_2}{\row_2}$}
+            \end{prooftree}
+
+          \end{minipage}
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\eVar} = \tEmbellished{\type}{\row}$}
-            \RightLabel{(\textsc{T-Variable})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\eVar}{\type}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hasType{\cExtend{\context}{\eVar}{\type_1}{\rEmpty}}{\effectMap}{\term}{\type_2}{\row_2}$}
-            \RightLabel{(\textsc{T-Abstraction})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\parens{\eAbs{\anno{\eVar}{\type_1}}{\term}}}{\parens{\tArrow{\type_1}{\type_2}{\row_2}}}{\rEmpty}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\effectMap}{\term_1}{\type_1}{\row_1}$}
-              \AxiomC{$\hasType{\context}{\effectMap}{\term_2}{\parens{\tArrow{\type_3}{\type_2}{\row_2}}}{\row_3}$}
-              \AxiomC{$\subtype{\type_1}{\type_3}$}
-            \RightLabel{(\textsc{T-Application})}
-            \TrinaryInfC{$\hasType{\context}{\effectMap}{\eApp{\term_2}{\term_1}}{\type_2}{\rUnion{\rUnion{\row_1}{\row_2}}{\row_3}}$}
+              \AxiomC{\Shortstack[c]{
+                {$\hasType{\context}{\effectMap}{\term_2}{\infer{\type_2}}{\infer{\row_2}}$}
+                {$\hasType{\context}{\effectMap}{\apply{\effectMap}{\effect}}{\infer{\type_3}}{\infer{\row_3}}$}
+                {$\type_1 = \substitute{\type_3}{\rSingleton{\effect}}{\row_4}$}
+                {$\row_1 = \substitute{\row_3}{\rSingleton{\effect}}{\row_4}$}
+                {$\hasType{\context}{\effectMap}{\term_1}{\type_1}{\row_1}$}
+              }}
+            \RightLabel{(\textsc{T-Handle1})}
+            \UnaryInfC{$\hasType{\context}{\effectMap}{\eHandle{\effect}{\row_4}{\term_1}{\term_2}}{\infer{\type_2}}{\infer{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\row_4}}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
+                {$\hasType{\context}{\effectMap}{\term_2}{\type_2}{\infer{\row_2}}$}
+                {$\hasType{\context}{\effectMap}{\apply{\effectMap}{\effect}}{\infer{\type_3}}{\infer{\row_3}}$}
+                {$\type_1 = \substitute{\type_3}{\rSingleton{\effect}}{\row_4}$}
+                {$\row_1 = \substitute{\row_3}{\rSingleton{\effect}}{\row_4}$}
                 {$\hasType{\context}{\effectMap}{\term_1}{\type_1}{\row_1}$}
-                {$\hasType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}$}
-                {$\hasType{\context}{\effectMap}{\apply{\effectMap}{\effect}}{\type_3}{\row_3}$}
-                {$\subtype{\type_1}{\substitute{\type_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
-                {$\subrow{\row_1}{\substitute{\row_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
               }}
-            \RightLabel{(\textsc{T-Handle})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\eHandle{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}$}
+            \RightLabel{(\textsc{T-Handle2})}
+            \UnaryInfC{$\hasType{\context}{\effectMap}{\eHandle{\effect}{\row_4}{\term_1}{\term_2}}{\type_2}{\infer{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\row_4}}}$}
           \end{prooftree}
 
-          \caption{Typing rules}\label{fig:typing_rules}
+          \caption{Type inference}\label{fig:typing_rules}
         \end{mdframed}
       \end{figure}
 

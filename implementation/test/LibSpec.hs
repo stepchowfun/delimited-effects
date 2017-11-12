@@ -1,3 +1,4 @@
+import ErrorSpec (errorSpec)
 import InferenceSpec (inferenceSpec)
 import SubrowSpec (subrowSpec)
 import SubtypeSpec (subtypeSpec)
@@ -8,6 +9,7 @@ import Test.Hspec (hspec)
 
 main :: IO ()
 main = hspec $ do
+  errorSpec
   inferenceSpec
   subrowSpec
   subtypeSpec

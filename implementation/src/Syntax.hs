@@ -26,7 +26,7 @@ data Term a b -- Metavariable: e
   | EVar a
   | EAbs a (Term a b)
   | EApp (Term a b) (Term a b)
-  | EHandle b [b] (Term a b) (Term a b)
+  | EHandle b (Row b) (Term a b) (Term a b)
   | EAnno (Term a b) (Type b) (Row b)
   deriving (Eq, Show)
 
