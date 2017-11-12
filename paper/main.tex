@@ -63,6 +63,7 @@
 \newcommand\eVar{x}
 \newcommand\eAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eApp[2]{#1 \; #2}
+\newcommand\eEffect[3]{\textbf{effect} \; #1 \; \textbf{where} \; #2 \; \textbf{in} \; #3}
 \newcommand\eHandle[4]{\textbf{handle} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
 
 % Types
@@ -106,7 +107,7 @@
 \newcommand\subrow[2]{#1 \subrowSym #2}
 \newcommand\subtype[2]{#1 \subtypeSym #2}
 \newcommand\hasType[4]{#1; #2 \vdash \anno{#3}{#4}}
-\newcommand\initWellFormed[2]{#1; #2 \; \text{initial}}
+\newcommand\eWellFormed[2]{#1 \vdash #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -148,6 +149,7 @@
               & $\eVar$ & variable \\
               & $\eAbs{\anno{\eVar}{\type}}{\term}$ & abstraction \\
               & $\eApp{\term}{\term}$ & application \\
+              & $\eEffect{\effect}{\anno{\term}{\tEmbellished{\type}{\row}}}{\term}$ & effect declaration \\
               & $\eHandle{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
               \\
               $\type \Coloneqq$ & & types: \\
@@ -260,6 +262,13 @@
           \end{prooftree}
 
           \begin{prooftree}
+              \AxiomC{$\hasType{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type_1}{\row_1}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}{\term}{\tEmbellished{\type_2}{\row_2}}$}
+              \AxiomC{$\eWellFormed{\effect}{\tEmbellished{\type_1}{\row_1}}$}
+            \RightLabel{(\textsc{T-Effect})}
+            \BinaryInfC{$\hasType{\context}{\effectMap}{\eEffect{\effect}{\anno{\eVar}{\tEmbellished{\type_1}{\row_1}}}{\term}}{\tEmbellished{\type_2}{\row_2}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
               \AxiomC{\Shortstack[c]{
                 {$\hasType{\context}{\effectMap}{\term_1}{\tEmbellished{\type_1}{\row_1}}$}
                 {$\hasType{\context}{\effectMap}{\term_2}{\tEmbellished{\type_2}{\row_2}}$}
@@ -278,38 +287,30 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\initWellFormed{\context}{\effectMap}$}
+            \framebox{$\eWellFormed{\effect}{\tEmbellished{\type}{\row}}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{}
-            \RightLabel{(\textsc{INIT-Empty})}
-            \UnaryInfC{$\initWellFormed{\cEmpty}{\emEmpty}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\initWellFormed{\context}{\effectMap}$}
               \AxiomC{$\subrow{\rSingleton{\effect}}{\row}$}
-            \RightLabel{(\textsc{INIT-Unit})}
-            \BinaryInfC{$\initWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\tUnit}{\row}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}$}
+            \RightLabel{(\textsc{EWF-Unit})}
+            \UnaryInfC{$\eWellFormed{\effect}{\tEmbellished{\tUnit}{\row}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\initWellFormed{\context}{\effectMap}$}
+              \AxiomC{$\eWellFormed{\effect}{\tEmbellished{\type_2}{\row_1}}$}
+            \RightLabel{(\textsc{EWF-Arrow1})}
+            \UnaryInfC{$\eWellFormed{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
               \AxiomC{$\subrow{\rSingleton{\effect}}{\row_2}$}
-            \RightLabel{(\textsc{INIT-Arrow1})}
-            \BinaryInfC{$\initWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}$}
+            \RightLabel{(\textsc{EWF-Arrow2})}
+            \UnaryInfC{$\eWellFormed{\effect}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}$}
           \end{prooftree}
 
-          \begin{prooftree}
-              \AxiomC{$\initWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type_2}{\row_1}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}$}
-            \RightLabel{(\textsc{INIT-Arrow2})}
-            \UnaryInfC{$\initWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\parens{\tArrow{\type_1}{\tEmbellished{\type_2}{\row_1}}}}{\row_2}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}$}
-          \end{prooftree}
-
-          \caption{Initial type and effect context well-formedness}\label{fig:context_well_formedness}
+          \caption{Effect well-formedness}\label{fig:effect_well_formedness}
         \end{mdframed}
       \end{figure}
 
