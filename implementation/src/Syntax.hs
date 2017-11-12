@@ -26,7 +26,7 @@ data Term a b -- Metavariable: e
   | EVar a
   | EAbs a (Term a b)
   | EApp (Term a b) (Term a b)
-  | EProvide b [b] (Term a b) (Term a b)
+  | EHandle b [b] (Term a b) (Term a b)
   | EAnno (Term a b) (Type b) (Row b)
   deriving (Eq, Show)
 
@@ -60,14 +60,14 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
     , (5, EVar <$> arbitrary)
     , (4, EAbs <$> arbitrary <*> arbitrary)
     , (2, EApp <$> arbitrary <*> arbitrary)
-    , (2, EProvide <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary)
+    , (2, EHandle <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary)
     , (4, EAnno <$> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink EUnit = []
   shrink (EVar _) = []
   shrink (EAbs x e) = [EAbs x' e' | (x', e') <- shrink (x, e)]
   shrink (EApp e1 e2) = [EApp e1' e2' | (e1', e2') <- shrink (e1, e2)]
-  shrink (EProvide z zs e1 e2) =
-    [EProvide z' zs' e1' e2' | (z', zs', e1', e2') <- shrink (z, zs, e1, e2)]
+  shrink (EHandle z zs e1 e2) =
+    [EHandle z' zs' e1' e2' | (z', zs', e1', e2') <- shrink (z, zs, e1, e2)]
   shrink (EAnno e t r) = [EAnno e' t' r' | (e', t', r') <- shrink (e, t, r)]
 
 instance Arbitrary a => Arbitrary (Type a) where

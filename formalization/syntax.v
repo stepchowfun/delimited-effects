@@ -23,7 +23,7 @@ Module Syntax (IdentifiersInstance : Identifiers).
   | eVar : termId -> term
   | eAbs : termId -> type -> term -> term
   | eApp : term -> term -> term
-  | eProvide : effectId -> list effectId -> term -> term -> term
+  | eHandle : effectId -> list effectId -> term -> term -> term
 
   (* Proper types *)
 
