@@ -32,7 +32,7 @@
 
 \definecolor{purple}{RGB}{127, 0, 181}
 
-\lstdefinelanguage{gram}{morekeywords={effect, provide}}
+\lstdefinelanguage{gram}{morekeywords={effect, handle}}
 
 \lstset{
   aboveskip=\bigskipamount,
@@ -63,7 +63,7 @@
 \newcommand\eVar{x}
 \newcommand\eAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eApp[2]{#1 \; #2}
-\newcommand\eProvide[4]{\textbf{provide} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
+\newcommand\eHandle[4]{\textbf{handle} \; #1 / #2 \; \textbf{with} \; #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\type{\tau}
@@ -148,7 +148,7 @@
               & $\eVar$ & variable \\
               & $\eAbs{\anno{\eVar}{\type}}{\term}$ & abstraction \\
               & $\eApp{\term}{\term}$ & application \\
-              & $\eProvide{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
+              & $\eHandle{\effect}{\overline{\effect_i}}{\term}{\term}$ & effect definition \\
               \\
               $\type \Coloneqq$ & & types: \\
               & $\tUnit$ & unit type \\
@@ -267,8 +267,8 @@
                 {$\subtype{\type_1}{\substitute{\type_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
                 {$\subrow{\row_1}{\substitute{\row_3}{\rSingleton{\effect}}{\bigcup_i \effect_i}}$}
               }}
-            \RightLabel{(\textsc{T-Provide})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\eProvide{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
+            \RightLabel{(\textsc{T-Handle})}
+            \UnaryInfC{$\hasType{\context}{\effectMap}{\eHandle{\effect}{\overline{\effect_i}}{\term_1}{\term_2}}{\tEmbellished{\type_2}{\rUnion{\parens{\rDiff{\row_2}{\rSingleton{\effect}}}}{\effect_i}}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing_rules}

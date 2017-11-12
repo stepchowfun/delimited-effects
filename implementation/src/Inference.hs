@@ -45,7 +45,7 @@ inferTypeAndRow c em (EApp e1 e2) =
          do r3 <- checkTypeInferRow c em e2 t2
             return (t3, (RUnion r1 (RUnion r2 r3)))
        _ -> Nothing
-inferTypeAndRow c em (EProvide z zs e1 e2) =
+inferTypeAndRow c em (EHandle z zs e1 e2) =
   do x <- effectMapLookup em z
      (t1, r1) <- inferTypeAndRow c em e1
      (t2, r2) <- inferTypeAndRow c em e2
