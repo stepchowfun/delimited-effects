@@ -107,6 +107,7 @@
 \newcommand\subtype[2]{#1 \subtypeSym #2}
 \newcommand\hasType[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\eWellFormed[2]{#1 \vdash #2}
+\newcommand\initWellFormed[2]{#1; #2 \; \text{initial}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -305,6 +306,31 @@
           \end{prooftree}
 
           \caption{Effect well-formedness}\label{fig:effect_well_formedness}
+        \end{mdframed}
+      \end{figure}
+
+      \begin{figure}[H]
+        \begin{mdframed}[backgroundcolor=none]
+          \begin{center}
+            \framebox{$\initWellFormed{\context}{\effectMap}$}
+          \end{center}
+
+          \medskip
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{INIT-Empty})}
+            \UnaryInfC{$\initWellFormed{\cEmpty}{\emEmpty}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\initWellFormed{\context}{\effectMap}$}
+              \AxiomC{$\eWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type}{\row}}}}{\emMap{\effect}{\eVar}}$}
+            \RightLabel{(\textsc{INIT-Extension})}
+            \BinaryInfC{$\initWellFormed{\cExtend{\context}{\anno{\eVar}{\tEmbellished{\type}{\row}}}}{\emExtend{\effectMap}{\emMap{\effect}{\eVar}}}$}
+          \end{prooftree}
+
+          \caption{Initial type and effect context well-formedness}\label{fig:context_well_formedness}
         \end{mdframed}
       \end{figure}
 
