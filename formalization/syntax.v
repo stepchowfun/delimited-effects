@@ -21,14 +21,14 @@ Module Syntax (IdentifiersInstance : Identifiers).
   | eVar : termId -> term
   | eAbs : termId -> term -> term
   | eApp : term -> term -> term
-  | eHandle : effectId -> row -> term -> term -> term
-  | eAnno : term -> type -> row -> term
+  | eHandle : effectId -> term -> term -> term
+  | eAnno : term -> type -> term
 
   (* Proper types *)
 
   with type : Type :=
   | tUnit : type
-  | tArrow : type -> type -> row -> type
+  | tArrow : type -> row -> type -> row -> type
 
   (* Rows *)
 
@@ -36,17 +36,23 @@ Module Syntax (IdentifiersInstance : Identifiers).
   | rEmpty : row
   | rSingleton : effectId -> row
   | rUnion : row -> row -> row
-  | rDiff : row -> row -> row.
+
+  (* Variable sets *)
+
+  with varSet : Type :=
+  | vsEmpty : varSet
+  | vsSingleton : termId -> varSet
+  | vsUnion : varSet -> varSet -> varSet
 
   (* Type contexts *)
 
-  Inductive context : Type :=
+  with context : Type :=
   | cEmpty : context
-  | cExtend : context -> termId -> type -> row -> context.
+  | cExtend : context -> termId -> type -> row -> context
 
   (* Effect map *)
 
-  Inductive effectMap : Type :=
+  with effectMap : Type :=
   | emEmpty : effectMap
   | emExtend : effectMap -> effectId -> termId -> type -> row -> effectMap.
 End Syntax.
