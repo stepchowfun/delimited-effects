@@ -19,7 +19,6 @@ library
   other-modules:       Error
                      , Inference
                      , Subrow
-                     , Subtype
                      , Syntax
   build-depends:       base >= 4.7 && < 5
                      , containers
@@ -41,7 +40,6 @@ test-suite implementation-test
   other-modules:       ErrorSpec
                      , InferenceSpec
                      , SubrowSpec
-                     , SubtypeSpec
                      , SyntaxSpec
                      , Types
   build-depends:       base
