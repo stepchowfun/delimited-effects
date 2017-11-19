@@ -5,41 +5,39 @@ module Lib
   , Row(..)
   , Term(..)
   , Type(..)
+  , VarSet(..)
   , abort
   , assert
-  , checkTypeAndRow
-  , checkTypeInferRow
+  , check
   , contextLookup
   , effectMapLookup
-  , inferTypeAndRow
-  , inferTypeCheckRow
+  , freeVars
+  , infer
   , maybeToPartial
-  , partialToMaybe
+  , rowContains
   , subrow
-  , substituteEffectsInRow
-  , substituteEffectsInType
-  , subtype ) where
+  , substituteEffectInRow
+  , substituteEffectInType
+  , varSetContains ) where
 
 import Error
   ( Partial
   , abort
   , assert
-  , maybeToPartial
-  , partialToMaybe )
-import Inference
-  ( checkTypeAndRow
-  , checkTypeInferRow
-  , inferTypeAndRow
-  , inferTypeCheckRow )
+  , maybeToPartial )
+import Inference (check, infer)
 import Subrow (subrow)
-import Subtype (subtype)
 import Syntax
   ( Context(..)
   , EffectMap(..)
   , Row(..)
   , Term(..)
   , Type(..)
+  , VarSet(..)
   , contextLookup
   , effectMapLookup
-  , substituteEffectsInRow
-  , substituteEffectsInType )
+  , freeVars
+  , rowContains
+  , substituteEffectInRow
+  , substituteEffectInType
+  , varSetContains )

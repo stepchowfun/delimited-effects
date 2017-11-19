@@ -1,131 +1,103 @@
-module Inference
-  ( checkTypeAndRow
-  , checkTypeInferRow
-  , inferTypeAndRow
-  , inferTypeCheckRow ) where
+module Inference (check, infer) where
 
-import Error
-  ( Partial
-  , abort
-  , assert
-  , maybeToPartial
-  , partialToMaybe )
+import Error (Partial, abort, assert, maybeToPartial)
 import Subrow (subrow)
-import Subtype (subtype)
 import Syntax
   ( Context(..)
   , EffectMap(..)
   , Row(..)
   , Term(..)
   , Type(..)
+  , VarSet(..)
   , contextLookup
   , effectMapLookup
-  , substituteEffectsInRow
-  , substituteEffectsInType )
-import qualified Data.Map.Lazy as Map
-
--- Infer the type and row
-
-inferTypeAndRow :: (Ord a, Ord b, Show a, Show b)
-                => Context a b
-                -> EffectMap a b
-                -> Term a b
-                -> Partial (Type b, Row b)
-inferTypeAndRow _ _ EUnit = return (TUnit, REmpty)
-inferTypeAndRow c _ (EVar x) = maybeToPartial (contextLookup c x)
-  ("Variable '" ++ show x ++ "' is not in the type context.")
-inferTypeAndRow _ _ (EAbs _ _) = abort
-  "The type and row of an abstraction cannot be synthesized."
-inferTypeAndRow c em (EApp e1 e2) =
-  do (t1, r1) <- inferTypeAndRow c em e1
-     case t1 of
-       TArrow t2 t3 r2 ->
-         do r3 <- checkTypeInferRow c em e2 t2
-            return (t3, (RUnion r1 (RUnion r2 r3)))
-       _ -> abort "The type of an applicand must be an arrow."
-inferTypeAndRow c em (EHandle z r4 e1 e2) =
-  do x <- maybeToPartial (effectMapLookup em z)
-       ("Effect '" ++ show z ++ "' is not in the effect context.")
-     (t3, r3) <- maybeToPartial (contextLookup c x)
-       ("Operation '" ++ show x ++ "' is not in the type context.")
-     let substitution = Map.singleton z r4
-         t1 = substituteEffectsInType substitution t3
-         r1 = substituteEffectsInRow substitution r3
-     checkTypeAndRow c em e1 t1 r1
-     (t2, r2) <- inferTypeAndRow c em e2
-     return (t2, (RUnion (RDifference r2 (RSingleton z)) r4))
-inferTypeAndRow c em (EAnno e t r) =
-  do checkTypeAndRow c em e t r
-     return (t, r)
-
--- Infer the type, check the row
-
-inferTypeCheckRow :: (Ord a, Ord b, Show a, Show b)
-                  => Context a b
-                  -> EffectMap a b
-                  -> Term a b
-                  -> Row b
-                  -> Partial (Type b)
-inferTypeCheckRow c em e r1 =
-  do (t, r2) <- inferTypeAndRow c em e
-     assert (subrow r2 r1)
-       "The synthesized row is not a subrow of the expected row."
-     return t
-
--- Check the type, infer the row
-
-checkTypeInferRow :: (Ord a, Ord b, Show a, Show b)
-                  => Context a b
-                  -> EffectMap a b
-                  -> Term a b
-                  -> Type b
-                  -> Partial (Row b)
-checkTypeInferRow c em (EAbs x e) (TArrow t1 t2 r) =
-  do checkTypeAndRow (CExtend c x t1 REmpty) em e t2 r
-     return REmpty
-checkTypeInferRow _ _ (EAbs _ _) _ = abort
-  "Checking for arrow types only succeeds on abstractions."
-checkTypeInferRow c em (EHandle z r4 e1 e2) t2 =
-  do x <- maybeToPartial (effectMapLookup em z)
-       ("Effect '" ++ show z ++ "' is not in the effect context.")
-     (t3, r3) <- maybeToPartial (contextLookup c x)
-       ("Operation '" ++ show x ++ "' is not in the type context.")
-     let substitution = Map.singleton z r4
-         t1 = substituteEffectsInType substitution t3
-         r1 = substituteEffectsInRow substitution r3
-     checkTypeAndRow c em e1 t1 r1
-     r2 <- checkTypeInferRow c em e2 t2
-     return (RUnion (RDifference r2 (RSingleton z)) r4)
-checkTypeInferRow c em e t1 =
-  do (t2, r) <- inferTypeAndRow c em e
-     assert (subtype t2 t1)
-       "The synthesized type is not a subtype of the expected type."
-     return r
+  , freeVars
+  , substituteEffectInRow
+  , substituteEffectInType
+  , varSetContains )
 
 -- Check the type and row
 
-checkTypeAndRow :: (Ord a, Ord b, Show a, Show b)
-                => Context a b
-                -> EffectMap a b
-                -> Term a b
-                -> Type b
-                -> Row b
-                -> Partial ()
-checkTypeAndRow c em e t1 r1 =
-  assert (all (== Nothing)
-    [ partialToMaybe $
-        do r2 <- checkTypeInferRow c em e t1
-           assert (subrow r2 r1)
-             "The synthesized row is not a subrow of the expected row."
-    , partialToMaybe $
-        do t2 <- inferTypeCheckRow c em e r1
-           assert (subtype t2 t1)
-             "The synthesized type is not a subtype of the expected type."
-    , partialToMaybe $
-        do (t2, r2) <- inferTypeAndRow c em e
-           assert (subtype t2 t1)
-             "The synthesized type is not a subtype of the expected type."
-           assert (subrow r2 r1)
-             "The synthesized row is not a subrow of the expected row." ])
-    "The synthesized type and row were not subsumed by the expected type and \
-      \row."
+check :: (Ord a, Ord b, Show a, Show b)
+      => Context a b
+      -> EffectMap a b
+      -> Term a b
+      -> Type b
+      -> Row b
+      -> Partial (Row b, VarSet a)
+check c em (EAbs x e) (TArrow t2 r2 t1 r1) r3 =
+  do (r4, v1) <- check (CExtend c x t2 r2) em e t1 r1
+     assert (varSetContains x v1)
+       ("Effects '" ++ show r4 ++ "' cannot be hoisted outside" ++
+       " the scope of variable '" ++ show x ++ ".")
+     let (r5, v2) =
+           if subrow r4 r3
+           then (REmpty, VEmpty)
+           else (r4, v1)
+     return (r5, v2)
+check _ _ (EAbs _ _) _ _ = abort
+  "Checking for arrow types only succeeds on abstractions."
+check c em (EHandle z e1 e2) t1 r1 =
+  do (t2, r2) <- maybeToPartial (
+         do x <- effectMapLookup em z
+            contextLookup c x
+       ) ("Failed to look up the type of operation '" ++ show z ++ "'.")
+     let t3 = substituteEffectInType z r1 t2
+         r3 = substituteEffectInRow z r1 r2
+     (r4, v1) <- check c em e1 t3 r3
+     (r5, v2) <- check c em e2 t1 (RUnion r1 (RSingleton z))
+     let (r6, v3) = if subrow r4 r1 then (REmpty, VEmpty) else (r4, v1)
+     return (RUnion r5 r6, VUnion v2 v3)
+check c em e t1 r1 =
+  do (t2, r2, v) <- infer c em e r1
+     assert (t1 == t2) ("Subsumption cannot be applied because the types '" ++
+       show t1 ++ "' and '" ++ show t2 ++ "' are not equal")
+     return (r2, v)
+
+-- Infer the type and check the row
+
+infer :: (Ord a, Ord b, Show a, Show b)
+      => Context a b
+      -> EffectMap a b
+      -> Term a b
+      -> Row b
+      -> Partial (Type b, Row b, VarSet a)
+infer _ _ EUnit _ = Right (TUnit, REmpty, VEmpty)
+infer c _ (EVar x) r1 =
+  do (t, r2) <- maybeToPartial (contextLookup c x)
+       ("Variable '" ++ show x ++ "' is not in the type context.")
+     let (r3, v) =
+           if subrow r2 r1
+           then (REmpty, VEmpty)
+           else (r2, VSingleton x)
+     return (t, r3, v)
+infer _ _ (EAbs _ _) _ = abort
+  "The type of an abstraction cannot be synthesized."
+infer c em (EApp e1 e2) r3 =
+  do (t3, r4, v1) <- infer c em e1 r3
+     case t3 of
+       TArrow t2 r2 t1 r1 ->
+         do (r5, v2) <- check c em e2 t2 r2
+            let (r6, v3) =
+                  case (subrow r1 r3, subrow r5 r3) of
+                    (True, True) -> (r4, v1)
+                    (True, False) -> (RUnion r4 r5, VUnion v1 v2)
+                    (False, _) ->
+                      (RUnion (RUnion (RUnion r1 r3) r4) r5,
+                      freeVars (EApp e1 e2))
+            return (t1, r6, v3)
+       _ -> abort "The type of an applicand must be an arrow."
+infer c em (EHandle z e1 e2) r1 =
+  do (t2, r2) <- maybeToPartial (
+         do x <- effectMapLookup em z
+            contextLookup c x
+       ) ("Failed to look up the type of operation '" ++ show z ++ "'.")
+     let t3 = substituteEffectInType z r1 t2
+         r3 = substituteEffectInRow z r1 r2
+     (r4, v1) <- check c em e1 t3 r3
+     (t1, r5, v2) <- infer c em e2 (RUnion r1 (RSingleton z))
+     let (r6, v3) = if subrow r4 r1 then (REmpty, VEmpty) else (r4, v1)
+     return (t1, RUnion r5 r6, VUnion v2 v3)
+infer c em (EAnno e t) r1 =
+  do (r2, v) <- check c em e t r1
+     return (t, r2, v)

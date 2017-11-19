@@ -1,7 +1,6 @@
 import ErrorSpec (errorSpec)
 import InferenceSpec (inferenceSpec)
 import SubrowSpec (subrowSpec)
-import SubtypeSpec (subtypeSpec)
 import SyntaxSpec (syntaxSpec)
 import Test.Hspec (hspec)
 
@@ -12,5 +11,4 @@ main = hspec $ do
   errorSpec
   inferenceSpec
   subrowSpec
-  subtypeSpec
   syntaxSpec

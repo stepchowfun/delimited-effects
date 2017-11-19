@@ -6,28 +6,24 @@ import Lib
   , Row(..)
   , Term(..)
   , Type(..)
-  , inferTypeAndRow
-  , subrow
-  , subtype )
+  , infer )
 import Test.Hspec (Expectation, Spec, describe, it, shouldBe)
 import Types (Effect(..), Variable(..))
 
 -- The QuickCheck specs
 
-specTypeCheck :: Term Variable Effect
+specInfer :: Term Variable Effect
               -> Type Effect
-              -> Row Effect
               -> Expectation
-specTypeCheck e t1 r1 =
+specInfer e t1 =
   let c = CEmpty :: Context Variable Effect
       em = EMEmpty :: EffectMap Variable Effect
-  in case inferTypeAndRow c em e of
-    Right (t2, r2) -> do
-      subtype t2 t1 `shouldBe` True
-      subrow r2 r1 `shouldBe` True
+  in case infer c em e REmpty of
+    Right (t2, _, _) -> do
+      t1 == t2 `shouldBe` True
     _ -> True `shouldBe` False
 
 inferenceSpec :: Spec
 inferenceSpec = describe "infer" $ do
   it "gives the correct type and effect row for EUnit" $ do
-    specTypeCheck EUnit TUnit REmpty
+    specInfer EUnit TUnit

@@ -2,8 +2,7 @@ module Error
   ( Partial
   , abort
   , assert
-  , maybeToPartial
-  , partialToMaybe ) where
+  , maybeToPartial ) where
 
 type Partial a = Either String a
 
@@ -16,7 +15,3 @@ assert b s = if b then return () else abort s
 maybeToPartial :: Maybe a -> String -> Partial a
 maybeToPartial (Just x) _ = return x
 maybeToPartial Nothing s = abort s
-
-partialToMaybe :: Partial a -> Maybe a
-partialToMaybe (Right x) = return x
-partialToMaybe (Left _) = Nothing
