@@ -54,5 +54,5 @@ Module Syntax (IdentifiersInstance : Identifiers).
 
   with effectMap : Type :=
   | emEmpty : effectMap
-  | emExtend : effectMap -> effectId -> termId -> type -> row -> effectMap.
+  | emExtend : effectMap -> effectId -> termId -> effectMap.
 End Syntax.
