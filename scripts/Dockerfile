@@ -20,7 +20,7 @@ RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
     build-essential \
-    coq \
+    coq=8.6-4 \
     curl \
     python-pip \
     texlive-full && \
