@@ -1,5 +1,3 @@
-override COQ_SOURCES := $(shell find formalization/*.v -type f) \
-
 # Phony targets
 
 .PHONY: \
@@ -32,7 +30,13 @@ lint:
 	      \) -print \
 	  )
 
-formalization: $(patsubst %.v,%.vo,$(COQ_SOURCES))
+formalization:
+	rm -f CoqMakefile _CoqProject
+	echo '-R formalization Main' > _CoqProject
+	find formalization -type f -name '*.v' >> _CoqProject
+	coq_makefile -f _CoqProject -o CoqMakefile
+	make -f CoqMakefile
+	rm -f CoqMakefile _CoqProject
 
 implementation:
 	cd implementation && \
@@ -45,11 +49,13 @@ clean-paper:
 	rm -rf .paper-build main.pdf
 
 clean-formalization:
-	rm -rf \
-	  formalization/*.glob \
-	  formalization/*.vo \
-	  formalization/.*.vo.aux \
-	  .paper-build
+	rm -f _CoqProject CoqMakefile \
+	  $(shell find . -type f \( \
+	    -name '*.glob' -o \
+	    -name '*.v.d' -o \
+	    -name '*.vo' -o \
+	    -name '*.vo.aux' \
+	  \) -print)
 
 clean-implementation:
 	rm -rf implementation/.stack-work
@@ -85,8 +91,3 @@ main.pdf: paper/main.tex
 	    paper/main.tex; \
 	done
 	mv .paper-build/main.pdf .
-
-# The formalization
-
-formalization/syntax.vo: formalization/syntax.v
-	COQPATH="$$(pwd)/formalization" coqc formalization/syntax.v
