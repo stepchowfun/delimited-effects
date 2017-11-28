@@ -1,6 +1,7 @@
 .paper-build
-formalization/*.glob
-formalization/*.vo
-formalization/*.vo.aux
+formalization/**/*.glob
+formalization/**/*.v.d
+formalization/**/*.vo
+formalization/**/*.vo.aux
 implementation/.stack-work/*
 main.pdf
