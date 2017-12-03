@@ -63,7 +63,8 @@
 
 % Terms
 \newcommand\term{t}
-\newcommand\eUnit{\texttt{()}}
+\newcommand\eTrue{\textbf{true}}
+\newcommand\eFalse{\textbf{false}}
 \newcommand\eVar{x}
 \newcommand\eAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eApp[2]{#1 \; #2}
@@ -72,7 +73,7 @@
 
 % Types
 \newcommand\type{\tau}
-\newcommand\tUnit{1}
+\newcommand\tBool{\textbf{bool}}
 \newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
 \newcommand\tEmbellished[2]{{#1}^{\textcolor{violet}{#2}}}
 
@@ -145,7 +146,8 @@
           \begin{center}
             \begin{tabular}{l l l}
               $\term \Coloneqq$ & & terms: \\
-              & $\eUnit$ & unit \\
+              & $\eTrue$ & true \\
+              & $\eFalse$ & false \\
               & $\eVar$ & variable \\
               & $\eAbs{\eVar}{\term}$ & abstraction \\
               & $\eApp{\term}{\term}$ & application \\
@@ -153,7 +155,7 @@
               & $\eAnno{\term}{\type}$ & type annotation \\
               \\
               $\type \Coloneqq$ & & types: \\
-              & $\tUnit$ & unit type \\
+              & $\tBool$ & Boolean type \\
               & $\tArrow{\type}{\row}{\type}{\row}$ & arrow type \\
               \\
               $\row \Coloneqq$ & & rows: \\
@@ -196,8 +198,14 @@
 
           \begin{prooftree}
               \AxiomC{}
-            \RightLabel{(\textsc{T-Unit})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eUnit}{\tUnit}{\row}{\rEmpty}{\vsEmpty}$}
+            \RightLabel{(\textsc{T-True})}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eTrue}{\tBool}{\row}{\rEmpty}{\vsEmpty}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{T-False})}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eFalse}{\tBool}{\row}{\rEmpty}{\vsEmpty}$}
           \end{prooftree}
 
           \begin{prooftree}
