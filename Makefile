@@ -31,12 +31,12 @@ lint:
 	  )
 
 formalization:
-	rm -f CoqMakefile _CoqProject
-	echo '-R formalization Main' > _CoqProject
-	find formalization -type f -name '*.v' >> _CoqProject
-	coq_makefile -f _CoqProject -o CoqMakefile
+	rm -f CoqMakefile _CoqProjectFull
+	echo '-R formalization Main' > _CoqProjectFull
+	find formalization -type f -name '*.v' >> _CoqProjectFull
+	coq_makefile -f _CoqProjectFull -o CoqMakefile
 	make -f CoqMakefile
-	rm -f CoqMakefile _CoqProject
+	rm -f CoqMakefile _CoqProjectFull
 
 implementation:
 	cd implementation && \
@@ -49,7 +49,7 @@ clean-paper:
 	rm -rf .paper-build main.pdf
 
 clean-formalization:
-	rm -f _CoqProject CoqMakefile \
+	rm -f _CoqProjectFull CoqMakefile \
 	  $(shell find . -type f \( \
 	    -name '*.glob' -o \
 	    -name '*.v.d' -o \
