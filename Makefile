@@ -69,11 +69,28 @@ docker-deps:
 	  .
 
 docker-build:
-	docker run \
-	  --rm \
-	  --volume $$(pwd):/root/delimited-effects \
-	  stephanmisc/delimited-effects:deps \
-	  sh -c 'cd /root/delimited-effects && make'
+	CONTAINER="$$( \
+	  docker create \
+	    --env "AWS_ACCESS_KEY_ID=$$AWS_ACCESS_KEY_ID" \
+	    --env "AWS_DEFAULT_REGION=$$AWS_DEFAULT_REGION" \
+	    --env "AWS_SECRET_ACCESS_KEY=$$AWS_SECRET_ACCESS_KEY" \
+	    --env "TRAVIS_BRANCH=$$TRAVIS_BRANCH" \
+	    --env "TRAVIS_DEPLOY=$$TRAVIS_DEPLOY" \
+	    --env "TRAVIS_PULL_REQUEST=$$TRAVIS_PULL_REQUEST" \
+	    --rm \
+	    --user=root \
+	    stephanmisc/delimited-effects:deps \
+	    bash -c ' \
+	      chown -R user:user . && \
+	      su user -c " \
+	        make clean && \
+		make && \
+		./scripts/travis-deploy.sh \
+	      " \
+	    ' \
+	)" && \
+	docker cp . "$$CONTAINER:/home/user/." && \
+	docker start --attach "$$CONTAINER"
 
 # The paper
 

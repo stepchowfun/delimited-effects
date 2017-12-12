@@ -16,6 +16,7 @@ FROM debian:stretch
 #   - Free up some space by removing the package lists, now that the packages
 #       are installed.
 #   - Free up 2G of disk space by deleting documentation for the packages.
+#   - Create a user.
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -28,4 +29,11 @@ RUN \
   curl -sSL https://get.haskellstack.org/ | sh && \
   stack --resolver lts-9.8 setup && \
   rm -rf /var/lib/apt/lists/* && \
-  rm -rf /usr/share/doc
+  rm -rf /usr/share/doc && \
+  useradd --user-group --create-home user
+
+# Set the default user.
+USER user:user
+
+# Set the default working directory to be the user's home directory.
+WORKDIR /home/user
