@@ -17,7 +17,8 @@ Module Syntax (IdentifiersInstance : Identifiers).
   (* Terms *)
 
   Inductive term : Type :=
-  | eUnit : term
+  | eTrue : term
+  | eFalse : term
   | eVar : termId -> term
   | eAbs : termId -> term -> term
   | eApp : term -> term -> term
@@ -27,7 +28,7 @@ Module Syntax (IdentifiersInstance : Identifiers).
   (* Proper types *)
 
   with type : Type :=
-  | tUnit : type
+  | tBool : type
   | tArrow : type -> row -> type -> row -> type
 
   (* Rows *)
