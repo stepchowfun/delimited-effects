@@ -25,5 +25,5 @@ specInfer e t1 =
 
 inferenceSpec :: Spec
 inferenceSpec = describe "infer" $ do
-  it "gives the correct type and effect row for EUnit" $ do
-    specInfer EUnit TUnit
+  it "gives the correct type and effect row for ETrue" $ do
+    specInfer ETrue TBool
