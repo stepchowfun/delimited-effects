@@ -26,7 +26,8 @@ import qualified Data.Set as Set
 -- Metavariable for effect names: z
 
 data Term a b -- Metavariable: e
-  = EUnit
+  = ETrue
+  | EFalse
   | EVar a
   | EAbs a (Term a b)
   | EApp (Term a b) (Term a b)
@@ -35,7 +36,7 @@ data Term a b -- Metavariable: e
   deriving (Eq, Show)
 
 data Type a -- Metavariable: t
-  = TUnit
+  = TBool
   | TArrow (Type a) (Row a) (Type a) (Row a)
   deriving (Eq, Show)
 
@@ -79,13 +80,15 @@ instance Ord a => Eq (VarSet a) where
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
   arbitrary = frequency
-    [ (5, pure EUnit)
+    [ (5, pure ETrue)
+    , (5, pure EFalse)
     , (5, EVar <$> arbitrary)
     , (4, EAbs <$> arbitrary <*> arbitrary)
     , (2, EApp <$> arbitrary <*> arbitrary)
     , (2, EHandle <$> arbitrary <*> arbitrary <*> arbitrary)
     , (4, EAnno <$> arbitrary <*> arbitrary) ]
-  shrink EUnit = []
+  shrink ETrue = []
+  shrink EFalse = []
   shrink (EVar _) = []
   shrink (EAbs x e) = [EAbs x' e' | (x', e') <- shrink (x, e)]
   shrink (EApp e1 e2) = [EApp e1' e2' | (e1', e2') <- shrink (e1, e2)]
@@ -95,9 +98,9 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
 
 instance Arbitrary a => Arbitrary (Type a) where
   arbitrary = frequency
-    [ (8, pure TUnit)
+    [ (8, pure TBool)
     , (3, TArrow <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary) ]
-  shrink TUnit = []
+  shrink TBool = []
   shrink (TArrow t1 r1 t2 r2) =
     [TArrow t1' r1' t2' r2' | (t1', r1', t2', r2') <- shrink (t1, r1, t2, r2)]
 
@@ -160,7 +163,8 @@ freeVars :: Ord a => Term a b -> VarSet a
 freeVars e = foldr (\x v -> VUnion (VSingleton x) v) VEmpty (freeVarsSet e)
 
 freeVarsSet :: Ord a => Term a b -> Set.Set a
-freeVarsSet EUnit = Set.empty
+freeVarsSet ETrue = Set.empty
+freeVarsSet EFalse = Set.empty
 freeVarsSet (EVar x) = Set.singleton x
 freeVarsSet (EAbs x e) = Set.delete x (freeVarsSet e)
 freeVarsSet (EApp e1 e2) = Set.union (freeVarsSet e1) (freeVarsSet e2)
@@ -177,7 +181,7 @@ substituteEffectInRow z r1 (RUnion r2 r3) =
   RUnion (substituteEffectInRow z r1 r2) (substituteEffectInRow z r1 r3)
 
 substituteEffectInType :: Eq a => a -> Row a -> Type a -> Type a
-substituteEffectInType _ _ TUnit = TUnit
+substituteEffectInType _ _ TBool = TBool
 substituteEffectInType z r3 (TArrow t1 r1 t2 r2) =
   TArrow
     (substituteEffectInType z r3 t1)

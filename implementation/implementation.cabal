@@ -16,14 +16,19 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Lib
+                     , Lexer
+                     , Parser
   other-modules:       Error
                      , Inference
                      , Subrow
                      , Syntax
-  build-depends:       base >= 4.7 && < 5
+  build-depends:       array
+                     , base >= 4.7 && < 5
                      , containers
                      , QuickCheck
   default-language:    Haskell2010
+  build-tools:         alex
+                     , happy
 
 executable implementation-exe
   hs-source-dirs:      app
@@ -39,6 +44,8 @@ test-suite implementation-test
   main-is:             LibSpec.hs
   other-modules:       ErrorSpec
                      , InferenceSpec
+                     , LexerSpec
+                     , ParserSpec
                      , SubrowSpec
                      , SyntaxSpec
                      , Types

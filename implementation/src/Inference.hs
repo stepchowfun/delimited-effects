@@ -62,7 +62,8 @@ infer :: (Ord a, Ord b, Show a, Show b)
       -> Term a b
       -> Row b
       -> Partial (Type b, Row b, VarSet a)
-infer _ _ EUnit _ = Right (TUnit, REmpty, VEmpty)
+infer _ _ ETrue _ = Right (TBool, REmpty, VEmpty)
+infer _ _ EFalse _ = Right (TBool, REmpty, VEmpty)
 infer c _ (EVar x) r1 =
   do (t, r2) <- maybeToPartial (contextLookup c x)
        ("Variable '" ++ show x ++ "' is not in the type context.")
