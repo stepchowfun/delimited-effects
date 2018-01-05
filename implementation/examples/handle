@@ -1,0 +1,4 @@
+handle foo with
+  \x -> x
+in
+  bar
