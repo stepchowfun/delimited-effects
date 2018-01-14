@@ -19,6 +19,7 @@ Module Syntax (IdentifiersInstance : Identifiers).
   Inductive term : Type :=
   | eTrue : term
   | eFalse : term
+  | eIf : term -> term -> term -> term
   | eVar : termId -> term
   | eAbs : termId -> term -> term
   | eApp : term -> term -> term

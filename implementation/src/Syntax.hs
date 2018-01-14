@@ -29,6 +29,7 @@ data Term a b -- Metavariable: e
   = ETrue
   | EFalse
   | EVar a
+  | EIf (Term a b) (Term a b) (Term a b)
   | EAbs a (Term a b)
   | EApp (Term a b) (Term a b)
   | EHandle b (Term a b) (Term a b)
@@ -82,6 +83,7 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
   arbitrary = frequency
     [ (5, pure ETrue)
     , (5, pure EFalse)
+    , (2, EIf <$> arbitrary <*> arbitrary <*> arbitrary)
     , (5, EVar <$> arbitrary)
     , (4, EAbs <$> arbitrary <*> arbitrary)
     , (2, EApp <$> arbitrary <*> arbitrary)
@@ -89,6 +91,8 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Term a b) where
     , (4, EAnno <$> arbitrary <*> arbitrary) ]
   shrink ETrue = []
   shrink EFalse = []
+  shrink (EIf e1 e2 e3) =
+    [EIf e1' e2' e3' | (e1', e2', e3') <- shrink (e1, e2, e3)]
   shrink (EVar _) = []
   shrink (EAbs x e) = [EAbs x' e' | (x', e') <- shrink (x, e)]
   shrink (EApp e1 e2) = [EApp e1' e2' | (e1', e2') <- shrink (e1, e2)]
@@ -165,6 +169,8 @@ freeVars e = foldr (\x v -> VUnion (VSingleton x) v) VEmpty (freeVarsSet e)
 freeVarsSet :: Ord a => Term a b -> Set.Set a
 freeVarsSet ETrue = Set.empty
 freeVarsSet EFalse = Set.empty
+freeVarsSet (EIf e1 e2 e3) =
+  Set.union (freeVarsSet e1) (Set.union (freeVarsSet e2) (freeVarsSet e3))
 freeVarsSet (EVar x) = Set.singleton x
 freeVarsSet (EAbs x e) = Set.delete x (freeVarsSet e)
 freeVarsSet (EApp e1 e2) = Set.union (freeVarsSet e1) (freeVarsSet e2)
