@@ -1,12 +1,14 @@
 # Phony targets
 
 .PHONY: \
-  all \
+  all test \
   paper lint formalization implementation \
   clean clean-paper clean-formalization clean-implementation \
   docker-deps docker-build
 
 all: paper lint formalization implementation
+
+test: implementation-test
 
 paper: main.pdf
 
@@ -42,7 +44,10 @@ formalization:
 
 implementation:
 	cd implementation && \
-	  stack build --pedantic --install-ghc --allow-different-user && \
+	  stack build --pedantic --install-ghc --allow-different-user
+
+implementation-test: implementation
+	cd implementation && \
 	  stack test --pedantic --install-ghc --allow-different-user
 
 clean: clean-paper clean-formalization clean-implementation
@@ -85,6 +90,7 @@ docker-build:
 	      su user -c " \
 	        make clean && \
 		make && \
+		make test && \
 		./scripts/travis-deploy.sh \
 	      " \
 	    ' \
