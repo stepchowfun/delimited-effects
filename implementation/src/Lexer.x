@@ -12,6 +12,9 @@ tokens :-
   "--".*                          ;
   true                            { \_ -> TokenTrue }
   false                           { \_ -> TokenFalse }
+  if                              { \_ -> TokenIf }
+  then                            { \_ -> TokenThen }
+  else                            { \_ -> TokenElse }
   [\\]                            { \_ -> TokenAbs }
   "->"                            { \_ -> TokenArrow }
   handle                          { \_ -> TokenHandle }
@@ -27,6 +30,9 @@ tokens :-
 data Token
   = TokenTrue
   | TokenFalse
+  | TokenIf
+  | TokenThen
+  | TokenElse
   | TokenAbs
   | TokenArrow
   | TokenHandle

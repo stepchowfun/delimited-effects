@@ -25,11 +25,16 @@ check :: (Ord a, Ord b, Show a, Show b)
       -> Type b
       -> Row b
       -> Partial (Row b, VarSet a)
+check c em (EIf e1 e2 e3) t r4 =
+  do (r1, v1) <- check c em e1 TBool r4
+     (r2, v2) <- check c em e2 t r4
+     (r3, v3) <- check c em e3 t r4
+     return (RUnion r1 (RUnion r2 r3), VUnion v1 (VUnion v2 v3))
 check c em (EAbs x e) (TArrow t2 r2 t1 r1) r3 =
   do (r4, v1) <- check (CExtend c x t2 r2) em e t1 r1
      assert (varSetContains x v1)
        ("Effects '" ++ show r4 ++ "' cannot be hoisted outside" ++
-       " the scope of variable '" ++ show x ++ ".")
+         " the scope of variable '" ++ show x ++ ".")
      let (r5, v2) =
            if subrow r4 r3
            then (REmpty, VEmpty)
@@ -64,6 +69,13 @@ infer :: (Ord a, Ord b, Show a, Show b)
       -> Partial (Type b, Row b, VarSet a)
 infer _ _ ETrue _ = Right (TBool, REmpty, VEmpty)
 infer _ _ EFalse _ = Right (TBool, REmpty, VEmpty)
+infer c em (EIf e1 e2 e3) r4 =
+  do (r1, v1) <- check c em e1 TBool r4
+     (t1, r2, v2) <- infer c em e2 r4
+     (t2, r3, v3) <- infer c em e3 r4
+     assert (t1 == t2)
+       ("Types '" ++ show t1 ++ "' and '" ++ show t2 ++ "' are not equal.")
+     return (t1, RUnion r1 (RUnion r2 r3), VUnion v1 (VUnion v2 v3))
 infer c _ (EVar x) r1 =
   do (t, r2) <- maybeToPartial (contextLookup c x)
        ("Variable '" ++ show x ++ "' is not in the type context.")

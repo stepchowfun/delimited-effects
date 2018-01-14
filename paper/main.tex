@@ -65,6 +65,7 @@
 \newcommand\term{t}
 \newcommand\eTrue{\textbf{true}}
 \newcommand\eFalse{\textbf{false}}
+\newcommand\eIf[3]{\textbf{if} \; #1 \; \textbf{then} \; #2 \; \textbf{else} \; #3}
 \newcommand\eVar{x}
 \newcommand\eAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eApp[2]{#1 \; #2}
@@ -148,6 +149,7 @@
               $\term \Coloneqq$ & & terms: \\
               & $\eTrue$ & true \\
               & $\eFalse$ & false \\
+              & $\eIf{\term}{\term}{\term}$ & conditional \\
               & $\eVar$ & variable \\
               & $\eAbs{\eVar}{\term}$ & abstraction \\
               & $\eApp{\term}{\term}$ & application \\
@@ -206,6 +208,27 @@
               \AxiomC{}
             \RightLabel{(\textsc{T-False})}
             \UnaryInfC{$\inferType{\context}{\effectMap}{\eFalse}{\tBool}{\row}{\rEmpty}{\vsEmpty}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{\Shortstack[c]{
+                {$\checkType{\context}{\effectMap}{\term_1}{\tBool}{\row_4}{\row_1}{\varSet_1}$}
+                {$\inferType{\context}{\effectMap}{\term_2}{\type_1}{\row_4}{\row_2}{\varSet_2}$}
+                {$\inferType{\context}{\effectMap}{\term_3}{\type_2}{\row_4}{\row_3}{\varSet_3}$}
+                {$\type_1 = \type_2$}
+              }}
+            \RightLabel{(\textsc{T-If1})}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eIf{\term_1}{\term_2}{\term_3}}{\type_1}{\row_4}{\rUnion{\row_1}{\rUnion{\row_2}{\row_3}}}{\vsUnion{\varSet_1}{\vsUnion{\varSet_2}{\varSet_3}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{\Shortstack[c]{
+                {$\checkType{\context}{\effectMap}{\term_1}{\tBool}{\row_4}{\row_1}{\varSet_1}$}
+                {$\checkType{\context}{\effectMap}{\term_2}{\type}{\row_4}{\row_2}{\varSet_2}$}
+                {$\checkType{\context}{\effectMap}{\term_3}{\type}{\row_4}{\row_3}{\varSet_3}$}
+              }}
+            \RightLabel{(\textsc{T-If2})}
+            \UnaryInfC{$\checkType{\context}{\effectMap}{\eIf{\term_1}{\term_2}{\term_3}}{\type}{\row_4}{\rUnion{\row_1}{\rUnion{\row_2}{\row_3}}}{\vsUnion{\varSet_1}{\vsUnion{\varSet_2}{\varSet_3}}}$}
           \end{prooftree}
 
           \begin{prooftree}
