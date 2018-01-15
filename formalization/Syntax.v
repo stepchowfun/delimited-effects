@@ -1,60 +1,45 @@
-(* Identifiers *)
+(* NOTE: We will use De Bruijn indices instead of variable names. *)
 
-Module Type Identifiers.
-  Parameter termId : Type.
-  Parameter effectId : Type.
-  Axiom termIdEqDec :
-    forall (id1 id2 : termId), {id1 = id2} + {id1 <> id2}.
-  Axiom effectIdEqDec :
-    forall (id1 id2 : effectId), {id1 = id2} + {id1 <> id2}.
-End Identifiers.
+(* Terms *)
 
-(* Syntax *)
+Inductive term : Type :=
+| eVar : nat -> term
+| eAbs : nat -> term -> term
+| eApp : term -> term -> term
+| eTAbs : nat -> term -> term
+| eTApp : term -> type -> term
+| eHandle : nat -> term -> term -> term
+| eAnno : term -> type -> term
 
-Module Syntax (IdentifiersInstance : Identifiers).
-  Import IdentifiersInstance.
+(* Proper types *)
 
-  (* Terms *)
+with type : Type :=
+| tArrow : type -> row -> type -> row -> type
+| tForall : nat -> type -> row -> type
 
-  Inductive term : Type :=
-  | eTrue : term
-  | eFalse : term
-  | eIf : term -> term -> term -> term
-  | eVar : termId -> term
-  | eAbs : termId -> term -> term
-  | eApp : term -> term -> term
-  | eHandle : effectId -> term -> term -> term
-  | eAnno : term -> type -> term
+(* Rows *)
 
-  (* Proper types *)
+with row : Type :=
+| rEmpty : row
+| rSingleton : nat -> row
+| rUnion : row -> row -> row
 
-  with type : Type :=
-  | tBool : type
-  | tArrow : type -> row -> type -> row -> type
+(* Hoisted term sets *)
 
-  (* Rows *)
+with hoistedSet : Type :=
+| hEmpty : hoistedSet
+| hSingleton : nat -> hoistedSet
+| hUnion : hoistedSet -> hoistedSet -> hoistedSet
 
-  with row : Type :=
-  | rEmpty : row
-  | rSingleton : effectId -> row
-  | rUnion : row -> row -> row
+(* Type contexts *)
 
-  (* Variable sets *)
+with context : Type :=
+| cEmpty : context
+| cTExtend : context -> nat -> type -> row -> context
+| cKExtend : context -> nat -> context
 
-  with varSet : Type :=
-  | vsEmpty : varSet
-  | vsSingleton : termId -> varSet
-  | vsUnion : varSet -> varSet -> varSet
+(* Effect map *)
 
-  (* Type contexts *)
-
-  with context : Type :=
-  | cEmpty : context
-  | cExtend : context -> termId -> type -> row -> context
-
-  (* Effect map *)
-
-  with effectMap : Type :=
-  | emEmpty : effectMap
-  | emExtend : effectMap -> effectId -> termId -> effectMap.
-End Syntax.
+with effectMap : Type :=
+| emEmpty : effectMap
+| emExtend : effectMap -> nat -> nat -> effectMap.
