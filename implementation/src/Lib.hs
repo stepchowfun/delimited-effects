@@ -11,6 +11,7 @@ module Lib
   , check
   , contextLookup
   , effectMapLookup
+  , effects
   , freeVars
   , infer
   , maybeToPartial
@@ -36,6 +37,7 @@ import Syntax
   , VarSet(..)
   , contextLookup
   , effectMapLookup
+  , effects
   , freeVars
   , rowContains
   , substituteEffectInRow

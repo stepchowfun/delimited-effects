@@ -10,11 +10,6 @@ import Lib (Term(..), Type(..))
 %error { parseError }
 
 %token
-  true     { TokenTrue }
-  false    { TokenFalse }
-  if       { TokenIf }
-  then     { TokenThen }
-  else     { TokenElse }
   lambda   { TokenAbs }
   arrow    { TokenArrow }
   handle   { TokenHandle }
@@ -28,18 +23,11 @@ import Lib (Term(..), Type(..))
 
 %%
 
-Term : true                        { ETrue }
-     | false                       { EFalse }
-     | if Term then Term else Term { EIf $2 $4 $6 }
-     | x                           { EVar $1 }
+Term : x                           { EVar $1 }
      | lambda x arrow Term         { EAbs $2 $4 }
      | Term Term                   { EApp $1 $2 }
      | handle x with Term in Term  { EHandle $2 $4 $6 }
-     | Term ':' Type               { EAnno $1 $3 }
      | '(' Term ')'                { $2 }
-
-Type : bool                        { TBool }
-
 {
 parseError :: [Token] -> a
 parseError _ = error "Parse error"

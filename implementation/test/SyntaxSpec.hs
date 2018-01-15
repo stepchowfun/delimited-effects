@@ -10,38 +10,24 @@ import Lib
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (property)
-import Types (Effect(..), Variable(..))
 
 -- The QuickCheck specs
 
-specContextLookupAfterExtend :: Context Variable Effect
-                             -> Variable
-                             -> Type Effect
-                             -> Row Effect
-                             -> Bool
+specContextLookupAfterExtend :: Context -> String -> Type -> Row -> Bool
 specContextLookupAfterExtend c x t r =
-  contextLookup (CExtend c x t r) x == Just (t, r)
+  contextLookup (CTExtend c x t r) x == Just (t, r)
 
-specContextExtendAfterLookup :: Context Variable Effect
-                             -> Variable
-                             -> Variable
-                             -> Bool
+specContextExtendAfterLookup :: Context -> String -> String -> Bool
 specContextExtendAfterLookup c x1 x2 =
   case contextLookup c x1 of
-    Just (t, r) -> contextLookup (CExtend c x1 t r) x2 == contextLookup c x2
+    Just (t, r) -> contextLookup (CTExtend c x1 t r) x2 == contextLookup c x2
     Nothing -> True
 
-specEffectMapLookupAfterExtend :: EffectMap Variable Effect
-                               -> Effect
-                               -> Variable
-                               -> Bool
+specEffectMapLookupAfterExtend :: EffectMap -> String -> String -> Bool
 specEffectMapLookupAfterExtend em z x =
   effectMapLookup (EMExtend em z x) z == Just x
 
-specEffectMapExtendAfterLookup :: EffectMap Variable Effect
-                               -> Effect
-                               -> Effect
-                               -> Bool
+specEffectMapExtendAfterLookup :: EffectMap -> String -> String -> Bool
 specEffectMapExtendAfterLookup em z1 z2 =
   case effectMapLookup em z1 of
     Just x ->
@@ -51,9 +37,9 @@ specEffectMapExtendAfterLookup em z1 z2 =
 syntaxSpec :: Spec
 syntaxSpec = modifyMaxSuccess (const 100000) $ do
   describe "contextLookup" $ do
-    it "contextLookup (CExtend c x t r) x == Just (t, r)" $ do
+    it "contextLookup (CTExtend c x t r) x == Just (t, r)" $ do
       property specContextLookupAfterExtend
-    it "CExtend em x t r == CExtend (contextLookup em x) x t r" $ do
+    it "CTExtend em x t r == CTExtend (contextLookup em x) x t r" $ do
       property specContextExtendAfterLookup
   describe "effectMapLookup" $ do
     it "effectMapLookup (EMExtend em z x) z == Just x" $ do
