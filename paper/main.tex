@@ -336,16 +336,16 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row_1}{\hoistedSet}$}
+              \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$}
             \RightLabel{(\textsc{T-Anno})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row_1}{\hoistedSet}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}{\hoistedSet}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row_1}{\hoistedSet}$}
+              \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row}{\hoistedSet}$}
               \AxiomC{$\type_1 = \type_2$}
             \RightLabel{(\textsc{T-Sub})}
-            \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row_1}{\hoistedSet}$}
+            \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row}{\hoistedSet}$}
           \end{prooftree}
 
           \caption{Type inference (part 2)}\label{fig:typing_2}
