@@ -48,7 +48,6 @@ test-suite implementation-test
                      , ParserSpec
                      , SubrowSpec
                      , SyntaxSpec
-                     , Types
   build-depends:       base
                      , implementation
                      , hspec

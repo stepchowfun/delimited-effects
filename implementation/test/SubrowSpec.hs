@@ -1,20 +1,19 @@
 module SubrowSpec (subrowSpec) where
 
-import Lib (Row(..), rowContains, subrow)
+import Lib (Row(..), effects, rowContains, subrow)
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (property)
-import Types (Effect(..), effects)
 
 -- Helper functions
 
-contained :: Row Effect -> Row Effect -> Bool
+contained :: Row -> Row -> Bool
 contained r1 r2 =
   all (\z -> not (rowContains z r1) || rowContains z r2) effects
 
 -- The QuickCheck specs
 
-specContainedIffSubrow :: Row Effect -> Row Effect -> Bool
+specContainedIffSubrow :: Row -> Row -> Bool
 specContainedIffSubrow r1 r2 = contained r1 r2 == subrow r1 r2
 
 subrowSpec :: Spec
