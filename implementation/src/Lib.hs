@@ -22,30 +22,15 @@ module Lib
   , subrow
   , substituteEffectInRow
   , substituteEffectInType
-  , substituteTypeInType ) where
+  , substituteTypeInType
+  ) where
 
-import Error
-  ( Partial
-  , abort
-  , assert
-  , maybeToPartial )
+import Error (Partial, abort, assert, maybeToPartial)
 import Inference (check, infer)
 import Subrow (subrow)
 import Syntax
-  ( Context(..)
-  , EffectMap(..)
-  , HoistedSet(..)
-  , Row(..)
-  , Term(..)
-  , Type(..)
-  , contextLookupKind
-  , contextLookupType
-  , eff
-  , effectMapLookup
-  , effects
-  , ftv
-  , fv
-  , rowContains
-  , substituteEffectInRow
-  , substituteEffectInType
-  , substituteTypeInType )
+       (Context(..), EffectMap(..), HoistedSet(..), Row(..), Term(..),
+        Type(..), contextLookupKind, contextLookupType, eff,
+        effectMapLookup, effects, ftv, fv, rowContains,
+        substituteEffectInRow, substituteEffectInType,
+        substituteTypeInType)

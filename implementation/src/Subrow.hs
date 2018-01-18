@@ -1,4 +1,6 @@
-module Subrow (subrow) where
+module Subrow
+  ( subrow
+  ) where
 
 import Syntax (Row(..), rowContains)
 

@@ -1,36 +1,41 @@
 # Phony targets
 
 .PHONY: \
-  all test \
-  paper lint formalization implementation \
-  clean clean-paper clean-formalization clean-implementation \
+  all test lint format clean \
+  paper formalization implementation \
+  test-implementation \
+  lint-implementation \
+  format-implementation \
+  clean-paper clean-formalization clean-implementation \
   docker-deps docker-build
 
-all: paper lint formalization implementation
+all: paper formalization implementation
 
-test: implementation-test
+test: test-implementation
+
+lint-implementation:
+	./scripts/check-line-lengths.sh $(shell \
+	  find . -type d \( \
+	    -path ./.git -o \
+	    -path ./.github -o \
+	    -path ./.paper-build -o \
+	    -path ./.stack -o \
+	    -path ./implementation/.stack-work \
+	  \) -prune -o \( \
+	    -name '*.hs' -o \
+	    -name '*.sh' -o \
+	    -name '*.v' -o \
+	    -name '*.yml' -o \
+	    -name 'Dockerfile' -o \
+	    -name 'Makefile' \
+	  \) -print \
+	)
+
+format: format-implementation
+
+clean: clean-paper clean-formalization clean-implementation
 
 paper: main.pdf
-
-lint:
-	./scripts/check-line-lengths.sh \
-	  $(shell \
-	    find . \
-	      -type d \( \
-	        -path ./.git -o \
-	        -path ./.github -o \
-	        -path ./.paper-build -o \
-	        -path ./implementation/.stack-work \
-	      \) -prune -o \
-	      \( \
-		-name '*.hs' -o \
-		-name '*.sh' -o \
-		-name '*.v' -o \
-		-name '*.yml' -o \
-		-name 'Dockerfile' -o \
-		-name 'Makefile' \
-	      \) -print \
-	  )
 
 formalization:
 	rm -f Makefile.coq _CoqProjectFull
@@ -46,23 +51,51 @@ implementation:
 	cd implementation && \
 	  stack build --pedantic --install-ghc --allow-different-user
 
-implementation-test: implementation
+test-implementation: implementation
 	cd implementation && \
 	  stack test --pedantic --install-ghc --allow-different-user
 
-clean: clean-paper clean-formalization clean-implementation
+lint-implementation:
+	for file in $(shell \
+	  find . -type d \( \
+	    -path ./.git -o \
+	    -path ./.github -o \
+	    -path ./.paper-build -o \
+	    -path ./implementation/.stack-work \
+	  \) -prune -o \( \
+	    -name '*.hs' \
+	  \) -print \
+	); do \
+	  cat "$$file" | hindent --line-length 79 > "$$file.tmp"; \
+	  cmp "$$file.tmp" "$$file" || (rm "$$file.tmp"; exit 1); \
+	  rm "$$file.tmp"; \
+	done
+
+format-implementation:
+	for file in $(shell \
+	  find . -type d \( \
+	    -path ./.git -o \
+	    -path ./.github -o \
+	    -path ./.paper-build -o \
+	    -path ./implementation/.stack-work \
+	  \) -prune -o \( \
+	    -name '*.hs' \
+	  \) -print \
+	); do \
+	  cat "$$file" | hindent --line-length 79 > "$$file.tmp"; \
+	  mv "$$file.tmp" "$$file"; \
+	done
 
 clean-paper:
 	rm -rf .paper-build main.pdf
 
 clean-formalization:
-	rm -f _CoqProjectFull Makefile.coq \
-	  $(shell find . -type f \( \
-	    -name '*.glob' -o \
-	    -name '*.v.d' -o \
-	    -name '*.vo' -o \
-	    -name '*.vo.aux' \
-	  \) -print)
+	rm -f _CoqProjectFull Makefile.coq $(shell find . -type f \( \
+	  -name '*.glob' -o \
+	  -name '*.v.d' -o \
+	  -name '*.vo' -o \
+	  -name '*.vo.aux' \
+	\) -print)
 
 clean-implementation:
 	rm -rf implementation/.stack-work
@@ -88,14 +121,16 @@ docker-build:
 	    bash -c ' \
 	      chown -R user:user . && \
 	      su user -c " \
+	        cd repo && \
 	        make clean && \
 		make && \
 		make test && \
+		make lint && \
 		./scripts/travis-deploy.sh \
 	      " \
 	    ' \
 	)" && \
-	docker cp . "$$CONTAINER:/home/user/." && \
+	docker cp . "$$CONTAINER:/home/user/repo" && \
 	docker start --attach "$$CONTAINER"
 
 # The paper

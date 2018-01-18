@@ -7,12 +7,12 @@ import SyntaxSpec (syntaxSpec)
 import Test.Hspec (hspec)
 
 -- The QuickCheck specs
-
 main :: IO ()
-main = hspec $ do
-  errorSpec
-  inferenceSpec
-  lexerSpec
-  parserSpec
-  subrowSpec
-  syntaxSpec
+main =
+  hspec $ do
+    errorSpec
+    inferenceSpec
+    lexerSpec
+    parserSpec
+    subrowSpec
+    syntaxSpec
