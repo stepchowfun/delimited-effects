@@ -17,6 +17,7 @@ FROM debian:stretch
 #       are installed.
 #   - Free up 2G of disk space by deleting documentation for the packages.
 #   - Create a user.
+#   - Install brittany, a Haskell source code formatter.
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -27,10 +28,11 @@ RUN \
     texlive-full && \
   pip install awscli && \
   curl -sSL https://get.haskellstack.org/ | sh && \
-  stack --resolver lts-9.8 setup && \
+  stack --resolver lts-10.3 setup && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc && \
-  useradd --user-group --create-home user
+  useradd --user-group --create-home user && \
+  su user -c 'stack install brittany'
 
 # Set the default user.
 USER user:user
