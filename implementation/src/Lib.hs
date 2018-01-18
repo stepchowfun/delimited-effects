@@ -1,25 +1,28 @@
 module Lib
   ( Context(..)
   , EffectMap(..)
+  , HoistedSet(..)
   , Partial
   , Row(..)
   , Term(..)
   , Type(..)
-  , VarSet(..)
   , abort
   , assert
   , check
-  , contextLookup
+  , contextLookupKind
+  , contextLookupType
+  , eff
   , effectMapLookup
   , effects
-  , freeVars
+  , ftv
+  , fv
   , infer
   , maybeToPartial
   , rowContains
   , subrow
   , substituteEffectInRow
   , substituteEffectInType
-  , varSetContains ) where
+  , substituteTypeInType ) where
 
 import Error
   ( Partial
@@ -31,15 +34,18 @@ import Subrow (subrow)
 import Syntax
   ( Context(..)
   , EffectMap(..)
+  , HoistedSet(..)
   , Row(..)
   , Term(..)
   , Type(..)
-  , VarSet(..)
-  , contextLookup
+  , contextLookupKind
+  , contextLookupType
+  , eff
   , effectMapLookup
   , effects
-  , freeVars
+  , ftv
+  , fv
   , rowContains
   , substituteEffectInRow
   , substituteEffectInType
-  , varSetContains )
+  , substituteTypeInType )

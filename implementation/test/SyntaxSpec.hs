@@ -5,7 +5,7 @@ import Lib
   , EffectMap(..)
   , Row(..)
   , Type(..)
-  , contextLookup
+  , contextLookupType
   , effectMapLookup )
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
@@ -15,12 +15,13 @@ import Test.QuickCheck (property)
 
 specContextLookupAfterExtend :: Context -> String -> Type -> Row -> Bool
 specContextLookupAfterExtend c x t r =
-  contextLookup (CTExtend c x t r) x == Just (t, r)
+  contextLookupType (CTExtend c x t r) x == Just (t, r)
 
 specContextExtendAfterLookup :: Context -> String -> String -> Bool
 specContextExtendAfterLookup c x1 x2 =
-  case contextLookup c x1 of
-    Just (t, r) -> contextLookup (CTExtend c x1 t r) x2 == contextLookup c x2
+  case contextLookupType c x1 of
+    Just (t, r) ->
+      contextLookupType (CTExtend c x1 t r) x2 == contextLookupType c x2
     Nothing -> True
 
 specEffectMapLookupAfterExtend :: EffectMap -> String -> String -> Bool
@@ -36,10 +37,10 @@ specEffectMapExtendAfterLookup em z1 z2 =
 
 syntaxSpec :: Spec
 syntaxSpec = modifyMaxSuccess (const 100000) $ do
-  describe "contextLookup" $ do
-    it "contextLookup (CTExtend c x t r) x == Just (t, r)" $ do
+  describe "contextLookupType" $ do
+    it "contextLookupType (CTExtend c x t r) x == Just (t, r)" $ do
       property specContextLookupAfterExtend
-    it "CTExtend em x t r == CTExtend (contextLookup em x) x t r" $ do
+    it "CTExtend em x t r == CTExtend (contextLookupType em x) x t r" $ do
       property specContextExtendAfterLookup
   describe "effectMapLookup" $ do
     it "effectMapLookup (EMExtend em z x) z == Just x" $ do

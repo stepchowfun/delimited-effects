@@ -1,6 +1,6 @@
 module InferenceSpec (inferenceSpec) where
 
-import Test.Hspec (Spec, describe, it)
+import Test.Hspec (Spec, describe, it, pending)
 
 -- The QuickCheck specs
 
