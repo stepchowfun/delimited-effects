@@ -14,4 +14,4 @@ assert b s = if b then return () else abort s
 
 maybeToPartial :: Maybe a -> String -> Partial a
 maybeToPartial (Just x) _ = return x
-maybeToPartial Nothing s = abort s
+maybeToPartial Nothing  s = abort s
