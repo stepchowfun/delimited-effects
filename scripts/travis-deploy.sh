@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-# This script uploads `/home/user/main.pdf` to S3 if certain conditions are
-# met. It is intended to be run from inside the Docker container.
+# This script uploads `/home/user/repo/main.pdf` to S3 if certain conditions
+# are met. It is intended to be run from inside the Docker container.
 
 # Usage:
 #   AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
@@ -19,5 +19,5 @@ if [ "$TRAVIS_DEPLOY" = 'true' ] && [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
   else
     S3_DESTINATION="s3://stephan-misc/paper/branch-$TRAVIS_BRANCH.pdf"
   fi
-  aws s3 cp --acl public-read /home/user/main.pdf "$S3_DESTINATION"
+  aws s3 cp --acl public-read /home/user/repo/main.pdf "$S3_DESTINATION"
 fi

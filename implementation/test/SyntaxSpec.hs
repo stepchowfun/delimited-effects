@@ -18,22 +18,19 @@ specContextLookupAfterExtend c x t r =
   contextLookupType (CTExtend c x t r) x == Just (t, r)
 
 specContextExtendAfterLookup :: Context -> String -> String -> Bool
-specContextExtendAfterLookup c x1 x2 =
-  case contextLookupType c x1 of
-    Just (t, r) ->
-      contextLookupType (CTExtend c x1 t r) x2 == contextLookupType c x2
-    Nothing -> True
+specContextExtendAfterLookup c x1 x2 = case contextLookupType c x1 of
+  Just (t, r) ->
+    contextLookupType (CTExtend c x1 t r) x2 == contextLookupType c x2
+  Nothing -> True
 
 specEffectMapLookupAfterExtend :: EffectMap -> String -> String -> Bool
 specEffectMapLookupAfterExtend em z x =
   effectMapLookup (EMExtend em z x) z == Just x
 
 specEffectMapExtendAfterLookup :: EffectMap -> String -> String -> Bool
-specEffectMapExtendAfterLookup em z1 z2 =
-  case effectMapLookup em z1 of
-    Just x ->
-      effectMapLookup (EMExtend em z1 x) z2 == effectMapLookup em z2
-    Nothing -> True
+specEffectMapExtendAfterLookup em z1 z2 = case effectMapLookup em z1 of
+  Just x  -> effectMapLookup (EMExtend em z1 x) z2 == effectMapLookup em z2
+  Nothing -> True
 
 syntaxSpec :: Spec
 syntaxSpec = modifyMaxSuccess (const 100000) $ do
