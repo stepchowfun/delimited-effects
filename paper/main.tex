@@ -87,12 +87,6 @@
 \newcommand\rSingleton[1]{\left\{ #1 \right\}}
 \newcommand\rUnion[2]{#1 \cup #2}
 
-% Hoisted term sets
-\newcommand\hoistedSet{\Delta}
-\newcommand\hSingleton[3]{\left\{ \anno{#1}{\tEmbellished{#2}{#3}} \right\}}
-\newcommand\hEmpty{\varnothing}
-\newcommand\hUnion[2]{#1 \cup #2}
-
 % Type contexts
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
@@ -111,8 +105,8 @@
 \newcommand\nSubrowSym{\nsubseteq}
 \newcommand\subrow[2]{#1 \subrowSym #2}
 \newcommand\nSubrow[2]{#1 \nSubrowSym #2}
-\newcommand\checkType[6]{#1; #2 \vdash #3 \Downarrow \tEmbellished{#4}{#5} \; | \; #6}
-\newcommand\inferType[6]{#1; #2 \vdash #3 \Uparrow \tEmbellished{#4}{#5} \; | \; #6}
+\newcommand\checkType[5]{#1; #2 \vdash #3 \Downarrow \tEmbellished{#4}{#5}}
+\newcommand\inferType[5]{#1; #2 \vdash #3 \Uparrow \tEmbellished{#4}{#5}}
 \newcommand\wellFormed[2]{#1; #2 \; \text{well-formed}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -169,11 +163,6 @@
               & $\rSingleton{\effect}$ & singleton row \\
               & $\rUnion{\row}{\row}$ & row union \\
               \\
-              $\hoistedSet \Coloneqq$ & & hoisted term sets: \\
-              & $\hEmpty$ & empty hoisted term set \\
-              & $\hSingleton{\term}{\type}{\row}$ & singleton hoisted term set \\
-              & $\hUnion{\hoistedSet}{\hoistedSet}$ & hoisted term set union \\
-              \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
               & $\cTExtend{\context}{\eVar}{\type}{\row}$ & variable binding \\
@@ -195,9 +184,9 @@
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
             \framebox{
-              $\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              $\checkType{\context}{\effectMap}{\term}{\type}{\row}$
               \qquad
-              $\inferType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              $\inferType{\context}{\effectMap}{\term}{\type}{\row}$
             }
           \end{center}
 
@@ -205,80 +194,34 @@
 
           \begin{prooftree}
               \AxiomC{$\tEmbellished{\type}{\row_2} = \apply{\context}{\eVar}$}
-              \AxiomC{$
-                \hoistedSet =
-                  \begin{cases}
-                    \hEmpty & \text{if } \subrow{\row_2}{\row_1} \\
-                    \hSingleton{\eVar}{\type}{\row_2} & \text{if } \nSubrow{\row_2}{\row_1}
-                  \end{cases}
-              $}
             \RightLabel{(\textsc{T-Var})}
-            \BinaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row_1}{\hoistedSet}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row_1}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\checkType{\cTExtend{\context}{\eVar}{\type_2}{\row_2}}{\effectMap}{\term}{\type_1}{\row_1}{\hoistedSet_1}$}
-                {$\eVar \notin \fv{\hoistedSet_1}$}
-                {$
-                  \hoistedSet_2 =
-                    \begin{cases}
-                      \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_3} \\
-                      \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_3}
-                    \end{cases}
-                $}
-              }}
+              \AxiomC {$\checkType{\cTExtend{\context}{\eVar}{\type_2}{\row_2}}{\effectMap}{\term}{\type_1}{\row_1}$}
             \RightLabel{(\textsc{T-Abs})}
-            \UnaryInfC{$\checkType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_2}$}
+            \UnaryInfC{$\checkType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_1}$}
-                {$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}{\hoistedSet_2}$}
-                {$
-                  \hoistedSet_3 =
-                    \begin{cases}
-                      \hoistedSet_1 & \text{if } \subrow{\row_1}{\row_3} \wedge \subrow{\eff{\hoistedSet_2}}{\row_3} \\
-                      \hUnion{\hoistedSet_1}{\hoistedSet_2} & \text{if } \subrow{\row_1}{\row_3} \wedge \nSubrow{\eff{\hoistedSet_2}}{\row_3} \\
-                      \hSingleton{\eApp{\term_1}{\term_2}}{\type_1}{\rUnion{\rUnion{\rUnion{\row_1}{\row_3}}{\eff{\hoistedSet_1}}}{\eff{\hoistedSet_2}}} & \text{if } \nSubrow{\row_1}{\row_3}
-                    \end{cases}
-                $}
-              }}
+              \AxiomC {$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
+              \AxiomC{$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}$}
             \RightLabel{(\textsc{T-App})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}{\hoistedSet_3}$}
+            \BinaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\tVar \notin \dom{\context}$}
-                {$\checkType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row_1}{\hoistedSet_1}$}
-                {$\tVar \notin \ftv{\hoistedSet_1}$}
-                {$
-                  \hoistedSet_2 =
-                    \begin{cases}
-                      \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_2} \\
-                      \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_2}
-                    \end{cases}
-                $}
-              }}
+              \AxiomC{$\tVar \notin \dom{\context}$}
+              \AxiomC{$\checkType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row_1}$}
             \RightLabel{(\textsc{T-TAbs})}
-            \UnaryInfC{$\checkType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForall{\tVar}{\type}{\row_1}}}{\row_2}{\hoistedSet_2}$}
+            \BinaryInfC{$\checkType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForall{\tVar}{\type}{\row_1}}}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\inferType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row_1}}}{\row_2}{\hoistedSet_1}$}
-                {$
-                  \hoistedSet_2 =
-                    \begin{cases}
-                      \hoistedSet_1 & \text{if } \subrow{\row_1}{\row_2} \\
-                      \hSingleton{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\rUnion{\rUnion{\row_1}{\row_2}}{\eff{\hoistedSet_1}}} & \text{if } \nSubrow{\row_1}{\row_2}
-                    \end{cases}
-                $}
-              }}
+              \AxiomC{$\inferType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row_1}}}{\row_2}$}
             \RightLabel{(\textsc{T-TApp})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row_2}{\hoistedSet_2}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row_2}$}
           \end{prooftree}
 
           \caption{Type inference (part 1)}\label{fig:typing_1}
@@ -289,9 +232,9 @@
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
             \framebox{
-              $\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              $\checkType{\context}{\effectMap}{\term}{\type}{\row}$
               \qquad
-              $\inferType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              $\inferType{\context}{\effectMap}{\term}{\type}{\row}$
             }
           \end{center}
 
@@ -302,18 +245,11 @@
                 {$\tEmbellished{\type_2}{\row_2} = \apply{\context}{\apply{\effectMap}{\effect}}$}
                 {$\type_3 = \substitute{\type_2}{\rSingleton{\effect}}{\row_1}$}
                 {$\row_3 = \substitute{\row_2}{\rSingleton{\effect}}{\row_1}$}
-                {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}{\hoistedSet_1}$}
-                {$\inferType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\effect}}}{\hoistedSet_2}$}
-                {$
-                  \hoistedSet_3 =
-                    \begin{cases}
-                      \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_1} \\
-                      \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_1}
-                    \end{cases}
-                $}
+                {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}$}
+                {$\inferType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\effect}}}$}
               }}
             \RightLabel{(\textsc{T-Handle1})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eHandle{\effect}{\term_1}{\term_2}}{\type_1}{\row_1}{\hUnion{\hoistedSet_2}{\hoistedSet_3}}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eHandle{\effect}{\term_1}{\term_2}}{\type_1}{\row_1}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -321,31 +257,24 @@
                 {$\tEmbellished{\type_2}{\row_2} = \apply{\context}{\apply{\effectMap}{\effect}}$}
                 {$\type_3 = \substitute{\type_2}{\rSingleton{\effect}}{\row_1}$}
                 {$\row_3 = \substitute{\row_2}{\rSingleton{\effect}}{\row_1}$}
-                {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}{\hoistedSet_1}$}
-                {$\checkType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\effect}}}{\hoistedSet_2}$}
-                {$
-                  \hoistedSet_3 =
-                    \begin{cases}
-                      \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_1} \\
-                      \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_1}
-                    \end{cases}
-                $}
+                {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}$}
+                {$\checkType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\effect}}}$}
               }}
             \RightLabel{(\textsc{T-Handle2})}
-            \UnaryInfC{$\checkType{\context}{\effectMap}{\eHandle{\effect}{\term_1}{\term_2}}{\type_1}{\row_1}{\hUnion{\hoistedSet_2}{\hoistedSet_3}}$}
+            \UnaryInfC{$\checkType{\context}{\effectMap}{\eHandle{\effect}{\term_1}{\term_2}}{\type_1}{\row_1}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$}
+              \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}$}
             \RightLabel{(\textsc{T-Anno})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}{\hoistedSet}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row}{\hoistedSet}$}
+              \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row}$}
               \AxiomC{$\type_1 = \type_2$}
             \RightLabel{(\textsc{T-Sub})}
-            \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row}{\hoistedSet}$}
+            \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row}$}
           \end{prooftree}
 
           \caption{Type inference (part 2)}\label{fig:typing_2}
