@@ -193,22 +193,22 @@
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\tEmbellished{\type}{\row_2} = \apply{\context}{\eVar}$}
+              \AxiomC{$\tEmbellished{\type}{\row} = \apply{\context}{\eVar}$}
             \RightLabel{(\textsc{T-Var})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row_1}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC {$\checkType{\cTExtend{\context}{\eVar}{\type_2}{\row_2}}{\effectMap}{\term}{\type_1}{\row_1}$}
+              \AxiomC{$\checkType{\cTExtend{\context}{\eVar}{\type_2}{\row_2}}{\effectMap}{\term}{\type_1}{\row_1}$}
             \RightLabel{(\textsc{T-Abs})}
-            \UnaryInfC{$\checkType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
+            \UnaryInfC{$\checkType{\context}{\effectMap}{\eAbs{\eVar}{\term}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC {$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
-              \AxiomC{$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}$}
+              \AxiomC{$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
+              \AxiomC{$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\rUnion{\row_2}{\row_4}}$}
             \RightLabel{(\textsc{T-App})}
-            \BinaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}$}
+            \BinaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\rUnion{\rUnion{\row_1}{\row_3}}{\row_4}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -221,7 +221,7 @@
           \begin{prooftree}
               \AxiomC{$\inferType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row_1}}}{\row_2}$}
             \RightLabel{(\textsc{T-TApp})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row_2}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\rUnion{\row_1}{\row_2}}$}
           \end{prooftree}
 
           \caption{Type inference (part 1)}\label{fig:typing_1}
