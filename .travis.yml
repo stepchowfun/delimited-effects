@@ -3,4 +3,7 @@ dist: trusty
 language: generic
 sudo: required
 services: docker
-script: make docker-build TRAVIS_DEPLOY=true
+script:
+  - while sleep 1m; do echo "=====[ still running ]====="; done &
+  - make docker-build TRAVIS_DEPLOY=true
+  - kill %1
