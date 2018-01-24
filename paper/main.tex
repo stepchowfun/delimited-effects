@@ -206,7 +206,7 @@
 
           \begin{prooftree}
               \AxiomC{$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
-              \AxiomC{$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}$}
+              \AxiomC{$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\rUnion{\row_2}{\row_3}}$}
               \AxiomC{$\subrow{\row_1}{\row_3}$}
             \RightLabel{(\textsc{T-App})}
             \TrinaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}$}
