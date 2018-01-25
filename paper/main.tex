@@ -72,7 +72,7 @@
 \newcommand\eTAbs[2]{\Lambda #1 \; . \; #2}
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eHandle[3]{\textbf{handle} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
-\newcommand\eEffect[5]{\textbf{effect} \; \anno{#1}{#2} \; \textbf{with} \; \tEmbellished{#3}{#4} \; \textbf{in} \; #5}
+\newcommand\eEffect[5]{\textbf{effect} \; #1 \; \textbf{where} \; \anno{#2}{\tEmbellished{#3}{#4}} \; \textbf{in} \; #5}
 \newcommand\eAnno[2]{\anno{#1}{#2}}
 
 % Types
@@ -148,7 +148,7 @@
               & $\eApp{\term}{\term}$ & application \\
               & $\eTAbs{\tVar}{\term}$ & type abstraction \\
               & $\eTApp{\term}{\type}$ & type application \\
-              & $\eEffect{\eVar}{\tVar}{\type}{\row}{\term}$ & effect definition \\
+              & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
               & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
               & $\eAnno{\term}{\type}$ & type annotation \\
               \\
@@ -244,13 +244,13 @@
           \begin{prooftree}
               \AxiomC{$\inferType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row}$}
             \RightLabel{(\textsc{T-Effect1})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eEffect{\eVar}{\tVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eEffect{\tVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\checkType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row}$}
             \RightLabel{(\textsc{T-Effect2})}
-            \UnaryInfC{$\checkType{\context}{\effectMap}{\eEffect{\eVar}{\tVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
+            \UnaryInfC{$\checkType{\context}{\effectMap}{\eEffect{\tVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
