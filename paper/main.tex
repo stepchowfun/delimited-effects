@@ -280,7 +280,7 @@
           \begin{prooftree}
               \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}$}
             \RightLabel{(\textsc{T-Anno})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}$}
+            \UnaryInfC{$\inferType{\context}{\effectMap}{\eAnno{\term}{\type}}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
