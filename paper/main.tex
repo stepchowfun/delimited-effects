@@ -192,9 +192,10 @@
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\tEmbellished{\type}{\row} = \apply{\context}{\eVar}$}
+              \AxiomC{$\tEmbellished{\type}{\row_1} = \apply{\context}{\eVar}$}
+              \AxiomC{$\subrow{\row_1}{\row_2}$}
             \RightLabel{(\textsc{T-Var})}
-            \UnaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row}$}
+            \BinaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
