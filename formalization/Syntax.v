@@ -4,18 +4,20 @@
 
 Inductive term : Type :=
 | eVar : nat -> term
-| eAbs : nat -> term -> term
+| eAbs : term -> term
 | eApp : term -> term -> term
-| eTAbs : nat -> term -> term
+| eTAbs : term -> term
 | eTApp : term -> type -> term
+| eEffect : type -> row -> term -> term
 | eHandle : nat -> term -> term -> term
 | eAnno : term -> type -> term
 
 (* Proper types *)
 
 with type : Type :=
+| tVar : nat -> type
 | tArrow : type -> row -> type -> row -> type
-| tForall : nat -> type -> row -> type
+| tForall : type -> row -> type
 
 (* Rows *)
 
@@ -23,13 +25,6 @@ with row : Type :=
 | rEmpty : row
 | rSingleton : nat -> row
 | rUnion : row -> row -> row
-
-(* Hoisted term sets *)
-
-with hoistedSet : Type :=
-| hEmpty : hoistedSet
-| hSingleton : nat -> hoistedSet
-| hUnion : hoistedSet -> hoistedSet -> hoistedSet
 
 (* Type contexts *)
 
@@ -42,4 +37,4 @@ with context : Type :=
 
 with effectMap : Type :=
 | emEmpty : effectMap
-| emExtend : effectMap -> nat -> nat -> effectMap.
+| emExtend : effectMap -> nat -> type -> row -> effectMap.
