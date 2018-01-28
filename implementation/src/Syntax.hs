@@ -3,7 +3,9 @@ module Syntax
   , EffectMap(..)
   , Row(..)
   , Term(..)
+  , TermVar(..)
   , Type(..)
+  , TypeVar(..)
   , contextLookupKind
   , contextLookupType
   , effectMapLookup
@@ -17,49 +19,56 @@ import Test.QuickCheck
   ( Arbitrary
   , arbitrary
   , frequency
-  , Gen
   , oneof
   , shrink )
 import qualified Data.Set as Set
 
 -- Data types
 
--- Metavariable for variable names: x
--- Metavariable for effect names: z
+newtype TermVar = TermVar String -- Metavariable x
+  deriving (Eq, Show)
+
+newtype TypeVar = TypeVar String -- Metavariable a
+  deriving (Eq, Show)
 
 data Term -- Metavariable: e
-  = EVar String
-  | EAbs String Term
+  = EVar TermVar
+  | EAbs TermVar Term
   | EApp Term Term
-  | ETAbs String Term
+  | ETAbs TypeVar Term
   | ETApp Term Type
-  | EEffect String String Type Row Term
-  | EHandle String Term Term
+  | EEffect TypeVar TermVar Type Row Term
+  | EHandle TypeVar Term Term
   | EAnno Term Type
   deriving (Eq, Show)
 
 data Type -- Metavariable: t
-  = TVar String
+  = TVar TypeVar
   | TArrow Type Row Type Row
-  | TForall String Type Row
+  | TForall TypeVar Type Row
   deriving (Eq, Show)
 
 data Row -- Metavariable: r
   = REmpty
-  | RSingleton String
+  | RSingleton TypeVar
   | RUnion Row Row
   deriving (Show)
 
 data Context -- Metavariable: c
   = CEmpty
-  | CTExtend Context String Type Row
-  | CKExtend Context String
+  | CTExtend Context TermVar Type Row
+  | CKExtend Context TypeVar
   deriving (Eq, Show)
 
 data EffectMap -- Metavariable: em
   = EMEmpty
-  | EMExtend EffectMap String Type Row
+  | EMExtend EffectMap TypeVar Type Row
   deriving (Eq, Show)
+
+-- Ord instances
+
+instance Ord TypeVar where
+  (<=) (TypeVar a1) (TypeVar a2) = a1 <= a2
 
 -- Eq instances
 
@@ -70,32 +79,34 @@ instance Eq Row where
           toSet (RUnion r1' r2') = Set.union (toSet r1') (toSet r2')
 
 -- Arbitrary instances
-termVars :: [String]
-termVars = ["TermVarV", "TermVarW", "TermVarX", "TermVarY", "TermVarZ"]
+termVars :: [TermVar]
+termVars =
+  map TermVar ["TermVarV", "TermVarW", "TermVarX", "TermVarY", "TermVarZ"]
 
-arbitraryTermVar :: Gen String
-arbitraryTermVar = oneof $ map (\e -> return e) termVars
+typeVars :: [TypeVar]
+typeVars =
+  map TypeVar ["TypeVarV", "TypeVarW", "TypeVarX", "TypeVarY", "TypeVarZ"]
 
-typeVars :: [String]
-typeVars = ["TypeVarV", "TypeVarW", "TypeVarX", "TypeVarY", "TypeVarZ"]
+instance Arbitrary TermVar where
+  arbitrary = oneof $ map (\e -> return e) termVars
 
-arbitraryTypeVar :: Gen String
-arbitraryTypeVar = oneof $ map (\e -> return e) typeVars
+instance Arbitrary TypeVar where
+  arbitrary = oneof $ map (\e -> return e) typeVars
 
 instance Arbitrary Term where
   arbitrary = frequency
-    [ (5, EVar <$> arbitraryTermVar)
-    , (4, EAbs <$> arbitraryTermVar <*> arbitrary)
+    [ (5, EVar <$> arbitrary)
+    , (4, EAbs <$> arbitrary<*> arbitrary)
     , (2, EApp <$> arbitrary <*> arbitrary)
-    , (4, ETAbs <$> arbitraryTypeVar <*> arbitrary)
+    , (4, ETAbs <$> arbitrary <*> arbitrary)
     , (2, ETApp <$> arbitrary <*> arbitrary)
     , (2, EEffect
-        <$> arbitraryTermVar
-        <*> arbitraryTypeVar
+        <$> arbitrary
+        <*> arbitrary
         <*> arbitrary
         <*> arbitrary
         <*> arbitrary)
-    , (2, EHandle <$> arbitraryTypeVar <*> arbitrary <*> arbitrary)
+    , (2, EHandle <$> arbitrary <*> arbitrary <*> arbitrary)
     , (4, EAnno <$> arbitrary <*> arbitrary) ]
   shrink (EVar _) = []
   shrink (EAbs x e) = [EAbs x' e' | (x', e') <- shrink (x, e)]
@@ -110,9 +121,9 @@ instance Arbitrary Term where
 
 instance Arbitrary Type where
   arbitrary = frequency
-    [ (16, TVar <$> arbitraryTypeVar)
+    [ (16, TVar <$> arbitrary)
     , (3, TArrow <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary)
-    , (3, TForall <$> arbitraryTypeVar <*> arbitrary <*> arbitrary) ]
+    , (3, TForall <$> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink (TVar _) = []
   shrink (TArrow t1 r1 t2 r2) =
     [TArrow t1' r1' t2' r2' | (t1', r1', t2', r2') <- shrink (t1, r1, t2, r2)]
@@ -122,7 +133,7 @@ instance Arbitrary Type where
 instance Arbitrary Row where
   arbitrary = frequency
     [ (5, pure REmpty)
-    , (5, RSingleton <$> arbitraryTypeVar)
+    , (5, RSingleton <$> arbitrary)
     , (3, RUnion <$> arbitrary <*> arbitrary) ]
   shrink REmpty = []
   shrink (RSingleton _) = []
@@ -134,10 +145,10 @@ instance Arbitrary Context where
     [ (2, pure CEmpty)
     , (3, CTExtend
         <$> arbitrary
-        <*> arbitraryTermVar
+        <*> arbitrary
         <*> arbitrary
         <*> arbitrary)
-    , (3, CKExtend <$> arbitrary <*> arbitraryTypeVar) ]
+    , (3, CKExtend <$> arbitrary <*> arbitrary) ]
   shrink CEmpty = []
   shrink (CTExtend c x t r) =
     [CTExtend c' x' t' r' | (c', x', t', r') <- shrink (c, x, t, r)]
@@ -149,7 +160,7 @@ instance Arbitrary EffectMap where
     [ (1, pure EMEmpty)
     , (3, EMExtend
         <$> arbitrary
-        <*> arbitraryTypeVar
+        <*> arbitrary
         <*> arbitrary
         <*> arbitrary) ]
   shrink EMEmpty = []
@@ -158,31 +169,31 @@ instance Arbitrary EffectMap where
 
 -- Helper functions
 
-contextLookupType :: Context -> String -> Maybe (Type, Row)
+contextLookupType :: Context -> TermVar -> Maybe (Type, Row)
 contextLookupType CEmpty _ = Nothing
 contextLookupType (CTExtend c x1 t r) x2 =
   if x1 == x2 then Just (t, r) else contextLookupType c x2
 contextLookupType (CKExtend c _) x2 = contextLookupType c x2
 
-contextLookupKind :: Context -> String -> Maybe ()
+contextLookupKind :: Context -> TypeVar -> Maybe ()
 contextLookupKind CEmpty             _  = Nothing
 contextLookupKind (CTExtend c _ _ _) a2 = contextLookupKind c a2
 contextLookupKind (CKExtend c a1) a2 =
   if a1 == a2 then Just () else contextLookupKind c a2
 
-effectMapLookup :: EffectMap -> String -> Maybe (Type, Row)
+effectMapLookup :: EffectMap -> TypeVar -> Maybe (Type, Row)
 effectMapLookup EMEmpty _ = Nothing
 effectMapLookup (EMExtend em a1 t r) a2 =
   if a1 == a2 then Just (t, r) else effectMapLookup em a2
 
-substituteEffectInRow :: String -> Row -> Row -> Row
+substituteEffectInRow :: TypeVar -> Row -> Row -> Row
 substituteEffectInRow _ _ REmpty = REmpty
 substituteEffectInRow a1 r (RSingleton a2) =
   if a1 == a2 then r else RSingleton a2
 substituteEffectInRow a r1 (RUnion r2 r3) =
   RUnion (substituteEffectInRow a r1 r2) (substituteEffectInRow a r1 r3)
 
-substituteEffectInType :: String -> Row -> Type -> Type
+substituteEffectInType :: TypeVar -> Row -> Type -> Type
 substituteEffectInType _ _  (TVar a            ) = TVar a
 substituteEffectInType a r3 (TArrow t1 r1 t2 r2) = TArrow
   (substituteEffectInType a r3 t1)
@@ -192,7 +203,7 @@ substituteEffectInType a r3 (TArrow t1 r1 t2 r2) = TArrow
 substituteEffectInType a1 r1 (TForall a2 t r2) =
   TForall a2 (substituteEffectInType a1 r1 t) (substituteEffectInRow a1 r1 r2)
 
-substituteTypeInType :: String -> Type -> Type -> Type
+substituteTypeInType :: TypeVar -> Type -> Type -> Type
 substituteTypeInType a1 t (TVar a2) = if a1 == a2 then t else (TVar a2)
 substituteTypeInType a t3 (TArrow t1 r1 t2 r2) =
   TArrow (substituteTypeInType a t3 t1) r1 (substituteTypeInType a t3 t2) r2
@@ -200,7 +211,7 @@ substituteTypeInType a1 t1 (TForall a2 t2 r) = if a1 == a2
   then TForall a2 t2 r
   else TForall a2 (substituteTypeInType a1 t1 t2) r
 
-rowContains :: String -> Row -> Bool
+rowContains :: TypeVar -> Row -> Bool
 rowContains _  REmpty          = False
 rowContains x1 (RSingleton x2) = x1 == x2
 rowContains x  (RUnion r1 r2 ) = rowContains x r1 || rowContains x r2

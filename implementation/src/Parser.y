@@ -2,7 +2,7 @@
 module Parser (parse) where
 
 import Lexer (Token(..))
-import Lib (Term(..), Type(..))
+import Lib (Term(..), TermVar(..), Type(..), TypeVar(..))
 }
 
 %name parse
@@ -23,10 +23,10 @@ import Lib (Term(..), Type(..))
 
 %%
 
-Term : x                           { EVar $1 }
-     | lambda x arrow Term         { EAbs $2 $4 }
+Term : x                           { EVar (TermVar $1) }
+     | lambda x arrow Term         { EAbs (TermVar $2) $4 }
      | Term Term                   { EApp $1 $2 }
-     | handle x with Term in Term  { EHandle $2 $4 $6 }
+     | handle x with Term in Term  { EHandle (TypeVar $2) $4 $6 }
      | '(' Term ')'                { $2 }
 {
 parseError :: [Token] -> a
