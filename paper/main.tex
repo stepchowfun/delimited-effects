@@ -230,7 +230,7 @@
                   $}
                 }}
               \RightLabel{(\textsc{T-Abs})}
-              \UnaryInfC{$\checkType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_2}$}
+              \UnaryInfC{$\checkType{\context}{\effectMap}{\eAbs{\eVar}{\term}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_2}$}
             \end{prooftree}
 
             \begin{prooftree}
@@ -326,7 +326,7 @@
             \begin{prooftree}
                 \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$}
               \RightLabel{(\textsc{T-Anno})}
-              \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}{\hoistedSet}$}
+              \UnaryInfC{$\inferType{\context}{\effectMap}{\eAnno{\term}{\type}}{\type}{\row}{\hoistedSet}$}
             \end{prooftree}
 
             \begin{prooftree}
