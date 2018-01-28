@@ -243,13 +243,13 @@
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\inferType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row}$}
+              \AxiomC{$\inferType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
             \RightLabel{(\textsc{T-Effect1})}
             \UnaryInfC{$\inferType{\context}{\effectMap}{\eEffect{\tVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\checkType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row}$}
+              \AxiomC{$\checkType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
             \RightLabel{(\textsc{T-Effect2})}
             \UnaryInfC{$\checkType{\context}{\effectMap}{\eEffect{\tVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
           \end{prooftree}

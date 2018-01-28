@@ -23,13 +23,14 @@ specContextExtendAfterLookup c x1 x2 = case contextLookupType c x1 of
     contextLookupType (CTExtend c x1 t r) x2 == contextLookupType c x2
   Nothing -> True
 
-specEffectMapLookupAfterExtend :: EffectMap -> String -> String -> Bool
-specEffectMapLookupAfterExtend em z x =
-  effectMapLookup (EMExtend em z x) z == Just x
+specEffectMapLookupAfterExtend :: EffectMap -> String -> Type -> Row -> Bool
+specEffectMapLookupAfterExtend em a t r =
+  effectMapLookup (EMExtend em a t r) a == Just (t, r)
 
 specEffectMapExtendAfterLookup :: EffectMap -> String -> String -> Bool
-specEffectMapExtendAfterLookup em z1 z2 = case effectMapLookup em z1 of
-  Just x  -> effectMapLookup (EMExtend em z1 x) z2 == effectMapLookup em z2
+specEffectMapExtendAfterLookup em a1 a2 = case effectMapLookup em a1 of
+  Just (t, r) ->
+    effectMapLookup (EMExtend em a1 t r) a2 == effectMapLookup em a2
   Nothing -> True
 
 syntaxSpec :: Spec
@@ -40,7 +41,7 @@ syntaxSpec = modifyMaxSuccess (const 100000) $ do
     it "CTExtend em x t r == CTExtend (contextLookupType em x) x t r" $ do
       property specContextExtendAfterLookup
   describe "effectMapLookup" $ do
-    it "effectMapLookup (EMExtend em z x) z == Just x" $ do
+    it "effectMapLookup (EMExtend em a t r) a == Just (t, r)" $ do
       property specEffectMapLookupAfterExtend
-    it "EMExtend em z x == EMExtend (effectMapLookup em z) z x" $ do
+    it "EMExtend em a t r == em where effectMapLookup em a = Just (t, r)" $ do
       property specEffectMapExtendAfterLookup

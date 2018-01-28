@@ -1,6 +1,6 @@
 module SubrowSpec (subrowSpec) where
 
-import Lib (Row(..), effects, rowContains, subrow)
+import Lib (Row(..), typeVars, rowContains, subrow)
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (property)
@@ -9,7 +9,7 @@ import Test.QuickCheck (property)
 
 contained :: Row -> Row -> Bool
 contained r1 r2 =
-  all (\z -> not (rowContains z r1) || rowContains z r2) effects
+  all (\a -> not (rowContains a r1) || rowContains a r2) typeVars
 
 -- The QuickCheck specs
 
