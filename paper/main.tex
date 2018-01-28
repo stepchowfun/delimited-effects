@@ -205,8 +205,9 @@
           \begin{prooftree}
               \AxiomC{$\hasType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}$}
               \AxiomC{$\hasType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}$}
+              \AxiomC{$\subrow{\row_1}{\row_3}$}
             \RightLabel{(\textsc{T-App})}
-            \BinaryInfC{$\hasType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\rUnion{\row_1}{\row_3}}$}
+            \TrinaryInfC{$\hasType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -218,8 +219,9 @@
 
           \begin{prooftree}
               \AxiomC{$\hasType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row_1}}}{\row_2}$}
+              \AxiomC{$\subrow{\row_1}{\row_2}$}
             \RightLabel{(\textsc{T-TApp})}
-            \UnaryInfC{$\hasType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\rUnion{\row_1}{\row_2}}$}
+            \BinaryInfC{$\hasType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
