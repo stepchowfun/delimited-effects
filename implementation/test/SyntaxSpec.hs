@@ -4,7 +4,9 @@ import Lib
   ( Context(..)
   , EffectMap(..)
   , Row(..)
+  , TermVar(..)
   , Type(..)
+  , TypeVar(..)
   , contextLookupType
   , effectMapLookup )
 import Test.Hspec (Spec, describe, it)
@@ -13,21 +15,21 @@ import Test.QuickCheck (property)
 
 -- The QuickCheck specs
 
-specContextLookupAfterExtend :: Context -> String -> Type -> Row -> Bool
+specContextLookupAfterExtend :: Context -> TermVar -> Type -> Row -> Bool
 specContextLookupAfterExtend c x t r =
   contextLookupType (CTExtend c x t r) x == Just (t, r)
 
-specContextExtendAfterLookup :: Context -> String -> String -> Bool
+specContextExtendAfterLookup :: Context -> TermVar -> TermVar -> Bool
 specContextExtendAfterLookup c x1 x2 = case contextLookupType c x1 of
   Just (t, r) ->
     contextLookupType (CTExtend c x1 t r) x2 == contextLookupType c x2
   Nothing -> True
 
-specEffectMapLookupAfterExtend :: EffectMap -> String -> Type -> Row -> Bool
+specEffectMapLookupAfterExtend :: EffectMap -> TypeVar -> Type -> Row -> Bool
 specEffectMapLookupAfterExtend em a t r =
   effectMapLookup (EMExtend em a t r) a == Just (t, r)
 
-specEffectMapExtendAfterLookup :: EffectMap -> String -> String -> Bool
+specEffectMapExtendAfterLookup :: EffectMap -> TypeVar -> TypeVar -> Bool
 specEffectMapExtendAfterLookup em a1 a2 = case effectMapLookup em a1 of
   Just (t, r) ->
     effectMapLookup (EMExtend em a1 t r) a2 == effectMapLookup em a2

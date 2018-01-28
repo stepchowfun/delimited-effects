@@ -4,7 +4,9 @@ module Lib
   , Partial
   , Row(..)
   , Term(..)
+  , TermVar(..)
   , Type(..)
+  , TypeVar(..)
   , abort
   , assert
   , check
@@ -32,7 +34,9 @@ import Syntax
   , EffectMap(..)
   , Row(..)
   , Term(..)
+  , TermVar(..)
   , Type(..)
+  , TypeVar(..)
   , contextLookupKind
   , contextLookupType
   , effectMapLookup
