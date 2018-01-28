@@ -90,6 +90,12 @@
 \newcommand\rSingleton[1]{\left\{ #1 \right\}}
 \newcommand\rUnion[2]{#1 \cup #2}
 
+% Hoisted term sets
+\newcommand\hoistedSet{\Delta}
+\newcommand\hSingleton[3]{\left\{ \anno{#1}{\tEmbellished{#2}{#3}} \right\}}
+\newcommand\hEmpty{\varnothing}
+\newcommand\hUnion[2]{#1 \cup #2}
+
 % Type contexts
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
@@ -106,10 +112,10 @@
 \newcommand\nSubrowSym{\nsubseteq}
 \newcommand\subrow[2]{#1 \subrowSym #2}
 \newcommand\nSubrow[2]{#1 \nSubrowSym #2}
+\newcommand\checkType[6]{#1; #2 \vdash #3 \Downarrow \tEmbellished{#4}{#5} \; | \; #6}
+\newcommand\inferType[6]{#1; #2 \vdash #3 \Uparrow \tEmbellished{#4}{#5} \; | \; #6}
+\newcommand\checkOrInferType[6]{#1 ; #2 \vdash #3 \Updownarrow \tEmbellished{#4}{#5} \; | \; #6}
 \newcommand\hasType[5]{#1 ; #2 \vdash \anno{#3}{\tEmbellished{#4}{#5}}}
-\newcommand\checkType[5]{#1 ; #2 \vdash #3 \Downarrow \tEmbellished{#4}{#5}}
-\newcommand\inferType[5]{#1 ; #2 \vdash #3 \Uparrow \tEmbellished{#4}{#5}}
-\newcommand\checkOrInferType[5]{#1 ; #2 \vdash #3 \Updownarrow \tEmbellished{#4}{#5}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -179,7 +185,158 @@
               \end{tabular}
             \end{center}
 
-            \caption{Syntax of the target language}\label{fig:target_syntax}
+            \caption{Syntax of the source language}\label{fig:source_syntax}
+          \end{mdframed}
+        \end{figure}
+
+      \subsubsection{Typing}
+        In the typing rules, terms are considered equivalent up to $\alpha$-conversion, and likewise for types. Effect row union is considered associative and commutative.
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \framebox{
+                $\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+                \qquad
+                $\inferType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              }
+            \end{center}
+
+            \medskip
+
+            \begin{prooftree}
+                \AxiomC{$\tEmbellished{\type}{\row_2} = \apply{\context}{\eVar}$}
+                \AxiomC{$
+                  \hoistedSet =
+                    \begin{cases}
+                      \hEmpty & \text{if } \subrow{\row_2}{\row_1} \\
+                      \hSingleton{\eVar}{\type}{\row_2} & \text{if } \nSubrow{\row_2}{\row_1}
+                    \end{cases}
+                $}
+              \RightLabel{(\textsc{T-Var})}
+              \BinaryInfC{$\inferType{\context}{\effectMap}{\eVar}{\type}{\row_1}{\hoistedSet}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\checkType{\cTExtend{\context}{\eVar}{\type_2}{\row_2}}{\effectMap}{\term}{\type_1}{\row_1}{\hoistedSet_1}$}
+                  {$\eVar \notin \fv{\hoistedSet_1}$}
+                  {$
+                    \hoistedSet_2 =
+                      \begin{cases}
+                        \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_3} \\
+                        \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_3}
+                      \end{cases}
+                  $}
+                }}
+              \RightLabel{(\textsc{T-Abs})}
+              \UnaryInfC{$\checkType{\context}{\effectMap}{\parens{\eAbs{\eVar}{\term}}}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_2}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\inferType{\context}{\effectMap}{\term_1}{\parens{\tArrow{\type_2}{\row_2}{\type_1}{\row_1}}}{\row_3}{\hoistedSet_1}$}
+                  {$\checkType{\context}{\effectMap}{\term_2}{\type_2}{\row_2}{\hoistedSet_2}$}
+                  {$
+                    \hoistedSet_3 =
+                      \begin{cases}
+                        \hoistedSet_1 & \text{if } \subrow{\row_1}{\row_3} \wedge \subrow{\eff{\hoistedSet_2}}{\row_3} \\
+                        \hUnion{\hoistedSet_1}{\hoistedSet_2} & \text{if } \subrow{\row_1}{\row_3} \wedge \nSubrow{\eff{\hoistedSet_2}}{\row_3} \\
+                        \hSingleton{\eApp{\term_1}{\term_2}}{\type_1}{\rUnion{\rUnion{\rUnion{\row_1}{\row_3}}{\eff{\hoistedSet_1}}}{\eff{\hoistedSet_2}}} & \text{if } \nSubrow{\row_1}{\row_3}
+                      \end{cases}
+                  $}
+                }}
+              \RightLabel{(\textsc{T-App})}
+              \UnaryInfC{$\inferType{\context}{\effectMap}{\eApp{\term_1}{\term_2}}{\type_1}{\row_3}{\hoistedSet_3}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\tVar \notin \dom{\context}$}
+                  {$\checkType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row_1}{\hoistedSet_1}$}
+                  {$\tVar \notin \ftv{\hoistedSet_1}$}
+                  {$
+                    \hoistedSet_2 =
+                      \begin{cases}
+                        \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_2} \\
+                        \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_2}
+                      \end{cases}
+                  $}
+                }}
+              \RightLabel{(\textsc{T-TAbs})}
+              \UnaryInfC{$\checkType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForall{\tVar}{\type}{\row_1}}}{\row_2}{\hoistedSet_2}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\inferType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row_1}}}{\row_2}{\hoistedSet_1}$}
+                  {$
+                    \hoistedSet_2 =
+                      \begin{cases}
+                        \hoistedSet_1 & \text{if } \subrow{\row_1}{\row_2} \\
+                        \hSingleton{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\rUnion{\rUnion{\row_1}{\row_2}}{\eff{\hoistedSet_1}}} & \text{if } \nSubrow{\row_1}{\row_2}
+                      \end{cases}
+                  $}
+                }}
+              \RightLabel{(\textsc{T-TApp})}
+              \UnaryInfC{$\inferType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row_2}{\hoistedSet_2}$}
+            \end{prooftree}
+
+            \caption{Type inference for the source language (part 1)}\label{fig:source_typing_1}
+          \end{mdframed}
+        \end{figure}
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \framebox{
+                $\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+                \qquad
+                $\inferType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$
+              }
+            \end{center}
+
+            \medskip
+
+            \begin{prooftree}
+                \AxiomC{$\checkOrInferType{\cTExtend{\context}{\eVar}{\type_1}{\row_1}}{\emExtend{\effectMap}{\tVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}{\hoistedSet}$}
+              \RightLabel{(\textsc{T-Effect})}
+              \UnaryInfC{$\checkOrInferType{\context}{\effectMap}{\eEffect{\tVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}{\hoistedSet}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{\Shortstack[c]{
+                  {$\tEmbellished{\type_2}{\row_2} = \apply{\effectMap}{\tVar}$}
+                  {$\type_3 = \substitute{\type_2}{\rSingleton{\tVar}}{\row_1}$}
+                  {$\row_3 = \substitute{\row_2}{\rSingleton{\tVar}}{\row_1}$}
+                  {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}{\hoistedSet_1}$}
+                  {$\checkOrInferType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\tVar}}}{\hoistedSet_2}$}
+                  {$
+                    \hoistedSet_3 =
+                      \begin{cases}
+                        \hEmpty & \text{if } \subrow{\eff{\hoistedSet_1}}{\row_1} \\
+                        \hoistedSet_1 & \text{if } \nSubrow{\eff{\hoistedSet_1}}{\row_1}
+                      \end{cases}
+                  $}
+                }}
+              \RightLabel{(\textsc{T-Handle})}
+              \UnaryInfC{$\checkOrInferType{\context}{\effectMap}{\eHandle{\tVar}{\term_1}{\term_2}}{\type_1}{\row_1}{\hUnion{\hoistedSet_2}{\hoistedSet_3}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedSet}$}
+              \RightLabel{(\textsc{T-Anno})}
+              \UnaryInfC{$\inferType{\context}{\effectMap}{\parens{\eAnno{\term}{\type}}}{\type}{\row}{\hoistedSet}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row}{\hoistedSet}$}
+                \AxiomC{$\type_1 = \type_2$}
+              \RightLabel{(\textsc{T-Sub})}
+              \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row}{\hoistedSet}$}
+            \end{prooftree}
+
+            \caption{Type inference for the source language (part 2)}\label{fig:source_typing_2}
           \end{mdframed}
         \end{figure}
 
@@ -208,7 +365,6 @@
         \end{figure}
 
       \subsubsection{Typing}
-        In the following rules, terms are considered equivalent up to $\alpha$-conversion, and likewise for types. Effect row union is considered associative and commutative.
 
         \begin{figure}[H]
           \begin{mdframed}[backgroundcolor=none]
