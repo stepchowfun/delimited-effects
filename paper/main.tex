@@ -140,7 +140,7 @@
 
   \section{Overview}
 
-    \subsection{The target language}
+    \subsection{The source language}
 
       \subsubsection{Syntax}
 
@@ -150,13 +150,13 @@
               \begin{tabular}{l l l}
                 $\term \Coloneqq$ & & terms: \\
                 & $\eVar$ & variable \\
-                & $\eAbsAnno{\eVar}{\type}{\row}{\term}$ & abstraction \\
+                & $\eAbs{\eVar}{\term}$ & abstraction \\
                 & $\eApp{\term}{\term}$ & application \\
                 & $\eTAbs{\tVar}{\term}$ & type abstraction \\
                 & $\eTApp{\term}{\type}$ & type application \\
                 & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
                 & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
-                & $\eDo{\eVar}{\term}{\term}$ & sequence \\
+                & $\eAnno{\term}{\type}$ & type annotation \\
                 \\
                 $\type \Coloneqq$ & & types: \\
                 & $\tVar$ & type variable \\
@@ -180,6 +180,30 @@
             \end{center}
 
             \caption{Syntax of the target language}\label{fig:target_syntax}
+          \end{mdframed}
+        \end{figure}
+
+    \subsection{The target language}
+
+      \subsubsection{Syntax}
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \begin{tabular}{l l l}
+                $\term \Coloneqq$ & & terms: \\
+                & $\eVar$ & variable \\
+                & $\eAbsAnno{\eVar}{\type}{\row}{\term}$ & abstraction \\
+                & $\eApp{\term}{\term}$ & application \\
+                & $\eTAbs{\tVar}{\term}$ & type abstraction \\
+                & $\eTApp{\term}{\type}$ & type application \\
+                & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
+                & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
+                & $\eDo{\eVar}{\term}{\term}$ & sequence \\
+              \end{tabular}
+            \end{center}
+
+            \caption{Syntax for terms of the target language}\label{fig:target_syntax}
           \end{mdframed}
         \end{figure}
 
