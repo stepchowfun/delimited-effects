@@ -52,7 +52,7 @@
 \newtheorem{theorem}{Theorem}
 
 % Misc
-\newcommand\anno[2]{#1 : #2}
+\newcommand\anno[2]{#1 : \colorType{#2}}
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\parens[1]{\left( #1 \right)}
 \newcommand\fv[1]{\apply{\text{fv}}{#1}}
@@ -70,14 +70,15 @@
 \newcommand\eAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eAbsAnno[4]{\eAbs{\anno{#1}{\tEmbellished{#2}{#3}}}{#4}}
 \newcommand\eApp[2]{#1 \; #2}
-\newcommand\eTAbs[2]{\Lambda #1 \; . \; #2}
+\newcommand\eTAbs[2]{\Lambda \colorType{#1} \; . \; #2}
 \newcommand\eTApp[2]{#1 \; #2}
-\newcommand\eHandle[3]{\textbf{handle} \; #1 \; \textbf{with} \; #2 \; \textbf{in} \; #3}
-\newcommand\eEffect[5]{\textbf{effect} \; #1 \; \textbf{where} \; \anno{#2}{\tEmbellished{#3}{#4}} \; \textbf{in} \; #5}
+\newcommand\eHandle[3]{\textbf{handle} \; \colorType{#1} \; \textbf{with} \; #2 \; \textbf{in} \; #3}
+\newcommand\eEffect[5]{\textbf{effect} \; \colorType{#1} \; \textbf{where} \; \anno{#2}{\tEmbellished{#3}{#4}} \; \textbf{in} \; #5}
 \newcommand\eAnno[2]{\anno{#1}{#2}}
 \newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types
+\newcommand\colorType[1]{\textcolor{teal}{#1}}
 \newcommand\type{\tau}
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
@@ -101,21 +102,21 @@
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
 \newcommand\cTExtend[4]{#1, \anno{#2}{\tEmbellished{#3}{#4}}}
-\newcommand\cKExtend[2]{#1, #2}
+\newcommand\cKExtend[2]{#1, \colorType{#2}}
 
 % Effect map
 \newcommand\effectMap{\Sigma}
 \newcommand\emEmpty{\varnothing}
-\newcommand\emExtend[4]{#1, #2 \mapsto \tEmbellished{#3}{#4}}
+\newcommand\emExtend[4]{#1, #2 \mapsto \colorType{\tEmbellished{#3}{#4}}}
 
 % Judgments
 \newcommand\subrowSym{\subseteq}
 \newcommand\nSubrowSym{\nsubseteq}
 \newcommand\subrow[2]{\colorRow{#1} \subrowSym \colorRow{#2}}
 \newcommand\nSubrow[2]{\colorRow{#1} \nSubrowSym \colorRow{#2}}
-\newcommand\checkType[6]{#1 ; #2 \vdash #3 \Downarrow \tEmbellished{#4}{#5} \; | \; #6}
-\newcommand\inferType[6]{#1 ; #2 \vdash #3 \Uparrow \tEmbellished{#4}{#5} \; | \; #6}
-\newcommand\checkOrInferType[6]{#1 ; #2 \vdash #3 \Updownarrow \tEmbellished{#4}{#5} \; | \; #6}
+\newcommand\checkType[6]{#1 ; #2 \vdash #3 \Downarrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
+\newcommand\inferType[6]{#1 ; #2 \vdash #3 \Uparrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
+\newcommand\checkOrInferType[6]{#1 ; #2 \vdash #3 \Updownarrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
 \newcommand\hasType[5]{#1 ; #2 \vdash \anno{#3}{\tEmbellished{#4}{#5}}}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -165,10 +166,10 @@
                 & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
                 & $\eAnno{\term}{\type}$ & type annotation \\
                 \\
-                $\type \Coloneqq$ & & types: \\
-                & $\tVar$ & type variable \\
-                & $\tArrow{\type}{\row}{\type}{\row}$ & arrow type \\
-                & $\tForall{\tVar}{\type}{\row}$ & universal type \\
+                $\colorType{\type} \Coloneqq$ & & types: \\
+                & $\colorType{\tVar}$ & type variable \\
+                & $\colorType{\tArrow{\type}{\row}{\type}{\row}}$ & arrow type \\
+                & $\colorType{\tForall{\tVar}{\type}{\row}}$ & universal type \\
                 \\
                 $\colorRow{\row} \Coloneqq$ & & rows: \\
                 & $\colorRow{\rEmpty}$ & empty row \\
@@ -258,9 +259,9 @@
 
             \begin{prooftree}
                 \AxiomC{\Shortstack[c]{
-                  {$\tVar \notin \dom{\context}$}
+                  {$\colorType{\tVar} \notin \dom{\context}$}
                   {$\checkType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row_1}{\hoistedSet_1}$}
-                  {$\tVar \notin \ftv{\hoistedSet_1}$}
+                  {$\colorType{\tVar} \notin \ftv{\hoistedSet_1}$}
                   {$
                     \hoistedSet_2 =
                       \begin{cases}
@@ -400,7 +401,7 @@
             \end{prooftree}
 
             \begin{prooftree}
-                \AxiomC{$\tVar \notin \dom{\context}$}
+                \AxiomC{$\colorType{\tVar} \notin \dom{\context}$}
                 \AxiomC{$\hasType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row}$}
               \RightLabel{(\textsc{T-TAbs})}
               \BinaryInfC{$\hasType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForall{\tVar}{\type}{\row}}}{\rEmpty}$}
