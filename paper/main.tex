@@ -52,7 +52,7 @@
 \newtheorem{theorem}{Theorem}
 
 % Misc
-\newcommand\anno[2]{#1 : \colorType{#2}}
+\newcommand\anno[2]{#1 : #2}
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\parens[1]{\left( #1 \right)}
 \newcommand\fv[1]{\apply{\text{fv}}{#1}}
@@ -74,7 +74,7 @@
 \newcommand\eTApp[2]{#1 \; \colorType{#2}}
 \newcommand\eHandle[3]{\textbf{handle} \; \colorType{#1} \; \textbf{with} \; #2 \; \textbf{in} \; #3}
 \newcommand\eEffect[5]{\textbf{effect} \; \colorType{#1} \; \textbf{where} \; \anno{#2}{\tEmbellished{#3}{#4}} \; \textbf{in} \; #5}
-\newcommand\eAnno[2]{\anno{#1}{#2}}
+\newcommand\eAnno[2]{\anno{#1}{\colorType{#2}}}
 \newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types
@@ -83,7 +83,7 @@
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
 \newcommand\tForall[3]{\forall #1 \; . \; \tEmbellished{#2}{#3}}
-\newcommand\tEmbellished[2]{#1 \; ! \; \colorRow{#2}}
+\newcommand\tEmbellished[2]{\colorType{#1} \; ! \; \colorRow{#2}}
 
 % Rows
 \newcommand\colorRow[1]{\textcolor[RGB]{150, 26, 12}{#1}}
@@ -314,7 +314,7 @@
             \begin{prooftree}
                 \AxiomC{\Shortstack[c]{
                   {$\tEmbellished{\type_2}{\row_2} = \apply{\effectMap}{\colorType{\tVar}}$}
-                  {$\type_3 = \substitute{\type_2}{\colorRow{\rSingleton{\tVar}}}{\colorRow{\row_1}}$}
+                  {$\colorType{\type_3} = \colorType{\substitute{\type_2}{\colorRow{\rSingleton{\tVar}}}{\colorRow{\row_1}}}$}
                   {$\colorRow{\row_3} = \colorRow{\substitute{\row_2}{\rSingleton{\tVar}}{\row_1}}$}
                   {$\checkType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}{\hoistedSet_1}$}
                   {$\checkOrInferType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\tVar}}}{\hoistedSet_2}$}
@@ -338,7 +338,7 @@
 
             \begin{prooftree}
                 \AxiomC{$\inferType{\context}{\effectMap}{\term}{\type_2}{\row}{\hoistedSet}$}
-                \AxiomC{$\type_1 = \type_2$}
+                \AxiomC{$\colorType{\type_1} = \colorType{\type_2}$}
               \RightLabel{(\textsc{T-Sub})}
               \BinaryInfC{$\checkType{\context}{\effectMap}{\term}{\type_1}{\row}{\hoistedSet}$}
             \end{prooftree}
@@ -422,7 +422,7 @@
             \begin{prooftree}
                 \AxiomC{\Shortstack[c]{
                   {$\tEmbellished{\type_2}{\row_2} = \apply{\effectMap}{\colorType{\tVar}}$}
-                  {$\type_3 = \substitute{\type_2}{\colorRow{\rSingleton{\tVar}}}{\colorRow{\row_1}}$}
+                  {$\colorType{\type_3} = \colorType{\substitute{\type_2}{\colorRow{\rSingleton{\tVar}}}{\colorRow{\row_1}}}$}
                   {$\colorRow{\row_3} = \colorRow{\substitute{\row_2}{\rSingleton{\tVar}}{\row_1}}$}
                   {$\hasType{\context}{\effectMap}{\term_1}{\type_3}{\row_3}$}
                   {$\hasType{\context}{\effectMap}{\term_2}{\type_1}{\rUnion{\row_1}{\rSingleton{\tVar}}}$}
