@@ -301,4 +301,35 @@
           \end{mdframed}
         \end{figure}
 
+      \subsubsection{Typing}
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \framebox{
+                $\checkType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedTerms}{\term}$
+                \qquad
+                $\inferType{\context}{\effectMap}{\term}{\type}{\row}{\hoistedTerms}{\term}$
+              }
+            \end{center}
+
+            \medskip
+
+            \begin{prooftree}
+                \AxiomC{$\tEmbellished{\type}{\row_2} = \apply{\context}{\eVar_1}$}
+                \AxiomC{$
+                  \parens{\hoistedTerms, \term} =
+                    \begin{cases}
+                      \parens{\hEmpty, \eVar_1} & \text{if } \subrow{\row_2}{\row_1} \\
+                      \parens{\hSingleton{\eVar_2}{\eVar_1}{\type}, \eVar_2} \; \text{where} \; \fresh{\eVar_2} & \text{if } \nSubrow{\row_2}{\row_1}
+                    \end{cases}
+                $}
+              \RightLabel{(\textsc{T-Var})}
+              \BinaryInfC{$\inferType{\context}{\effectMap}{\eVar_1}{\type}{\row_1}{\hoistedTerms}{\term}$}
+            \end{prooftree}
+
+            \caption{Type inference for the source language}\label{fig:source_typing}
+          \end{mdframed}
+        \end{figure}
+
 \end{document}
