@@ -92,9 +92,9 @@
 \newcommand\rSingleton[1]{\left\{ \colorType{#1} \right\}}
 \newcommand\rUnion[2]{#1 \cup #2}
 
-% Hoisted term sets
-\newcommand\hoistedSet{\Delta}
-\newcommand\hSingleton[3]{\left\{ \anno{#1}{\tEmbellished{#2}{#3}} \right\}}
+% Hoisted terms
+\newcommand\hoistedTerms{\Delta}
+\newcommand\hSingleton[3]{\left\{ #1 \mapsto \anno{#2}{\colorType{#3}} \right\}}
 \newcommand\hEmpty{\varnothing}
 \newcommand\hUnion[2]{#1 \cup #2}
 
@@ -114,10 +114,11 @@
 \newcommand\nSubrowSym{\nsubseteq}
 \newcommand\subrow[2]{\colorRow{#1} \subrowSym \colorRow{#2}}
 \newcommand\nSubrow[2]{\colorRow{#1} \nSubrowSym \colorRow{#2}}
-\newcommand\checkType[6]{#1 ; #2 \vdash #3 \Downarrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
-\newcommand\inferType[6]{#1 ; #2 \vdash #3 \Uparrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
+\newcommand\checkType[7]{#1 ; #2 \vdash #3 \Downarrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6; #7}
+\newcommand\inferType[7]{#1 ; #2 \vdash #3 \Uparrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6; #7}
 \newcommand\checkOrInferType[6]{#1 ; #2 \vdash #3 \Updownarrow \colorType{\tEmbellished{#4}{#5}} \; | \; #6}
 \newcommand\hasType[5]{#1 ; #2 \vdash \anno{#3}{\tEmbellished{#4}{#5}}}
+\newcommand\fresh[1]{#1 \; \text{fresh}}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -176,10 +177,10 @@
                 & $\colorRow{\rSingleton{\tVar}}$ & singleton row \\
                 & $\colorRow{\rUnion{\row}{\row}}$ & row union \\
                 \\
-                $\hoistedSet \Coloneqq$ & & hoisted term sets: \\
-                & $\hEmpty$ & empty hoisted term set \\
-                & $\hSingleton{\term}{\type}{\row}$ & singleton hoisted term set \\
-                & $\hUnion{\hoistedSet}{\hoistedSet}$ & hoisted term set union \\
+                $\hoistedTerms \Coloneqq$ & & hoisted term maps: \\
+                & $\hEmpty$ & empty hoisted term map \\
+                & $\hSingleton{\eVar}{\term}{\type}$ & singleton hoisted term map \\
+                & $\hUnion{\hoistedTerms}{\hoistedTerms}$ & hoisted term map union \\
                 \\
                 $\context \Coloneqq$ & & contexts: \\
                 & $\cEmpty$ & empty context \\
