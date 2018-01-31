@@ -192,6 +192,51 @@
           \end{mdframed}
         \end{figure}
 
+      \subsubsection{Subrow Relation}
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \framebox{$\subrow{\row}{\row}$}
+            \end{center}
+
+            \medskip
+
+            \begin{prooftree}
+                \AxiomC{}
+              \RightLabel{(\textsc{R-Empty})}
+              \UnaryInfC{$\subrow{\rEmpty}{\row}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{}
+              \RightLabel{(\textsc{R-SingletonRefl})}
+              \UnaryInfC{$\subrow{\rSingleton{\tVar}}{\rSingleton{\tVar}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\subrow{\rSingleton{\tVar}}{\row_1}$}
+              \RightLabel{(\textsc{R-SingletonLeft})}
+              \UnaryInfC{$\subrow{\rSingleton{\tVar}}{\rUnion{\row_1}{\row_2}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\subrow{\rSingleton{\tVar}}{\row_2}$}
+              \RightLabel{(\textsc{R-SingletonRight})}
+              \UnaryInfC{$\subrow{\rSingleton{\tVar}}{\rUnion{\row_1}{\row_2}}$}
+            \end{prooftree}
+
+            \begin{prooftree}
+                \AxiomC{$\subrow{\row_1}{\row_3}$}
+                \AxiomC{$\subrow{\row_2}{\row_3}$}
+              \RightLabel{(\textsc{R-Union})}
+              \BinaryInfC{$\subrow{\rUnion{\row_1}{\row_2}}{\row_3}$}
+            \end{prooftree}
+
+            \caption{Subrow relation}\label{fig:subrow_relation}
+          \end{mdframed}
+        \end{figure}
+
       \subsubsection{Typing}
 
         In the following rules, terms are considered equivalent up to $\alpha$-conversion, and likewise for types. Effect row union is considered associative and commutative.
