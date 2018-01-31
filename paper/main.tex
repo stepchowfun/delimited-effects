@@ -177,11 +177,6 @@
                 & $\colorRow{\rSingleton{\tVar}}$ & singleton row \\
                 & $\colorRow{\rUnion{\row}{\row}}$ & row union \\
                 \\
-                $\hoistedTerms \Coloneqq$ & & hoisted term maps: \\
-                & $\hEmpty$ & empty hoisted term map \\
-                & $\hSingleton{\eVar}{\term}{\type}$ & singleton hoisted term map \\
-                & $\hUnion{\hoistedTerms}{\hoistedTerms}$ & hoisted term map union \\
-                \\
                 $\context \Coloneqq$ & & contexts: \\
                 & $\cEmpty$ & empty context \\
                 & $\cTExtend{\context}{\eVar}{\type}{\row}$ & variable binding \\
@@ -294,6 +289,11 @@
                 & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
                 & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
                 & $\eAnno{\term}{\type}$ & type annotation \\
+                \\
+                $\hoistedTerms \Coloneqq$ & & hoisted term maps: \\
+                & $\hEmpty$ & empty hoisted term map \\
+                & $\hSingleton{\eVar}{\term}{\type}$ & singleton hoisted term map \\
+                & $\hUnion{\hoistedTerms}{\hoistedTerms}$ & hoisted term map union \\
               \end{tabular}
             \end{center}
 
