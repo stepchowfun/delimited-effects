@@ -1,11 +1,16 @@
 module SubrowSpec (subrowSpec) where
 
-import Lib (Row(..), typeVars, rowContains, subrow)
+import Lib (Row(..), TypeVar, typeVars, subrow)
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (property)
 
 -- Helper functions
+
+rowContains :: TypeVar -> Row -> Bool
+rowContains _  REmpty          = False
+rowContains x1 (RSingleton x2) = x1 == x2
+rowContains x  (RUnion r1 r2 ) = rowContains x r1 || rowContains x r2
 
 contained :: Row -> Row -> Bool
 contained r1 r2 =
