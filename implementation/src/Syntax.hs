@@ -9,7 +9,6 @@ module Syntax
   , contextLookupKind
   , contextLookupType
   , effectMapLookup
-  , rowContains
   , substituteEffectInRow
   , substituteEffectInType
   , substituteTypeInType
@@ -210,8 +209,3 @@ substituteTypeInType a t3 (TArrow t1 r1 t2 r2) =
 substituteTypeInType a1 t1 (TForall a2 t2 r) = if a1 == a2
   then TForall a2 t2 r
   else TForall a2 (substituteTypeInType a1 t1 t2) r
-
-rowContains :: TypeVar -> Row -> Bool
-rowContains _  REmpty          = False
-rowContains x1 (RSingleton x2) = x1 == x2
-rowContains x  (RUnion r1 r2 ) = rowContains x r1 || rowContains x r2

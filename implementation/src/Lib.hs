@@ -15,7 +15,6 @@ module Lib
   , effectMapLookup
   , infer
   , maybeToPartial
-  , rowContains
   , subrow
   , substituteEffectInRow
   , substituteEffectInType
@@ -40,7 +39,6 @@ import Syntax
   , contextLookupKind
   , contextLookupType
   , effectMapLookup
-  , rowContains
   , substituteEffectInRow
   , substituteEffectInType
   , substituteTypeInType
