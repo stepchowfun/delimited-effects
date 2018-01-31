@@ -24,10 +24,10 @@ import qualified Data.Set as Set
 
 -- Data types
 
-newtype TermVar = TermVar String -- Metavariable x
+newtype TermVar = TermVar String -- Metavariable: x
   deriving (Eq, Show)
 
-newtype TypeVar = TypeVar String -- Metavariable a
+newtype TypeVar = TypeVar String -- Metavariable: a
   deriving (Eq, Show)
 
 data Term -- Metavariable: e
@@ -78,6 +78,7 @@ instance Eq Row where
           toSet (RUnion r1' r2') = Set.union (toSet r1') (toSet r2')
 
 -- Arbitrary instances
+
 termVars :: [TermVar]
 termVars =
   map TermVar ["TermVarV", "TermVarW", "TermVarX", "TermVarY", "TermVarZ"]
