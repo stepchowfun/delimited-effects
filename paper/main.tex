@@ -149,7 +149,7 @@
 
   \section{Overview}
 
-    \subsection{The source language}
+    \subsection{The core language}
 
       \subsubsection{Syntax}
 
@@ -159,13 +159,13 @@
               \begin{tabular}{l l l}
                 $\term \Coloneqq$ & & terms: \\
                 & $\eVar$ & variable \\
-                & $\eAbs{\eVar}{\term}$ & abstraction \\
+                & $\eAbsAnno{\eVar}{\type}{\row}{\term}$ & abstraction \\
                 & $\eApp{\term}{\term}$ & application \\
                 & $\eTAbs{\tVar}{\term}$ & type abstraction \\
                 & $\eTApp{\term}{\type}$ & type application \\
                 & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
                 & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
-                & $\eAnno{\term}{\type}$ & type annotation \\
+                & $\eDo{\eVar}{\term}{\term}$ & sequence \\
                 \\
                 $\colorType{\type} \Coloneqq$ & & types: \\
                 & $\colorType{\tVar}$ & type variable \\
@@ -193,31 +193,7 @@
               \end{tabular}
             \end{center}
 
-            \caption{Syntax of the source language}\label{fig:source_syntax}
-          \end{mdframed}
-        \end{figure}
-
-    \subsection{The target language}
-
-      \subsubsection{Syntax}
-
-        \begin{figure}[H]
-          \begin{mdframed}[backgroundcolor=none]
-            \begin{center}
-              \begin{tabular}{l l l}
-                $\term \Coloneqq$ & & terms: \\
-                & $\eVar$ & variable \\
-                & $\eAbsAnno{\eVar}{\type}{\row}{\term}$ & abstraction \\
-                & $\eApp{\term}{\term}$ & application \\
-                & $\eTAbs{\tVar}{\term}$ & type abstraction \\
-                & $\eTApp{\term}{\type}$ & type application \\
-                & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
-                & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
-                & $\eDo{\eVar}{\term}{\term}$ & sequence \\
-              \end{tabular}
-            \end{center}
-
-            \caption{Syntax for terms of the target language}\label{fig:target_syntax}
+            \caption{Syntax of the core language}\label{fig:core_syntax}
           \end{mdframed}
         \end{figure}
 
@@ -297,7 +273,31 @@
               \BinaryInfC{$\hasType{\context}{\effectMap}{\term}{\type}{\row_2}$}
             \end{prooftree}
 
-            \caption{Typing rules for the target language}\label{fig:target_typing}
+            \caption{Typing rules for the core language}\label{fig:core_typing}
+          \end{mdframed}
+        \end{figure}
+
+    \subsection{The source language}
+
+      \subsubsection{Syntax}
+
+        \begin{figure}[H]
+          \begin{mdframed}[backgroundcolor=none]
+            \begin{center}
+              \begin{tabular}{l l l}
+                $\term \Coloneqq$ & & terms: \\
+                & $\eVar$ & variable \\
+                & $\eAbs{\eVar}{\term}$ & abstraction \\
+                & $\eApp{\term}{\term}$ & application \\
+                & $\eTAbs{\tVar}{\term}$ & type abstraction \\
+                & $\eTApp{\term}{\type}$ & type application \\
+                & $\eEffect{\tVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
+                & $\eHandle{\tVar}{\term}{\term}$ & effect handler \\
+                & $\eAnno{\term}{\type}$ & type annotation \\
+              \end{tabular}
+            \end{center}
+
+            \caption{Syntax for terms of the source language}\label{fig:source_syntax}
           \end{mdframed}
         \end{figure}
 
