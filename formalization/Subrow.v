@@ -6,6 +6,7 @@
 (*****************************)
 (*****************************)
 
+Require Import Main.Tactics.
 Require Import Main.Syntax.
 
 Inductive subrow : row -> row -> Prop :=
@@ -27,3 +28,31 @@ Inductive subrow : row -> row -> Prop :=
   subrow r1 r3 ->
   subrow r2 r3 ->
   subrow (rUnion r1 r2) r3.
+
+Hint Constructors subrow.
+
+Inductive rowContains : row -> nat -> Prop :=
+| rcSingleton :
+  forall a,
+  rowContains (rSingleton a) a
+| rcUnionLeft :
+  forall r1 r2 a,
+  rowContains r1 a ->
+  rowContains (rUnion r1 r2) a
+| rcUnionRight :
+  forall r1 r2 a,
+  rowContains r2 a ->
+  rowContains (rUnion r1 r2) a.
+
+Hint Constructors rowContains.
+
+Theorem subrowCorrect :
+  forall r1 r2,
+  (forall a, rowContains r1 a -> rowContains r2 a) <-> subrow r1 r2.
+Proof.
+  split; intros.
+  - induction r1; magic.
+    specialize (H n); feed H; magic.
+    induction r2; inversion H; magic.
+  - induction H; inversion H0; magic.
+Qed.
