@@ -6,8 +6,9 @@
 (*****************************)
 (*****************************)
 
-Require Import Main.Tactics.
+Require Import Main.Name.
 Require Import Main.Syntax.
+Require Import Main.Tactics.
 
 Inductive subrow : row -> row -> Prop :=
 | rsEmpty :
@@ -31,7 +32,7 @@ Inductive subrow : row -> row -> Prop :=
 
 Hint Constructors subrow.
 
-Inductive rowContains : row -> nat -> Prop :=
+Inductive rowContains : row -> name -> Prop :=
 | rcSingleton :
   forall a,
   rowContains (rSingleton a) a
