@@ -6,43 +6,43 @@
 (********************)
 (********************)
 
-(* NOTE: We will use De Bruijn indices instead of variable names. *)
+Require Import Main.Name.
 
 (* Terms (e) *)
 
 Inductive term : Type :=
-| eVar : nat -> term (* Metavariable: x *)
-| eAbs : type -> row -> term -> term
+| eVar : name -> term (* Metavariable: x *)
+| eAbs : name -> type -> row -> term -> term
 | eApp : term -> term -> term
-| eTAbs : term -> term
+| eTAbs : name -> term -> term
 | eTApp : term -> type -> term
-| eEffect : type -> row -> term -> term
-| eHandle : nat -> term -> term -> term
-| eDo : term -> term -> term
+| eEffect : name -> name -> type -> row -> term -> term
+| eHandle : name -> term -> term -> term
+| eDo : name -> term -> term -> term
 
 (* Proper types (t) *)
 
 with type : Type :=
-| tVar : nat -> type (* Metavariable: a *)
+| tVar : name -> type (* Metavariable: a *)
 | tArrow : type -> row -> type -> row -> type
-| tForall : type -> row -> type
+| tForall : name -> type -> row -> type
 
 (* Rows (r) *)
 
 with row : Type :=
 | rEmpty : row
-| rSingleton : nat -> row
+| rSingleton : name -> row
 | rUnion : row -> row -> row
 
 (* Type contexts (c) *)
 
 with context : Type :=
 | cEmpty : context
-| cTExtend : context -> nat -> type -> row -> context
-| cKExtend : context -> nat -> context
+| cTExtend : context -> name -> type -> row -> context
+| cKExtend : context -> name -> context
 
 (* Effect map (em) *)
 
 with effectMap : Type :=
 | emEmpty : effectMap
-| emExtend : effectMap -> nat -> type -> row -> effectMap.
+| emExtend : effectMap -> name -> type -> row -> effectMap.
