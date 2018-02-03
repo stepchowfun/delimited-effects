@@ -20,7 +20,7 @@ end
 
 body = "[Here](https://s3.amazonaws.com/stephan-misc/paper/branch-" \
   "#{ENV['TRAVIS_PULL_REQUEST_BRANCH']}.pdf) is a link to the PDF " \
-  "generated from this PR."
+  "generated from this PR. This is an automated message."
 
 if !Octokit.issue_comments(
   ENV['TRAVIS_REPO_SLUG'],
