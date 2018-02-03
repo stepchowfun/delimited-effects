@@ -1,9 +1,12 @@
 os: linux
 dist: trusty
-language: generic
+language: ruby
+rvm:
+  - 2.4.3
 sudo: required
 services: docker
+install: gem install octokit --version 4.8.0
 script:
   - while sleep 1m; do echo "=====[ still running ]====="; done &
-  - make docker-build TRAVIS_DEPLOY=true
+  - make docker-build TRAVIS_DEPLOY=true && ./scripts/post-artifact-link.rb
   - kill %1
