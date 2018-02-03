@@ -7,7 +7,7 @@
 #   TRAVIS_PULL_REQUEST=123 \
 #   TRAVIS_PULL_REQUEST_BRANCH=foo \
 #   TRAVIS_REPO_SLUG=owner_name/repo_name \
-#   ./post-artifact-link.rb
+#   ./post-paper-link.rb
 
 exit if ENV['TRAVIS_PULL_REQUEST'] == 'false'
 

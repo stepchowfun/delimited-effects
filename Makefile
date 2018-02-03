@@ -1,12 +1,13 @@
 # Phony targets
 
 .PHONY: \
-  all test lint format clean \
+  all test lint format clean deploy \
   paper formalization implementation \
   test-implementation \
   lint-implementation \
   format-implementation \
   clean-paper clean-formalization clean-implementation \
+  deploy-paper \
   docker-deps docker-build
 
 all: paper formalization implementation
@@ -34,6 +35,8 @@ lint: lint-implementation
 format: format-implementation
 
 clean: clean-paper clean-formalization clean-implementation
+
+deploy: deploy-paper
 
 paper: main.pdf
 
@@ -101,6 +104,9 @@ clean-formalization:
 clean-implementation:
 	rm -rf implementation/.stack-work
 
+deploy-paper:
+	./scripts/upload-paper.sh
+
 docker-deps:
 	docker build \
 	  -f scripts/Dockerfile \
@@ -114,7 +120,7 @@ docker-build:
 	    --env "AWS_DEFAULT_REGION=$$AWS_DEFAULT_REGION" \
 	    --env "AWS_SECRET_ACCESS_KEY=$$AWS_SECRET_ACCESS_KEY" \
 	    --env "TRAVIS_BRANCH=$$TRAVIS_BRANCH" \
-	    --env "TRAVIS_DEPLOY=$$TRAVIS_DEPLOY" \
+	    --env "DEPLOY=$$DEPLOY" \
 	    --env "TRAVIS_PULL_REQUEST=$$TRAVIS_PULL_REQUEST" \
 	    --env "TRAVIS_PULL_REQUEST_BRANCH=$$TRAVIS_PULL_REQUEST_BRANCH" \
 	    --rm \
@@ -122,14 +128,17 @@ docker-build:
 	    stephanmisc/delimited-effects:deps \
 	    bash -c ' \
 	      chown -R user:user repo && \
+	      cd repo && \
 	      su user -s /bin/bash -l -c " \
-		cd repo && \
+	        cd repo && \
 	        make clean && \
 		make && \
 		make test && \
 		make lint \
-	      " && \
-	      ./repo/scripts/travis-deploy.sh \
+	      " && ( \
+		  test "$$DEPLOY" != true || \
+		    make deploy PDF_PATH=/home/user/repo/main.pdf \
+	      ) \
 	    ' \
 	)" && \
 	docker cp . "$$CONTAINER:/home/user/repo" && \
