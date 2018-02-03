@@ -8,14 +8,18 @@ set -eu -o pipefail
 #   AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
 #   AWS_DEFAULT_REGION=us-east-1 \
 #   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \
-#   TRAVIS_BRANCH=master \
+#   TRAVIS_BRANCH=foo \
 #   TRAVIS_DEPLOY=true \
-#   TRAVIS_PULL_REQUEST=false \
+#   TRAVIS_PULL_REQUEST=123 \
 #   ./travis-deploy.sh
 
-if [ "$TRAVIS_DEPLOY" = 'true' ] && [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
-  if [ "$TRAVIS_BRANCH" = 'master' ]; then
-    S3_DESTINATION='s3://stephan-misc/paper/latest.pdf'
+if [ "$TRAVIS_DEPLOY" = 'true' ]; then
+  if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
+    if [ "$TRAVIS_BRANCH" = 'master' ]; then
+      S3_DESTINATION='s3://stephan-misc/paper/latest.pdf'
+    else
+      exit
+    fi
   else
     S3_DESTINATION="s3://stephan-misc/paper/branch-$TRAVIS_BRANCH.pdf"
   fi
