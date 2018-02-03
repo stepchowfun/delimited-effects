@@ -9,7 +9,12 @@
 #   TRAVIS_REPO_SLUG=owner_name/repo_name \
 #   ./post-artifact-link.rb
 
-exit if ENV['TRAVIS_PULL_REQUEST'] == 'false'
+if ENV['TRAVIS_PULL_REQUEST'] == 'false'
+  puts 'TRAVIS_PULL_REQUEST == false, skipping.'
+  exit
+else
+  puts 'TRAVIS_PULL_REQUEST != false, continuing...'
+end
 
 require 'octokit'
 
@@ -26,9 +31,12 @@ if !Octokit.issue_comments(
   ENV['TRAVIS_REPO_SLUG'],
   ENV['TRAVIS_PULL_REQUEST']
 ).any? { |comment| comment.body == body }
-  Octokit.add_comment(
+  puts 'Posting comment to GitHub...'
+  puts Octokit.add_comment(
     ENV['TRAVIS_REPO_SLUG'],
     ENV['TRAVIS_PULL_REQUEST'],
     body
   )
 end
+
+puts 'Done.'
