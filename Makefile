@@ -132,12 +132,12 @@ docker-build:
 	      su user -s /bin/bash -l -c " \
 	        cd repo && \
 	        make clean && \
-		make && \
-		make test && \
-		make lint \
+	        make && \
+	        make test && \
+	        make lint \
 	      " && ( \
-		  test "$$DEPLOY" != true || \
-		    make deploy PDF_PATH=/home/user/repo/main.pdf \
+	        test "$$DEPLOY" != true || \
+	          make deploy PDF_PATH=/home/user/repo/main.pdf \
 	      ) \
 	    ' \
 	)" && \
