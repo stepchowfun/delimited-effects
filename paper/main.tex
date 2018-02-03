@@ -278,7 +278,7 @@
             \begin{prooftree}
                 \AxiomC{$\hasType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row}}}{\rEmpty}$}
               \RightLabel{(\textsc{T-TApp})}
-              \UnaryInfC{$\hasType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\row}$}
+              \UnaryInfC{$\hasType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\substitute{\row}{\tVar}{\type_2}}$}
             \end{prooftree}
 
             \begin{prooftree}
