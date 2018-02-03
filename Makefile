@@ -116,6 +116,7 @@ docker-build:
 	    --env "TRAVIS_BRANCH=$$TRAVIS_BRANCH" \
 	    --env "TRAVIS_DEPLOY=$$TRAVIS_DEPLOY" \
 	    --env "TRAVIS_PULL_REQUEST=$$TRAVIS_PULL_REQUEST" \
+	    --env "TRAVIS_PULL_REQUEST_BRANCH=$$TRAVIS_PULL_REQUEST_BRANCH" \
 	    --rm \
 	    --user=root \
 	    stephanmisc/delimited-effects:deps \

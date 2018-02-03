@@ -10,14 +10,22 @@ set -eu -o pipefail
 #   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \
 #   TRAVIS_BRANCH=master \
 #   TRAVIS_DEPLOY=true \
-#   TRAVIS_PULL_REQUEST=false \
+#   TRAVIS_PULL_REQUEST=123 \
+#   TRAVIS_PULL_REQUEST_BRANCH=foo \
 #   ./travis-deploy.sh
 
-if [ "$TRAVIS_DEPLOY" = 'true' ] && [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
-  if [ "$TRAVIS_BRANCH" = 'master' ]; then
-    S3_DESTINATION='s3://stephan-misc/paper/latest.pdf'
+S3_PREFIX='s3://stephan-misc/paper'
+
+if [ "$TRAVIS_DEPLOY" = 'true' ]; then
+  if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then
+    if [ "$TRAVIS_BRANCH" = 'master' ]; then
+      S3_SUFFIX='latest.pdf'
+    else
+      exit 0
+    fi
   else
-    S3_DESTINATION="s3://stephan-misc/paper/branch-$TRAVIS_BRANCH.pdf"
+    S3_SUFFIX="branch-$TRAVIS_PULL_REQUEST_BRANCH.pdf"
   fi
-  aws s3 cp --acl public-read /home/user/repo/main.pdf "$S3_DESTINATION"
+
+  aws s3 cp --acl public-read /home/user/repo/main.pdf "$S3_PREFIX/$S3_SUFFIX"
 fi
