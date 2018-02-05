@@ -6,5 +6,12 @@
 (*******************************************)
 (*******************************************)
 
-Parameter name : Set.
-Parameter nameEq : forall x1 x2 : name, { x1 = x2 } + { x1 <> x2 }.
+(* Term variables *)
+
+Parameter eName : Set.
+Parameter eNameEq : forall x1 x2 : eName, { x1 = x2 } + { x1 <> x2 }.
+
+(* Type variables *)
+
+Parameter tName : Set.
+Parameter tNameEq : forall x1 x2 : tName, { x1 = x2 } + { x1 <> x2 }.

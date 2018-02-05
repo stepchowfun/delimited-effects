@@ -32,7 +32,7 @@ Inductive subrow : row -> row -> Prop :=
 
 Hint Constructors subrow.
 
-Inductive rowContains : row -> name -> Prop :=
+Inductive rowContains : row -> tName -> Prop :=
 | rcSingleton :
   forall a,
   rowContains (rSingleton a) a
@@ -53,7 +53,7 @@ Theorem subrowCorrect :
 Proof.
   split; intros.
   - induction r1; magic.
-    specialize (H n); feed H; magic.
+    specialize (H t). feed H; magic.
     induction r2; inversion H; magic.
   - induction H; inversion H0; magic.
 Qed.

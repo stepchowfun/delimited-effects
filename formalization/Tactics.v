@@ -8,9 +8,8 @@
 
 Require Import Omega.
 
-(* This tactic removes superfluous hypotheses. *)
-
-Ltac clean := repeat (
+(* This is like the `inversion` tactic, but leaves less junk around. *)
+Ltac invert H := inversion H; clear H; repeat (
   match goal with
   | [ H : ?x = ?y |- _ ] => (is_var y; subst x) || (is_var x; subst y)
   | [ H : ?x = ?x |- _ ] => clear H
@@ -23,7 +22,6 @@ Ltac clean := repeat (
 *)
 
 Ltac magic := try abstract (
-  clean;
   cbn;
   intros;
   f_equal;
@@ -42,3 +40,10 @@ Ltac feed H1 := let H2 := fresh "H" in
   match type of H1 with
   | ?T -> _ => assert (H2 : T); [ | specialize (H1 H2); clear H2 ]
   end.
+
+(*
+  This tactic takes a given term and adds its type to the context as a new
+  hypothesis.
+*)
+
+Ltac fact E := let H := fresh "H" in pose (H := E); clearbody H.
