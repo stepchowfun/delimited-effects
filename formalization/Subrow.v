@@ -12,7 +12,8 @@ Require Import Main.Tactics.
 
 Inductive subrow : row -> row -> Prop :=
 | rsEmpty :
-  forall r, subrow rEmpty r
+  forall r,
+  subrow rEmpty r
 | rsSingletonRefl :
   forall a,
   subrow (rSingleton a) (rSingleton a)
@@ -37,11 +38,11 @@ Inductive rowContains : row -> tName -> Prop :=
   forall a,
   rowContains (rSingleton a) a
 | rcUnionLeft :
-  forall r1 r2 a,
+  forall a r1 r2,
   rowContains r1 a ->
   rowContains (rUnion r1 r2) a
 | rcUnionRight :
-  forall r1 r2 a,
+  forall a r1 r2,
   rowContains r2 a ->
   rowContains (rUnion r1 r2) a.
 
