@@ -22,7 +22,7 @@ check c em (EAbs x e) (TArrow t2 r2 t1 r1) _ =
   check (CTExtend c x t2 r2) em e t1 r1
 check _ _ (EAbs _ _) _ _ =
   abort "Checking for arrow types only succeeds on term abstractions."
-check c em (ETAbs a1 e) (TForall a2 t r1) _ = do
+check c em (ETAbs a1 e) (TForAll a2 t r1) _ = do
   assert
     (a1 == a2)
     (  "Checking for universal types only succeeds when the type"
@@ -88,7 +88,7 @@ infer _ _ (ETAbs _ _) _ =
 infer c em (ETApp e t2) r2 = do
   t3 <- infer c em e r2
   case t3 of
-    TForall a t1 r1 -> do
+    TForAll a t1 r1 -> do
       let t4 = substituteTypeInType a t2 t1
       assert
         (subrow r1 r2)
@@ -96,7 +96,7 @@ infer c em (ETApp e t2) r2 = do
         ++ "subsumed by the effects on the type application."
         )
       return t4
-    _ -> abort "The type of a type applicand must be a forall."
+    _ -> abort "The type of a type applicand must be a universal type."
 infer c em (EEffect a x t1 r1 e) r2 =
   infer (CTExtend c x t1 r1) (EMExtend em a t1 r1) e r2
 infer c em (EHandle a e1 e2) r1 = do

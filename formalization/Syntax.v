@@ -25,7 +25,7 @@ Inductive term : Type :=
 with type : Type :=
 | tVar : name -> type (* Metavariable: a *)
 | tArrow : type -> row -> type -> row -> type
-| tForall : name -> type -> row -> type
+| tForAll : name -> type -> row -> type
 
 (* Rows (r) *)
 

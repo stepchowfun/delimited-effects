@@ -82,7 +82,7 @@
 \newcommand\type{\tau}
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
-\newcommand\tForall[3]{\forall #1 \; . \; \tEmbellished{#2}{#3}}
+\newcommand\tForAll[3]{\forall #1 \; . \; \tEmbellished{#2}{#3}}
 \newcommand\tEmbellished[2]{\colorType{#1} \; ! \; \colorRow{#2}}
 
 % Rows
@@ -170,7 +170,7 @@
                 $\colorType{\type} \Coloneqq$ & & types: \\
                 & $\colorType{\tVar}$ & type variable \\
                 & $\colorType{\tArrow{\type}{\row}{\type}{\row}}$ & arrow type \\
-                & $\colorType{\tForall{\tVar}{\type}{\row}}$ & universal type \\
+                & $\colorType{\tForAll{\tVar}{\type}{\row}}$ & universal type \\
                 \\
                 $\colorRow{\row} \Coloneqq$ & & rows: \\
                 & $\colorRow{\rEmpty}$ & empty row \\
@@ -272,11 +272,11 @@
                 \AxiomC{$\colorType{\tVar} \notin \dom{\context}$}
                 \AxiomC{$\hasType{\cKExtend{\context}{\tVar}}{\effectMap}{\term}{\type}{\row}$}
               \RightLabel{(\textsc{T-TAbs})}
-              \BinaryInfC{$\hasType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForall{\tVar}{\type}{\row}}}{\rEmpty}$}
+              \BinaryInfC{$\hasType{\context}{\effectMap}{\eTAbs{\tVar}{\term}}{\parens{\tForAll{\tVar}{\type}{\row}}}{\rEmpty}$}
             \end{prooftree}
 
             \begin{prooftree}
-                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\parens{\tForall{\tVar}{\type_1}{\row}}}{\rEmpty}$}
+                \AxiomC{$\hasType{\context}{\effectMap}{\term}{\parens{\tForAll{\tVar}{\type_1}{\row}}}{\rEmpty}$}
               \RightLabel{(\textsc{T-TApp})}
               \UnaryInfC{$\hasType{\context}{\effectMap}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\substitute{\row}{\colorType{\tVar}}{\colorType{\type_2}}}$}
             \end{prooftree}
