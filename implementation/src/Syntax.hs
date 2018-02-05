@@ -44,7 +44,7 @@ data Term -- Metavariable: e
 data Type -- Metavariable: t
   = TVar TypeVar
   | TArrow Type Row Type Row
-  | TForall TypeVar Type Row
+  | TForAll TypeVar Type Row
   deriving (Eq, Show)
 
 data Row -- Metavariable: r
@@ -123,12 +123,12 @@ instance Arbitrary Type where
   arbitrary = frequency
     [ (16, TVar <$> arbitrary)
     , (3, TArrow <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary)
-    , (3, TForall <$> arbitrary <*> arbitrary <*> arbitrary) ]
+    , (3, TForAll <$> arbitrary <*> arbitrary <*> arbitrary) ]
   shrink (TVar _) = []
   shrink (TArrow t1 r1 t2 r2) =
     [TArrow t1' r1' t2' r2' | (t1', r1', t2', r2') <- shrink (t1, r1, t2, r2)]
-  shrink (TForall a t r) =
-    [TForall a' t' r' | (a', t', r') <- shrink (a, t, r)]
+  shrink (TForAll a t r) =
+    [TForAll a' t' r' | (a', t', r') <- shrink (a, t, r)]
 
 instance Arbitrary Row where
   arbitrary = frequency
@@ -200,13 +200,13 @@ substituteEffectInType a r3 (TArrow t1 r1 t2 r2) = TArrow
   (substituteEffectInRow a r3 r1)
   (substituteEffectInType a r3 t2)
   (substituteEffectInRow a r3 r2)
-substituteEffectInType a1 r1 (TForall a2 t r2) =
-  TForall a2 (substituteEffectInType a1 r1 t) (substituteEffectInRow a1 r1 r2)
+substituteEffectInType a1 r1 (TForAll a2 t r2) =
+  TForAll a2 (substituteEffectInType a1 r1 t) (substituteEffectInRow a1 r1 r2)
 
 substituteTypeInType :: TypeVar -> Type -> Type -> Type
 substituteTypeInType a1 t (TVar a2) = if a1 == a2 then t else (TVar a2)
 substituteTypeInType a t3 (TArrow t1 r1 t2 r2) =
   TArrow (substituteTypeInType a t3 t1) r1 (substituteTypeInType a t3 t2) r2
-substituteTypeInType a1 t1 (TForall a2 t2 r) = if a1 == a2
-  then TForall a2 t2 r
-  else TForall a2 (substituteTypeInType a1 t1 t2) r
+substituteTypeInType a1 t1 (TForAll a2 t2 r) = if a1 == a2
+  then TForAll a2 t2 r
+  else TForAll a2 (substituteTypeInType a1 t1 t2) r
