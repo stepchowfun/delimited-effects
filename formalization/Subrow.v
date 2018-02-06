@@ -10,6 +10,8 @@ Require Import Main.Name.
 Require Import Main.Syntax.
 Require Import Main.Tactics.
 
+Import Name.
+
 Inductive subrow : row -> row -> Prop :=
 | rsEmpty :
   forall r,

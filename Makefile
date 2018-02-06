@@ -15,7 +15,7 @@ all: paper formalization implementation
 test: test-implementation
 
 lint: lint-implementation
-	./scripts/check-line-lengths.sh $(shell \
+	for file in $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
 	    -path ./.github -o \
@@ -30,7 +30,7 @@ lint: lint-implementation
 	    -name 'Dockerfile' -o \
 	    -name 'Makefile' \
 	  \) -print \
-	)
+	); do ./scripts/general-lint.sh "$$file" || exit 1; done
 
 format: format-implementation
 
