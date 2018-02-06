@@ -8,6 +8,8 @@
 
 Require Import Main.Name.
 
+Import Name.
+
 (* Terms (e) *)
 
 Inductive term : Type :=
