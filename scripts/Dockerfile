@@ -12,7 +12,12 @@ RUN \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc
 
+# Without this, Ruby will assume that files are encoded as ASCII.
+RUN echo 'export LANG="C.UTF-8"' >> ~/.profile
+
 RUN pip install 'awscli==1.14.*'
+
+RUN gem install octokit --version '~> 4.8.0'
 
 # The Stack installation script apparently uses apt-get.
 RUN \
@@ -34,6 +39,6 @@ RUN \
 
 RUN stack setup --resolver lts-10.4
 
-# The `mkdir` command is needed to work around a bug in brittany.
-# See https://github.com/lspitzner/brittany/issues/115 for details.
+# This is needed to work around a bug in brittany. See
+# https://github.com/lspitzner/brittany/issues/115 for details.
 RUN mkdir "$HOME/.config" && stack install brittany

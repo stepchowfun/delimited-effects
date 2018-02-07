@@ -1,13 +1,12 @@
 # Phony targets
 
 .PHONY: \
-  all test lint format clean deploy \
+  all test lint format clean \
   paper formalization implementation \
   test-implementation \
   lint-implementation \
   format-implementation \
   clean-paper clean-formalization clean-implementation \
-  deploy-paper \
   docker-deps docker-build
 
 all: paper formalization implementation
@@ -15,7 +14,7 @@ all: paper formalization implementation
 test: test-implementation
 
 lint: lint-implementation
-	for file in $(shell \
+	./scripts/general-lint.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
 	    -path ./.github -o \
@@ -24,19 +23,18 @@ lint: lint-implementation
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' -o \
+	    -name '*.rb' -o \
 	    -name '*.sh' -o \
 	    -name '*.v' -o \
 	    -name '*.yml' -o \
 	    -name 'Dockerfile' -o \
 	    -name 'Makefile' \
 	  \) -print \
-	); do ./scripts/general-lint.sh "$$file" || exit 1; done
+	)
 
 format: format-implementation
 
 clean: clean-paper clean-formalization clean-implementation
-
-deploy: deploy-paper
 
 paper: main.pdf
 
@@ -104,9 +102,6 @@ clean-formalization:
 clean-implementation:
 	rm -rf implementation/.stack-work
 
-deploy-paper:
-	./scripts/upload-paper.sh
-
 docker-deps:
 	docker build \
 	  -f scripts/Dockerfile \
@@ -119,10 +114,12 @@ docker-build:
 	    --env "AWS_ACCESS_KEY_ID=$$AWS_ACCESS_KEY_ID" \
 	    --env "AWS_DEFAULT_REGION=$$AWS_DEFAULT_REGION" \
 	    --env "AWS_SECRET_ACCESS_KEY=$$AWS_SECRET_ACCESS_KEY" \
-	    --env "TRAVIS_BRANCH=$$TRAVIS_BRANCH" \
 	    --env "DEPLOY=$$DEPLOY" \
+	    --env "GITHUB_TOKEN=$$GITHUB_TOKEN" \
+	    --env "TRAVIS_BRANCH=$$TRAVIS_BRANCH" \
 	    --env "TRAVIS_PULL_REQUEST=$$TRAVIS_PULL_REQUEST" \
 	    --env "TRAVIS_PULL_REQUEST_BRANCH=$$TRAVIS_PULL_REQUEST_BRANCH" \
+	    --env "TRAVIS_REPO_SLUG=$$TRAVIS_REPO_SLUG" \
 	    --rm \
 	    --user=root \
 	    stephanmisc/delimited-effects:deps \
@@ -135,10 +132,7 @@ docker-build:
 	        make && \
 	        make test && \
 	        make lint \
-	      " && ( \
-	        test "$$DEPLOY" != true || \
-	          make deploy PDF_PATH=/home/user/repo/main.pdf \
-	      ) \
+	      " && (test "$$DEPLOY" != true || ./scripts/deploy.rb) \
 	    ' \
 	)" && \
 	docker cp . "$$CONTAINER:/home/user/repo" && \
