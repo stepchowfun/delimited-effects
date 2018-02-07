@@ -3,15 +3,16 @@ FROM debian:stretch
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    build-essential=12.3 \
-    coq=8.6-4 \
-    curl=7.52.1-5+deb9u3 \
-    python-pip=9.0.1-2 \
-    texlive-full=2016.20170123-5 && \
+    'build-essential=12.3' \
+    'coq=8.6-*' \
+    'curl=7.52.*' \
+    'python-pip=9.0.*' \
+    'ruby=1:2.3.*' \
+    'texlive-full=2016.*' && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc
 
-RUN pip install awscli==1.14.28
+RUN pip install 'awscli==1.14.*'
 
 # The Stack installation script apparently uses apt-get.
 RUN \
@@ -31,7 +32,7 @@ RUN \
   mkdir -p "$HOME/.local/bin" && \
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 
-RUN stack setup --resolver lts-10.3
+RUN stack setup --resolver lts-10.4
 
 # The `mkdir` command is needed to work around a bug in brittany.
 # See https://github.com/lspitzner/brittany/issues/115 for details.
