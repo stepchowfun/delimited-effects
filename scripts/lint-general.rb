@@ -3,7 +3,7 @@
 # This script applies basic general linting to a list of source files.
 #
 # Usage:
-#   ./general-lint.rb path1 path2 path3 ...
+#   ./scripts/lint-general.rb path1 path2 path3 ...
 
 # Iterate over the input files.
 ARGV.each do |path|

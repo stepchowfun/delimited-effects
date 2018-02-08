@@ -14,7 +14,7 @@ all: paper formalization implementation
 test: test-implementation
 
 lint: lint-implementation
-	./scripts/general-lint.rb $(shell \
+	./scripts/lint-general.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
 	    -path ./.github -o \
@@ -31,6 +31,7 @@ lint: lint-implementation
 	    -name 'Makefile' \
 	  \) -print \
 	)
+	./scripts/lint-tex.rb paper/main.tex
 
 format: format-implementation
 
