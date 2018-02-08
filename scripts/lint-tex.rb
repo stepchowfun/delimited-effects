@@ -6,51 +6,61 @@
 # Usage:
 #   ./scripts/lint-tex.rb path
 
+MACRO_REGEX = /\\newcommand\s*\\(\w+)\s*(\[\s*([0-9]+)\s*\])?\s*{/
+
 def check(path, line_num, macros, s)
-  split = s.split(/\\(\w+)/, 2)
+  # Split the string into [prefix, macro, suffix], or [s, '', ''] if no macro
+  # was found.
+  prefix, macro, suffix = s.partition(/\\(\w+)/)
+  macro_name = macro[1..-1]
+
+  # Return to the parent if there are no macros in the string.
+  return s.partition('}').last if macro.empty?
 
   # Return to the parent if we encounter a closing brace before the next
   # macro to be processed.
-  prefix = split[0] || ''
   return s.partition('}').last if prefix.include?('}')
 
-  # If the split failed, then there is no macro in the string, so we
-  # are done checking it and return an empty string.
-  return '' if split.length < 3
-  _, macro, remainder = split
-
-  # Check each argument.
-  arg_count = 0
-  while remainder[0] == '{'
-    remainder = check(path, line_num, macros, remainder[1..-1])
-    arg_count += 1
+  # Check each argument recursively.
+  arity = 0
+  while suffix[0] == '{'
+    suffix = check(path, line_num, macros, suffix[1..-1])
+    arity += 1
   end
 
-  if macros[macro] && macros[macro] != arg_count
+  # Report an error if the arity didn't match what we expected.
+  if macros[macro_name] && macros[macro_name] != arity
     STDERR.puts(
-      "Error: Line #{line_num} of #{path} expects #{macros[macro]} " \
-      "argument(s) for macro `#{macro}`, but found #{arg_count}."
+      "Error: Expected #{macros[macro_name]} argument(s) for macro " \
+        "`#{macro_name}` on line #{line_num} of #{path}, but found #{arity}."
     )
     exit(1)
   end
-  check(path, line_num, macros, remainder)
+
+  # Check the rest of the string recursively.
+  check(path, line_num, macros, suffix)
 end
 
-MACRO_REGEX = /^\\newcommand\s*\\(\w+)\s*\[\s*([0-9]+)\s*\]?\s*{/
+# Iterate over the input files.
+ARGV.each do |path|
+  # Read the contents of the file.
+  doc = File.read(path)
+  lines = doc.split("\n", -1)
 
-path = ARGV[0]
-doc = File.read(path)
-lines = doc.split("\n", -1)
+  # Get the arity of all the macros.
+  macros = doc.scan(MACRO_REGEX).map do |r|
+    [r[0], r[2] ? r[2].to_i : 0]
+  end.to_h
 
-# Add all the macros to the hash.
-macros = doc.scan(MACRO_REGEX).map do |r|
-  [r[0], r[1] ? r[1].to_i : 0]
-end.to_h
+  # Check the macro invocations on each line.
+  lines.each_with_index do |line, index|
+    # Don't check commands currently being defined.
+    line.slice!(MACRO_REGEX)
 
-# Check the macros on each line.
-lines.each_with_index do |line, index|
-  # Don't check commands currently being defined.
-  line.slice!(MACRO_REGEX)
-
-  check(path, index + 1, macros, line)
+    # Scan the line for macro invocations and check the arities.
+    remainder = line
+    while !remainder.empty?
+      remainder = check(path, index + 1, macros, remainder)
+    end
+  end
 end
