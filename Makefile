@@ -3,6 +3,7 @@
 .PHONY: \
   all test lint format clean \
   paper formalization implementation \
+  lint-paper \
   test-implementation \
   lint-implementation \
   format-implementation \
@@ -13,7 +14,7 @@ all: paper formalization implementation
 
 test: test-implementation
 
-lint: lint-implementation
+lint: lint-paper lint-implementation
 	./scripts/lint-general.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
@@ -31,13 +32,23 @@ lint: lint-implementation
 	    -name 'Makefile' \
 	  \) -print \
 	)
-	./scripts/lint-tex.rb paper/main.tex
 
 format: format-implementation
 
 clean: clean-paper clean-formalization clean-implementation
 
 paper: main.pdf
+
+lint-paper:
+	./scripts/lint-tex.rb $(shell \
+	  find . -type d \( \
+	    -path ./.git -o \
+	    -path ./.github -o \
+	    -path ./.paper-build -o \
+	    -path ./.stack -o \
+	    -path ./implementation/.stack-work \
+	  \) -prune -o -name '*.tex' -print \
+	)
 
 formalization:
 	rm -f Makefile.coq _CoqProjectFull
