@@ -55,10 +55,10 @@ formalization:
 	echo '-R formalization Main' > _CoqProjectFull
 	find formalization -type f -name '*.v' >> _CoqProjectFull
 	coq_makefile -f _CoqProjectFull -o Makefile.coq || \
-	  (rm -f Makefile.coq _CoqProjectFull; exit 1)
+	  (rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf; exit 1)
 	make -f Makefile.coq || \
-	  (rm -f Makefile.coq _CoqProjectFull; exit 1)
-	rm -f Makefile.coq _CoqProjectFull
+	  (rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf; exit 1)
+	rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf
 
 implementation:
 	cd implementation && \
@@ -104,10 +104,12 @@ clean-paper:
 clean-formalization:
 	rm -f _CoqProjectFull Makefile.coq $(shell \
 	  find . -type f \( \
+	    -name '*.aux' -o \
 	    -name '*.glob' -o \
 	    -name '*.v.d' -o \
 	    -name '*.vo' -o \
-	    -name '*.vo.aux' \
+	    -name '*.vo.aux' -o \
+	    -name 'Makefile.coq.conf' \
 	  \) -print \
 	)
 
