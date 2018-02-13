@@ -31,7 +31,7 @@ PRELUDE_ARITIES = {
   'begin' => [1, 2],
   'bfseries' => [0],
   'bigskipamount' => [0],
-  'boxed' => [0],
+  'boxed' => [1],
   'caption' => [1],
   'color' => [1],
   'cup' => [0],
@@ -64,7 +64,7 @@ PRELUDE_ARITIES = {
   'newtheorem' => [2],
   'notin' => [0],
   'nsubseteq' => [0],
-  'renewcommand' => [1],
+  'renewcommand' => [0],
   'right' => [0],
   'rightarrow' => [0],
   'rrbracket' => [0],
@@ -85,12 +85,23 @@ PRELUDE_ARITIES = {
   'vdash' => [0],
 }
 
-def num_lines(s)
-  s.scan("\n").length
-end
-
 def prefix_matches?(s, regex)
   (s =~ regex) == 0
+end
+
+def count_args(s)
+  arity = 0
+  loop do
+    if prefix_matches?(s, SQUARE_REGEX)
+      s.slice!(SQUARE_REGEX)
+    elsif prefix_matches?(s, CURLY_REGEX)
+      s.slice!(CURLY_REGEX)
+      arity += 1
+    else
+      break
+    end
+  end
+  arity
 end
 
 # Iterate over the input files.
@@ -106,7 +117,7 @@ ARGV.each do |path|
     end.to_h
   )
 
-  # Remove newcommands so that they don't get checked.
+  # Remove newcommands so they don't get checked.
   doc.gsub!(/\\newcommand\s*\\[A-Za-z@]+/, '')
 
   # Check for undefined macros.
@@ -128,34 +139,19 @@ ARGV.each do |path|
 
     # Iterate while there are still invocations of the macro to be checked.
     while !suffix.empty?
-      prefix, m, suffix = suffix.partition(/\\#{macro}\b/)
-      break if m.empty?
+      # Find the next invocation of the macro.
+      prefix, match, suffix = suffix.partition(/\\#{macro}\b/)
+      break if match.empty?
+      line_num += prefix.scan("\n").size
 
-      line_num += num_lines(prefix)
-      macro_line = line_num
-
-      # Remove matched square brackets and anything inside them from
-      # the beginning of `suffix`, and store the matched string
-      # in `match`.
-      if prefix_matches?(suffix, SQUARE_REGEX)
-        match = suffix.slice!(SQUARE_REGEX)
-        line_num += num_lines(match)
-      end
-
-      # Remove arguments given to the macro from `suffix`, and count the
-      # number of arguments.
-      arity = 0
-      while prefix_matches?(suffix, CURLY_REGEX)
-        match = suffix.slice!(CURLY_REGEX)
-        line_num += num_lines(match)
-        arity += 1
-      end
+      # Compute the arity of the macro.
+      arity = count_args(suffix)
 
       # Report an error if the arity didn't match what we expected.
       if !macros[macro].include?(arity)
         STDERR.puts(
           "Error: Expected #{macros[macro]} argument(s) for macro " \
-            "`#{macro}` on line #{macro_line} of #{path}, but found #{arity}."
+            "`#{macro}` on line #{line_num} of #{path}, but found #{arity}."
         )
         exit(1)
       end
