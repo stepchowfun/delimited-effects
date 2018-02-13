@@ -7,6 +7,8 @@
 #   ./scripts/lint-tex.rb path
 
 MACRO_REGEX = /\\newcommand\s*\\([A-Za-z@]+)\s*(\[\s*([0-9]+)\s*\])?\s*{/
+CURLY_REGEX = /{(\g<0>|[^{}])*}/
+SQUARE_REGEX = /\[(\g<0>|[^\[\]])*\]/
 
 PRELUDE_ARITIES = {
   'AxiomC' => [1],
@@ -83,64 +85,12 @@ PRELUDE_ARITIES = {
   'vdash' => [0],
 }
 
-def check(path, line_num, macros, s)
-  # Split the string into [prefix, macro, suffix], or [s, '', ''] if no macro
-  # was found.
-  prefix, macro, suffix = s.partition(/\\([A-Za-z@]+)/)
-  macro_name = macro[1..-1]
+def num_lines(s)
+  s.scan("\n").length
+end
 
-  # Return to the parent if there are no macros in the string.
-  return s.partition('}').last if macro.empty?
-
-  # Return to the parent if we encounter a closing brace before the next
-  # macro to be processed.
-  return s.partition('}').last if prefix.include?('}')
-
-  # Skip anything in square brackets.
-  while suffix[0] == '['
-    nesting = 1
-    pos = 1
-
-    while suffix[pos] && nesting > 0
-      if suffix[pos] == '['
-        nesting += 1
-      end
-
-      if suffix[pos] == ']'
-        nesting -= 1
-      end
-
-      pos += 1
-    end
-
-    suffix = suffix[pos..-1]
-  end
-
-  # Check each argument recursively.
-  arity = 0
-  while suffix[0] == '{'
-    suffix = check(path, line_num, macros, suffix[1..-1])
-    arity += 1
-  end
-
-  # Report an error if the arity didn't match what we expected.
-  if macros[macro_name]
-    if !macros[macro_name].include?(arity)
-      STDERR.puts(
-        "Error: Expected #{macros[macro_name]} argument(s) for macro " \
-          "`#{macro_name}` on line #{line_num} of #{path}, but found #{arity}."
-      )
-      exit(1)
-    end
-  else
-    STDERR.puts(
-      "Error: Unrecognized macro #{macro_name} on line #{line_num} of #{path}."
-    )
-    exit(1)
-  end
-
-  # Check the rest of the string recursively.
-  check(path, line_num, macros, suffix)
+def prefix_matches?(s, regex)
+  (s =~ regex) == 0
 end
 
 # Iterate over the input files.
@@ -156,15 +106,59 @@ ARGV.each do |path|
     end.to_h
   )
 
-  # Check the macro invocations on each line.
-  lines.each_with_index do |line, index|
-    # Don't check commands currently being defined.
-    line.slice!(MACRO_REGEX)
+  # Remove newcommands so that they don't get checked.
+  doc.gsub!(/\\newcommand\s*\\[A-Za-z@]+/, '')
 
-    # Scan the line for macro invocations and check the arities.
-    remainder = line
-    while !remainder.empty?
-      remainder = check(path, index + 1, macros, remainder)
+  # Check for undefined macros.
+  undefined_macros = doc.scan(/\\[A-Za-z@]+/).select do |r|
+    !macros[r[1..-1]]
+  end
+
+  if !undefined_macros.empty?
+    STDERR.puts(
+      "Error: Unrecognized macros #{undefined_macros} in #{path}."
+    )
+    exit(1)
+  end
+
+  # Check the arities of macro invocations.
+  macros.each do |macro, arities|
+    line_num = 1
+    suffix = doc
+
+    # Iterate while there are still invocations of the macro to be checked.
+    while !suffix.empty?
+      prefix, m, suffix = suffix.partition(/\\#{macro}\b/)
+      break if m.empty?
+
+      line_num += num_lines(prefix)
+      macro_line = line_num
+
+      # Remove matched square brackets and anything inside them from
+      # the beginning of `suffix`, and store the matched string
+      # in `match`.
+      if prefix_matches?(suffix, SQUARE_REGEX)
+        match = suffix.slice!(SQUARE_REGEX)
+        line_num += num_lines(match)
+      end
+
+      # Remove arguments given to the macro from `suffix`, and count the
+      # number of arguments.
+      arity = 0
+      while prefix_matches?(suffix, CURLY_REGEX)
+        match = suffix.slice!(CURLY_REGEX)
+        line_num += num_lines(match)
+        arity += 1
+      end
+
+      # Report an error if the arity didn't match what we expected.
+      if !macros[macro].include?(arity)
+        STDERR.puts(
+          "Error: Expected #{macros[macro]} argument(s) for macro " \
+            "`#{macro}` on line #{macro_line} of #{path}, but found #{arity}."
+        )
+        exit(1)
+      end
     end
   end
 end
