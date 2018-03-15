@@ -2,19 +2,24 @@
 
 .PHONY: \
   all test lint format clean \
-  paper formalization implementation \
-  lint-paper \
-  test-implementation \
-  lint-implementation \
-  format-implementation \
-  clean-paper clean-formalization clean-implementation \
+  paper \
+    lint-paper \
+    clean-paper \
+  formalization \
+    lint-formalization \
+    clean-formalization \
+  implementation \
+    test-implementation \
+    lint-implementation \
+    format-implementation \
+    clean-implementation \
   docker-deps docker-build
 
 all: paper formalization implementation
 
 test: test-implementation
 
-lint: lint-paper lint-implementation
+lint: lint-paper lint-formalization lint-implementation
 	./scripts/lint-general.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
@@ -50,6 +55,9 @@ lint-paper:
 	  \) -prune -o -name '*.tex' -print \
 	)
 
+clean-paper:
+	rm -rf .paper-build main.pdf
+
 formalization:
 	rm -f Makefile.coq _CoqProjectFull
 	echo '-R formalization Main' > _CoqProjectFull
@@ -59,6 +67,54 @@ formalization:
 	make -f Makefile.coq || \
 	  (rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf; exit 1)
 	rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf
+
+lint-formalization: formalization
+	./scripts/lint-imports.rb \
+	  '^\s*Require ' \
+	  'coqc -R formalization Main ?' \
+	  $(shell \
+	    find . -type d \( \
+	      -path ./.git -o \
+	      -path ./.github -o \
+	      -path ./.paper-build -o \
+	      -path ./.stack -o \
+	      -path ./implementation/.stack-work \
+	    \) -prune -o \( \
+	      -name '*.v' \
+	    \) -print \
+	  )
+	./scripts/lint-imports.rb \
+	  '^\s*Import ' \
+	  'coqc -R formalization Main ?' \
+	  $(shell \
+	    find . -type d \( \
+	      -path ./.git -o \
+	      -path ./.github -o \
+	      -path ./.paper-build -o \
+	      -path ./.stack -o \
+	      -path ./implementation/.stack-work \
+	    \) -prune -o \( \
+	      -name '*.v' \
+	    \) -print \
+	  )
+
+clean-formalization:
+	rm -f _CoqProjectFull Makefile.coq $(shell \
+	  find . -type d \( \
+	    -path ./.git -o \
+	    -path ./.github -o \
+	    -path ./.paper-build -o \
+	    -path ./.stack -o \
+	    -path ./implementation/.stack-work \
+	  \) -prune -o \( \
+	    -name '*.aux' -o \
+	    -name '*.glob' -o \
+	    -name '*.v.d' -o \
+	    -name '*.vo' -o \
+	    -name '*.vo.aux' -o \
+	    -name 'Makefile.coq.conf' \
+	  \) -print \
+	)
 
 implementation:
 	cd implementation && \
@@ -74,6 +130,7 @@ lint-implementation:
 	    -path ./.git -o \
 	    -path ./.github -o \
 	    -path ./.paper-build -o \
+	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' \
@@ -90,6 +147,7 @@ format-implementation:
 	    -path ./.git -o \
 	    -path ./.github -o \
 	    -path ./.paper-build -o \
+	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' \
@@ -97,21 +155,6 @@ format-implementation:
 	); do \
 	  brittany --write-mode=inplace "$$file"; \
 	done
-
-clean-paper:
-	rm -rf .paper-build main.pdf
-
-clean-formalization:
-	rm -f _CoqProjectFull Makefile.coq $(shell \
-	  find . -type f \( \
-	    -name '*.aux' -o \
-	    -name '*.glob' -o \
-	    -name '*.v.d' -o \
-	    -name '*.vo' -o \
-	    -name '*.vo.aux' -o \
-	    -name 'Makefile.coq.conf' \
-	  \) -print \
-	)
 
 clean-implementation:
 	rm -rf implementation/.stack-work
