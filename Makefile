@@ -69,6 +69,16 @@ formalization:
 	rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf
 
 lint-formalization: formalization
+	if grep \
+	  --recursive \
+	  --line-number \
+	  --include '*.v' \
+	  Admitted \
+	  formalization; \
+	then \
+	  echo "Error: 'Admitted' found in proofs." 1>&2; \
+	  exit 1; \
+	fi
 	./scripts/lint-imports.rb \
 	  '^\s*Require ' \
 	  'coqc -R formalization Main ?' \
