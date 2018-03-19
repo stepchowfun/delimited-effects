@@ -69,16 +69,6 @@ formalization:
 	rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf
 
 lint-formalization: formalization
-	if grep \
-	  --recursive \
-	  --line-number \
-	  --include '*.v' \
-	  Admitted \
-	  formalization; \
-	then \
-	  echo "Error: 'Admitted' found in proofs." 1>&2; \
-	  exit 1; \
-	fi
 	./scripts/lint-imports.rb \
 	  '^\s*Require ' \
 	  'coqc -R formalization Main ?' \
@@ -107,6 +97,16 @@ lint-formalization: formalization
 	      -name '*.v' \
 	    \) -print \
 	  )
+	if grep \
+	  --recursive \
+	  --line-number \
+	  --include '*.v' \
+	  Admitted \
+	  formalization; \
+	then \
+	  echo "Error: 'Admitted' found in proofs." 1>&2; \
+	  exit 1; \
+	fi
 
 clean-formalization:
 	rm -f _CoqProjectFull Makefile.coq $(shell \
@@ -194,11 +194,7 @@ docker-build:
 	      chown -R user:user repo && \
 	      cd repo && \
 	      su user -s /bin/bash -l -c " \
-	        cd repo && \
-	        make clean && \
-	        make && \
-	        make test && \
-	        make lint \
+	        cd repo && make clean && make all test lint \
 	      " && (test "$$DEPLOY" != true || ./scripts/deploy.rb) \
 	    ' \
 	)" && \
