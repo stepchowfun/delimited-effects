@@ -7,7 +7,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Stephan Boyer and Esther Wang
 maintainer:          stephan@stephanboyer.com and esther.wang47@gmail.com
-copyright:           (c) 2017 Stephan Boyer and Esther Wang
+copyright:           (c) 2018 Stephan Boyer and Esther Wang
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md

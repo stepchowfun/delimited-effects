@@ -4,6 +4,5 @@ formalization/**/*.aux
 formalization/**/*.glob
 formalization/**/*.v.d
 formalization/**/*.vo
-formalization/**/*.vo.aux
 implementation/.stack-work/*
 main.pdf
