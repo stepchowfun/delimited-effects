@@ -23,9 +23,7 @@ lint: lint-paper lint-formalization lint-implementation
 	./scripts/lint-general.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
-	    -path ./.github -o \
 	    -path ./.paper-build -o \
-	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' -o \
@@ -48,9 +46,7 @@ lint-paper:
 	./scripts/lint-tex.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
-	    -path ./.github -o \
 	    -path ./.paper-build -o \
-	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o -name '*.tex' -print \
 	)
@@ -75,9 +71,7 @@ lint-formalization: formalization
 	  $(shell \
 	    find . -type d \( \
 	      -path ./.git -o \
-	      -path ./.github -o \
 	      -path ./.paper-build -o \
-	      -path ./.stack -o \
 	      -path ./implementation/.stack-work \
 	    \) -prune -o \( \
 	      -name '*.v' \
@@ -89,9 +83,7 @@ lint-formalization: formalization
 	  $(shell \
 	    find . -type d \( \
 	      -path ./.git -o \
-	      -path ./.github -o \
 	      -path ./.paper-build -o \
-	      -path ./.stack -o \
 	      -path ./implementation/.stack-work \
 	    \) -prune -o \( \
 	      -name '*.v' \
@@ -112,9 +104,7 @@ clean-formalization:
 	rm -f _CoqProjectFull Makefile.coq $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
-	    -path ./.github -o \
 	    -path ./.paper-build -o \
-	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.aux' -o \
@@ -138,9 +128,7 @@ lint-implementation:
 	for file in $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
-	    -path ./.github -o \
 	    -path ./.paper-build -o \
-	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' \
@@ -155,9 +143,7 @@ format-implementation:
 	for file in $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
-	    -path ./.github -o \
 	    -path ./.paper-build -o \
-	    -path ./.stack -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
 	    -name '*.hs' \
