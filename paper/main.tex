@@ -59,13 +59,12 @@
 
 % Effects and handlers
 \newcommand\xVar{\varepsilon}
-\newcommand\hVar{\phi}
-\newcommand\hToX[2]{#1 \mapsto #2}
+\newcommand\tToX[2]{#1 \mapsto #2}
 
 % Rows
 \newcommand\row{\Delta}
 \newcommand\rEmpty{\varnothing}
-\newcommand\rExtend[3]{#1, \hToX{#2}{#3}}
+\newcommand\rExtend[3]{#1, \tToX{#2}{#3}}
 
 % Terms
 \newcommand\term{t}
@@ -74,19 +73,16 @@
 \newcommand\eApp[2]{#1 \; #2}
 \newcommand\eTAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eTApp[2]{#1 \; #2}
-\newcommand\eHAbs[2]{\lambda #1 \; . \; #2}
-\newcommand\eHApp[2]{#1 \; #2}
 \newcommand\eSuspend[2]{\textbf{suspend} \; #1 \; \textbf{with} \; #2}
 \newcommand\eDo[1]{\textbf{do} \; #1}
 \newcommand\eEffect[4]{\textbf{effect} \; #1 \; \textbf{where} \; \anno{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eHandle[4]{\textbf{handle} \; \hToX{#1}{#2} \; \textbf{with} \; #3 \; \textbf{in} \; #4}
+\newcommand\eHandle[4]{\textbf{handle} \; \tToX{#1}{#2} \; \textbf{with} \; #3 \; \textbf{in} \; #4}
 
 % Types
 \newcommand\type{\tau}
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[2]{#1 \rightarrow #2}
-\newcommand\tTForAll[2]{\forall #1 \; . \; #2}
-\newcommand\tHForAll[2]{\forall #1 \; . \; #2}
+\newcommand\tForAll[2]{\forall #1 \; . \; #2}
 \newcommand\tComputation[2]{#1 \; ! \; #2}
 
 % Contexts
@@ -95,7 +91,6 @@
 \newcommand\cEExtend[3]{#1, \anno{#2}{#3}}
 \newcommand\cTExtend[2]{#1, #2}
 \newcommand\cXExtend[3]{#1, #2 \mapsto #3}
-\newcommand\cHExtend[2]{#1, #2}
 
 % Judgments
 \newcommand\rSub[2]{#1 \subseteq #2}
@@ -144,30 +139,26 @@
               & $\eApp{\term}{\term}$ & application \\
               & $\eTAbs{\tVar}{\term}$ & type abstraction \\
               & $\eTApp{\term}{\type}$ & type application \\
-              & $\eHAbs{\hVar}{\term}$ & handler abstraction \\
-              & $\eHApp{\term}{\hVar}$ & handler application \\
               & $\eSuspend{\term}{\row}$ & computation introduction \\
               & $\eDo{\term}$ & computation elimination \\
               & $\eEffect{\xVar}{\eVar}{\type}{\term}$ & effect definition \\
-              & $\eHandle{\hVar}{\xVar}{\term}{\term}$ & effect handler \\
+              & $\eHandle{\tVar}{\xVar}{\term}{\term}$ & effect handler \\
               \\
               $\type \Coloneqq$ & & types: \\
               & $\tVar$ & type variable \\
               & $\tArrow{\type}{\type}$ & arrow type \\
-              & $\tTForAll{\tVar}{\type}$ & quantification over types \\
-              & $\tHForAll{\hVar}{\type}$ & quantification over handlers \\
+              & $\tForAll{\tVar}{\type}$ & universal type \\
               & $\tComputation{\type}{\row}$ & computation type \\
               \\
               $\row \Coloneqq$ & & rows: \\
               & $\rEmpty$ & empty row \\
-              & $\rExtend{\row}{\hVar}{\xVar}$ & row extension \\
+              & $\rExtend{\row}{\type}{\xVar}$ & row extension \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
               & $\cEExtend{\context}{\eVar}{\type}$ & variable binding \\
               & $\cTExtend{\context}{\tVar}$ & type variable binding \\
               & $\cXExtend{\context}{\xVar}{\type}$ & effect variable binding \\
-              & $\cHExtend{\context}{\hVar}$ & handler variable binding \\
             \end{tabular}
           \end{center}
 
@@ -208,26 +199,13 @@
               \AxiomC{$\hasType{\cTExtend{\context}{\tVar}}{\row}{\term}{\type}$}
               \AxiomC{$\tVar \notin \dom{\context}$}
             \RightLabel{(\textsc{T-TAbs})}
-            \BinaryInfC{$\hasType{\context}{\row}{\eTAbs{\tVar}{\term}}{\tTForAll{\tVar}{\type}}$}
+            \BinaryInfC{$\hasType{\context}{\row}{\eTAbs{\tVar}{\term}}{\tForAll{\tVar}{\type}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\row}{\term}{\tTForAll{\tVar}{\type_1}}$}
+              \AxiomC{$\hasType{\context}{\row}{\term}{\tForAll{\tVar}{\type_1}}$}
             \RightLabel{(\textsc{T-TApp})}
             \UnaryInfC{$\hasType{\context}{\row}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hasType{\cTExtend{\context}{\hVar}}{\row}{\term}{\type}$}
-              \AxiomC{$\hVar \notin \dom{\context}$}
-            \RightLabel{(\textsc{T-HAbs})}
-            \BinaryInfC{$\hasType{\context}{\row}{\eHAbs{\hVar}{\term}}{\tHForAll{\hVar}{\type}}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\row}{\term}{\tHForAll{\hVar_1}{\type}}$}
-            \RightLabel{(\textsc{T-HApp})}
-            \UnaryInfC{$\hasType{\context}{\row}{\eHApp{\term}{\hVar_2}}{\substitute{\type}{\hVar_1}{\hVar_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -244,19 +222,19 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\cEExtend{\cXExtend{\context}{\xVar}{\type_1}}{\eVar}{\tHForAll{\hVar}{\tComputation{\type_1}{\rExtend{\rEmpty}{\hVar}{\xVar}}}}}{\row}{\term}{\type_2}$}
+              \AxiomC{$\hasType{\cEExtend{\cXExtend{\context}{\xVar}{\type_1}}{\eVar}{\tForAll{\tVar}{\tComputation{\type_1}{\rExtend{\rEmpty}{\tVar}{\xVar}}}}}{\row}{\term}{\type_2}$}
               \AxiomC{$\xVar \notin \dom{\context}$}
             \RightLabel{(\textsc{T-Effect})}
             \BinaryInfC{$\hasType{\context}{\row}{\eEffect{\xVar}{\eVar}{\type_1}{\term}}{\type_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\cHExtend{\context}{\hVar}}{\rExtend{\row}{\hVar}{\xVar}}{\term_2}{\type_2}$}
+              \AxiomC{$\hasType{\cTExtend{\context}{\tVar}}{\rExtend{\row}{\tVar}{\xVar}}{\term_2}{\type_2}$}
               \AxiomC{$\hasType{\context}{\row}{\term_1}{\type_1}$}
               \AxiomC{$\type_1 = \apply{\context}{\xVar}$}
-              \AxiomC{$\hVar \notin \dom{\context}$}
+              \AxiomC{$\tVar \notin \dom{\context}$}
             \RightLabel{(\textsc{T-Handle})}
-            \QuaternaryInfC{$\hasType{\context}{\row}{\eHandle{\hVar}{\xVar}{\term_1}{\term_2}}{\type_2}$}
+            \QuaternaryInfC{$\hasType{\context}{\row}{\eHandle{\tVar}{\xVar}{\term_1}{\term_2}}{\type_2}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing}
