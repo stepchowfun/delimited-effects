@@ -66,7 +66,6 @@ PRELUDE_ARITIES = {
   'newtheorem' => [2],
   'notin' => [0],
   'nsubseteq' => [0],
-  'phi' => [0],
   'renewcommand' => [0],
   'right' => [0],
   'rightarrow' => [0],
