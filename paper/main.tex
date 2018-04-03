@@ -60,10 +60,6 @@
 \newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
 \newcommand\tAnno[3]{#1 : \tEmbellished{#2}{#3}}
 
-% Mirrors and reifications
-\newcommand\mVar{\varepsilon}
-\newcommand\rToM[2]{#1 \mapsto #2}
-
 % Terms
 \newcommand\term{t}
 \newcommand\eVar{x}
@@ -73,9 +69,8 @@
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eRAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eRApp[2]{#1 \; #2}
-\newcommand\eMirror[4]{\textbf{mirror} \; #1 \; \textbf{over} \; \tEmbellished{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eReify[4]{\textbf{reify} \; #1 \; \textbf{as} \; \rToM{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eReflect[2]{\textbf{reflect} \; \rToM{#1}{#2}}
+\newcommand\eReify[3]{\textbf{reify} \; #1 \; \textbf{as} \; #2 \; \textbf{in} \; #3}
+\newcommand\eReflect[1]{\textbf{reflect} \; #1}
 \newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types and rows
@@ -83,25 +78,23 @@
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
 \newcommand\tForAll[4]{\forall \kAnno{#1}{#2} \; . \; \tEmbellished{#3}{#4}}
-\newcommand\row{\rho}
+\newcommand\row{\omega}
 \newcommand\tEmbellished[2]{#1 \; ! \; #2}
 \newcommand\tEmpty{\varnothing}
-\newcommand\tSingleton[2]{\left\{ \rToM{#1}{#2} \right\}}
+\newcommand\tSingleton[1]{\left\{ #1 \right\}}
 \newcommand\tUnion[2]{#1 \cup #2}
-\newcommand\reification{\sigma}
 
 % Kinds
 \newcommand\kind{\kappa}
 \newcommand\kType{\star}
-\newcommand\kRow{\circ}
-\newcommand\kReification{\diamond}
+\newcommand\kRow{\diamond}
+\newcommand\kReification[2]{\left\langle \tEmbellished{#1}{#2} \right\rangle}
 
 % Contexts
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
 \newcommand\cEExtend[4]{#1, \tAnno{#2}{#3}{#4}}
 \newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
-\newcommand\cMExtend[4]{#1, #2 \mapsto \tEmbellished{#3}{#4}}
 
 % Judgments
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
@@ -146,29 +139,27 @@
               & $\eApp{\term}{\term}$ & term application \\
               & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
               & $\eTApp{\term}{\type}$ & type application \\
-              & $\eMirror{\mVar}{\type}{\row}{\term}$ & mirror definition \\
-              & $\eReify{\term}{\tVar}{\mVar}{\term}$ & reification \\
-              & $\eReflect{\reification}{\mVar}$ & reflection \\
+              & $\eReify{\term}{\tVar}{\term}$ & reification \\
+              & $\eReflect{\tVar}$ & reflection \\
               & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
               \\
-              $\type, \row, \reification \Coloneqq$ & & types: \\
+              $\type, \row \Coloneqq$ & & types: \\
               & $\tVar$ & type variable \\
               & $\tArrow{\type}{\row}{\type}{\row}$ & arrow type \\
               & $\tForAll{\tVar}{\kind}{\type}{\row}$ & universal type \\
               & $\tEmpty$ & empty row \\
-              & $\tSingleton{\reification}{\mVar}$ & singleton row \\
+              & $\tSingleton{\tVar}$ & singleton row \\
               & $\tUnion{\row}{\row}$ & row union \\
               \\
               $\kind \Coloneqq$ & & kinds: \\
               & $\kType$ & type \\
               & $\kRow$ & row \\
-              & $\kReification$ & reified term \\
+              & $\kReification{\type}{\row}$ & reified term \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
               & $\cEExtend{\context}{\eVar}{\type}{\row}$ & term variable binding \\
               & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
-              & $\cMExtend{\context}{\mVar}{\type}{\row}$ & mirror binding \\
             \end{tabular}
           \end{center}
 
@@ -223,27 +214,17 @@
 
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
-                {$\hasKind{\context}{\type_1}{\kType}$ \qquad $\hasKind{\context}{\row_1}{\kRow}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\mVar \notin \dom{\context}$ \qquad $\hasType{\cMExtend{\context}{\mVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
-              }}
-            \RightLabel{(\textsc{T-Mirror})}
-            \UnaryInfC{$\hasType{\context}{\eMirror{\mVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\apply{\context}{\mVar} = \tEmbellished{\type_1}{\row_1}$ \qquad $\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kReification}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}{\mVar}}}$}
+                {$\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
+                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kReification{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
               }}
             \RightLabel{(\textsc{T-Reify})}
-            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\mVar}{\term_2}}{\type_2}{\row_2}$}
+            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\reification}{\kReification}$}
-              \AxiomC{$\apply{\context}{\mVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kReification{\type}{\row}}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \BinaryInfC{$\hasType{\context}{\eReflect{\reification}{\mVar}}{\type}{\tUnion{\row}{\tSingleton{\reification}{\mVar}}}$}
+            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -301,10 +282,9 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\reification}{\kReification}$}
-              \AxiomC{$\apply{\context}{\mVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kReification{\type}{\row}}$}
             \RightLabel{(\textsc{K-Singleton})}
-            \BinaryInfC{$\hasKind{\context}{\tSingleton{\reification}{\mVar}}{\kRow}$}
+            \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
           \end{prooftree}
 
           \begin{prooftree}
