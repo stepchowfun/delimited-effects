@@ -43,6 +43,7 @@ PRELUDE_ARITIES = {
   'diamond' => [0],
   'displaystyle' => [0],
   'documentclass' => [1],
+  'emph' => [1],
   'end' => [1],
   'fbox' => [1],
   'fboxsep' => [0],

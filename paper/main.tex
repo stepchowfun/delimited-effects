@@ -22,7 +22,7 @@
 \SetWatermarkScale{3}
 \SetWatermarkLightness{0.975}
 
-\title{Delimited effects}
+\title{Mirrors: reflecting terms in types}
 \date{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,7 +31,7 @@
 
 \definecolor{purple}{RGB}{127, 0, 181}
 
-\lstdefinelanguage{gram}{morekeywords={effect, handle}}
+\lstdefinelanguage{gram}{morekeywords={mirror, reify, reflect, do, over, in, as}}
 
 \lstset{
   aboveskip=\bigskipamount,
@@ -60,9 +60,9 @@
 \newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
 \newcommand\tAnno[3]{#1 : \tEmbellished{#2}{#3}}
 
-% Effects and handlers
-\newcommand\xVar{\varepsilon}
-\newcommand\hToX[2]{#1 \mapsto #2}
+% Mirrors and reifications
+\newcommand\mVar{\varepsilon}
+\newcommand\rToM[2]{#1 \mapsto #2}
 
 % Terms
 \newcommand\term{t}
@@ -73,9 +73,9 @@
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eRAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eRApp[2]{#1 \; #2}
-\newcommand\eEffect[4]{\textbf{effect} \; #1 \; \textbf{where} \; \tEmbellished{#2}{#3} \; \textbf{in} \; #4}
-\newcommand\eHandle[4]{\textbf{handle} \; \hToX{#1}{#2} \; \textbf{with} \; #3 \; \textbf{in} \; #4}
-\newcommand\eReflect[2]{\textbf{reflect} \; \hToX{#1}{#2}}
+\newcommand\eMirror[4]{\textbf{mirror} \; #1 \; \textbf{over} \; \tEmbellished{#2}{#3} \; \textbf{in} \; #4}
+\newcommand\eReify[4]{\textbf{reify} \; #1 \; \textbf{as} \; \rToM{#2}{#3} \; \textbf{in} \; #4}
+\newcommand\eReflect[2]{\textbf{reflect} \; \rToM{#1}{#2}}
 \newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types and rows
@@ -86,22 +86,22 @@
 \newcommand\row{\rho}
 \newcommand\tEmbellished[2]{#1 \; ! \; #2}
 \newcommand\tEmpty{\varnothing}
-\newcommand\tSingleton[2]{\left\{ \hToX{#1}{#2} \right\}}
+\newcommand\tSingleton[2]{\left\{ \rToM{#1}{#2} \right\}}
 \newcommand\tUnion[2]{#1 \cup #2}
-\newcommand\handler{\sigma}
+\newcommand\reification{\sigma}
 
 % Kinds
 \newcommand\kind{\kappa}
 \newcommand\kType{\star}
 \newcommand\kRow{\circ}
-\newcommand\kHandler{\diamond}
+\newcommand\kReification{\diamond}
 
 % Contexts
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
 \newcommand\cEExtend[4]{#1, \tAnno{#2}{#3}{#4}}
 \newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
-\newcommand\cXExtend[4]{#1, #2 \mapsto \tEmbellished{#3}{#4}}
+\newcommand\cMExtend[4]{#1, #2 \mapsto \tEmbellished{#3}{#4}}
 
 % Judgments
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
@@ -116,22 +116,17 @@
   \maketitle
 
   \begin{abstract}
-    We introduce delimited effects, a modest type and effect system capable of modeling a diverse collection of programming language features including algebraic effects, type classes with local instances, and dynamic scoping.
+    We introduce \emph{mirrors}, a mechanism for reifying terms into types and reflecting them back into terms. Mirrors are capable of modeling a diverse collection of programming language features including algebraic effects and handlers, type classes with local instances, and dynamic scoping.
   \end{abstract}
 
   \section{Introduction}
 
     \iffalse
       \begin{lstlisting}[gobble=4]
-        effect IO
-          getLine   : String ! IO
-          printLine : String -> () ! IO
-      \end{lstlisting}
-
-      \begin{lstlisting}[gobble=4]
-        effect Monoid a
-          mempty  : a ! Monoid a
-          mappend : a -> a -> a ! Monoid a
+        mirror IO over String ! { } in
+          reify "Hello" as a => IO in
+            do x <- reflect a => IO in
+              x + ", World!"
       \end{lstlisting}
     \fi
 
@@ -149,31 +144,31 @@
               & $\eVar$ & variable \\
               & $\eAbs{\eVar}{\type}{\row}{\term}$ & term abstraction \\
               & $\eApp{\term}{\term}$ & term application \\
-              & $\eTAbs{\tVar}{\kind}{\term}$ & type, row, or handler abstraction \\
-              & $\eTApp{\term}{\type}$ & type, row, or handler application \\
-              & $\eEffect{\xVar}{\type}{\row}{\term}$ & effect definition \\
-              & $\eHandle{\tVar}{\xVar}{\term}{\term}$ & effect handler \\
-              & $\eReflect{\tVar}{\xVar}$ & reflection \\
+              & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
+              & $\eTApp{\term}{\type}$ & type application \\
+              & $\eMirror{\mVar}{\type}{\row}{\term}$ & mirror definition \\
+              & $\eReify{\term}{\tVar}{\mVar}{\term}$ & reification \\
+              & $\eReflect{\tVar}{\mVar}$ & reflection \\
               & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
               \\
-              $\type, \row, \handler \Coloneqq$ & & types, rows, and handlers: \\
-              & $\tVar$ & type, row, or handler variable \\
+              $\type, \row, \reification \Coloneqq$ & & types: \\
+              & $\tVar$ & type variable \\
               & $\tArrow{\type}{\row}{\type}{\row}$ & arrow type \\
               & $\tForAll{\tVar}{\kind}{\type}{\row}$ & universal type \\
               & $\tEmpty$ & empty row \\
-              & $\tSingleton{\handler}{\xVar}$ & singleton row \\
+              & $\tSingleton{\reification}{\mVar}$ & singleton row \\
               & $\tUnion{\row}{\row}$ & row union \\
               \\
               $\kind \Coloneqq$ & & kinds: \\
               & $\kType$ & type \\
               & $\kRow$ & row \\
-              & $\kHandler$ & handler \\
+              & $\kReification$ & reified term \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
               & $\cEExtend{\context}{\eVar}{\type}{\row}$ & term variable binding \\
-              & $\cTExtend{\context}{\tVar}{\kind}$ & type, row, or handler variable binding \\
-              & $\cXExtend{\context}{\xVar}{\type}{\row}$ & effect variable binding \\
+              & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
+              & $\cMExtend{\context}{\mVar}{\type}{\row}$ & mirror binding \\
             \end{tabular}
           \end{center}
 
@@ -229,25 +224,25 @@
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
                 {$\hasKind{\context}{\type_1}{\kType}$ \qquad $\hasKind{\context}{\row_1}{\kRow}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\xVar \notin \dom{\context}$ \qquad $\hasType{\cXExtend{\context}{\xVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
+                {$\mVar \notin \dom{\context}$ \qquad $\hasType{\cMExtend{\context}{\mVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
               }}
-            \RightLabel{(\textsc{T-Effect})}
-            \UnaryInfC{$\hasType{\context}{\eEffect{\xVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
+            \RightLabel{(\textsc{T-Mirror})}
+            \UnaryInfC{$\hasType{\context}{\eMirror{\mVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
-                {$\apply{\context}{\xVar} = \tEmbellished{\type_1}{\row_1}$ \qquad $\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kHandler}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}{\xVar}}}$}
+                {$\apply{\context}{\mVar} = \tEmbellished{\type_1}{\row_1}$ \qquad $\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
+                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kReification}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}{\mVar}}}$}
               }}
-            \RightLabel{(\textsc{T-Handle})}
-            \UnaryInfC{$\hasType{\context}{\eHandle{\tVar}{\xVar}{\term_1}{\term_2}}{\type_2}{\row_2}$}
+            \RightLabel{(\textsc{T-Reify})}
+            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\mVar}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\xVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\apply{\context}{\mVar} = \tEmbellished{\type}{\row}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}{\xVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}{\xVar}}}$}
+            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}{\mVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}{\mVar}}}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -305,10 +300,10 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\handler}{\kHandler}$}
-              \AxiomC{$\apply{\context}{\xVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\hasKind{\context}{\reification}{\kReification}$}
+              \AxiomC{$\apply{\context}{\mVar} = \tEmbellished{\type}{\row}$}
             \RightLabel{(\textsc{K-Singleton})}
-            \BinaryInfC{$\hasKind{\context}{\tSingleton{\handler}{\xVar}}{\kRow}$}
+            \BinaryInfC{$\hasKind{\context}{\tSingleton{\reification}{\mVar}}{\kRow}$}
           \end{prooftree}
 
           \begin{prooftree}
