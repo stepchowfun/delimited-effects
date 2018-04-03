@@ -148,7 +148,7 @@
               & $\eTApp{\term}{\type}$ & type application \\
               & $\eMirror{\mVar}{\type}{\row}{\term}$ & mirror definition \\
               & $\eReify{\term}{\tVar}{\mVar}{\term}$ & reification \\
-              & $\eReflect{\tVar}{\mVar}$ & reflection \\
+              & $\eReflect{\reification}{\mVar}$ & reflection \\
               & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
               \\
               $\type, \row, \reification \Coloneqq$ & & types: \\
@@ -240,9 +240,10 @@
           \end{prooftree}
 
           \begin{prooftree}
+              \AxiomC{$\hasKind{\context}{\reification}{\kReification}$}
               \AxiomC{$\apply{\context}{\mVar} = \tEmbellished{\type}{\row}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}{\mVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}{\mVar}}}$}
+            \BinaryInfC{$\hasType{\context}{\eReflect{\reification}{\mVar}}{\type}{\tUnion{\row}{\tSingleton{\reification}{\mVar}}}$}
           \end{prooftree}
 
           \begin{prooftree}
