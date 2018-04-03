@@ -73,9 +73,10 @@
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eRAbs[2]{\lambda #1 \; . \; #2}
 \newcommand\eRApp[2]{#1 \; #2}
-\newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
-\newcommand\eEffect[5]{\textbf{effect} \; #1 \; \textbf{where} \; \tAnno{#2}{#3}{#4} \; \textbf{in} \; #5}
+\newcommand\eEffect[4]{\textbf{effect} \; #1 \; \textbf{where} \; \tEmbellished{#2}{#3} \; \textbf{in} \; #4}
 \newcommand\eHandle[4]{\textbf{handle} \; \hToX{#1}{#2} \; \textbf{with} \; #3 \; \textbf{in} \; #4}
+\newcommand\eReflect[2]{\textbf{reflect} \; \hToX{#1}{#2}}
+\newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types and rows
 \newcommand\type{\tau}
@@ -150,9 +151,10 @@
               & $\eApp{\term}{\term}$ & term application \\
               & $\eTAbs{\tVar}{\kind}{\term}$ & type, row, or handler abstraction \\
               & $\eTApp{\term}{\type}$ & type, row, or handler application \\
-              & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
-              & $\eEffect{\xVar}{\eVar}{\type}{\row}{\term}$ & effect definition \\
+              & $\eEffect{\xVar}{\type}{\row}{\term}$ & effect definition \\
               & $\eHandle{\tVar}{\xVar}{\term}{\term}$ & effect handler \\
+              & $\eReflect{\tVar}{\xVar}$ & reflection \\
+              & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
               \\
               $\type, \row, \handler \Coloneqq$ & & types, rows, and handlers: \\
               & $\tVar$ & type, row, or handler variable \\
@@ -225,30 +227,34 @@
           \end{prooftree}
 
           \begin{prooftree}
+              \AxiomC{\Shortstack[c]{
+                {$\hasKind{\context}{\type_1}{\kType}$ \qquad $\hasKind{\context}{\row_1}{\kRow}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
+                {$\xVar \notin \dom{\context}$ \qquad $\hasType{\cXExtend{\context}{\xVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
+              }}
+            \RightLabel{(\textsc{T-Effect})}
+            \UnaryInfC{$\hasType{\context}{\eEffect{\xVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{\Shortstack[c]{
+                {$\apply{\context}{\xVar} = \tEmbellished{\type_1}{\row_1}$ \qquad $\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
+                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kHandler}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}{\xVar}}}$}
+              }}
+            \RightLabel{(\textsc{T-Handle})}
+            \UnaryInfC{$\hasType{\context}{\eHandle{\tVar}{\xVar}{\term_1}{\term_2}}{\type_2}{\row_2}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\apply{\context}{\xVar} = \tEmbellished{\type}{\row}$}
+            \RightLabel{(\textsc{T-Reflect})}
+            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}{\xVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}{\xVar}}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
               \AxiomC{$\hasType{\context}{\term_1}{\type_1}{\row}$}
               \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}{\tEmpty}}{\term_2}{\type_2}{\row}$}
             \RightLabel{(\textsc{T-Do})}
             \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\type_2}{\row}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\xVar \notin \dom{\context}$ \qquad $\tVar \notin \dom{\context}$}
-                {$\hasKind{\context}{\type_1}{\kType}$ \qquad $\hasKind{\context}{\row_1}{\kRow}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\hasKind{\cXExtend{\context}{\xVar}{\type_1}{\row_1}}{\parens{\tForAll{\tVar}{\kHandler}{\type_1}{\tUnion{\row_1}{\tSingleton{\tVar}{\xVar}}}}}{\kType}$}
-                {$\hasType{\cEExtend{\cXExtend{\context}{\xVar}{\type_1}{\row_1}}{\eVar}{\parens{\tForAll{\tVar}{\kHandler}{\type_1}{\tUnion{\row_1}{\tSingleton{\tVar}{\xVar}}}}}{\tEmpty}}{\term}{\type_2}{\row_2}$}
-              }}
-            \RightLabel{(\textsc{T-Effect})}
-            \UnaryInfC{$\hasType{\context}{\eEffect{\xVar}{\eVar}{\type_1}{\row_1}{\term}}{\type_2}{\row_2}$}
-          \end{prooftree}
-
-          \begin{prooftree}
-              \AxiomC{\Shortstack[c]{
-                {$\tVar \notin \dom{\context}$ \qquad $\apply{\context}{\xVar} = \tEmbellished{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kHandler}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}{\xVar}}}$}
-              }}
-            \RightLabel{(\textsc{T-Handle})}
-            \UnaryInfC{$\hasType{\context}{\eHandle{\tVar}{\xVar}{\term_1}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
