@@ -88,7 +88,7 @@
 \newcommand\kind{\kappa}
 \newcommand\kType{\star}
 \newcommand\kRow{\diamond}
-\newcommand\kReification[2]{\left\langle \tEmbellished{#1}{#2} \right\rangle}
+\newcommand\kWitness[2]{\left\langle \tEmbellished{#1}{#2} \right\rangle}
 
 % Contexts
 \newcommand\context{\Gamma}
@@ -97,9 +97,9 @@
 \newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
 
 % Judgments
-\newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
 \newcommand\hasType[4]{#1 \vdash \tAnno{#2}{#3}{#4}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
+\newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -154,7 +154,7 @@
               $\kind \Coloneqq$ & & kinds: \\
               & $\kType$ & type \\
               & $\kRow$ & row \\
-              & $\kReification{\type}{\row}$ & reified term \\
+              & $\kWitness{\type}{\row}$ & witness \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
@@ -215,16 +215,16 @@
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
                 {$\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kReification{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
+                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
               }}
             \RightLabel{(\textsc{T-Reify})}
             \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kReification{\type}{\row}}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}{\tUnion{\row}{\tSingleton{\tVar}}}$}
+            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -282,7 +282,7 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kReification{\type}{\row}}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
             \RightLabel{(\textsc{K-Singleton})}
             \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
           \end{prooftree}
