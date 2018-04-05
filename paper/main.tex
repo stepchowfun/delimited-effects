@@ -91,17 +91,22 @@
 \newcommand\kRow{\diamond}
 \newcommand\kWitness[2]{\left\langle \tEmbellished{#1}{#2} \right\rangle}
 
-% Contexts
-\newcommand\context{\Gamma}
-\newcommand\cEmpty{\varnothing}
-\newcommand\cEExtend[4]{#1, \tAnno{#2}{#3}{#4}}
-\newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
+% Typing contexts
+\newcommand\tContext{\Gamma}
+\newcommand\tcEmpty{\varnothing}
+\newcommand\tcEExtend[4]{#1, \tAnno{#2}{#3}{#4}}
+\newcommand\tcTExtend[3]{#1, \kAnno{#2}{#3}}
+
+% Evaluation contexts
+\newcommand\eContext{\Delta}
+\newcommand\ecEmpty{\varnothing}
+\newcommand\ecExtend[3]{#1, #2 \mapsto #3}
 
 % Judgments
 \newcommand\hasType[4]{#1 \vdash \tAnno{#2}{#3}{#4}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
-\newcommand\step[2]{#1 \longrightarrow #2}
+\newcommand\step[3]{#1 \vdash #2 \longrightarrow #3}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -162,10 +167,14 @@
               & $\kRow$ & kind of rows \\
               & $\kWitness{\type}{\row}$ & kind of witnesses \\
               \\
-              $\context \Coloneqq$ & & contexts: \\
-              & $\cEmpty$ & empty context \\
-              & $\cEExtend{\context}{\eVar}{\type}{\row}$ & term variable binding \\
-              & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
+              $\tContext \Coloneqq$ & & typing contexts: \\
+              & $\tcEmpty$ & empty typing context \\
+              & $\tcEExtend{\tContext}{\eVar}{\type}{\row}$ & term variable binding \\
+              & $\tcTExtend{\tContext}{\tVar}{\kind}$ & type variable binding \\
+              \\
+              $\eContext \Coloneqq$ & & evaluation contexts: \\
+              & $\ecEmpty$ & empty evaluation context \\
+              & $\ecExtend{\eContext}{\tVar}{\term}$ & witness binding \\
             \end{tabular}
           \end{center}
 
@@ -178,73 +187,73 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hasType{\context}{\term}{\type}{\row}$}
+            \framebox{$\hasType{\tContext}{\term}{\type}{\row}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\eVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\apply{\tContext}{\eVar} = \tEmbellished{\type}{\row}$}
             \RightLabel{(\textsc{T-Var})}
-            \UnaryInfC{$\hasType{\context}{\eVar}{\type}{\row}$}
+            \UnaryInfC{$\hasType{\tContext}{\eVar}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
-              \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
+              \AxiomC{$\hasType{\tcEExtend{\tContext}{\eVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
+              \AxiomC{$\hasKind{\tContext}{\type_1}{\kType}$}
+              \AxiomC{$\hasKind{\tContext}{\row_1}{\kRow}$}
             \RightLabel{(\textsc{T-Abs})}
-            \TrinaryInfC{$\hasType{\context}{\eAbs{\eVar}{\type_1}{\row_1}{\term}}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
+            \TrinaryInfC{$\hasType{\tContext}{\eAbs{\eVar}{\type_1}{\row_1}{\term}}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term_1}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
-              \AxiomC{$\hasType{\context}{\term_2}{\type_1}{\row_1}$}
+              \AxiomC{$\hasType{\tContext}{\term_1}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
+              \AxiomC{$\hasType{\tContext}{\term_2}{\type_1}{\row_1}$}
             \RightLabel{(\textsc{T-App})}
-            \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}{\row_2}$}
+            \BinaryInfC{$\hasType{\tContext}{\eApp{\term_1}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\tVar \notin \dom{\context}$}
-              \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}{\row}$}
+              \AxiomC{$\tVar \notin \dom{\tContext}$}
+              \AxiomC{$\hasType{\tcTExtend{\tContext}{\tVar}{\kind}}{\term}{\type}{\row}$}
             \RightLabel{(\textsc{T-TAbs})}
-            \BinaryInfC{$\hasType{\context}{\eTAbs{\tVar}{\kind}{\term}}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\tEmpty}$}
+            \BinaryInfC{$\hasType{\tContext}{\eTAbs{\tVar}{\kind}{\term}}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\tEmpty}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}{\row}}}{\tEmpty}$}
-              \AxiomC{$\hasKind{\context}{\type_2}{\kind}$}
+              \AxiomC{$\hasType{\tContext}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}{\row}}}{\tEmpty}$}
+              \AxiomC{$\hasKind{\tContext}{\type_2}{\kind}$}
             \RightLabel{(\textsc{T-TApp})}
-            \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\substitute{\row}{\tVar}{\type_2}}$}
+            \BinaryInfC{$\hasType{\tContext}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\substitute{\row}{\tVar}{\type_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
-                {$\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
+                {$\hasType{\tContext}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\tContext}{\type_2}{\kType}$ \qquad $\hasKind{\tContext}{\row_2}{\kRow}$}
+                {$\tVar \notin \dom{\tContext}$ \qquad $\hasType{\tcTExtend{\tContext}{\tVar}{\kWitness{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
               }}
             \RightLabel{(\textsc{T-Reify})}
-            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}{\row_2}$}
+            \UnaryInfC{$\hasType{\tContext}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}{\row_2}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
+              \AxiomC{$\hasKind{\tContext}{\tVar}{\kWitness{\type}{\row}}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}{\row}$}
+            \UnaryInfC{$\hasType{\tContext}{\eReflect{\tVar}}{\type}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term_1}{\type_1}{\row}$}
-              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}{\tEmpty}}{\term_2}{\type_2}{\row}$}
+              \AxiomC{$\hasType{\tContext}{\term_1}{\type_1}{\row}$}
+              \AxiomC{$\hasType{\tcEExtend{\tContext}{\eVar}{\type_1}{\tEmpty}}{\term_2}{\type_2}{\row}$}
             \RightLabel{(\textsc{T-Do})}
-            \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\type_2}{\row}$}
+            \BinaryInfC{$\hasType{\tContext}{\eDo{\eVar}{\term_1}{\term_2}}{\type_2}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term}{\type}{\row_1}$}
-              \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
+              \AxiomC{$\hasType{\tContext}{\term}{\type}{\row_1}$}
+              \AxiomC{$\rowSub{\tContext}{\row_1}{\row_2}$}
             \RightLabel{(\textsc{T-Subsumption})}
-            \BinaryInfC{$\hasType{\context}{\term}{\type}{\row_2}$}
+            \BinaryInfC{$\hasType{\tContext}{\term}{\type}{\row_2}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing}
@@ -254,50 +263,50 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hasKind{\context}{\type}{\kind}$}
+            \framebox{$\hasKind{\tContext}{\type}{\kind}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\kind = \apply{\context}{\tVar}$}
+              \AxiomC{$\kind = \apply{\tContext}{\tVar}$}
             \RightLabel{(\textsc{K-Var})}
-            \UnaryInfC{$\hasKind{\context}{\tVar}{\kind}$}
+            \UnaryInfC{$\hasKind{\tContext}{\tVar}{\kind}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
-              \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\type_1}{\kType}$}
+              \AxiomC{$\hasKind{\tContext}{\row_1}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\type_2}{\kType}$}
+              \AxiomC{$\hasKind{\tContext}{\row_2}{\kRow}$}
             \RightLabel{(\textsc{K-Arrow})}
-            \QuaternaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}{\kType}$}
+            \QuaternaryInfC{$\hasKind{\tContext}{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}{\kType}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+              \AxiomC{$\hasKind{\tcTExtend{\tContext}{\tVar}{\kind}}{\type}{\kType}$}
+              \AxiomC{$\hasKind{\tContext}{\row}{\kRow}$}
             \RightLabel{(\textsc{K-ForAll})}
-            \BinaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\kType}$}
+            \BinaryInfC{$\hasKind{\tContext}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\kType}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{K-Empty})}
-            \UnaryInfC{$\hasKind{\context}{\tEmpty}{\kRow}$}
+            \UnaryInfC{$\hasKind{\tContext}{\tEmpty}{\kRow}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
+              \AxiomC{$\hasKind{\tContext}{\tVar}{\kWitness{\type}{\row}}$}
             \RightLabel{(\textsc{K-Singleton})}
-            \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
+            \UnaryInfC{$\hasKind{\tContext}{\tSingleton{\tVar}}{\kRow}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
-              \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\row_1}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\row_2}{\kRow}$}
             \RightLabel{(\textsc{K-Union})}
-            \BinaryInfC{$\hasKind{\context}{\tUnion{\row_1}{\row_2}}{\kRow}$}
+            \BinaryInfC{$\hasKind{\tContext}{\tUnion{\row_1}{\row_2}}{\kRow}$}
           \end{prooftree}
 
           \caption{Kinding rules}\label{fig:kinding}
@@ -307,42 +316,42 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\rowSub{\context}{\row}{\row}$}
+            \framebox{$\rowSub{\tContext}{\row}{\row}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\row}{\kRow}$}
             \RightLabel{(\textsc{R-Refl})}
-            \UnaryInfC{$\rowSub{\context}{\row}{\row}$}
+            \UnaryInfC{$\rowSub{\tContext}{\row}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+              \AxiomC{$\hasKind{\tContext}{\row}{\kRow}$}
             \RightLabel{(\textsc{R-Empty})}
-            \UnaryInfC{$\rowSub{\context}{\tEmpty}{\row}$}
+            \UnaryInfC{$\rowSub{\tContext}{\tEmpty}{\row}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
-              \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
+              \AxiomC{$\rowSub{\tContext}{\row_1}{\row_2}$}
+              \AxiomC{$\hasKind{\tContext}{\row_3}{\kRow}$}
             \RightLabel{(\textsc{R-WeakeningLeft})}
-            \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+            \BinaryInfC{$\rowSub{\tContext}{\row_1}{\tUnion{\row_2}{\row_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-              \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+              \AxiomC{$\rowSub{\tContext}{\row_1}{\row_3}$}
+              \AxiomC{$\hasKind{\tContext}{\row_2}{\kRow}$}
             \RightLabel{(\textsc{R-WeakeningRight})}
-            \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+            \BinaryInfC{$\rowSub{\tContext}{\row_1}{\tUnion{\row_2}{\row_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-              \AxiomC{$\rowSub{\context}{\row_2}{\row_3}$}
+              \AxiomC{$\rowSub{\tContext}{\row_1}{\row_3}$}
+              \AxiomC{$\rowSub{\tContext}{\row_2}{\row_3}$}
             \RightLabel{(\textsc{R-Strengthening})}
-            \BinaryInfC{$\rowSub{\context}{\tUnion{\row_1}{\row_2}}{\row_3}$}
+            \BinaryInfC{$\rowSub{\tContext}{\tUnion{\row_1}{\row_2}}{\row_3}$}
           \end{prooftree}
 
           \caption{Row subsumption}\label{fig:row_subsumption}
@@ -354,63 +363,69 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\step{\term}{\term}$}
+            \framebox{$\step{\eContext}{\term}{\term}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\step{\term_1}{\term_2}$}
+              \AxiomC{$\step{\eContext}{\term_1}{\term_2}$}
             \RightLabel{(\textsc{E-App1})}
-            \UnaryInfC{$\step{\eApp{\term_1}{\term_3}}{\eApp{\term_2}{\term_3}}$}
+            \UnaryInfC{$\step{\eContext}{\eApp{\term_1}{\term_3}}{\eApp{\term_2}{\term_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\step{\term_1}{\term_2}$}
+              \AxiomC{$\step{\eContext}{\term_1}{\term_2}$}
             \RightLabel{(\textsc{E-App2})}
-            \UnaryInfC{$\step{\eApp{\eValue}{\term_1}}{\eApp{\eValue}{\term_2}}$}
+            \UnaryInfC{$\step{\eContext}{\eApp{\eValue}{\term_1}}{\eApp{\eValue}{\term_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{E-Beta})}
-            \UnaryInfC{$\step{\eApp{\parens{\eAbs{\eVar}{\type}{\row}{\term}}}{\eValue}}{\substitute{\term}{\eVar}{\eValue}}$}
+            \UnaryInfC{$\step{\eContext}{\eApp{\parens{\eAbs{\eVar}{\type}{\row}{\term}}}{\eValue}}{\substitute{\term}{\eVar}{\eValue}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\step{\term_1}{\term_2}$}
+              \AxiomC{$\step{\eContext}{\term_1}{\term_2}$}
             \RightLabel{(\textsc{E-TApp})}
-            \UnaryInfC{$\step{\eTApp{\term_1}{\type}}{\eTApp{\term_2}{\type}}$}
+            \UnaryInfC{$\step{\eContext}{\eTApp{\term_1}{\type}}{\eTApp{\term_2}{\type}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{E-TBeta})}
-            \UnaryInfC{$\step{\eTApp{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\type}}{\substitute{\term}{\tVar}{\type}}$}
+            \UnaryInfC{$\step{\eContext}{\eTApp{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\type}}{\substitute{\term}{\tVar}{\type}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\step{\term_1}{\term_2}$}
+              \AxiomC{$\step{\ecExtend{\eContext}{\tVar}{\term_1}}{\term_2}{\term_3}$}
             \RightLabel{(\textsc{E-Reify1})}
-            \UnaryInfC{$\step{\eReify{\term_1}{\tVar}{\term_3}}{\eReify{\term_2}{\tVar}{\term_3}}$}
+            \UnaryInfC{$\step{\eContext}{\eReify{\term_1}{\tVar}{\term_2}}{\eReify{\term_1}{\tVar}{\term_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{E-Reify2})}
-            \UnaryInfC{$\step{\eReify{\eValue}{\tVar}{\term}}{\substitute{\term}{\eReflect{\tVar}}{\eValue}}$}
+            \UnaryInfC{$\step{\eContext}{\eReify{\term}{\tVar}{\eValue}}{\eValue}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\step{\term_1}{\term_2}$}
+              \AxiomC{$\apply{\eContext}{\tVar} = \term$}
+            \RightLabel{(\textsc{E-Reflect})}
+            \UnaryInfC{$\step{\eContext}{\eReflect{\tVar}}{\term}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\step{\eContext}{\term_1}{\term_2}$}
             \RightLabel{(\textsc{E-Do1})}
-            \UnaryInfC{$\step{\eDo{\eVar}{\term_1}{\term_3}}{\eDo{\eVar}{\term_2}{\term_3}}$}
+            \UnaryInfC{$\step{\eContext}{\eDo{\eVar}{\term_1}{\term_3}}{\eDo{\eVar}{\term_2}{\term_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{}
             \RightLabel{(\textsc{E-Do2})}
-            \UnaryInfC{$\step{\eDo{\eVar}{\eValue}{\term}}{\substitute{\term}{\eVar}{\eValue}}$}
+            \UnaryInfC{$\step{\eContext}{\eDo{\eVar}{\eValue}{\term}}{\substitute{\term}{\eVar}{\eValue}}$}
           \end{prooftree}
 
           \caption{Operational semantics}\label{fig:operational_semantics}
