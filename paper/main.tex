@@ -62,6 +62,7 @@
 
 % Terms
 \newcommand\term{t}
+\newcommand\eValue{v}
 \newcommand\eVar{x}
 \newcommand\eAbs[4]{\lambda \tAnno{#1}{#2}{#3} \; . \; #4}
 \newcommand\eApp[2]{#1 \; #2}
@@ -100,6 +101,7 @@
 \newcommand\hasType[4]{#1 \vdash \tAnno{#2}{#3}{#4}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
+\newcommand\step[2]{#1 \longrightarrow #2}
 
 %%%%%%%%%%%%%%%%%%%%%
 % The specification %
@@ -142,6 +144,10 @@
               & $\eReify{\term}{\tVar}{\term}$ & reification \\
               & $\eReflect{\tVar}$ & reflection \\
               & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
+              \\
+              $\eValue \Coloneqq$ & & values: \\
+              & $\eAbs{\eVar}{\type}{\row}{\term}$ & term abstraction \\
+              & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
               \\
               $\type, \row \Coloneqq$ & & types: \\
               & $\tVar$ & type variable \\
@@ -340,6 +346,74 @@
           \end{prooftree}
 
           \caption{Row subsumption}\label{fig:row_subsumption}
+        \end{mdframed}
+      \end{figure}
+
+    \subsection{Semantics}
+
+      \begin{figure}[H]
+        \begin{mdframed}[backgroundcolor=none]
+          \begin{center}
+            \framebox{$\step{\term}{\term}$}
+          \end{center}
+
+          \medskip
+
+          \begin{prooftree}
+              \AxiomC{$\step{\term_1}{\term_2}$}
+            \RightLabel{(\textsc{E-App1})}
+            \UnaryInfC{$\step{\eApp{\term_1}{\term_3}}{\eApp{\term_2}{\term_3}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\step{\term_1}{\term_2}$}
+            \RightLabel{(\textsc{E-App2})}
+            \UnaryInfC{$\step{\eApp{\eValue}{\term_1}}{\eApp{\eValue}{\term_2}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{E-Beta})}
+            \UnaryInfC{$\step{\eApp{\parens{\eAbs{\eVar}{\type}{\row}{\term}}}{\eValue}}{\substitute{\term}{\eVar}{\eValue}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\step{\term_1}{\term_2}$}
+            \RightLabel{(\textsc{E-TApp})}
+            \UnaryInfC{$\step{\eTApp{\term_1}{\type}}{\eTApp{\term_2}{\type}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{E-TBeta})}
+            \UnaryInfC{$\step{\eTApp{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\type}}{\substitute{\term}{\tVar}{\type}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\step{\term_1}{\term_2}$}
+            \RightLabel{(\textsc{E-Reify1})}
+            \UnaryInfC{$\step{\eReify{\term_1}{\tVar}{\term_3}}{\eReify{\term_2}{\tVar}{\term_3}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{E-Reify2})}
+            \UnaryInfC{$\step{\eReify{\eValue}{\tVar}{\term}}{\substitute{\term}{\eReflect{\tVar}}{\eValue}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\step{\term_1}{\term_2}$}
+            \RightLabel{(\textsc{E-Do1})}
+            \UnaryInfC{$\step{\eDo{\eVar}{\term_1}{\term_3}}{\eDo{\eVar}{\term_2}{\term_3}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{}
+            \RightLabel{(\textsc{E-Do2})}
+            \UnaryInfC{$\step{\eDo{\eVar}{\eValue}{\term}}{\substitute{\term}{\eVar}{\eValue}}$}
+          \end{prooftree}
+
+          \caption{Operational semantics}\label{fig:operational_semantics}
         \end{mdframed}
       \end{figure}
 

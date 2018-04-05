@@ -58,6 +58,7 @@ PRELUDE_ARITIES = {
   'left' => [0],
   'leftarrow' => [0],
   'llbracket' => [0],
+  'longrightarrow' => [0],
   'lstdefinelanguage' => [2],
   'lstset' => [1],
   'm@th' => [0],
