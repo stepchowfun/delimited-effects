@@ -1,0 +1,140 @@
+\section{Reflection and reification}
+
+  We adopt the convention that alpha-equivalent expressions are interchangeable in all contexts.
+
+  \subsection{Syntax}
+
+    \begin{figure}[H]
+      \begin{center}
+        \begin{tabular}{l l l}
+          $\term \Coloneqq$ & & terms: \\
+          & $\eVar$ & variable \\
+          & $\eAbs{\eVar}{\type}{\term}$ & term abstraction \\
+          & $\eApp{\term}{\term}$ & term application \\
+          & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
+          & $\eTApp{\term}{\type}$ & type application \\
+          & $\eReify{\term}{\tVar}{\term}$ & reification \\
+          & $\eReflect{\tVar}$ & reflection \\
+          \\
+          $\type \Coloneqq$ & & types: \\
+          & $\tVar$ & type variable \\
+          & $\tArrow{\type}{\type}$ & arrow type \\
+          & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
+          \\
+          $\kind \Coloneqq$ & & kinds: \\
+          & $\kType$ & kind of proper types \\
+          & $\kWitness{\type}$ & kind of witnesses \\
+          \\
+          $\context \Coloneqq$ & & contexts: \\
+          & $\cEmpty$ & empty context \\
+          & $\cEExtend{\context}{\eVar}{\type}$ & term variable binding \\
+          & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
+        \end{tabular}
+      \end{center}
+
+      \caption{Syntax}\label{fig:refl_syntax}
+    \end{figure}
+
+  \subsection{Typing}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\hasType{\context}{\term}{\type}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\apply{\context}{\eVar} = \type$}
+        \RightLabel{(\textsc{T-Var})}
+        \UnaryInfC{$\hasType{\context}{\eVar}{\type}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term}{\type_2}$}
+          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
+        \RightLabel{(\textsc{T-Abs})}
+        \BinaryInfC{$\hasType{\context}{\parens{\eAbs{\eVar}{\type_1}{\term}}}{\tArrow{\type_1}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term_1}{\tArrow{\type_1}{\type_2}}$}
+          \AxiomC{$\hasType{\context}{\term_2}{\type_1}$}
+        \RightLabel{(\textsc{T-App})}
+        \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}$}
+          \AxiomC{$\tVar \notin \dom{\context}$}
+        \RightLabel{(\textsc{T-TAbs})}
+        \BinaryInfC{$\hasType{\context}{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\parens{\tForAll{\tVar}{\kind}{\type}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}}}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kind}$}
+        \RightLabel{(\textsc{T-TApp})}
+        \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\type_2}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
+          \AxiomC{$\tVar \notin \dom{\context}$}
+        \RightLabel{(\textsc{T-Reify})}
+        \QuaternaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+        \RightLabel{(\textsc{T-Reflect})}
+        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
+      \end{prooftree}
+
+      \caption{Typing rules}\label{fig:refl_typing}
+    \end{figure}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\hasKind{\context}{\type}{\kind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\apply{\context}{\tVar} = \kind$}
+        \RightLabel{(\textsc{K-Var})}
+        \UnaryInfC{$\hasKind{\context}{\tVar}{\kind}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
+        \RightLabel{(\textsc{K-Arrow})}
+        \BinaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\type_2}}{\kType}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}$}
+        \RightLabel{(\textsc{K-ForAll})}
+        \UnaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}}}{\kType}$}
+      \end{prooftree}
+
+      \caption{Kinding rules}\label{fig:refl_kinding}
+    \end{figure}
+
+  \subsection{Semantics}
+
+    Consider the program
+    \[
+      \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
+    \]
+    which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the normal form $\eAbs{\eVar}{\type_1}{\term}$. In a call-by-value setting, what would be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
+    \[
+      \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
+    \]
+    But that would be reduction under a lambda abstraction, which is forbidden in a call-by-value semantics. Indeed, the program is stuck.
+
+    This may come as a surprise, since no aspect of our system inherently relies on the semantics being call-by-value. The true problem is with substitution, as noted by \cite{amin17}.

@@ -20,6 +20,7 @@ PRELUDE_ARITIES = {
   'Lambda' => [0],
   'QuaternaryInfC' => [1],
   'RightLabel' => [1],
+  'Rightarrow' => [0],
   'SetWatermarkLightness' => [1],
   'SetWatermarkScale' => [1],
   'SetWatermarkText' => [1],
@@ -29,34 +30,64 @@ PRELUDE_ARITIES = {
   'UnaryInfC' => [1],
   'Uparrow' => [0],
   'Updownarrow' => [0],
+  'acmArticle' => [1],
+  'acmDOI' => [1],
+  'acmJournal' => [1],
+  'acmMonth' => [1],
+  'acmNumber' => [1],
+  'acmVolume' => [1],
+  'acmYear' => [1],
+  'affiliation' => [1],
   'alpha' => [0],
+  'author' => [1],
   'begin' => [1, 2],
+  'beginAcm' => [0],
+  'beginNonAcm' => [0],
   'bfseries' => [0],
+  'bibliography' => [1],
+  'bibliographystyle' => [1],
   'bigskipamount' => [0],
   'boxed' => [1],
   'caption' => [1],
+  'ccsdesc' => [1],
+  'cite' => [1],
+  'citestyle' => [1],
+  'city' => [1],
   'color' => [1],
+  'copyrightyear' => [1],
+  'country' => [1],
   'cup' => [0],
   'date' => [1],
   'definecolor' => [3],
   'diamond' => [0],
   'displaystyle' => [0],
   'documentclass' => [1],
+  'else' => [0],
+  'email' => [1],
   'emph' => [1],
   'end' => [1],
+  'endAcm' => [0],
+  'endNonAcm' => [0],
   'fbox' => [1],
   'fboxsep' => [0],
   'fi' => [0],
   'forall' => [0],
   'framebox' => [1],
   'iffalse' => [0],
+  'iftrue' => [0],
+  'ifuseacm' => [0],
+  'input' => [1],
+  'institution' => [1],
   'kappa' => [0],
   'kern' => [0],
+  'keywords' => [1],
   'label' => [1],
   'lambda' => [0],
   'langle' => [0],
   'left' => [0],
   'leftarrow' => [0],
+  'let' => [0],
+  'linewidth' => [0],
   'llbracket' => [0],
   'lstdefinelanguage' => [2],
   'lstset' => [1],
@@ -67,18 +98,26 @@ PRELUDE_ARITIES = {
   'mapsto' => [0],
   'medskip' => [0],
   'newcommand' => [0],
+  'newif' => [0],
   'newtheorem' => [2],
+  'noindent' => [0],
   'notin' => [0],
   'nsubseteq' => [0],
   'omega' => [0],
+  'orcid' => [1],
+  'postcode' => [1],
   'qquad' => [0],
   'rangle' => [0],
+  'received' => [1],
   'renewcommand' => [0],
   'right' => [0],
   'rightarrow' => [0],
   'rrbracket' => [0],
   'section' => [1],
+  'setcopyright' => [1],
   'star' => [0],
+  'state' => [1],
+  'streetaddress' => [1],
   'subsection' => [1],
   'subseteq' => [0],
   'subsubsection' => [1],
@@ -89,6 +128,7 @@ PRELUDE_ARITIES = {
   'textsc' => [1],
   'title' => [1],
   'ttfamily' => [0],
+  'useacmtrue' => [0],
   'usepackage' => [1],
   'varepsilon' => [0],
   'varnothing' => [0],
@@ -114,18 +154,28 @@ def count_args(s)
   arity
 end
 
-# Iterate over the input files.
+# Get macros from each of the input files.
+macros = {}
 ARGV.each do |path|
   # Read the contents of the file.
   doc = File.read(path)
   lines = doc.split("\n", -1)
 
   # Get the arity of all the macros.
-  macros = PRELUDE_ARITIES.merge(
-    doc.scan(MACRO_REGEX).map do |r|
-      [r[0], r[2] ? [r[2].to_i] : [0]]
-    end.to_h
+  macros = macros.merge(
+    PRELUDE_ARITIES.merge(
+      doc.scan(MACRO_REGEX).map do |r|
+        [r[0], r[2] ? [r[2].to_i] : [0]]
+      end.to_h
+    )
   )
+end
+
+# Check each of the input files.
+ARGV.each do |path|
+  # Read the contents of the file.
+  doc = File.read(path)
+  lines = doc.split("\n", -1)
 
   # Remove newcommands so they don't get checked.
   doc.gsub!(/\\newcommand\s*\\[A-Za-z@]+/, '')
@@ -133,7 +183,7 @@ ARGV.each do |path|
   # Check for undefined macros.
   undefined_macros = doc.scan(/\\[A-Za-z@]+/).select do |r|
     !macros[r[1..-1]]
-  end
+  end.uniq
 
   if !undefined_macros.empty?
     STDERR.puts(

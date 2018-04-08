@@ -1,0 +1,230 @@
+\section{Entanglement}
+
+  We adopt the convention that alpha-equivalent expressions are interchangeable in all contexts.
+
+  \subsection{Syntax}
+
+    \begin{figure}[H]
+      \begin{center}
+        \begin{tabular}{l l l}
+          $\term \Coloneqq$ & & terms: \\
+          & $\eVar$ & variable \\
+          & $\eAbs{\eVar}{\type}{\term}$ & term abstraction \\
+          & $\eApp{\term}{\term}$ & term application \\
+          & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
+          & $\eTApp{\term}{\type}$ & type application \\
+          & $\eReify{\term}{\tVar}{\term}$ & reification \\
+          & $\eReflect{\tVar}$ & reflection \\
+          & $\eBind{\eVar}{\term}{\term}$ & bind \\
+          \\
+          $\type, \row \Coloneqq$ & & types: \\
+          & $\tVar$ & type variable \\
+          & $\tArrow{\type}{\type}$ & arrow type \\
+          & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
+          & $\tEntangled{\type}{\row}$ & entangled type \\
+          & $\tEmpty$ & empty row \\
+          & $\tSingleton{\tVar}$ & singleton row \\
+          & $\tUnion{\row}{\row}$ & row union \\
+          \\
+          $\kind \Coloneqq$ & & kinds: \\
+          & $\kType$ & kind of proper types \\
+          & $\kRow$ & kind of rows \\
+          & $\kWitness{\type}$ & kind of witnesses \\
+          \\
+          $\context \Coloneqq$ & & contexts: \\
+          & $\cEmpty$ & empty context \\
+          & $\cEExtend{\context}{\eVar}{\type}$ & term variable binding \\
+          & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
+        \end{tabular}
+      \end{center}
+
+      \caption{Syntax}\label{fig:entanglement_syntax}
+    \end{figure}
+
+  \subsection{Typing}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\hasType{\context}{\term}{\type}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\apply{\context}{\eVar} = \type$}
+        \RightLabel{(\textsc{T-Var})}
+        \UnaryInfC{$\hasType{\context}{\eVar}{\type}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term}{\type_2}$}
+          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
+        \RightLabel{(\textsc{T-Abs})}
+        \BinaryInfC{$\hasType{\context}{\parens{\eAbs{\eVar}{\type_1}{\term}}}{\tArrow{\type_1}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term_1}{\tArrow{\type_1}{\type_2}}$}
+          \AxiomC{$\hasType{\context}{\term_2}{\type_1}$}
+        \RightLabel{(\textsc{T-App})}
+        \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}$}
+          \AxiomC{$\tVar \notin \dom{\context}$}
+        \RightLabel{(\textsc{T-TAbs})}
+        \BinaryInfC{$\hasType{\context}{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\parens{\tForAll{\tVar}{\kind}{\type}}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}}}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kind}$}
+        \RightLabel{(\textsc{T-TApp})}
+        \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{\Shortstack[c]{
+            {$\hasType{\context}{\term_1}{\type_1}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\tEntangled{\type_2}{\tUnion{\row}{\tSingleton{\tVar}}}}$}
+            {$\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row}{\kRow}$ \qquad $\tVar \notin \dom{\context}$}
+          }}
+        \RightLabel{(\textsc{T-Reify})}
+        \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+        \RightLabel{(\textsc{T-Reflect})}
+        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term_1}{\tEntangled{\type_1}{\row}}$}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tEntangled{\type_2}{\row}}$}
+        \RightLabel{(\textsc{T-Bind})}
+        \BinaryInfC{$\hasType{\context}{\eBind{\eVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\type}$}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{T-Entangle})}
+        \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\tEmpty}}$}
+        \RightLabel{(\textsc{T-Escape})}
+        \UnaryInfC{$\hasType{\context}{\term}{\type}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_1}}$}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{T-Subsumption})}
+        \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_2}}$}
+      \end{prooftree}
+
+      \caption{Typing rules}\label{fig:entanglement_typing}
+    \end{figure}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\hasKind{\context}{\type}{\kind}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\apply{\context}{\tVar} = \kind$}
+        \RightLabel{(\textsc{K-Var})}
+        \UnaryInfC{$\hasKind{\context}{\tVar}{\kind}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
+        \RightLabel{(\textsc{K-Arrow})}
+        \BinaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\type_2}}{\kType}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}$}
+        \RightLabel{(\textsc{K-ForAll})}
+        \UnaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}}}{\kType}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\type}{\kType}$}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{K-Entangled})}
+        \BinaryInfC{$\hasKind{\context}{\tEntangled{\type}{\row}}{\kType}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{K-Empty})}
+        \UnaryInfC{$\hasKind{\context}{\tEmpty}{\kRow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+        \RightLabel{(\textsc{K-Singleton})}
+        \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
+          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+        \RightLabel{(\textsc{K-Union})}
+        \BinaryInfC{$\hasKind{\context}{\tUnion{\row_1}{\row_2}}{\kRow}$}
+      \end{prooftree}
+
+      \caption{Kinding rules}\label{fig:entanglement_kinding}
+    \end{figure}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\rowSub{\context}{\row}{\row}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{R-Refl})}
+        \UnaryInfC{$\rowSub{\context}{\row}{\row}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{R-Empty})}
+        \UnaryInfC{$\rowSub{\context}{\tEmpty}{\row}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
+          \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
+        \RightLabel{(\textsc{R-Weakening1})}
+        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
+          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+        \RightLabel{(\textsc{R-Weakening2})}
+        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
+          \AxiomC{$\rowSub{\context}{\row_2}{\row_3}$}
+        \RightLabel{(\textsc{R-Strengthening})}
+        \BinaryInfC{$\rowSub{\context}{\tUnion{\row_1}{\row_2}}{\row_3}$}
+      \end{prooftree}
+
+      \caption{Row subsumption}\label{fig:row_subsumption}
+    \end{figure}
+
+  \subsection{Semantics}

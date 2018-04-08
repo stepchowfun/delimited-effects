@@ -1,5 +1,3 @@
-# Phony targets
-
 .PHONY: \
   all test lint format clean \
   paper \
@@ -187,18 +185,27 @@ docker-build:
 	docker cp . "$$CONTAINER:/home/user/repo" && \
 	docker start --attach "$$CONTAINER"
 
-# The paper
-
-main.pdf: paper/main.tex
+main.pdf: $(shell find paper -name '*.tex' -print -o -name '*.bib' -print)
+	make clean-paper
+	test "$$USEACM" = true && \
+	  sed -i '' -e 's/^% \\useacmtrue/\\useacmtrue/g' paper/main.tex || true
+	test "$$USEACM" = false && \
+	  sed -i '' -e 's/^\\useacmtrue/% \\useacmtrue/g' paper/main.tex || true
 	mkdir -p ".paper-build"
 	pdflatex \
 	  -interaction=nonstopmode \
 	  -output-directory ".paper-build" \
 	  paper/main.tex
 	while ( \
-	  grep -qi '^LaTeX Warning: Label(s) may have changed' \
+	  grep -qi '^LaTeX Warning: Label(s) may have changed.' \
+	    '.paper-build/main.log' || \
+	  grep -qi '^Package natbib Warning: Citation(s) may have changed.' \
 	    '.paper-build/main.log' \
 	) do \
+	  ( \
+	    cd .paper-build && \
+	    BIBINPUTS=../paper bibtex main.aux \
+	  ); \
 	  pdflatex \
 	    -interaction=nonstopmode \
 	    -output-directory ".paper-build" \
