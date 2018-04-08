@@ -22,7 +22,7 @@
 \SetWatermarkScale{3}
 \SetWatermarkLightness{0.975}
 
-\title{Mirrors: reflecting terms in types}
+\title{Reflection and entanglement}
 \date{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,7 +31,7 @@
 
 \definecolor{purple}{RGB}{127, 0, 181}
 
-\lstdefinelanguage{gram}{morekeywords={mirror, reify, reflect, do, over, in, as}}
+\lstdefinelanguage{gram}{morekeywords={reify, reflect, as, in}}
 
 \lstset{
   aboveskip=\bigskipamount,
@@ -51,19 +51,17 @@
 \newtheorem{theorem}{Theorem}
 
 % Misc
+\newcommand\anno[2]{#1 : #2}
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\dom[1]{\apply{\text{dom}}{#1}}
-\newcommand\eff[1]{\apply{\text{eff}}{#1}}
-\newcommand\fv[1]{\apply{\text{fv}}{#1}}
 \newcommand\kAnno[2]{#1 : #2}
 \newcommand\parens[1]{\left( #1 \right)}
 \newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
-\newcommand\tAnno[3]{#1 : \tEmbellished{#2}{#3}}
 
 % Terms
 \newcommand\term{t}
 \newcommand\eVar{x}
-\newcommand\eAbs[4]{\lambda \tAnno{#1}{#2}{#3} \; . \; #4}
+\newcommand\eAbs[3]{\lambda \anno{#1}{#2} \; . \; #3}
 \newcommand\eApp[2]{#1 \; #2}
 \newcommand\eTAbs[3]{\lambda \kAnno{#1}{#2} \; . \; #3}
 \newcommand\eTApp[2]{#1 \; #2}
@@ -71,15 +69,15 @@
 \newcommand\eRApp[2]{#1 \; #2}
 \newcommand\eReify[3]{\textbf{reify} \; #1 \; \textbf{as} \; #2 \; \textbf{in} \; #3}
 \newcommand\eReflect[1]{\textbf{reflect} \; #1}
-\newcommand\eDo[3]{\textbf{do} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
+\newcommand\eBind[3]{#1 \leftarrow #2 \; \textbf{in} \; #3}
 
 % Types and rows
 \newcommand\type{\tau}
 \newcommand\tVar{\alpha}
-\newcommand\tArrow[4]{\tEmbellished{#1}{#2} \rightarrow \tEmbellished{#3}{#4}}
-\newcommand\tForAll[4]{\forall \kAnno{#1}{#2} \; . \; \tEmbellished{#3}{#4}}
+\newcommand\tArrow[2]{#1 \rightarrow #2}
+\newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
+\newcommand\tEntangled[2]{#1 \; ! \; #2}
 \newcommand\row{\omega}
-\newcommand\tEmbellished[2]{#1 \; ! \; #2}
 \newcommand\tEmpty{\varnothing}
 \newcommand\tSingleton[1]{\left\{ #1 \right\}}
 \newcommand\tUnion[2]{#1 \cup #2}
@@ -88,38 +86,37 @@
 \newcommand\kind{\kappa}
 \newcommand\kType{\star}
 \newcommand\kRow{\diamond}
-\newcommand\kWitness[2]{\left\langle \tEmbellished{#1}{#2} \right\rangle}
+\newcommand\kWitness[1]{\left\langle #1 \right\rangle}
 
 % Contexts
 \newcommand\context{\Gamma}
 \newcommand\cEmpty{\varnothing}
-\newcommand\cEExtend[4]{#1, \tAnno{#2}{#3}{#4}}
+\newcommand\cEExtend[3]{#1, \anno{#2}{#3}}
 \newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
 
 % Judgments
-\newcommand\hasType[4]{#1 \vdash \tAnno{#2}{#3}{#4}}
+\newcommand\hasType[3]{#1 \vdash \anno{#2}{#3}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
 
-%%%%%%%%%%%%%%%%%%%%%
-% The specification %
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%
+% The writeup %
+%%%%%%%%%%%%%%%
 
 \begin{document}
   \maketitle
 
   \begin{abstract}
-    We introduce \emph{mirrors}, a mechanism for reifying terms into types and reflecting them back into terms. Mirrors are capable of modeling a diverse collection of programming language features including algebraic effects and handlers, type classes with local instances, and dynamic scoping.
+    Motivated by an observed similarity between the rules by which type class constraints and algebraic effects propagate through programs in their respective systems, we introduce a novel language feature capable of modeling both. Our system offers a uniform treatment of algebraic effects and type classes. Building on the idea by Kiselyov and Shan of reifying terms as types and reflecting them back into terms, our system preserves coherence for local type class instances.
   \end{abstract}
 
   \section{Introduction}
 
     \iffalse
       \begin{lstlisting}[gobble=4]
-        mirror IO over String ! { } in
-          reify "Hello" as a => IO in
-            do x <- reflect a => IO in
-              x + ", World!"
+        reify "Hello" as a in
+          x <- reflect a in
+            x + ", World!"
       \end{lstlisting}
     \fi
 
@@ -135,18 +132,19 @@
             \begin{tabular}{l l l}
               $\term \Coloneqq$ & & terms: \\
               & $\eVar$ & variable \\
-              & $\eAbs{\eVar}{\type}{\row}{\term}$ & term abstraction \\
+              & $\eAbs{\eVar}{\type}{\term}$ & term abstraction \\
               & $\eApp{\term}{\term}$ & term application \\
               & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
               & $\eTApp{\term}{\type}$ & type application \\
               & $\eReify{\term}{\tVar}{\term}$ & reification \\
               & $\eReflect{\tVar}$ & reflection \\
-              & $\eDo{\eVar}{\term}{\term}$ & sequencing \\
+              & $\eBind{\eVar}{\term}{\term}$ & bind \\
               \\
               $\type, \row \Coloneqq$ & & types: \\
               & $\tVar$ & type variable \\
-              & $\tArrow{\type}{\row}{\type}{\row}$ & arrow type \\
-              & $\tForAll{\tVar}{\kind}{\type}{\row}$ & universal type \\
+              & $\tArrow{\type}{\type}$ & arrow type \\
+              & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
+              & $\tEntangled{\type}{\row}$ & entangled type \\
               & $\tEmpty$ & empty row \\
               & $\tSingleton{\tVar}$ & singleton row \\
               & $\tUnion{\row}{\row}$ & row union \\
@@ -154,11 +152,11 @@
               $\kind \Coloneqq$ & & kinds: \\
               & $\kType$ & kind of proper types \\
               & $\kRow$ & kind of rows \\
-              & $\kWitness{\type}{\row}$ & kind of witnesses \\
+              & $\kWitness{\type}$ & kind of witnesses \\
               \\
               $\context \Coloneqq$ & & contexts: \\
               & $\cEmpty$ & empty context \\
-              & $\cEExtend{\context}{\eVar}{\type}{\row}$ & term variable binding \\
+              & $\cEExtend{\context}{\eVar}{\type}$ & term variable binding \\
               & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
             \end{tabular}
           \end{center}
@@ -172,73 +170,85 @@
       \begin{figure}[H]
         \begin{mdframed}[backgroundcolor=none]
           \begin{center}
-            \framebox{$\hasType{\context}{\term}{\type}{\row}$}
+            \framebox{$\hasType{\context}{\term}{\type}$}
           \end{center}
 
           \medskip
 
           \begin{prooftree}
-              \AxiomC{$\apply{\context}{\eVar} = \tEmbellished{\type}{\row}$}
+              \AxiomC{$\apply{\context}{\eVar} = \type$}
             \RightLabel{(\textsc{T-Var})}
-            \UnaryInfC{$\hasType{\context}{\eVar}{\type}{\row}$}
+            \UnaryInfC{$\hasType{\context}{\eVar}{\type}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}{\row_1}}{\term}{\type_2}{\row_2}$}
+              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term}{\type_2}$}
               \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
             \RightLabel{(\textsc{T-Abs})}
-            \TrinaryInfC{$\hasType{\context}{\eAbs{\eVar}{\type_1}{\row_1}{\term}}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
+            \BinaryInfC{$\hasType{\context}{\parens{\eAbs{\eVar}{\type_1}{\term}}}{\tArrow{\type_1}{\type_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term_1}{\parens{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}}{\tEmpty}$}
-              \AxiomC{$\hasType{\context}{\term_2}{\type_1}{\row_1}$}
+              \AxiomC{$\hasType{\context}{\term_1}{\tArrow{\type_1}{\type_2}}$}
+              \AxiomC{$\hasType{\context}{\term_2}{\type_1}$}
             \RightLabel{(\textsc{T-App})}
-            \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}{\row_2}$}
+            \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}$}
           \end{prooftree}
 
           \begin{prooftree}
+              \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}$}
               \AxiomC{$\tVar \notin \dom{\context}$}
-              \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}{\row}$}
             \RightLabel{(\textsc{T-TAbs})}
-            \BinaryInfC{$\hasType{\context}{\eTAbs{\tVar}{\kind}{\term}}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\tEmpty}$}
+            \BinaryInfC{$\hasType{\context}{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\parens{\tForAll{\tVar}{\kind}{\type}}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}{\row}}}{\tEmpty}$}
+              \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}}}$}
               \AxiomC{$\hasKind{\context}{\type_2}{\kind}$}
             \RightLabel{(\textsc{T-TApp})}
-            \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}{\substitute{\row}{\tVar}{\type_2}}$}
+            \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{\Shortstack[c]{
-                {$\hasType{\context}{\term_1}{\type_1}{\row_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row_2}{\kRow}$}
-                {$\tVar \notin \dom{\context}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}{\row_1}}}{\term_2}{\type_2}{\tUnion{\row_2}{\tSingleton{\tVar}}}$}
+                {$\hasType{\context}{\term_1}{\type_1}$ \qquad $\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row}{\kRow}$}
+                {$\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\tEntangled{\type_2}{\tUnion{\row}{\tSingleton{\tVar}}}}$ \qquad $\tVar \notin \dom{\context}$}
               }}
             \RightLabel{(\textsc{T-Reify})}
-            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}{\row_2}$}
+            \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\tEntangled{\type_2}{\row}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
             \RightLabel{(\textsc{T-Reflect})}
-            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}{\row}$}
+            \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term_1}{\type_1}{\row}$}
-              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}{\tEmpty}}{\term_2}{\type_2}{\row}$}
-            \RightLabel{(\textsc{T-Do})}
-            \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\type_2}{\row}$}
+              \AxiomC{$\hasType{\context}{\term_1}{\tEntangled{\type_1}{\row}}$}
+              \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tEntangled{\type_2}{\row}}$}
+            \RightLabel{(\textsc{T-Bind})}
+            \BinaryInfC{$\hasType{\context}{\eBind{\eVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasType{\context}{\term}{\type}{\row_1}$}
+              \AxiomC{$\hasType{\context}{\term}{\type}$}
+              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+            \RightLabel{(\textsc{T-Entangle})}
+            \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row}}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\tEmpty}}$}
+            \RightLabel{(\textsc{T-Escape})}
+            \UnaryInfC{$\hasType{\context}{\term}{\type}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_1}}$}
               \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
             \RightLabel{(\textsc{T-Subsumption})}
-            \BinaryInfC{$\hasType{\context}{\term}{\type}{\row_2}$}
+            \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_2}}$}
           \end{prooftree}
 
           \caption{Typing rules}\label{fig:typing}
@@ -261,18 +271,22 @@
 
           \begin{prooftree}
               \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
               \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
             \RightLabel{(\textsc{K-Arrow})}
-            \QuaternaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\row_1}{\type_2}{\row_2}}{\kType}$}
+            \BinaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\type_2}}{\kType}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}$}
-              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
             \RightLabel{(\textsc{K-ForAll})}
-            \BinaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}{\row}}}{\kType}$}
+            \UnaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}}}{\kType}$}
+          \end{prooftree}
+
+          \begin{prooftree}
+              \AxiomC{$\hasKind{\context}{\type}{\kType}$}
+              \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+            \RightLabel{(\textsc{K-Entangled})}
+            \BinaryInfC{$\hasKind{\context}{\tEntangled{\type}{\row}}{\kType}$}
           \end{prooftree}
 
           \begin{prooftree}
@@ -282,7 +296,7 @@
           \end{prooftree}
 
           \begin{prooftree}
-              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}{\row}}$}
+              \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
             \RightLabel{(\textsc{K-Singleton})}
             \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
           \end{prooftree}
@@ -321,14 +335,14 @@
           \begin{prooftree}
               \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
               \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
-            \RightLabel{(\textsc{R-WeakeningLeft})}
+            \RightLabel{(\textsc{R-Weakening1})}
             \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
           \end{prooftree}
 
           \begin{prooftree}
               \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
               \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
-            \RightLabel{(\textsc{R-WeakeningRight})}
+            \RightLabel{(\textsc{R-Weakening2})}
             \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
           \end{prooftree}
 
