@@ -28,11 +28,11 @@
     \noindent
     \begin{minipage}{\linewidth}
       \begin{lstlisting}[gobble=8, mathescape=true]
-        identity : <Monoid a> $\Rightarrow$ a
+        identity : Monoid a $\Rightarrow$ a
         identity = $\lambda$(a : *) (b : <Monoid a>) . x
           where Monoid x _ = reflect b
 
-        combine : <Monoid a> $\Rightarrow$ a $\rightarrow$ a $\rightarrow$ a
+        combine : Monoid a $\Rightarrow$ a $\rightarrow$ a $\rightarrow$ a
         combine = $\lambda$(a : *) (b : <Monoid a>) . x
           where Monoid _ x = reflect b
       \end{lstlisting}
