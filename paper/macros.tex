@@ -1,0 +1,48 @@
+% Misc
+\newcommand\anno[2]{#1 : #2}
+\newcommand\apply[2]{#1\parens{#2}}
+\newcommand\dom[1]{\apply{\text{dom}}{#1}}
+\newcommand\kAnno[2]{#1 : #2}
+\newcommand\parens[1]{\left( #1 \right)}
+\newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
+
+% Terms
+\newcommand\term{t}
+\newcommand\eVar{x}
+\newcommand\eAbs[3]{\lambda \anno{#1}{#2} \; . \; #3}
+\newcommand\eApp[2]{#1 \; #2}
+\newcommand\eTAbs[3]{\lambda \kAnno{#1}{#2} \; . \; #3}
+\newcommand\eTApp[2]{#1 \; #2}
+\newcommand\eRAbs[2]{\lambda #1 \; . \; #2}
+\newcommand\eRApp[2]{#1 \; #2}
+\newcommand\eReify[3]{\textbf{reify} \; #1 \; \textbf{as} \; #2 \; \textbf{in} \; #3}
+\newcommand\eReflect[1]{\textbf{reflect} \; #1}
+\newcommand\eBind[3]{#1 \leftarrow #2 \; \textbf{in} \; #3}
+
+% Types and rows
+\newcommand\type{\tau}
+\newcommand\tVar{\alpha}
+\newcommand\tArrow[2]{#1 \rightarrow #2}
+\newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
+\newcommand\tEntangled[2]{#1 \; ! \; #2}
+\newcommand\row{\omega}
+\newcommand\tEmpty{\varnothing}
+\newcommand\tSingleton[1]{\left\{ #1 \right\}}
+\newcommand\tUnion[2]{#1 \cup #2}
+
+% Kinds
+\newcommand\kind{\kappa}
+\newcommand\kType{\star}
+\newcommand\kRow{\diamond}
+\newcommand\kWitness[1]{\left\langle #1 \right\rangle}
+
+% Contexts
+\newcommand\context{\Gamma}
+\newcommand\cEmpty{\varnothing}
+\newcommand\cEExtend[3]{#1, \anno{#2}{#3}}
+\newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
+
+% Judgments
+\newcommand\hasType[3]{#1 \vdash \anno{#2}{#3}}
+\newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
+\newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}

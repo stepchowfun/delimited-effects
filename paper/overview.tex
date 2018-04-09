@@ -1,0 +1,52 @@
+\section{Overview}
+
+  \subsection{Reflection and reification}
+
+    Here's a simple example of reification and reflection.
+
+    \noindent
+    \begin{minipage}{\linewidth}
+      \begin{lstlisting}[gobble=8, mathescape=true]
+        reify "Hello" as a in
+          x $\leftarrow$ reflect a in
+            x + ", World!"
+      \end{lstlisting}
+    \end{minipage}
+
+  \subsection{Type classes with local instances}
+
+    We can represent a type class as an ordinary data type.
+
+    \noindent
+    \begin{minipage}{\linewidth}
+      \begin{lstlisting}[gobble=8, mathescape=true]
+        data Monoid a = Monoid a (a $\rightarrow$ a $\rightarrow$ a)
+      \end{lstlisting}
+    \end{minipage}
+
+    \noindent For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance back into a term and extract the appropriate fields.
+
+    \noindent
+    \begin{minipage}{\linewidth}
+      \begin{lstlisting}[gobble=8, mathescape=true]
+        identity : <Monoid a> $\Rightarrow$ a
+        identity = $\lambda$(a : *) (b : <Monoid a>) $\rightarrow$
+          let Monoid x _ = reflect b in x
+
+        combine : <Monoid a> $\Rightarrow$ a $\rightarrow$ a $\rightarrow$ a
+        combine = $\lambda$(a : *) (b : <Monoid a>) $\rightarrow$
+          let Monoid _ x = reflect b in x
+      \end{lstlisting}
+    \end{minipage}
+
+    \noindent We create an instance of the class by invoking the data constructor and reifying the result.
+
+    \noindent
+    \begin{minipage}{\linewidth}
+      \begin{lstlisting}[gobble=8, mathescape=true]
+        reify Monoid 0 addInt as a in
+          combine 3 4
+      \end{lstlisting}
+    \end{minipage}
+
+  \subsection{Effects and handlers}
