@@ -12,6 +12,7 @@
 \newcommand\eAbs[3]{\lambda \tAnno{#1}{#2} \; . \; #3}
 \newcommand\eApp[2]{#1 \; #2}
 \newcommand\eTAbs[3]{\Lambda \kAnno{#1}{#2} \; . \; #3}
+\newcommand\eTAbsNoKind[2]{\Lambda #1 \; . \; #2}
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eReify[3]{\textbf{reify} \; #1 \leftarrow #2 \; \textbf{in} \; #3}
 \newcommand\eReflect[1]{\textbf{reflect} \; #1}
@@ -22,11 +23,14 @@
 \newcommand\tVar{\alpha}
 \newcommand\tArrow[2]{#1 \rightarrow #2}
 \newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
+\newcommand\tForAllNoKind[2]{\forall #1 \; . \; #2}
 \newcommand\tEntangled[2]{#1 \; ! \; #2}
 \newcommand\row{\omega}
 \newcommand\tEmpty{\varnothing}
 \newcommand\tSingleton[1]{\left\{ #1 \right\}}
 \newcommand\tUnion[2]{#1 \cup #2}
+\newcommand\tVoid{\mathbf{0}}
+\newcommand\tUnit{\mathbf{1}}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -44,6 +48,7 @@
 \newcommand\hasType[3]{#1 \vdash \tAnno{#2}{#3}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
 \newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
+\newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
 
 % Pseudo-constructs used for exposition
 \newcommand\eAddInt{\text{addInt}}
