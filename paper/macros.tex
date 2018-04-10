@@ -19,6 +19,18 @@
 \newcommand\eReflect[1]{\textbf{reflect} \; #1}
 \newcommand\eBind[3]{#1 \leftarrow #2 \; \textbf{in} \; #3}
 
+% Pseudo-terms used for exposition
+\newcommand\eAddInt{\text{addInt}}
+\newcommand\eCombine{\text{combine}}
+\newcommand\eData[2]{\textbf{data} \; #1 \Coloneqq #2}
+\newcommand\eIdentity{\text{identity}}
+\newcommand\eLet[3]{\textbf{let} \; #1 = #2 \; \textbf{in} \; #3}
+\newcommand\eMonoid[2]{\eApp{\eApp{\monoid}{#1}}{#2}}
+\newcommand\monoid{\text{Monoid}}
+\newcommand\tApp[2]{#1 \; #2}
+\newcommand\tMonoid[1]{\tApp{\monoid}{#1}}
+\newcommand\wildcard{\_}
+
 % Types and rows
 \newcommand\type{\tau}
 \newcommand\tVar{\alpha}
