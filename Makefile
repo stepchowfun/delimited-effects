@@ -178,7 +178,7 @@ docker-build:
 	      chown -R user:user repo && \
 	      cd repo && \
 	      su user -s /bin/bash -l -c " \
-	        cd repo && make clean && make all test lint \
+	        cd repo && make clean && make all test lint USEACM=true \
 	      " && (test "$$DEPLOY" != true || ./scripts/deploy.rb) \
 	    ' \
 	)" && \
