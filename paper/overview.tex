@@ -3,7 +3,7 @@
   \subsection{Reflection and reification}
 
     Here's a simple example of reification and reflection.
-    \[ \eReify{4}{\tVar}{\parens{3 + \eReflect{\tVar}}} \]
+    \[ \eReify{\tVar}{4}{\parens{3 + \eReflect{\tVar}}} \]
 
   \subsection{Type classes with local instances}
 
@@ -13,6 +13,6 @@
     \[ \eIdentity \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\eVar}{\wildcard}}{\eReflect{\tVar_2}}{\eVar}}} \]
     \[ \eCombine \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\wildcard}{\eVar}}{\eReflect{\tVar_2}}{\eVar}}} \]
     We create an instance of the class by invoking the data constructor and reifying the result.
-    \[ \eReify{\eMonoid{0}{\eAddInt}}{\tVar}{\eApp{\eApp{\eCombine}{3}}{4}} \]
+    \[ \eReify{\tVar}{\eMonoid{0}{\eAddInt}}{\eApp{\eApp{\eCombine}{3}}{4}} \]
 
   \subsection{Effects and handlers}

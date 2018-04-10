@@ -13,9 +13,9 @@
           & $\eApp{\term}{\term}$ & term application \\
           & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
           & $\eTApp{\term}{\type}$ & type application \\
-          & $\eReify{\term}{\tVar}{\term}$ & reification \\
+          & $\eReify{\tVar}{\term}{\term}$ & reification \\
           & $\eReflect{\tVar}$ & reflection \\
-          & $\eBind{\eVar}{\term}{\term}$ & bind \\
+          & $\eDo{\eVar}{\term}{\term}$ & sequence \\
           \\
           $\type, \row \Coloneqq$ & & types: \\
           & $\tVar$ & type variable \\
@@ -90,7 +90,7 @@
             {$\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row}{\kRow}$ \qquad $\tVar \notin \dom{\context}$}
           }}
         \RightLabel{(\textsc{T-Reify})}
-        \UnaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+        \UnaryInfC{$\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -102,8 +102,8 @@
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term_1}{\tEntangled{\type_1}{\row}}$}
           \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tEntangled{\type_2}{\row}}$}
-        \RightLabel{(\textsc{T-Bind})}
-        \BinaryInfC{$\hasType{\context}{\eBind{\eVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+        \RightLabel{(\textsc{T-Do})}
+        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}

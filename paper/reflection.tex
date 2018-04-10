@@ -13,7 +13,7 @@
           & $\eApp{\term}{\term}$ & term application \\
           & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
           & $\eTApp{\term}{\type}$ & type application \\
-          & $\eReify{\term}{\tVar}{\term}$ & reification \\
+          & $\eReify{\tVar}{\term}{\term}$ & reification \\
           & $\eReflect{\tVar}$ & reflection \\
           \\
           $\type \Coloneqq$ & & types: \\
@@ -84,7 +84,7 @@
           \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
           \AxiomC{$\tVar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-Reify})}
-        \QuaternaryInfC{$\hasType{\context}{\eReify{\term_1}{\tVar}{\term_2}}{\type_2}$}
+        \QuaternaryInfC{$\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -129,10 +129,10 @@
 
     Consider the program
     \[
-      \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
+      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
     \]
     which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the (weak) normal form $\eAbs{\eVar}{\type_1}{\term}$. What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
-      \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
+      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
     \]
-    But that would be reduction under a lambda abstraction, which ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
+    But that would be reduction under a lambda abstraction, which is ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
