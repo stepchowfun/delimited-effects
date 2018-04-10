@@ -270,12 +270,12 @@
 
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
-        \RightLabel{(\textsc{K-ForAll1})}
+        \RightLabel{(\textsc{S-ForAll1})}
         \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type_1}}{\tForAllNoKind{\tVar}{\type_2}}$}
         \DisplayProof
         \qquad
           \AxiomC{$\translatesTo{\context}{\type}{\term}$}
-        \RightLabel{(\textsc{K-ForAll2})}
+        \RightLabel{(\textsc{S-ForAll2})}
         \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type}}{\tForAllNoKind{\tVar}{\tVoid}}$}
         \DisplayProof
       \end{center}
@@ -283,13 +283,13 @@
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
           \AxiomC{$\translatesTo{\context}{\type_2}{\type_4}$}
-        \RightLabel{(\textsc{K-ForAll3})}
+        \RightLabel{(\textsc{S-ForAll3})}
         \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\type_4}}$}
         \DisplayProof
         \qquad
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
           \AxiomC{$\translatesTo{\context}{\type_2}{\term}$}
-        \RightLabel{(\textsc{K-ForAll4})}
+        \RightLabel{(\textsc{S-ForAll4})}
         \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\tVoid}}$}
         \DisplayProof
       \end{center}
@@ -297,13 +297,13 @@
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\term}$}
           \AxiomC{$\translatesTo{\context}{\type_2}{\type_3}$}
-        \RightLabel{(\textsc{K-ForAll5})}
+        \RightLabel{(\textsc{S-ForAll5})}
         \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\type_3}}$}
         \DisplayProof
         \qquad
           \AxiomC{$\translatesTo{\context}{\type_1}{\term_1}$}
           \AxiomC{$\translatesTo{\context}{\type_2}{\term_2}$}
-        \RightLabel{(\textsc{K-ForAll6})}
+        \RightLabel{(\textsc{S-ForAll6})}
         \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\tVoid}}$}
         \DisplayProof
       \end{center}
