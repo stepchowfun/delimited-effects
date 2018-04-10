@@ -22,14 +22,12 @@
 \usepackage{amssymb} % For \varnothing
 \usepackage{bussproofs} % For inference rules
 \usepackage{float} % For the [H] option in \begin{figure}[H]. NOTE: Stop using this when we have more content
-\usepackage{listings} % For source code
 \usepackage{mathtools} % For \Coloneqq
 \usepackage{stackengine} % For stacking axioms
 \usepackage{stmaryrd} % For \llbracket and \rrbracket
 
 \ifnoacm
   \usepackage[margin=1in]{geometry} % For setting the margin
-  \usepackage{xcolor} % For \definecolor{...}{...}{...}
 \fi
 
 %%%%%%%%%%%%
@@ -99,39 +97,15 @@
   \keywords{Type classes, algebraic effects, effect handlers, reflection, entanglement}
 \fi
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Source code formatting %
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\lstdefinelanguage{gram}{
-  comment=[l]{\#},
-  morekeywords={reify, reflect, as, in, data, let, where},
-}
-
-\ifnoacm
-  \definecolor{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
-  \definecolor{ACMPurple}{cmyk}{0.55,1,0,0.15}
-\fi
-
-\lstset{
-  aboveskip=\bigskipamount,
-  basicstyle=\ttfamily,
-  belowskip=\bigskipamount,
-  commentstyle=\color{ACMDarkBlue},
-  keepspaces=true,
-  keywordstyle=\bfseries\color{ACMPurple},
-  language=gram,
-}
-
-\input{paper/macros.tex}
-
 %%%%%%%%%%%%%%%
 % The writeup %
 %%%%%%%%%%%%%%%
 
+\input{paper/macros.tex}
+
 \begin{document}
   \ifacm
-    \citestyle{acmauthoryear}
+    \citestyle{acmnumeric}
 
     % The `acmart` layout requires the abstract to be before \maketitle.
     % But the `article` layout requires the abstract to be after \maketitle.
@@ -170,7 +144,7 @@
   \ifacm
     \bibliographystyle{ACM-Reference-Format}
   \else
-    \bibliographystyle{apalike}
+    \bibliographystyle{plain}
   \fi
 
   \bibliography{references}
