@@ -234,6 +234,206 @@
   \subsection{Semantics}
 
     \begin{figure}[H]
+      \ifnoacm
+        \small
+      \fi
+
+      \begin{center}
+        \framebox{$\translatesTo{\context}{\term}{\term}$}
+        \framebox{$\translatesTo{\context}{\type}{\type}$}
+        \framebox{$\translatesTo{\context}{\type}{\term}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Var})}
+        \UnaryInfC{$\translatesTo{\context}{\eVar}{\eVar}$}
+      \end{prooftree}
+
+      \begin{center}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kType}$}
+        \RightLabel{(\textsc{S-TVar1})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+        \RightLabel{(\textsc{S-TVar2})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVoid}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+        \RightLabel{(\textsc{S-TVar3})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\eVar_{\tVar}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-Abs1})}
+        \BinaryInfC{$\translatesTo{\context}{\eAbs{\eVar}{\type_1}{\term_1}}{\eAbs{\eVar}{\type_2}{\term_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-Abs2})}
+        \BinaryInfC{$\translatesTo{\context}{\eAbs{\eVar}{\type}{\term_1}}{\eAbs{\eVar}{\tVoid}{\term_2}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+        \RightLabel{(\textsc{S-App})}
+        \BinaryInfC{$\translatesTo{\context}{\eApp{\term_1}{\term_2}}{\eApp{\term_3}{\term_4}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-TAbs1})}
+        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kType}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-TAbs2})}
+        \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type_1}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\type_2}{\term_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-TAbs3})}
+        \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\tVoid}{\term_2}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+        \RightLabel{(\textsc{S-TApp1})}
+        \BinaryInfC{$\translatesTo{\context}{\eTApp{\term_1}{\type_1}}{\eTApp{\term_2}{\type_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
+        \RightLabel{(\textsc{S-TApp2})}
+        \BinaryInfC{$\translatesTo{\context}{\eTApp{\term_1}{\type}}{\eApp{\term_2}{\term_3}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+        \RightLabel{(\textsc{S-Reify})}
+        \BinaryInfC{$\translatesTo{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\substitute{\term_4}{\eVar_{\tVar}}{\term_3}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Reflect})}
+        \UnaryInfC{$\translatesTo{\context}{\eReflect{\tVar}}{\eVar_{\tVar}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+        \RightLabel{(\textsc{S-Do})}
+        \BinaryInfC{$\translatesTo{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\substitute{\term_4}{\eVar}{\term_3}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+        \RightLabel{(\textsc{S-Entangled})}
+        \UnaryInfC{$\translatesTo{\context}{\tEntangled{\type_1}{\row}}{\type_2}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\type_4}$}
+        \RightLabel{(\textsc{S-Arrow1})}
+        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\type_4}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\term}$}
+        \RightLabel{(\textsc{S-Arrow2})}
+        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\tVoid}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\term}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\type_3}$}
+        \RightLabel{(\textsc{S-Arrow3})}
+        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\type_3}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type_1}{\term_1}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\term_2}$}
+        \RightLabel{(\textsc{S-Arrow4})}
+        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\tVoid}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+        \RightLabel{(\textsc{S-ForAll1})}
+        \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type_1}}{\tForAllNoKind{\tVar}{\type_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type}{\term}$}
+        \RightLabel{(\textsc{S-ForAll2})}
+        \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type}}{\tForAllNoKind{\tVar}{\tVoid}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\type_4}$}
+        \RightLabel{(\textsc{S-ForAll3})}
+        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\type_4}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\term}$}
+        \RightLabel{(\textsc{S-ForAll4})}
+        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\tVoid}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\term}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\type_3}$}
+        \RightLabel{(\textsc{S-ForAll5})}
+        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\type_3}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\type_1}{\term_1}$}
+          \AxiomC{$\translatesTo{\context}{\type_2}{\term_2}$}
+        \RightLabel{(\textsc{S-ForAll6})}
+        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\tVoid}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{center}
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Empty})}
+        \UnaryInfC{$\translatesTo{\context}{\tEmpty}{\tVoid}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Singleton})}
+        \UnaryInfC{$\translatesTo{\context}{\tSingleton{\tVar}}{\tVoid}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{}
+        \RightLabel{(\textsc{S-Union})}
+        \UnaryInfC{$\translatesTo{\context}{\tUnion{\row_1}{\row_2}}{\tVoid}$}
+        \DisplayProof
+      \end{center}
 
       \caption{Translation into System F}
       \label{fig:entanglement_semantics}
