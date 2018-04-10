@@ -131,10 +131,8 @@
     \[
       \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
     \]
-    which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the normal form $\eAbs{\eVar}{\type_1}{\term}$. In a call-by-value setting, what would be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
+    which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the (weak) normal form $\eAbs{\eVar}{\type_1}{\term}$. What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
       \eReify{\term}{\tVar_1}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
     \]
-    But that would be reduction under a lambda abstraction, which is forbidden in a call-by-value semantics. Indeed, the program is stuck.
-
-    This may come as a surprise, since no aspect of our system inherently relies on the semantics being call-by-value. The true problem is with substitution, as noted by Amin and Rompf in \cite{amin17}.
+    But that would be reduction under a lambda abstraction, which ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
