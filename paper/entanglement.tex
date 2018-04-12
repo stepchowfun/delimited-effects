@@ -97,7 +97,7 @@
       \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
         \RightLabel{(\textsc{T-Reflect})}
-        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
+        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\tEntangled{\type}{\tSingleton{\tVar}}}$}
       \end{prooftree}
 
       \begin{prooftree}
