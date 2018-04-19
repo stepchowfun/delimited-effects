@@ -3,8 +3,8 @@
 Makefile.coq
 Makefile.coq.conf
 _CoqProjectFull
-coq/**/*.aux
-coq/**/*.glob
-coq/**/*.vo
+formalization/**/*.aux
+formalization/**/*.glob
+formalization/**/*.vo
 implementation/.stack-work/*
 main.pdf
