@@ -53,14 +53,14 @@ clean-paper:
 	rm -rf .paper-build main.pdf
 
 formalization:
-	rm -f Makefile.coq _CoqProjectFull
+	rm -f .coqdeps.d Makefile.coq Makefile.coq.conf _CoqProjectFull
 	echo '-R formalization Main' > _CoqProjectFull
 	find formalization -type f -name '*.v' >> _CoqProjectFull
 	coq_makefile -f _CoqProjectFull -o Makefile.coq || \
-	  (rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf; exit 1)
+	  (rm -f .coqdeps.d Makefile.coq Makefile.coq.conf _CoqProjectFull; exit 1)
 	make -f Makefile.coq || \
-	  (rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf; exit 1)
-	rm -f _CoqProjectFull Makefile.coq Makefile.coq.conf
+	  (rm -f .coqdeps.d Makefile.coq Makefile.coq.conf _CoqProjectFull; exit 1)
+	rm -f .coqdeps.d Makefile.coq Makefile.coq.conf _CoqProjectFull
 
 lint-formalization: formalization
 	./scripts/lint-imports.rb \
@@ -107,10 +107,11 @@ clean-formalization:
 	  \) -prune -o \( \
 	    -name '*.aux' -o \
 	    -name '*.glob' -o \
-	    -name '*.v.d' -o \
 	    -name '*.vo' -o \
-	    -name '*.vo.aux' -o \
-	    -name 'Makefile.coq.conf' \
+	    -name '.coqdeps.d' -o \
+	    -name 'Makefile.coq' -o \
+	    -name 'Makefile.coq.conf' -o \
+	    -name '_CoqProjectFull' \
 	  \) -print \
 	)
 
