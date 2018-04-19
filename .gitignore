@@ -1,8 +1,10 @@
+.coqdeps.d
 .paper-build
+Makefile.coq
 Makefile.coq.conf
-formalization/**/*.aux
-formalization/**/*.glob
-formalization/**/*.v.d
-formalization/**/*.vo
+_CoqProjectFull
+coq/**/*.aux
+coq/**/*.glob
+coq/**/*.vo
 implementation/.stack-work/*
 main.pdf
