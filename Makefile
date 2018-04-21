@@ -124,6 +124,7 @@ test-implementation: implementation
 	  stack test --pedantic --install-ghc --allow-different-user
 
 lint-implementation:
+	hlint implementation
 	for file in $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \

@@ -1,8 +1,8 @@
 module Main (main) where
 
-import Lexer as Lexer
+import Lexer
 import Lib ()
-import Parser as Parser
+import Parser
 import System.Environment
 
 main :: IO ()

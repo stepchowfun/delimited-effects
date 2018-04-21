@@ -7,7 +7,7 @@ module Error
 type Partial a = Either String a
 
 abort :: String -> Partial a
-abort s = Left s
+abort = Left
 
 assert :: Bool -> String -> Partial ()
 assert b s = if b then return () else abort s

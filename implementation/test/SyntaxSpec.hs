@@ -38,12 +38,12 @@ specEffectMapExtendAfterLookup em a1 a2 = case effectMapLookup em a1 of
 syntaxSpec :: Spec
 syntaxSpec = modifyMaxSuccess (const 100000) $ do
   describe "contextLookupType" $ do
-    it "contextLookupType (CTExtend c x t r) x == Just (t, r)" $ do
-      property specContextLookupAfterExtend
-    it "CTExtend em x t r == CTExtend (contextLookupType em x) x t r" $ do
-      property specContextExtendAfterLookup
+    it "contextLookupType (CTExtend c x t r) x == Just (t, r)"
+      $ property specContextLookupAfterExtend
+    it "CTExtend em x t r == CTExtend (contextLookupType em x) x t r"
+      $ property specContextExtendAfterLookup
   describe "effectMapLookup" $ do
-    it "effectMapLookup (EMExtend em a t r) a == Just (t, r)" $ do
-      property specEffectMapLookupAfterExtend
-    it "EMExtend em a t r == em where effectMapLookup em a = Just (t, r)" $ do
-      property specEffectMapExtendAfterLookup
+    it "effectMapLookup (EMExtend em a t r) a == Just (t, r)"
+      $ property specEffectMapLookupAfterExtend
+    it "EMExtend em a t r == em where effectMapLookup em a = Just (t, r)"
+      $ property specEffectMapExtendAfterLookup
