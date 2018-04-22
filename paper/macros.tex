@@ -16,7 +16,10 @@
 \newcommand\eTApp[2]{#1 \; #2}
 \newcommand\eReify[3]{\mathbf{reify} \; #1 \leftarrow #2 \; \mathbf{in} \; #3}
 \newcommand\eReflect[1]{\mathbf{reflect} \; #1}
+\newcommand\ePure[1]{\mathbf{pure} \; #1}
+\newcommand\eRun[1]{\mathbf{run} \; #1}
 \newcommand\eDo[3]{\mathbf{do} \; #1 \leftarrow #2 \; \mathbf{in} \; #3}
+\newcommand\eUnit{\parens{}}
 
 % Types and rows
 \newcommand\type{\tau}
@@ -24,12 +27,13 @@
 \newcommand\tArrow[2]{#1 \rightarrow #2}
 \newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
 \newcommand\tForAllNoKind[2]{\forall #1 \; . \; #2}
-\newcommand\tEntangled[2]{#1 \; ! \; #2}
-\newcommand\row{\omega}
+\newcommand\tComputation[2]{#1 \; ! \; #2}
+\newcommand\row{\varepsilon}
 \newcommand\tEmpty{\varnothing}
 \newcommand\tSingleton[1]{\left\{ #1 \right\}}
 \newcommand\tUnion[2]{#1 \cup #2}
 \newcommand\tVoid{\mathbf{0}}
+\newcommand\tUnit{\mathbf{1}}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -50,12 +54,13 @@
 \newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
 
 % Pseudo-constructs used for exposition
-\newcommand\eAddInt{\mathit{addInt}}
+\newcommand\eMulInt{\mathit{multiplyInt}}
 \newcommand\eCombine{\mathit{combine}}
 \newcommand\eData[2]{\mathbf{data} \; #1 \Coloneqq #2}
 \newcommand\eIdentity{\mathit{identity}}
 \newcommand\eLet[3]{\mathbf{let} \; #1 = #2 \; \mathbf{in} \; #3}
 \newcommand\eMonoid[2]{\eApp{\eApp{\monoid}{#1}}{#2}}
+\newcommand\eSquare{\mathit{square}}
 \newcommand\monoid{\mathit{Monoid}}
 \newcommand\tApp[2]{#1 \; #2}
 \newcommand\tMonoid[1]{\tApp{\monoid}{#1}}

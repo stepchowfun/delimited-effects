@@ -1,4 +1,4 @@
-\section{Entanglement}
+\section{The calculus}
 
   We adopt the convention that alpha-equivalent expressions are interchangeable in all contexts.
 
@@ -15,13 +15,15 @@
           & $\eTApp{\term}{\type}$ & type application \\
           & $\eReify{\tVar}{\term}{\term}$ & reification \\
           & $\eReflect{\tVar}$ & reflection \\
-          & $\eDo{\eVar}{\term}{\term}$ & sequence \\
+          & $\ePure{\term}$ & computation introduction \\
+          & $\eRun{\term}$ & computation elimination \\
+          & $\eDo{\eVar}{\term}{\term}$ & computation sequencing \\
           \\
           $\type, \row \Coloneqq$ & & types: \\
           & $\tVar$ & type variable \\
           & $\tArrow{\type}{\type}$ & arrow type \\
           & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
-          & $\tEntangled{\type}{\row}$ & entangled type \\
+          & $\tComputation{\type}{\row}$ & computation type \\
           & $\tEmpty$ & empty row \\
           & $\tSingleton{\tVar}$ & singleton row \\
           & $\tUnion{\row}{\row}$ & row union \\
@@ -39,7 +41,7 @@
       \end{center}
 
       \caption{Syntax}
-      \label{fig:entanglement_syntax}
+      \label{fig:syntax}
     \end{figure}
 
   \subsection{Typing}
@@ -86,49 +88,48 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\Shortstack[c]{
-            {$\hasType{\context}{\term_1}{\type_1}$ \qquad $\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\tEntangled{\type_2}{\tUnion{\row}{\tSingleton{\tVar}}}}$}
-            {$\hasKind{\context}{\type_2}{\kType}$ \qquad $\hasKind{\context}{\row}{\kRow}$ \qquad $\tVar \notin \dom{\context}$}
-          }}
+          \AxiomC{$\hasType{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\type_2}$}
+          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
+          \AxiomC{$\tVar \notin \dom{\context}$}
         \RightLabel{(\textsc{T-Reify})}
-        \UnaryInfC{$\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+        \QuaternaryInfC{$\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\type_2}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
         \RightLabel{(\textsc{T-Reflect})}
-        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\tEntangled{\type}{\tSingleton{\tVar}}}$}
+        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\tEntangled{\type_1}{\row}}$}
-          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tEntangled{\type_2}{\row}}$}
+          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\row}}$}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\row}}$}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tEntangled{\type_2}{\row}}$}
+        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\type}$}
-          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
-        \RightLabel{(\textsc{T-Entangle})}
-        \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row}}$}
+        \RightLabel{(\textsc{T-Pure})}
+        \UnaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tEmpty}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\tEmpty}}$}
-        \RightLabel{(\textsc{T-Escape})}
-        \UnaryInfC{$\hasType{\context}{\term}{\type}$}
+          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tEmpty}}$}
+        \RightLabel{(\textsc{T-Run})}
+        \UnaryInfC{$\hasType{\context}{\eRun{\term}}{\type}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_1}}$}
+          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\row_1}}$}
           \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
         \RightLabel{(\textsc{T-Subsumption})}
-        \BinaryInfC{$\hasType{\context}{\term}{\tEntangled{\type}{\row_2}}$}
+        \BinaryInfC{$\hasType{\context}{\term}{\tComputation{\type}{\row_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}
-      \label{fig:entanglement_typing}
+      \label{fig:typing}
     \end{figure}
 
     \begin{figure}[H]
@@ -160,8 +161,8 @@
       \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\type}{\kType}$}
           \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
-        \RightLabel{(\textsc{K-Entangled})}
-        \BinaryInfC{$\hasKind{\context}{\tEntangled{\type}{\row}}{\kType}$}
+        \RightLabel{(\textsc{K-Computation})}
+        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\row}}{\kType}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -184,7 +185,7 @@
       \end{prooftree}
 
       \caption{Kinding rules}
-      \label{fig:entanglement_kinding}
+      \label{fig:kinding}
     \end{figure}
 
     \begin{figure}[H]
@@ -233,6 +234,18 @@
 
   \subsection{Semantics}
 
+    Consider the program
+    \[
+      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
+    \]
+    which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the (weak) normal form $\eAbs{\eVar}{\type_1}{\term}$. What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
+    \[
+      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
+    \]
+    But that would be reduction under a lambda abstraction, which is ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
+
+    However, the system admits a type-directed translation into call-by-value System F, shown in Figure~\ref{fig:semantics}.
+
     \begin{figure}[H]
       \ifnoacm
         \small
@@ -246,26 +259,16 @@
 
       \medskip
 
-      \begin{prooftree}
+      \begin{center}
           \AxiomC{}
         \RightLabel{(\textsc{S-Var})}
         \UnaryInfC{$\translatesTo{\context}{\eVar}{\eVar}$}
-      \end{prooftree}
-
-      \begin{center}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kType}$}
-        \RightLabel{(\textsc{S-TVar1})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
         \DisplayProof
         \qquad
-          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
-        \RightLabel{(\textsc{S-TVar2})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVoid}$}
-        \DisplayProof
-        \qquad
-          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
-        \RightLabel{(\textsc{S-TVar3})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\eVar_{\tVar}}$}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
+          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+        \RightLabel{(\textsc{S-App})}
+        \BinaryInfC{$\translatesTo{\context}{\eApp{\term_1}{\term_2}}{\eApp{\term_3}{\term_4}}$}
         \DisplayProof
       \end{center}
 
@@ -284,28 +287,27 @@
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
-        \RightLabel{(\textsc{S-App})}
-        \BinaryInfC{$\translatesTo{\context}{\eApp{\term_1}{\term_2}}{\eApp{\term_3}{\term_4}}$}
-        \DisplayProof
-        \qquad
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
         \RightLabel{(\textsc{S-TAbs1})}
         \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kType}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-TAbs2})}
+        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kRow}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
         \DisplayProof
       \end{center}
 
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
-        \RightLabel{(\textsc{S-TAbs2})}
+        \RightLabel{(\textsc{S-TAbs3})}
         \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type_1}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\type_2}{\term_2}}$}
         \DisplayProof
         \qquad
           \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
-        \RightLabel{(\textsc{S-TAbs3})}
+        \RightLabel{(\textsc{S-TAbs4})}
         \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\tVoid}{\term_2}}$}
         \DisplayProof
       \end{center}
@@ -338,15 +340,40 @@
       \end{center}
 
       \begin{center}
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-Pure})}
+        \UnaryInfC{$\translatesTo{\context}{\ePure{\term_1}}{\eAbs{\wildcard}{\tUnit}{\term_2}}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+        \RightLabel{(\textsc{S-Run})}
+        \UnaryInfC{$\translatesTo{\context}{\eRun{\term_1}}{\eApp{\term_2}{\eUnit}}$}
+        \DisplayProof
+      \end{center}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term_1}{\type_1}$}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
           \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
         \RightLabel{(\textsc{S-Do})}
-        \BinaryInfC{$\translatesTo{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\substitute{\term_4}{\eVar}{\term_3}}$}
+        \QuaternaryInfC{$\translatesTo{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\eApp{\parens{\eAbs{\eVar}{\type_2}{\term_4}}}{\term_3}}$}
+      \end{prooftree}
+
+      \begin{center}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kType}$}
+        \RightLabel{(\textsc{S-TVar1})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
-        \RightLabel{(\textsc{S-Entangled})}
-        \UnaryInfC{$\translatesTo{\context}{\tEntangled{\type_1}{\row}}{\type_2}$}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+        \RightLabel{(\textsc{S-TVar2})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tUnit}$}
+        \DisplayProof
+        \qquad
+          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+        \RightLabel{(\textsc{S-TVar3})}
+        \UnaryInfC{$\translatesTo{\context}{\tVar}{\eVar_{\tVar}}$}
         \DisplayProof
       \end{center}
 
@@ -418,23 +445,29 @@
         \DisplayProof
       \end{center}
 
+      \begin{prooftree}
+          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+        \RightLabel{(\textsc{S-Computation})}
+        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\row}}{\tArrow{\tUnit}{\type_2}}$}
+      \end{prooftree}
+
       \begin{center}
           \AxiomC{}
         \RightLabel{(\textsc{S-Empty})}
-        \UnaryInfC{$\translatesTo{\context}{\tEmpty}{\tVoid}$}
+        \UnaryInfC{$\translatesTo{\context}{\tEmpty}{\tUnit}$}
         \DisplayProof
         \qquad
           \AxiomC{}
         \RightLabel{(\textsc{S-Singleton})}
-        \UnaryInfC{$\translatesTo{\context}{\tSingleton{\tVar}}{\tVoid}$}
+        \UnaryInfC{$\translatesTo{\context}{\tSingleton{\tVar}}{\tUnit}$}
         \DisplayProof
         \qquad
           \AxiomC{}
         \RightLabel{(\textsc{S-Union})}
-        \UnaryInfC{$\translatesTo{\context}{\tUnion{\row_1}{\row_2}}{\tVoid}$}
+        \UnaryInfC{$\translatesTo{\context}{\tUnion{\row_1}{\row_2}}{\tUnit}$}
         \DisplayProof
       \end{center}
 
       \caption{Translation into System F}
-      \label{fig:entanglement_semantics}
+      \label{fig:semantics}
     \end{figure}
