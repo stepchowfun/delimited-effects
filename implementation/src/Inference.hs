@@ -1,5 +1,6 @@
 module Inference (check, infer) where
 
+import Data.Maybe (isNothing)
 import Error (Partial, abort, assert, maybeToPartial)
 import Subrow (subrow)
 import Syntax
@@ -8,12 +9,24 @@ import Syntax
   , Row(..)
   , Term(..)
   , Type(..)
+  , TypeVar
   , contextLookupKind
   , contextLookupType
   , effectMapLookup
   , substituteEffectInRow
   , substituteEffectInType
   , substituteTypeInType )
+
+-- Helper functions
+
+lookupEffectAndSubstitute :: EffectMap -> TypeVar -> Row -> Partial (Type, Row)
+lookupEffectAndSubstitute em a r1 = do
+  (t2, r2) <- maybeToPartial
+    (effectMapLookup em a)
+    ("Failed to look up the type of operation '" ++ show a ++ "'.")
+  let t3 = substituteEffectInType a r1 t2
+      r3 = substituteEffectInRow a r1 r2
+  return (t3, r3)
 
 -- Check the type and row
 
@@ -28,19 +41,15 @@ check c em (ETAbs a1 e) (TForAll a2 t r1) _ = do
     (  "Checking for universal types only succeeds when the type"
     ++ " variables match in the term and type."
     )
-  assert (contextLookupKind c a1 == Nothing)
-         ("Type variables in a scope must be unique.")
+  assert (isNothing (contextLookupKind c a1))
+         "Type variables in a scope must be unique."
   check (CKExtend c a1) em e t r1
 check _ _ (ETAbs _ _) _ _ =
   abort "Checking for universal types only succeeds on type abstractions."
 check c em (EEffect a x t1 r1 e) t2 r2 =
   check (CTExtend c x t1 r1) (EMExtend em a t1 r1) e t2 r2
 check c em (EHandle a e1 e2) t1 r1 = do
-  (t2, r2) <- maybeToPartial
-    (effectMapLookup em a)
-    ("Failed to look up the type of operation '" ++ show a ++ "'.")
-  let t3 = substituteEffectInType a r1 t2
-      r3 = substituteEffectInRow a r1 r2
+  (t3, r3) <- lookupEffectAndSubstitute em a r1
   check c em e1 t3 r3
   check c em e2 t1 (RUnion r1 (RSingleton a))
 check c em e t1 r = do
@@ -100,11 +109,7 @@ infer c em (ETApp e t2) r2 = do
 infer c em (EEffect a x t1 r1 e) r2 =
   infer (CTExtend c x t1 r1) (EMExtend em a t1 r1) e r2
 infer c em (EHandle a e1 e2) r1 = do
-  (t2, r2) <- maybeToPartial
-    (effectMapLookup em a)
-    ("Failed to look up the type of operation '" ++ show a ++ "'.")
-  let t3 = substituteEffectInType a r1 t2
-      r3 = substituteEffectInRow a r1 r2
+  (t3, r3) <- lookupEffectAndSubstitute em a r1
   check c em e1 t3 r3
   infer c em e2 (RUnion r1 (RSingleton a))
 infer c em (EAnno e t) r = do

@@ -88,10 +88,10 @@ typeVars =
   map TypeVar ["TypeVarV", "TypeVarW", "TypeVarX", "TypeVarY", "TypeVarZ"]
 
 instance Arbitrary TermVar where
-  arbitrary = oneof $ map (\e -> return e) termVars
+  arbitrary = oneof $ map return termVars
 
 instance Arbitrary TypeVar where
-  arbitrary = oneof $ map (\e -> return e) typeVars
+  arbitrary = oneof $ map return typeVars
 
 instance Arbitrary Term where
   arbitrary = frequency
@@ -204,7 +204,7 @@ substituteEffectInType a1 r1 (TForAll a2 t r2) =
   TForAll a2 (substituteEffectInType a1 r1 t) (substituteEffectInRow a1 r1 r2)
 
 substituteTypeInType :: TypeVar -> Type -> Type -> Type
-substituteTypeInType a1 t (TVar a2) = if a1 == a2 then t else (TVar a2)
+substituteTypeInType a1 t (TVar a2) = if a1 == a2 then t else TVar a2
 substituteTypeInType a t3 (TArrow t1 r1 t2 r2) =
   TArrow (substituteTypeInType a t3 t1) r1 (substituteTypeInType a t3 t2) r2
 substituteTypeInType a1 t1 (TForAll a2 t2 r) = if a1 == a2
