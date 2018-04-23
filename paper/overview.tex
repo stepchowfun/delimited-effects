@@ -8,11 +8,13 @@
   \subsection{Type classes with local instances}
 
     We can represent a type class as an ordinary data type.
-    \[ \eData{\tMonoid{\tVar}}{\eMonoid{\tVar}{\parens{\tArrow{\tVar}{\tVar}}}} \]
-    For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance back into a term and extract the appropriate fields.
+    \[ \eData{\tMonoid{\tVar}}{\eMonoid{\tVar}{\parens{\tArrow{\tVar}{\tArrow{\tVar}{\tVar}}}}} \]
+    For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance and project the appropriate components.
     \[ \eIdentity \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\eVar}{\wildcard}}{\eReflect{\tVar_2}}{\eVar}}} \]
     \[ \eCombine \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\wildcard}{\eVar}}{\eReflect{\tVar_2}}{\eVar}}} \]
-    We create an instance of the class by invoking the data constructor and reifying the result.
-    \[ \eReify{\tVar}{\eMonoid{0}{\eAddInt}}{\eApp{\eApp{\eCombine}{3}}{4}} \]
+    Here's a polymorphic function which ``squares'' its argument using the monoid operation:
+    \[ \eSquare \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eAbs{\eVar}{\tVar_1}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\tVar_1}}{\tVar_2}}{\eVar}}{\eVar}}}} \]
+    Here, we create and use a local instance of the class which reifies the monoid structure of integers under multiplication:
+    \[ \eReify{\tVar}{\eMonoid{1}{\eMulInt}}{\eApp{\eSquare}{3}} \]
 
   \subsection{Effects and handlers}
