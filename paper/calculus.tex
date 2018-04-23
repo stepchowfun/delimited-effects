@@ -25,7 +25,6 @@
           & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
           & $\tComputation{\type}{\row}$ & computation type \\
           & $\tEmpty$ & empty row \\
-          & $\tSingleton{\tVar}$ & singleton row \\
           & $\tUnion{\row}{\row}$ & row union \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
@@ -172,12 +171,6 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
-        \RightLabel{(\textsc{K-Singleton})}
-        \UnaryInfC{$\hasKind{\context}{\tSingleton{\tVar}}{\kRow}$}
-      \end{prooftree}
-
-      \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
           \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
         \RightLabel{(\textsc{K-Union})}
@@ -196,9 +189,9 @@
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
-        \RightLabel{(\textsc{R-Refl})}
-        \UnaryInfC{$\rowSub{\context}{\row}{\row}$}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+        \RightLabel{(\textsc{R-Var})}
+        \UnaryInfC{$\rowSub{\context}{\tVar}{\tVar}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -455,11 +448,6 @@
           \AxiomC{}
         \RightLabel{(\textsc{S-Empty})}
         \UnaryInfC{$\translatesTo{\context}{\tEmpty}{\tUnit}$}
-        \DisplayProof
-        \qquad
-          \AxiomC{}
-        \RightLabel{(\textsc{S-Singleton})}
-        \UnaryInfC{$\translatesTo{\context}{\tSingleton{\tVar}}{\tUnit}$}
         \DisplayProof
         \qquad
           \AxiomC{}
