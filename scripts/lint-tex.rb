@@ -51,6 +51,7 @@ PRELUDE_ARITIES = {
   'boxed' => [1],
   'caption' => [1],
   'ccsdesc' => [1],
+  'circ' => [0],
   'cite' => [1],
   'citestyle' => [1],
   'city' => [1],
