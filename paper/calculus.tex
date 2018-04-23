@@ -24,8 +24,7 @@
           & $\tArrow{\type}{\type}$ & arrow type \\
           & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
           & $\tComputation{\type}{\row}$ & computation type \\
-          & $\tEmpty$ & empty row \\
-          & $\tUnion{\row}{\row}$ & row union \\
+          & $\tPure$ & pure row \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
           & $\kType$ & kind of proper types \\
@@ -111,20 +110,13 @@
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\type}$}
         \RightLabel{(\textsc{T-Pure})}
-        \UnaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tEmpty}}$}
+        \UnaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tPure}}$}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tEmpty}}$}
+          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tPure}}$}
         \RightLabel{(\textsc{T-Run})}
         \UnaryInfC{$\hasType{\context}{\eRun{\term}}{\type}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\row_1}}$}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{T-Subsumption})}
-        \BinaryInfC{$\hasType{\context}{\term}{\tComputation{\type}{\row_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}
@@ -166,63 +158,12 @@
 
       \begin{prooftree}
           \AxiomC{}
-        \RightLabel{(\textsc{K-Empty})}
-        \UnaryInfC{$\hasKind{\context}{\tEmpty}{\kRow}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
-          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
-        \RightLabel{(\textsc{K-Union})}
-        \BinaryInfC{$\hasKind{\context}{\tUnion{\row_1}{\row_2}}{\kRow}$}
+        \RightLabel{(\textsc{K-Pure})}
+        \UnaryInfC{$\hasKind{\context}{\tPure}{\kRow}$}
       \end{prooftree}
 
       \caption{Kinding rules}
       \label{fig:kinding}
-    \end{figure}
-
-    \begin{figure}[H]
-      \begin{center}
-        \framebox{$\rowSub{\context}{\row}{\row}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
-        \RightLabel{(\textsc{R-Var})}
-        \UnaryInfC{$\rowSub{\context}{\tVar}{\tVar}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
-        \RightLabel{(\textsc{R-Empty})}
-        \UnaryInfC{$\rowSub{\context}{\tEmpty}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
-          \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
-        \RightLabel{(\textsc{R-Weakening1})}
-        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
-        \RightLabel{(\textsc{R-Weakening2})}
-        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-          \AxiomC{$\rowSub{\context}{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{R-Strengthening})}
-        \BinaryInfC{$\rowSub{\context}{\tUnion{\row_1}{\row_2}}{\row_3}$}
-      \end{prooftree}
-
-      \caption{Row subsumption}
-      \label{fig:row_subsumption}
     \end{figure}
 
   \subsection{Semantics}
@@ -438,21 +379,15 @@
         \DisplayProof
       \end{center}
 
-      \begin{prooftree}
+      \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{S-Computation})}
         \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\row}}{\tArrow{\tUnit}{\type_2}}$}
-      \end{prooftree}
-
-      \begin{center}
-          \AxiomC{}
-        \RightLabel{(\textsc{S-Empty})}
-        \UnaryInfC{$\translatesTo{\context}{\tEmpty}{\tUnit}$}
         \DisplayProof
         \qquad
           \AxiomC{}
-        \RightLabel{(\textsc{S-Union})}
-        \UnaryInfC{$\translatesTo{\context}{\tUnion{\row_1}{\row_2}}{\tUnit}$}
+        \RightLabel{(\textsc{S-Pure})}
+        \UnaryInfC{$\translatesTo{\context}{\tPure}{\tUnit}$}
         \DisplayProof
       \end{center}
 
