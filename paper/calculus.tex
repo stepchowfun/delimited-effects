@@ -19,16 +19,16 @@
           & $\eRun{\term}$ & computation elimination \\
           & $\eDo{\eVar}{\term}{\term}$ & computation sequencing \\
           \\
-          $\type, \row \Coloneqq$ & & types: \\
+          $\type, \effect \Coloneqq$ & & types: \\
           & $\tVar$ & type variable \\
           & $\tArrow{\type}{\type}$ & arrow type \\
           & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
-          & $\tComputation{\type}{\row}$ & computation type \\
-          & $\tPure$ & pure row \\
+          & $\tComputation{\type}{\effect}$ & computation type \\
+          & $\tPure$ & pure effect \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
           & $\kType$ & kind of proper types \\
-          & $\kRow$ & kind of rows \\
+          & $\kEffect$ & kind of effects \\
           & $\kWitness{\type}$ & kind of witnesses \\
           \\
           $\context \Coloneqq$ & & contexts: \\
@@ -101,16 +101,17 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\row}}$}
-          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\row}}$}
+          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\effect}}$}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\effect}}$}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\row}}$}
+        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\effect}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\type}$}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kEffect}$}
         \RightLabel{(\textsc{T-Pure})}
-        \UnaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tPure}}$}
+        \BinaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tVar}}$}
       \end{prooftree}
 
       \begin{prooftree}
@@ -151,15 +152,15 @@
 
       \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\type}{\kType}$}
-          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+          \AxiomC{$\hasKind{\context}{\effect}{\kEffect}$}
         \RightLabel{(\textsc{K-Computation})}
-        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\row}}{\kType}$}
+        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\effect}}{\kType}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-Pure})}
-        \UnaryInfC{$\hasKind{\context}{\tPure}{\kRow}$}
+        \UnaryInfC{$\hasKind{\context}{\tPure}{\kEffect}$}
       \end{prooftree}
 
       \caption{Kinding rules}
@@ -228,7 +229,7 @@
         \qquad
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
         \RightLabel{(\textsc{S-TAbs2})}
-        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kRow}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kEffect}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
         \DisplayProof
       \end{center}
 
@@ -300,7 +301,7 @@
         \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
         \DisplayProof
         \qquad
-          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kEffect}$}
         \RightLabel{(\textsc{S-TVar2})}
         \UnaryInfC{$\translatesTo{\context}{\tVar}{\tUnit}$}
         \DisplayProof
@@ -382,7 +383,7 @@
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{S-Computation})}
-        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\row}}{\tArrow{\tUnit}{\type_2}}$}
+        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\effect}}{\tArrow{\tUnit}{\type_2}}$}
         \DisplayProof
         \qquad
           \AxiomC{}
