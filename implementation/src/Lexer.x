@@ -1,47 +1,38 @@
 {
+
 module Lexer (alexScanTokens, Token(..)) where
+
 }
 
 %wrapper "basic"
 
-$digit = 0-9       -- digits
-$alpha = [a-zA-Z]  -- alphabetic characters
+$digit = 0-9
+$alpha = [a-zA-Z]
+@identifier = $alpha [$alpha $digit _]*
 
-tokens :-
+:-
   $white+                         ;
-  "--".*                          ;
-  true                            { \_ -> TokenTrue }
-  false                           { \_ -> TokenFalse }
-  if                              { \_ -> TokenIf }
-  then                            { \_ -> TokenThen }
-  else                            { \_ -> TokenElse }
-  [\\]                            { \_ -> TokenAbs }
+  "#".*                           ;
+  ":"                             { \_ -> TokenAnno }
   "->"                            { \_ -> TokenArrow }
-  handle                          { \_ -> TokenHandle }
-  with                            { \_ -> TokenWith }
-  in                              { \_ -> TokenIn }
-  bool                            { \_ -> TokenBool }
-  $alpha [$alpha $digit \_ \']*   { \s -> TokenVar s }
-  [\:]                            { \_ -> TokenAnno }
-  [\(]                            { \_ -> TokenLParen }
-  [\)]                            { \_ -> TokenRParen }
+  "."                             { \_ -> TokenDot }
+  "forall"                        { \_ -> TokenForAll }
+  @identifier                     { \s -> TokenId s }
+  "("                             { \_ -> TokenLParen }
+  "\"                             { \_ -> TokenLambda }
+  ")"                             { \_ -> TokenRParen }
 
 {
+
 data Token
-  = TokenTrue
-  | TokenFalse
-  | TokenIf
-  | TokenThen
-  | TokenElse
-  | TokenAbs
+  = TokenAnno
   | TokenArrow
-  | TokenHandle
-  | TokenWith
-  | TokenIn
-  | TokenBool
-  | TokenVar String
-  | TokenAnno
+  | TokenDot
+  | TokenForAll
+  | TokenId String
   | TokenLParen
+  | TokenLambda
   | TokenRParen
   deriving (Eq, Show)
+
 }

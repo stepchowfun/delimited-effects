@@ -11,17 +11,14 @@ copyright:           (c) 2018 Stephan Boyer and Esther Wang
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
-cabal-version:       >=1.10
+cabal-version:       >= 1.10
 
 library
   hs-source-dirs:      src
   exposed-modules:     Lib
                      , Lexer
                      , Parser
-  other-modules:       Error
-                     , Inference
-                     , Subrow
-                     , Syntax
+  other-modules:       Syntax
   build-depends:       array
                      , base >= 4.7 && < 5
                      , containers
@@ -42,11 +39,8 @@ test-suite implementation-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             LibSpec.hs
-  other-modules:       ErrorSpec
-                     , InferenceSpec
-                     , LexerSpec
+  other-modules:       LexerSpec
                      , ParserSpec
-                     , SubrowSpec
                      , SyntaxSpec
   build-depends:       base
                      , implementation
