@@ -158,7 +158,7 @@ clean-implementation:
 docker-deps:
 	docker build \
 	  -f scripts/Dockerfile \
-	  -t stephanmisc/delimited-effects:deps \
+	  -t stephanmisc/effect-classes:deps \
 	  .
 
 docker-build:
@@ -175,7 +175,7 @@ docker-build:
 	    --env "TRAVIS_REPO_SLUG=$$TRAVIS_REPO_SLUG" \
 	    --rm \
 	    --user=root \
-	    stephanmisc/delimited-effects:deps \
+	    stephanmisc/effect-classes:deps \
 	    bash -c ' \
 	      chown -R user:user repo && \
 	      cd repo && \
