@@ -15,10 +15,11 @@ cabal-version:       >= 1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     FSyntax
+                     , Inference
                      , Lexer
                      , Parser
-  other-modules:       Syntax
+                     , Syntax
   build-depends:       array
                      , base >= 4.7 && < 5
                      , containers
@@ -39,7 +40,9 @@ test-suite implementation-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             LibSpec.hs
-  other-modules:       LexerSpec
+  other-modules:       FSyntaxSpec
+                     , InferenceSpec
+                     , LexerSpec
                      , ParserSpec
                      , SyntaxSpec
   build-depends:       base
