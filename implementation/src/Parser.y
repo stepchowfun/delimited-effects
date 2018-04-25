@@ -9,6 +9,7 @@ import Syntax (Term(..), Type(..))
 
 %name parse
 %tokentype { Token }
+%monad { Either String }
 %error { parseError }
 
 %token
@@ -45,7 +46,7 @@ VarList : x                     { [$1] }
 
 {
 
-parseError :: [Token] -> a
-parseError x = error ("Parse error: " ++ show x)
+parseError :: [Token] -> Either String a
+parseError x = Left ("Parse error: " ++ show x)
 
 }
