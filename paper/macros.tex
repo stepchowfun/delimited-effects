@@ -28,15 +28,16 @@
 \newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
 \newcommand\tForAllNoKind[2]{\forall #1 \; . \; #2}
 \newcommand\tComputation[2]{#1 \; ! \; #2}
-\newcommand\effect{\varepsilon}
+\newcommand\row{\varepsilon}
 \newcommand\tPure{\circ}
+\newcommand\tUnion[2]{#1, #2}
 \newcommand\tVoid{\mathbf{0}}
 \newcommand\tUnit{\mathbf{1}}
 
 % Kinds
 \newcommand\kind{\kappa}
 \newcommand\kType{\star}
-\newcommand\kEffect{\diamond}
+\newcommand\kRow{\diamond}
 \newcommand\kWitness[1]{\left\langle #1 \right\rangle}
 
 % Contexts
@@ -46,6 +47,7 @@
 \newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
 
 % Judgments
+\newcommand\rowSub[3]{#1 \vdash #2 \subseteq #3}
 \newcommand\hasType[3]{#1 \vdash \tAnno{#2}{#3}}
 \newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
 \newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
