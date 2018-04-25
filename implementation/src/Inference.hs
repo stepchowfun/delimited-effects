@@ -1,11 +1,9 @@
 module Inference
   ( infer ) where
 
-import FSyntax (FTerm(..), FType(..))
-import Syntax (Term(..))
+import Syntax (FTerm(..), Term(..), Type(..))
 
 infer :: Term -> FTerm
-infer _ = FEAbs
-  "x"
-  (FTForAll "a" $ FTForAll "b" (FTArrow (FTVar "a") (FTVar "b")))
-  (FEVar "x")
+infer _ = FEAbs "x"
+                (TForAll "a" $ TForAll "b" (TArrow (TVar "a") (TVar "b")))
+                (FEVar "x")
