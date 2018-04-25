@@ -19,16 +19,17 @@
           & $\eRun{\term}$ & computation elimination \\
           & $\eDo{\eVar}{\term}{\term}$ & computation sequencing \\
           \\
-          $\type, \effect \Coloneqq$ & & types: \\
+          $\type, \row \Coloneqq$ & & types: \\
           & $\tVar$ & type variable \\
           & $\tArrow{\type}{\type}$ & arrow type \\
           & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
-          & $\tComputation{\type}{\effect}$ & computation type \\
-          & $\tPure$ & pure effect \\
+          & $\tComputation{\type}{\row}$ & computation type \\
+          & $\tPure$ & pure row \\
+          & $\tUnion{\row}{\row}$ & row union \\
           \\
           $\kind \Coloneqq$ & & kinds: \\
           & $\kType$ & kind of proper types \\
-          & $\kEffect$ & kind of effects \\
+          & $\kRow$ & kind of rows \\
           & $\kWitness{\type}$ & kind of witnesses \\
           \\
           $\context \Coloneqq$ & & contexts: \\
@@ -101,15 +102,15 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\effect}}$}
-          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\effect}}$}
+          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\row}}$}
+          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\row}}$}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\effect}}$}
+        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\type}$}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kEffect}$}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
         \RightLabel{(\textsc{T-Pure})}
         \BinaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tVar}}$}
       \end{prooftree}
@@ -118,6 +119,13 @@
           \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tPure}}$}
         \RightLabel{(\textsc{T-Run})}
         \UnaryInfC{$\hasType{\context}{\eRun{\term}}{\type}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\row_1}}$}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
+        \RightLabel{(\textsc{T-Subsumption})}
+        \BinaryInfC{$\hasType{\context}{\term}{\tComputation{\type}{\row_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}
@@ -152,19 +160,70 @@
 
       \begin{prooftree}
           \AxiomC{$\hasKind{\context}{\type}{\kType}$}
-          \AxiomC{$\hasKind{\context}{\effect}{\kEffect}$}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
         \RightLabel{(\textsc{K-Computation})}
-        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\effect}}{\kType}$}
+        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\row}}{\kType}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-Pure})}
-        \UnaryInfC{$\hasKind{\context}{\tPure}{\kEffect}$}
+        \UnaryInfC{$\hasKind{\context}{\tPure}{\kRow}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\row_1}{\kRow}$}
+          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+        \RightLabel{(\textsc{K-Union})}
+        \BinaryInfC{$\hasKind{\context}{\tUnion{\row_1}{\row_2}}{\kRow}$}
       \end{prooftree}
 
       \caption{Kinding rules}
       \label{fig:kinding}
+    \end{figure}
+
+    \begin{figure}[H]
+      \begin{center}
+        \framebox{$\rowSub{\context}{\row}{\row}$}
+      \end{center}
+
+      \medskip
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+        \RightLabel{(\textsc{R-Var})}
+        \UnaryInfC{$\rowSub{\context}{\tVar}{\tVar}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{R-Empty})}
+        \UnaryInfC{$\rowSub{\context}{\tPure}{\row}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
+          \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
+        \RightLabel{(\textsc{R-Weakening1})}
+        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
+          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
+        \RightLabel{(\textsc{R-Weakening2})}
+        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
+      \end{prooftree}
+
+      \begin{prooftree}
+          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
+          \AxiomC{$\rowSub{\context}{\row_2}{\row_3}$}
+        \RightLabel{(\textsc{R-Strengthening})}
+        \BinaryInfC{$\rowSub{\context}{\tUnion{\row_1}{\row_2}}{\row_3}$}
+      \end{prooftree}
+
+      \caption{Row subsumption}
+      \label{fig:row_subsumption}
     \end{figure}
 
   \subsection{Semantics}
@@ -229,7 +288,7 @@
         \qquad
           \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
         \RightLabel{(\textsc{S-TAbs2})}
-        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kEffect}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kRow}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
         \DisplayProof
       \end{center}
 
@@ -301,13 +360,8 @@
         \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
         \DisplayProof
         \qquad
-          \AxiomC{$\hasKind{\context}{\tVar}{\kEffect}$}
-        \RightLabel{(\textsc{S-TVar2})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tUnit}$}
-        \DisplayProof
-        \qquad
           \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
-        \RightLabel{(\textsc{S-TVar3})}
+        \RightLabel{(\textsc{S-TVar2})}
         \UnaryInfC{$\translatesTo{\context}{\tVar}{\eVar_{\tVar}}$}
         \DisplayProof
       \end{center}
@@ -383,12 +437,11 @@
       \begin{center}
           \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
         \RightLabel{(\textsc{S-Computation})}
-        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\effect}}{\tArrow{\tUnit}{\type_2}}$}
+        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\row}}{\tArrow{\tUnit}{\type_2}}$}
         \DisplayProof
-        \qquad
-          \AxiomC{}
-        \RightLabel{(\textsc{S-Pure})}
-        \UnaryInfC{$\translatesTo{\context}{\tPure}{\tUnit}$}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
+        \RightLabel{(\textsc{S-Row})}
+        \UnaryInfC{$\translatesTo{\context}{\row}{\tUnit}$}
         \DisplayProof
       \end{center}
 
