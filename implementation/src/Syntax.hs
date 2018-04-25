@@ -1,7 +1,14 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Syntax
   ( FTerm(..)
   , Term(..)
   , Type(..) ) where
+
+import Data.Function (on)
+import Data.List (groupBy)
 
 data Term -- Metavariable: e
   = EVar String
@@ -24,32 +31,50 @@ data Type -- Metavariable: t
   | TForAll String Type
   deriving Eq
 
-collectAbs :: Term -> ([String], Term)
-collectAbs (EVar x     ) = ([], EVar x)
-collectAbs (EAbs  x  e1) = let (xs, e2) = collectAbs e1 in (x : xs, e2)
-collectAbs (EApp  e1 e2) = ([], EApp e1 e2)
-collectAbs (EAnno e  t ) = ([], EAnno e t)
+class CollectParams a b | a -> b where
+  collectParams :: a -> ([b], a)
 
-fCollectAbs :: FTerm -> ([String], FTerm)
-fCollectAbs (FEVar x) = ([], FEVar x)
-fCollectAbs (FEAbs x t e1) =
-  let (xs, e2) = fCollectAbs e1
-  in  (("(" ++ x ++ " : " ++ show t ++ ")") : xs, e2)
-fCollectAbs (FEApp e1 e2) = ([], FEApp e1 e2)
-fCollectAbs (FETAbs x e1) =
-  let (xs, e2) = fCollectAbs e1 in (("(" ++ x ++ " : *)") : xs, e2)
-fCollectAbs (FETApp e t) = ([], FETApp e t)
+instance CollectParams Term String where
+  collectParams (EVar x     ) = ([], EVar x)
+  collectParams (EAbs  x  e1) = let (xs, e2) = collectParams e1 in (x : xs, e2)
+  collectParams (EApp  e1 e2) = ([], EApp e1 e2)
+  collectParams (EAnno e  t ) = ([], EAnno e t)
 
-collectForAll :: Type -> ([String], Type)
-collectForAll (TVar x       ) = ([], TVar x)
-collectForAll (TArrow  t1 t2) = ([], TArrow t1 t2)
-collectForAll (TForAll x  t1) = let (xs, t2) = collectForAll t1 in (x : xs, t2)
+instance CollectParams FTerm (String, String) where
+  collectParams (FEVar x) = ([], FEVar x)
+  collectParams (FEAbs x t e1) =
+    let (xs, e2) = collectParams e1
+    in  ((x, show t) : xs, e2)
+  collectParams (FEApp e1 e2) = ([], FEApp e1 e2)
+  collectParams (FETAbs x e1) =
+    let (xs, e2) = collectParams e1 in ((x, "*") : xs, e2)
+  collectParams (FETApp e t) = ([], FETApp e t)
+
+instance CollectParams Type String where
+  collectParams (TVar x       ) = ([], TVar x)
+  collectParams (TArrow  t1 t2) = ([], TArrow t1 t2)
+  collectParams (TForAll x  t1) =
+    let (xs, t2) = collectParams t1
+    in (x : xs, t2)
+
+class PresentParams a where
+  presentParams :: [a] -> String
+
+instance PresentParams String where
+  presentParams = unwords
+
+instance PresentParams (String, String) where
+  presentParams xs = unwords $ do
+    group <- groupBy (on (==) snd) xs
+    let ys = fst <$> group
+    let t = snd (head group)
+    return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
 
 instance Show Term where
   show (EVar x) = x
   show (EAbs x e1) =
-    let (xs, e2) = collectAbs (EAbs x e1)
-    in  "\\" ++ unwords xs ++ " . " ++ show e2
+    let (xs, e2) = collectParams (EAbs x e1)
+    in  "\\" ++ presentParams xs ++ " . " ++ show e2
   show (EApp (EAbs x e1) (EApp e2 e3)) =
     "(" ++ show (EAbs x e1) ++ ") (" ++ show (EApp e2 e3) ++ ")"
   show (EApp (EAbs x e1) e2) =
@@ -66,8 +91,8 @@ instance Show Term where
 instance Show FTerm where
   show (FEVar x) = x
   show (FEAbs x t e1) =
-    let (xs, e2) = fCollectAbs (FEAbs x t e1)
-    in  "\\" ++ unwords xs ++ " . " ++ show e2
+    let (xs, e2) = collectParams (FEAbs x t e1)
+    in  "\\" ++ presentParams xs ++ " . " ++ show e2
   show (FEApp (FEAbs x t e1) (FEApp e2 e3)) =
     "(" ++ show (FEAbs x t e1) ++ ") (" ++ show (FEApp e2 e3) ++ ")"
   show (FEApp (FEAbs x t1 e1) (FETApp e2 t2)) =
@@ -86,8 +111,8 @@ instance Show FTerm where
     show e1 ++ " (" ++ show (FETApp e2 t) ++ ")"
   show (FEApp e1 e2) = show e1 ++ " " ++ show e2
   show (FETAbs x e1) =
-    let (xs, e2) = fCollectAbs (FETAbs x e1)
-    in  "\\" ++ unwords xs ++ " . " ++ show e2
+    let (xs, e2) = collectParams (FETAbs x e1)
+    in  "\\" ++ presentParams xs ++ " . " ++ show e2
   show (FETApp (FEAbs x t1 e) t2) =
     "(" ++ show (FEAbs x t1 e) ++ ") " ++ show t2
   show (FETApp (FETAbs x e) t) =
@@ -99,5 +124,5 @@ instance Show Type where
   show (TArrow (TVar x) t) = x ++ " -> " ++ show t
   show (TArrow t1 t2) = "(" ++ show t1 ++ ") -> " ++ show t2
   show (TForAll x t1) =
-    let (xs, t2) = collectForAll (TForAll x t1)
-    in  "forall " ++ unwords xs ++ " . " ++ show t2
+    let (xs, t2) = collectParams (TForAll x t1)
+    in  "forall " ++ presentParams xs ++ " . " ++ show t2
