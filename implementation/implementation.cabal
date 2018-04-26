@@ -19,10 +19,12 @@ library
                      , Lexer
                      , Parser
                      , Syntax
-  build-depends:       array
+  build-depends:       QuickCheck
+                     , array
                      , base >= 4.7 && < 5
+                     , bimap
                      , containers
-                     , QuickCheck
+                     , mtl
   default-language:    Haskell2010
   build-tools:         alex
                      , happy
