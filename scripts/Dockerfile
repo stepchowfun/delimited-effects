@@ -1,22 +1,14 @@
 FROM debian:stretch
 
-# We install the `libtinfo-dev` package to work around a strange bug in Stack.
-# Without it, we get this error when running `stack install brittany` below:
-#   <command line>: can't load .so/.DLL for: libtinfo.so
-#   (libtinfo.so: cannot open shared object file: No such file or directory)
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
     'build-essential=12.3' \
-    'libtinfo-dev=6.0+*' \
     'python-pip=9.0.*' \
     'ruby=1:2.3.*' \
     'texlive-full=2016.*' && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc
-
-# Without this, Ruby will assume that files are encoded as ASCII.
-RUN echo 'export LANG="C.UTF-8"' >> ~/.profile
 
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
@@ -59,6 +51,9 @@ USER user:user
 
 WORKDIR /home/user
 
+# Without this, Ruby will assume files are encoded as ASCII.
+RUN echo 'export LANG="C.UTF-8"' >> ~/.profile
+
 # Stack installs executables in $HOME/.local/bin.
 RUN \
   mkdir -p "$HOME/.local/bin" && \
@@ -66,6 +61,4 @@ RUN \
 
 RUN stack setup --resolver lts-10.4
 
-# The `mkdir` command is needed to work around a bug in brittany. See
-# https://github.com/lspitzner/brittany/issues/115 for details.
-RUN mkdir "$HOME/.config" && stack install brittany hlint
+RUN stack install hindent hlint
