@@ -134,7 +134,7 @@ lint-implementation:
 	    -name '*.hs' \
 	  \) -print \
 	); do \
-	  cat "$$file" | hindent --line-length 79 > "$$file.tmp"; \
+	  cat "$$file" | hindent > "$$file.tmp"; \
 	  (cmp "$$file.tmp" "$$file" && rm "$$file.tmp") || \
 	    (rm "$$file.tmp" && false) || exit 1; \
 	done
@@ -149,7 +149,7 @@ format-implementation:
 	    -name '*.hs' \
 	  \) -print \
 	); do \
-	  cat "$$file" | hindent --line-length 79 > "$$file.tmp"; \
+	  cat "$$file" | hindent > "$$file.tmp"; \
 	  (cmp --quiet "$$file.tmp" "$$file" && rm "$$file.tmp") || \
 	    mv "$$file.tmp" "$$file"; \
 	done

@@ -3,7 +3,7 @@ module Main
   ) where
 
 import Data.Char (isSpace)
-import Inference (infer)
+import Inference (typeCheck)
 import Lexer (scan)
 import Parser (parse)
 import System.Environment (getArgs)
@@ -17,11 +17,10 @@ runProgram program =
       let result = do
             tokens <- scan program
             term <- parse tokens
-            let fterm = infer term
-            return fterm
+            typeCheck term
       case result of
         Left s -> putStrLn ("  " ++ s)
-        Right fterm -> putStrLn ("  " ++ show fterm)
+        Right (e, t) -> putStrLn ("  " ++ show e ++ "\n  : " ++ show t)
 
 main :: IO ()
 main = do
