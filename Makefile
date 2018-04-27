@@ -1,6 +1,7 @@
 .PHONY: \
   all test lint format clean \
   paper \
+    lint-general \
     lint-paper \
     clean-paper \
   formalization \
@@ -17,7 +18,9 @@ all: paper formalization implementation
 
 test: test-implementation
 
-lint: lint-paper lint-formalization lint-implementation
+lint: lint-general lint-paper lint-formalization lint-implementation
+
+lint-general:
 	./scripts/lint-general.rb $(shell \
 	  find . -type d \( \
 	    -path ./.git -o \
