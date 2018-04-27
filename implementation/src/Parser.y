@@ -31,7 +31,7 @@ import Syntax (EVar(..), TVar(..), ITerm(..), Type(..))
 %%
 
 ITerm : x                         { IEVar (ToEVar $1) }
-     | lambda VarList '.' ITerm   { foldr (\x e -> IEAbs (ToEVar x) e) $4 (reverse $2) }
+     | lambda VarList '->' ITerm  { foldr (\x e -> IEAbs (ToEVar x) e) $4 (reverse $2) }
      | ITerm ITerm %prec APP      { IEApp $1 $2 }
      | ITerm ':' Type             { IEAnno $1 $3 }
      | '(' ITerm ')'              { $2 }

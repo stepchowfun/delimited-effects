@@ -49,6 +49,12 @@ data PartialType
   | PTForAll TVar
              PartialType
 
+ptFreeVars :: PartialType -> [TVar]
+ptFreeVars (PTUnifier _) = []
+ptFreeVars (PTVar a) = [a]
+ptFreeVars (PTArrow t1 t2) = ptFreeVars t1 ++ ptFreeVars t2
+ptFreeVars (PTForAll a t) = filter (/= a) (ptFreeVars t)
+
 instance CollectParams PartialType String where
   collectParams (PTUnifier u) = ([], PTUnifier u)
   collectParams (PTVar a) = ([], PTVar a)
@@ -170,13 +176,6 @@ elimQuantifiers (TForAll a1 t1) = do
   (t2, as) <- elimQuantifiers (substVarInType a1 (TVar a2) t1)
   return (t2, a2 : as)
 
--- Helpers to compute free variables.
-ptFreeVars :: PartialType -> [TVar]
-ptFreeVars (PTUnifier _) = []
-ptFreeVars (PTVar a) = [a]
-ptFreeVars (PTArrow t1 t2) = ptFreeVars t1 ++ ptFreeVars t2
-ptFreeVars (PTForAll a t) = filter (/= a) (ptFreeVars t)
-
 -- Check that the free variables of a type are bound in the context.
 ensureTypeWellFormed :: Type -> TypeCheck ()
 ensureTypeWellFormed t = mapM_ tLookupVar (tFreeVars t)
@@ -244,30 +243,20 @@ infer (IEApp e1 e2)
   -- Check the argument.
   (e4, uToT) <- check e2 t5
   -- Use the unification results to instantiate the quantifiers.
-  let e6 =
+  let (e6, t8) =
         foldl'
-          (\e5 a ->
-             FETApp e5 $
-             fromMaybe
-               (TVar a)
-               (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT))
-          e3
-          as
-  let t7 =
-        foldl'
-          (\t6 a ->
-             substVarInType
-               a
-               (fromMaybe
-                  (TVar a)
-                  (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT))
-               t6)
-          t4
+          (\(e5, t6) a ->
+             let t7 =
+                   fromMaybe
+                     (TVar a)
+                     (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT)
+             in (FETApp e5 t7, substVarInType a t7 t6))
+          (e3, t4)
           as
   -- Construct the application.
   let e7 = FEApp e6 e4
   -- Re-generalize the result.
-  return $ foldl' (\(e8, t6) a -> (FETAbs a e8, TForAll a t6)) (e7, t7) as
+  return $ foldl' (\(e8, t6) a -> (FETAbs a e8, TForAll a t6)) (e7, t8) as
 infer (IEAnno e1 t) = do
   ensureTypeWellFormed t
   (e2, _) <- check e1 (makePartial t)
@@ -308,29 +297,19 @@ check e1 t1
   -- Unify the result with t1.
   uToT1 <- unify t1 t4
   -- Use the unification results to instantiate the quantifiers.
-  let e4 =
+  let (e4, t7) =
         foldl'
-          (\e3 a ->
-             FETApp e3 $
-             fromMaybe
-               (TVar $ ToTVar "unit")
-               (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT1))
-          e2
-          as
-  let t6 =
-        foldl'
-          (\t5 a ->
-             substVarInType
-               a
-               (fromMaybe
-                  (TVar $ ToTVar "unit")
-                  (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT1))
-               t5)
-          t3
+          (\(e3, t5) a ->
+             let t6 =
+                   fromMaybe
+                     (TVar $ ToTVar "unit")
+                     (Map.lookup (fromJust (Bimap.lookup a aToU)) uToT1)
+             in (FETApp e3 t6, substVarInType a t6 t5))
+          (e2, t3)
           as
   -- Unify the original type against the inferred type with eliminated
   -- quantifiers.
-  uToT2 <- unify (makePartial t6) t1
+  uToT2 <- unify (makePartial t7) t1
   return (e4, uToT2)
 
 -- Given a term in the untyped language, return a term in the typed language
