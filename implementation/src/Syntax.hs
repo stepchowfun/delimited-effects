@@ -4,24 +4,24 @@
 
 module Syntax
   ( CollectParams
-  , PresentParams
+  , EVar(..)
   , FTerm(..)
   , ITerm(..)
-  , EVar(..)
+  , PresentParams
   , TVar(..)
   , Type(..)
-  , substEVarInTerm
-  , iFreeEVars
-  , iFreeTVars
+  , collectParams
   , fFreeEVars
   , fFreeTVars
-  , tFreeVars
-  , substTVarInTerm
-  , substEVarInFTerm
-  , substTVarInFTerm
-  , substVarInType
-  , collectParams
+  , iFreeEVars
+  , iFreeTVars
   , presentParams
+  , substEVarInFTerm
+  , substEVarInTerm
+  , substTVarInFTerm
+  , substTVarInTerm
+  , substVarInType
+  , tFreeVars
   ) where
 
 import Data.Function (on)
