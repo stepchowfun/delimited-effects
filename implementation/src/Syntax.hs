@@ -47,7 +47,10 @@ instance Show TVar where
   show (FreshTVar s) = s
 
 data ITerm
-  = IEVar EVar
+  = IEIntLit Integer
+  | IEAddInt ITerm
+             ITerm
+  | IEVar EVar
   | IEAbs EVar
           (Maybe Type)
           ITerm
@@ -60,7 +63,10 @@ data ITerm
            Type
 
 data FTerm
-  = FEVar EVar
+  = FEIntLit Integer
+  | FEAddInt FTerm
+             FTerm
+  | FEVar EVar
   | FEAbs EVar
           Type
           FTerm
@@ -80,6 +86,8 @@ data Type
 
 -- Free variables
 iFreeEVars :: ITerm -> [EVar]
+iFreeEVars (IEIntLit _) = []
+iFreeEVars (IEAddInt e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
 iFreeEVars (IEVar x) = [x]
 iFreeEVars (IEAbs x _ e) = filter (/= x) (iFreeEVars e)
 iFreeEVars (IEApp e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
@@ -87,6 +95,8 @@ iFreeEVars (IELet x e1 e2) = iFreeEVars e1 ++ filter (/= x) (iFreeEVars e2)
 iFreeEVars (IEAnno e _) = iFreeEVars e
 
 iFreeTVars :: ITerm -> [TVar]
+iFreeTVars (IEIntLit _) = []
+iFreeTVars (IEAddInt e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
 iFreeTVars (IEVar _) = []
 iFreeTVars (IEAbs _ (Just t) e) = tFreeVars t ++ iFreeTVars e
 iFreeTVars (IEAbs _ Nothing e) = iFreeTVars e
@@ -95,6 +105,8 @@ iFreeTVars (IELet _ e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
 iFreeTVars (IEAnno _ t) = tFreeVars t
 
 fFreeEVars :: FTerm -> [EVar]
+fFreeEVars (FEIntLit _) = []
+fFreeEVars (FEAddInt e1 e2) = fFreeEVars e1 ++ fFreeEVars e2
 fFreeEVars (FEVar x) = [x]
 fFreeEVars (FEAbs x _ e) = filter (/= x) (fFreeEVars e)
 fFreeEVars (FEApp e1 e2) = fFreeEVars e1 ++ fFreeEVars e2
@@ -102,6 +114,8 @@ fFreeEVars (FETAbs _ e) = fFreeEVars e
 fFreeEVars (FETApp e _) = fFreeEVars e
 
 fFreeTVars :: FTerm -> [TVar]
+fFreeTVars (FEIntLit _) = []
+fFreeTVars (FEAddInt e1 e2) = fFreeTVars e1 ++ fFreeTVars e2
 fFreeTVars (FEVar _) = []
 fFreeTVars (FEAbs _ t e) = tFreeVars t ++ fFreeTVars e
 fFreeTVars (FEApp e1 e2) = fFreeTVars e1 ++ fFreeTVars e2
@@ -115,6 +129,9 @@ tFreeVars (TForAll a t) = filter (/= a) (tFreeVars t)
 
 -- Substitution
 substEVarInTerm :: EVar -> ITerm -> ITerm -> ITerm
+substEVarInTerm _ _ (IEIntLit i) = IEIntLit i
+substEVarInTerm x e1 (IEAddInt e2 e3) =
+  IEAddInt (substEVarInTerm x e1 e2) (substEVarInTerm x e1 e3)
 substEVarInTerm x1 e (IEVar x2) =
   if x1 == x2
     then e
@@ -136,6 +153,9 @@ substEVarInTerm x1 e1 (IELet x2 e2 e3) =
 substEVarInTerm x e1 (IEAnno e2 t) = IEAnno (substEVarInTerm x e1 e2) t
 
 substTVarInTerm :: TVar -> Type -> ITerm -> ITerm
+substTVarInTerm _ _ (IEIntLit i) = IEIntLit i
+substTVarInTerm a t (IEAddInt e1 e2) =
+  IEAddInt (substTVarInTerm a t e1) (substTVarInTerm a t e2)
 substTVarInTerm _ _ (IEVar x) = IEVar x
 substTVarInTerm a t1 (IEAbs x t2 e2) =
   IEAbs x (substVarInType a t1 <$> t2) (substTVarInTerm a t1 e2)
@@ -147,6 +167,9 @@ substTVarInTerm a t1 (IEAnno e t2) =
   IEAnno (substTVarInTerm a t1 e) (substVarInType a t1 t2)
 
 substEVarInFTerm :: EVar -> FTerm -> FTerm -> FTerm
+substEVarInFTerm _ _ (FEIntLit i) = FEIntLit i
+substEVarInFTerm x e1 (FEAddInt e2 e3) =
+  FEAddInt (substEVarInFTerm x e1 e2) (substEVarInFTerm x e1 e3)
 substEVarInFTerm x1 e (FEVar x2) =
   if x1 == x2
     then e
@@ -162,6 +185,9 @@ substEVarInFTerm x e1 (FETAbs a e2) = FETAbs a (substEVarInFTerm x e1 e2)
 substEVarInFTerm x e1 (FETApp e2 t) = FETApp (substEVarInFTerm x e1 e2) t
 
 substTVarInFTerm :: TVar -> Type -> FTerm -> FTerm
+substTVarInFTerm _ _ (FEIntLit i) = FEIntLit i
+substTVarInFTerm a t (FEAddInt e1 e2) =
+  FEAddInt (substTVarInFTerm a t e1) (substTVarInFTerm a t e2)
 substTVarInFTerm _ _ (FEVar x) = FEVar x
 substTVarInFTerm a t1 (FEAbs x t2 e) =
   FEAbs x (substVarInType a t1 t2) (substTVarInFTerm a t1 e)
@@ -186,6 +212,8 @@ substVarInType a1 t1 (TForAll a2 t2) =
 
 -- Equality
 instance Eq ITerm where
+  IEIntLit i1 == IEIntLit i2 = i1 == i2
+  IEAddInt e1 e2 == IEAddInt e3 e4 = e1 == e3 && e2 == e4
   IEVar x1 == IEVar x2 = x1 == x2
   IEAbs x1 t1 e1 == IEAbs x2 t2 e2 =
     t1 == t2 &&
@@ -196,6 +224,8 @@ instance Eq ITerm where
   _ == _ = False
 
 instance Eq FTerm where
+  FEIntLit i1 == FEIntLit i2 = i1 == i2
+  FEAddInt e1 e2 == FEAddInt e3 e4 = e1 == e3 && e2 == e4
   FEVar x1 == FEVar x2 = x1 == x2
   FEAbs x1 t1 e1 == FEAbs x2 t2 e2 =
     e1 == substEVarInFTerm x2 (FEVar x1) e2 &&
@@ -220,8 +250,13 @@ class CollectParams a b | a -> b where
   collectParams :: a -> ([b], a)
 
 instance CollectParams ITerm (String, String) where
+  collectParams (IEIntLit i) = ([], IEIntLit i)
+  collectParams (IEAddInt e1 e2) = ([], IEAddInt e1 e2)
   collectParams (IEVar x) = ([], IEVar x)
-  collectParams (IEAbs x t e1) =
+  collectParams (IEAbs x Nothing e1) =
+    let (xs, e2) = collectParams e1
+    in ((show x, "?") : xs, e2)
+  collectParams (IEAbs x (Just t) e1) =
     let (xs, e2) = collectParams e1
     in ((show x, show t) : xs, e2)
   collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
@@ -229,6 +264,8 @@ instance CollectParams ITerm (String, String) where
   collectParams (IEAnno e t) = ([], IEAnno e t)
 
 instance CollectParams FTerm (String, String) where
+  collectParams (FEIntLit i) = ([], FEIntLit i)
+  collectParams (FEAddInt e1 e2) = ([], FEAddInt e1 e2)
   collectParams (FEVar x) = ([], FEVar x)
   collectParams (FEAbs x t e1) =
     let (xs, e2) = collectParams e1
@@ -261,56 +298,29 @@ instance PresentParams (String, String) where
       return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
 
 instance Show ITerm where
+  show (IEIntLit i) = show i
+  show (IEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
   show (IEVar x) = show x
-  show (IEAbs x Nothing e1) =
-    let (xs, e2) = collectParams (IEAbs x Nothing e1)
-    in "λ" ++ presentParams xs ++ " . " ++ show e2
-  show (IEAbs x (Just t) e1) =
-    let (xs, e2) = collectParams (IEAbs x (Just t) e1)
-    in "λ" ++ presentParams xs ++ " : " ++ show t ++ " . " ++ show e2
-  show (IEApp (IEAbs x t e1) (IEApp e2 e3)) =
-    "(" ++ show (IEAbs x t e1) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
-  show (IEApp (IEAbs x t e1) e2) =
-    "(" ++ show (IEAbs x t e1) ++ ") " ++ show e2
-  show (IEApp (IELet x e1 e2) (IEApp e3 e4)) =
-    "(" ++ show (IELet x e1 e2) ++ ") (" ++ show (IEApp e3 e4) ++ ")"
-  show (IEApp (IELet x e1 e2) e3) =
-    "(" ++ show (IELet x e1 e2) ++ ") " ++ show e3
-  show (IEApp (IEAnno e1 t) (IEApp e2 e3)) =
-    "(" ++ show (IEAnno e1 t) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
-  show (IEApp (IEAnno e1 t) e2) = "(" ++ show (IEAnno e1 t) ++ ") " ++ show e2
-  show (IEApp e1 (IEApp e2 e3)) = show e1 ++ " (" ++ show (IEApp e2 e3) ++ ")"
-  show (IEApp e1 e2) = show e1 ++ " " ++ show e2
+  show (IEAbs x t e1) =
+    let (xs, e2) = collectParams (IEAbs x t e1)
+    in "(λ" ++ presentParams xs ++ " . " ++ show e2 ++ ")"
+  show (IEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
   show (IELet x e1 e2) =
-    "let " ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2
-  show (IEAnno e t) = show e ++ " : " ++ show t
+    "(let " ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2 ++ ")"
+  show (IEAnno e t) = "(" ++ show e ++ " : " ++ show t ++ ")"
 
 instance Show FTerm where
+  show (FEIntLit i) = show i
+  show (FEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
   show (FEVar x) = show x
   show (FEAbs x t e1) =
     let (xs, e2) = collectParams (FEAbs x t e1)
-    in "λ" ++ presentParams xs ++ " . " ++ show e2
-  show (FEApp (FEAbs x t e1) (FEApp e2 e3)) =
-    "(" ++ show (FEAbs x t e1) ++ ") (" ++ show (FEApp e2 e3) ++ ")"
-  show (FEApp (FEAbs x t1 e1) (FETApp e2 t2)) =
-    "(" ++ show (FEAbs x t1 e1) ++ ") (" ++ show (FETApp e2 t2) ++ ")"
-  show (FEApp (FEAbs x t e1) e2) =
-    "(" ++ show (FEAbs x t e1) ++ ") " ++ show e2
-  show (FEApp (FETAbs a e1) (FEApp e2 e3)) =
-    "(" ++ show (FETAbs a e1) ++ ") (" ++ show (FEApp e2 e3) ++ ")"
-  show (FEApp (FETAbs a e1) (FETApp e2 t)) =
-    "(" ++ show (FETAbs a e1) ++ ") (" ++ show (FETApp e2 t) ++ ")"
-  show (FEApp (FETAbs a e1) e2) = "(" ++ show (FETAbs a e1) ++ ") " ++ show e2
-  show (FEApp e1 (FEApp e2 e3)) = show e1 ++ " (" ++ show (FEApp e2 e3) ++ ")"
-  show (FEApp e1 (FETApp e2 t)) = show e1 ++ " (" ++ show (FETApp e2 t) ++ ")"
-  show (FEApp e1 e2) = show e1 ++ " " ++ show e2
+    in "(λ" ++ presentParams xs ++ " . " ++ show e2 ++ ")"
+  show (FEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
   show (FETAbs a e1) =
     let (as, e2) = collectParams (FETAbs a e1)
-    in "λ" ++ presentParams as ++ " . " ++ show e2
-  show (FETApp (FEAbs x t1 e) t2) =
-    "(" ++ show (FEAbs x t1 e) ++ ") " ++ show t2
-  show (FETApp (FETAbs a e) t) = "(" ++ show (FETAbs a e) ++ ") " ++ show t
-  show (FETApp e t) = show e ++ " " ++ show t
+    in "(λ" ++ presentParams as ++ " . " ++ show e2 ++ ")"
+  show (FETApp e t) = "(" ++ show e ++ " " ++ show t ++ ")"
 
 instance Show Type where
   show (TVar a) = show a

@@ -15,29 +15,33 @@ import Syntax (EVar(..), TVar(..), ITerm(..), Type(..))
 %token
   '('    { TokenLParen }
   ')'    { TokenRParen }
+  '+'    { TokenPlus }
   '->'   { TokenArrow }
   '.'    { TokenDot }
   ':'    { TokenAnno }
   '='    { TokenEquals }
   forall { TokenForAll }
+  i      { TokenIntLit $$ }
   in     { TokenIn }
   lambda { TokenLambda }
   let    { TokenLet }
   x      { TokenId $$ }
 
-%nonassoc ':' '=' in
-%left '.'
+%nonassoc ':' '=' in '.'
 %right '->'
-%nonassoc let forall x '(' lambda ')'
+%left '+'
+%nonassoc let forall lambda '(' ')' x i
 %nonassoc APP
 
 %%
 
 ITerm
-  : x                          { IEVar (UserEVar $1) }
+  : i                          { IEIntLit $1 }
+  | x                          { IEVar (UserEVar $1) }
   | lambda EVarList '->' ITerm { foldr (\(x, t) e -> IEAbs (UserEVar x) t e) $4 (reverse $2) }
   | ITerm ITerm %prec APP      { IEApp $1 $2 }
   | ITerm ':' Type             { IEAnno $1 $3 }
+  | ITerm '+' ITerm            { IEAddInt $1 $3 }
   | let x '=' ITerm in ITerm   { IELet (UserEVar $2) $4 $6 }
   | '(' ITerm ')'              { $2 }
 

@@ -6,6 +6,14 @@ import Control.Monad.Except (throwError)
 import Syntax (FTerm(..), substEVarInFTerm, substTVarInFTerm)
 
 eval :: FTerm -> Either String FTerm
+eval (FEIntLit i) = return $ FEIntLit i
+eval (FEAddInt e1 e2) = do
+  e3 <- eval e1
+  e4 <- eval e2
+  case (e3, e4) of
+    (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 + i2)
+    _ ->
+      throwError $ "Type error: cannot add " ++ show e3 ++ " and " ++ show e4
 eval (FEVar x) = throwError $ "Unbound variable: " ++ show x
 eval (FEAbs x t e) = return $ FEAbs x t e
 eval (FEApp e1 e2) = do
