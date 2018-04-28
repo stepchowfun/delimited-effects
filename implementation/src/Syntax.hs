@@ -10,17 +10,14 @@ module Syntax
   , FreeTVars
   , ITerm(..)
   , PresentParams
+  , Subst
   , TVar(..)
   , Type(..)
   , collectParams
   , freeEVars
   , freeTVars
   , presentParams
-  , substEVarInFTerm
-  , substEVarInTerm
-  , substTVarInFTerm
-  , substTVarInTerm
-  , substVarInType
+  , subst
   ) where
 
 import Data.Function (on)
@@ -133,87 +130,76 @@ instance FreeTVars Type where
   freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
 
 -- Substitution
-substEVarInTerm :: EVar -> ITerm -> ITerm -> ITerm
-substEVarInTerm _ _ (IEIntLit i) = IEIntLit i
-substEVarInTerm x e1 (IEAddInt e2 e3) =
-  IEAddInt (substEVarInTerm x e1 e2) (substEVarInTerm x e1 e3)
-substEVarInTerm x1 e (IEVar x2) =
-  if x1 == x2
-    then e
-    else IEVar x2
-substEVarInTerm x1 e1 (IEAbs x2 t e2) =
-  IEAbs x2 t $
-  if x1 == x2
-    then e2
-    else substEVarInTerm x1 e1 e2
-substEVarInTerm x e1 (IEApp e2 e3) =
-  IEApp (substEVarInTerm x e1 e2) (substEVarInTerm x e1 e3)
-substEVarInTerm x1 e1 (IELet x2 e2 e3) =
-  IELet
-    x2
-    (substEVarInTerm x1 e1 e2)
-    (if x1 == x2
-       then e3
-       else substEVarInTerm x1 e1 e3)
-substEVarInTerm x e1 (IEAnno e2 t) = IEAnno (substEVarInTerm x e1 e2) t
+class Subst a b c where
+  subst :: a -> b -> c -> c
 
-substTVarInTerm :: TVar -> Type -> ITerm -> ITerm
-substTVarInTerm _ _ (IEIntLit i) = IEIntLit i
-substTVarInTerm a t (IEAddInt e1 e2) =
-  IEAddInt (substTVarInTerm a t e1) (substTVarInTerm a t e2)
-substTVarInTerm _ _ (IEVar x) = IEVar x
-substTVarInTerm a t1 (IEAbs x t2 e2) =
-  IEAbs x (substVarInType a t1 <$> t2) (substTVarInTerm a t1 e2)
-substTVarInTerm a t (IEApp e1 e2) =
-  IEApp (substTVarInTerm a t e1) (substTVarInTerm a t e2)
-substTVarInTerm a t (IELet x e1 e2) =
-  IELet x (substTVarInTerm a t e1) (substTVarInTerm a t e2)
-substTVarInTerm a t1 (IEAnno e t2) =
-  IEAnno (substTVarInTerm a t1 e) (substVarInType a t1 t2)
+instance Subst EVar ITerm ITerm where
+  subst _ _ (IEIntLit i) = IEIntLit i
+  subst x e1 (IEAddInt e2 e3) = IEAddInt (subst x e1 e2) (subst x e1 e3)
+  subst x1 e (IEVar x2) =
+    if x1 == x2
+      then e
+      else IEVar x2
+  subst x1 e1 (IEAbs x2 t e2) =
+    IEAbs x2 t $
+    if x1 == x2
+      then e2
+      else subst x1 e1 e2
+  subst x e1 (IEApp e2 e3) = IEApp (subst x e1 e2) (subst x e1 e3)
+  subst x1 e1 (IELet x2 e2 e3) =
+    IELet
+      x2
+      (subst x1 e1 e2)
+      (if x1 == x2
+         then e3
+         else subst x1 e1 e3)
+  subst x e1 (IEAnno e2 t) = IEAnno (subst x e1 e2) t
 
-substEVarInFTerm :: EVar -> FTerm -> FTerm -> FTerm
-substEVarInFTerm _ _ (FEIntLit i) = FEIntLit i
-substEVarInFTerm x e1 (FEAddInt e2 e3) =
-  FEAddInt (substEVarInFTerm x e1 e2) (substEVarInFTerm x e1 e3)
-substEVarInFTerm x1 e (FEVar x2) =
-  if x1 == x2
-    then e
-    else FEVar x2
-substEVarInFTerm x1 e1 (FEAbs x2 t e2) =
-  FEAbs x2 t $
-  if x1 == x2
-    then e2
-    else substEVarInFTerm x1 e1 e2
-substEVarInFTerm x e1 (FEApp e2 e3) =
-  FEApp (substEVarInFTerm x e1 e2) (substEVarInFTerm x e1 e3)
-substEVarInFTerm x e1 (FETAbs a e2) = FETAbs a (substEVarInFTerm x e1 e2)
-substEVarInFTerm x e1 (FETApp e2 t) = FETApp (substEVarInFTerm x e1 e2) t
+instance Subst TVar Type ITerm where
+  subst _ _ (IEIntLit i) = IEIntLit i
+  subst a t (IEAddInt e1 e2) = IEAddInt (subst a t e1) (subst a t e2)
+  subst _ _ (IEVar x) = IEVar x
+  subst a t1 (IEAbs x t2 e2) = IEAbs x (subst a t1 <$> t2) (subst a t1 e2)
+  subst a t (IEApp e1 e2) = IEApp (subst a t e1) (subst a t e2)
+  subst a t (IELet x e1 e2) = IELet x (subst a t e1) (subst a t e2)
+  subst a t1 (IEAnno e t2) = IEAnno (subst a t1 e) (subst a t1 t2)
 
-substTVarInFTerm :: TVar -> Type -> FTerm -> FTerm
-substTVarInFTerm _ _ (FEIntLit i) = FEIntLit i
-substTVarInFTerm a t (FEAddInt e1 e2) =
-  FEAddInt (substTVarInFTerm a t e1) (substTVarInFTerm a t e2)
-substTVarInFTerm _ _ (FEVar x) = FEVar x
-substTVarInFTerm a t1 (FEAbs x t2 e) =
-  FEAbs x (substVarInType a t1 t2) (substTVarInFTerm a t1 e)
-substTVarInFTerm a t (FEApp e1 e2) =
-  FEApp (substTVarInFTerm a t e1) (substTVarInFTerm a t e2)
-substTVarInFTerm a1 t (FETAbs a2 e) = FETAbs a2 (substTVarInFTerm a1 t e)
-substTVarInFTerm a t1 (FETApp e t2) =
-  FETApp (substTVarInFTerm a t2 e) (substVarInType a t1 t2)
+instance Subst EVar FTerm FTerm where
+  subst _ _ (FEIntLit i) = FEIntLit i
+  subst x e1 (FEAddInt e2 e3) = FEAddInt (subst x e1 e2) (subst x e1 e3)
+  subst x1 e (FEVar x2) =
+    if x1 == x2
+      then e
+      else FEVar x2
+  subst x1 e1 (FEAbs x2 t e2) =
+    FEAbs x2 t $
+    if x1 == x2
+      then e2
+      else subst x1 e1 e2
+  subst x e1 (FEApp e2 e3) = FEApp (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FETAbs a e2) = FETAbs a (subst x e1 e2)
+  subst x e1 (FETApp e2 t) = FETApp (subst x e1 e2) t
 
-substVarInType :: TVar -> Type -> Type -> Type
-substVarInType a1 t (TVar a2) =
-  if a1 == a2
-    then t
-    else TVar a2
-substVarInType a t1 (TArrow t2 t3) =
-  TArrow (substVarInType a t1 t2) (substVarInType a t1 t3)
-substVarInType a1 t1 (TForAll a2 t2) =
-  TForAll a2 $
-  if a1 == a2
-    then t2
-    else substVarInType a1 t1 t2
+instance Subst TVar Type FTerm where
+  subst _ _ (FEIntLit i) = FEIntLit i
+  subst a t (FEAddInt e1 e2) = FEAddInt (subst a t e1) (subst a t e2)
+  subst _ _ (FEVar x) = FEVar x
+  subst a t1 (FEAbs x t2 e) = FEAbs x (subst a t1 t2) (subst a t1 e)
+  subst a t (FEApp e1 e2) = FEApp (subst a t e1) (subst a t e2)
+  subst a1 t (FETAbs a2 e) = FETAbs a2 (subst a1 t e)
+  subst a t1 (FETApp e t2) = FETApp (subst a t2 e) (subst a t1 t2)
+
+instance Subst TVar Type Type where
+  subst a1 t (TVar a2) =
+    if a1 == a2
+      then t
+      else TVar a2
+  subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
+  subst a1 t1 (TForAll a2 t2) =
+    TForAll a2 $
+    if a1 == a2
+      then t2
+      else subst a1 t1 t2
 
 -- Equality
 instance Eq ITerm where
@@ -221,9 +207,7 @@ instance Eq ITerm where
   IEAddInt e1 e2 == IEAddInt e3 e4 = e1 == e3 && e2 == e4
   IEVar x1 == IEVar x2 = x1 == x2
   IEAbs x1 t1 e1 == IEAbs x2 t2 e2 =
-    t1 == t2 &&
-    e1 == substEVarInTerm x2 (IEVar x1) e2 &&
-    e2 == substEVarInTerm x1 (IEVar x2) e1
+    t1 == t2 && e1 == subst x2 (IEVar x1) e2 && e2 == subst x1 (IEVar x2) e1
   IEApp e1 e2 == IEApp e3 e4 = e1 == e3 && e2 == e4
   IEAnno e1 t1 == IEAnno e2 t2 = e1 == e2 && t1 == t2
   _ == _ = False
@@ -233,12 +217,10 @@ instance Eq FTerm where
   FEAddInt e1 e2 == FEAddInt e3 e4 = e1 == e3 && e2 == e4
   FEVar x1 == FEVar x2 = x1 == x2
   FEAbs x1 t1 e1 == FEAbs x2 t2 e2 =
-    e1 == substEVarInFTerm x2 (FEVar x1) e2 &&
-    e2 == substEVarInFTerm x1 (FEVar x2) e1 && t1 == t2
+    e1 == subst x2 (FEVar x1) e2 && e2 == subst x1 (FEVar x2) e1 && t1 == t2
   FEApp e1 e2 == FEApp e3 e4 = e1 == e3 && e2 == e4
   FETAbs a1 e1 == FETAbs a2 e2 =
-    e1 == substTVarInFTerm a2 (TVar a1) e2 &&
-    e2 == substTVarInFTerm a1 (TVar a2) e1
+    e1 == subst a2 (TVar a1) e2 && e2 == subst a1 (TVar a2) e1
   FETApp e1 t1 == FETApp e2 t2 = e1 == e2 && t1 == t2
   _ == _ = False
 
@@ -246,24 +228,23 @@ instance Eq Type where
   TVar a1 == TVar a2 = a1 == a2
   TArrow t1 t2 == TArrow t3 t4 = t1 == t3 && t2 == t4
   TForAll a1 t1 == TForAll a2 t2 =
-    t1 == substVarInType a2 (TVar a1) t2 &&
-    t2 == substVarInType a1 (TVar a2) t1
+    t1 == subst a2 (TVar a1) t2 && t2 == subst a1 (TVar a2) t1
   _ == _ = False
 
 -- Pretty printing
 class CollectParams a b | a -> b where
   collectParams :: a -> ([b], a)
 
-instance CollectParams ITerm (String, String) where
+instance CollectParams ITerm (String, Maybe String) where
   collectParams (IEIntLit i) = ([], IEIntLit i)
   collectParams (IEAddInt e1 e2) = ([], IEAddInt e1 e2)
   collectParams (IEVar x) = ([], IEVar x)
   collectParams (IEAbs x Nothing e1) =
     let (xs, e2) = collectParams e1
-    in ((show x, "?") : xs, e2)
+    in ((show x, Nothing) : xs, e2)
   collectParams (IEAbs x (Just t) e1) =
     let (xs, e2) = collectParams e1
-    in ((show x, show t) : xs, e2)
+    in ((show x, Just $ show t) : xs, e2)
   collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
   collectParams (IELet x e1 e2) = ([], IELet x e1 e2)
   collectParams (IEAnno e t) = ([], IEAnno e t)
@@ -293,6 +274,15 @@ class PresentParams a where
 
 instance PresentParams String where
   presentParams = unwords
+
+instance PresentParams (String, Maybe String) where
+  presentParams xs =
+    unwords $ do
+      group <- groupBy (on (==) snd) xs
+      let ys = fst <$> group
+      case snd (head group) of
+        Just t -> return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
+        Nothing -> return $ unwords ys
 
 instance PresentParams (String, String) where
   presentParams xs =

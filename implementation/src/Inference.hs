@@ -22,13 +22,13 @@ import Syntax
   , FTerm(..)
   , FreeTVars
   , ITerm(..)
+  , Subst
   , TVar(..)
   , Type(..)
   , collectParams
   , freeTVars
   , presentParams
-  , substEVarInTerm
-  , substTVarInFTerm
+  , subst
   )
 
 -- Unification variables are holes in a type.
@@ -67,8 +67,7 @@ instance Eq PartialType where
   PTVar a1 == PTVar a2 = a1 == a2
   PTArrow t1 t2 == PTArrow t3 t4 = t1 == t3 && t2 == t4
   PTForAll a1 t1 == PTForAll a2 t2 =
-    t1 == substVarInPartialType a2 (PTVar a1) t2 &&
-    t2 == substVarInPartialType a1 (PTVar a2) t1
+    t1 == subst a2 (PTVar a1) t2 && t2 == subst a1 (PTVar a2) t1
   _ == _ = False
 
 instance Show PartialType where
@@ -81,33 +80,27 @@ instance Show PartialType where
     in "∀" ++ presentParams as ++ " . " ++ show t2
 
 -- Substitution
-substVarInPartialType :: TVar -> PartialType -> PartialType -> PartialType
-substVarInPartialType _ _ (PTUnifier u) = PTUnifier u
-substVarInPartialType a1 t (PTVar a2) =
-  if a1 == a2
-    then t
-    else PTVar a2
-substVarInPartialType a t1 (PTArrow t2 t3) =
-  PTArrow (substVarInPartialType a t1 t2) (substVarInPartialType a t1 t3)
-substVarInPartialType a1 t1 (PTForAll a2 t2) =
-  PTForAll a2 $
-  if a1 == a2
-    then t2
-    else substVarInPartialType a1 t1 t2
+instance Subst TVar PartialType PartialType where
+  subst _ _ (PTUnifier u) = PTUnifier u
+  subst a1 t (PTVar a2) =
+    if a1 == a2
+      then t
+      else PTVar a2
+  subst a t1 (PTArrow t2 t3) = PTArrow (subst a t1 t2) (subst a t1 t3)
+  subst a1 t1 (PTForAll a2 t2) =
+    PTForAll a2 $
+    if a1 == a2
+      then t2
+      else subst a1 t1 t2
 
-substUnifierInPartialType ::
-     Unifier -> PartialType -> PartialType -> PartialType
-substUnifierInPartialType u1 t (PTUnifier u2) =
-  if u1 == u2
-    then t
-    else PTUnifier u2
-substUnifierInPartialType _ _ (PTVar a) = PTVar a
-substUnifierInPartialType u t1 (PTArrow t2 t3) =
-  PTArrow
-    (substUnifierInPartialType u t1 t2)
-    (substUnifierInPartialType u t1 t3)
-substUnifierInPartialType u t1 (PTForAll a t2) =
-  PTForAll a (substUnifierInPartialType u t1 t2)
+instance Subst Unifier PartialType PartialType where
+  subst u1 t (PTUnifier u2) =
+    if u1 == u2
+      then t
+      else PTUnifier u2
+  subst _ _ (PTVar a) = PTVar a
+  subst u t1 (PTArrow t2 t3) = PTArrow (subst u t1 t2) (subst u t1 t3)
+  subst u t1 (PTForAll a t2) = PTForAll a (subst u t1 t2)
 
 -- The TypeCheck monad provides:
 -- 1. The ability to read the context (via Reader).
@@ -187,7 +180,7 @@ open (PTVar a) = return (PTVar a, [])
 open (PTArrow t1 t2) = return (PTArrow t1 t2, [])
 open (PTForAll a t1) = do
   u <- freshUnifier
-  (t2, us) <- open (substVarInPartialType a (PTUnifier u) t1)
+  (t2, us) <- open (subst a (PTUnifier u) t1)
   return (t2, (u, a) : us)
 
 -- This is needed when we need to eliminate type abstractions and we don't care
@@ -197,7 +190,7 @@ unitType = TForAll (FreshTVar "a") (TVar $ FreshTVar "a")
 
 -- This function applies a term and a type, doing beta reduction if possible.
 applyType :: FTerm -> Type -> FTerm
-applyType (FETAbs a e) t = substTVarInFTerm a t e
+applyType (FETAbs a e) t = subst a t e
 applyType e t = FETApp e t
 
 -- Check that two unification results agree. Upon failure, a given error
@@ -234,7 +227,7 @@ unify (PTForAll a1 t1) (PTForAll a2 t2) = do
     throwError $
     "Unable to unify " ++
     show (PTForAll a1 t1) ++ " with " ++ show (PTForAll a2 t2)
-  unify t1 (substVarInPartialType a2 (PTVar a1) t2)
+  unify t1 (subst a2 (PTVar a1) t2)
 unify t1 t2 =
   throwError $ "Unable to unify " ++ show t1 ++ " with " ++ show t2
 
@@ -258,8 +251,7 @@ infer (IEAbs x1 t1 e1) = do
   x2 <- freshEVar (show x1)
   catchError
     (do (e2, t2) <-
-          local (first (Map.insert x2 xt)) $
-          infer (substEVarInTerm x1 (IEVar x2) e1)
+          local (first (Map.insert x2 xt)) $ infer (subst x1 (IEVar x2) e1)
         let e3 = FEAbs x2 xt e2
         let t4 = TArrow xt t2
         return $
@@ -292,10 +284,7 @@ infer (IEApp e1 e2)
              Nothing -> do
                a2 <- freshTVar (show a1)
                return (TVar a2, a2 : as)
-         return
-           ( applyType e5 t6
-           , substUnifierInPartialType u (makePartial t6) t5
-           , newAs))
+         return (applyType e5 t6, subst u (makePartial t6) t5, newAs))
       (e3, t4, [])
       usAndAs
   t6 <- makeTotal t5
@@ -307,8 +296,7 @@ infer (IELet x1 e1 e2) = do
   (e3, t1) <- infer e1
   x2 <- freshEVar (show x1)
   (e4, t2) <-
-    local (first (Map.insert x2 t1)) $
-    infer (substEVarInTerm x1 (IEVar x2) e2)
+    local (first (Map.insert x2 t1)) $ infer (subst x1 (IEVar x2) e2)
   return (FEApp (FEAbs x2 t1 e4) e3, t2)
 infer (IEAnno e1 t) = do
   mapM_ tLookupVar (freeTVars t)
@@ -323,8 +311,7 @@ check e1 (PTUnifier u) = do
 check e1 (PTForAll a1 t) = do
   a2 <- freshTVar (show a1)
   (e2, uToT) <-
-    local (second (Set.insert a2)) $
-    check e1 (substVarInPartialType a1 (PTVar a2) t)
+    local (second (Set.insert a2)) $ check e1 (subst a1 (PTVar a2) t)
   return (FETAbs a2 e2, uToT)
 check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
   (t3, t4, uToT1) <-
@@ -333,9 +320,7 @@ check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
         uToT <- unify (makePartial t3) t1
         let (t6, t7) =
               Map.foldrWithKey
-                (\k v (t4, t5) ->
-                   ( substUnifierInPartialType k v t4
-                   , substUnifierInPartialType k v t5))
+                (\k v (t4, t5) -> (subst k v t4, subst k v t5))
                 (t1, t2)
                 (makePartial <$> uToT)
         return (t6, t7, uToT)
@@ -343,8 +328,7 @@ check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
   x2 <- freshEVar (show x1)
   t5 <- makeTotal t3
   (e2, uToT2) <-
-    local (first (Map.insert x2 t5)) $
-    check (substEVarInTerm x1 (IEVar x2) e1) t4
+    local (first (Map.insert x2 t5)) $ check (subst x1 (IEVar x2) e1) t4
   checkInst uToT1 uToT2 $
     "Unable to unify " ++
     show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
@@ -353,8 +337,7 @@ check (IELet x1 e1 e2) t1 = do
   (e3, t2) <- infer e1
   x2 <- freshEVar (show x1)
   (e4, uToT) <-
-    local (first (Map.insert x2 t2)) $
-    check (substEVarInTerm x1 (IEVar x2) e2) t1
+    local (first (Map.insert x2 t2)) $ check (subst x1 (IEVar x2) e2) t1
   return (FEApp (FEAbs x2 t2 e4) e3, uToT)
 check e1 t1
   -- Infer the type of e1.
@@ -370,8 +353,7 @@ check e1 t1
         foldl'
           (\(e3, t4) (u, _) ->
              let t5 = fromMaybe unitType (Map.lookup u uToT1)
-             in ( applyType e3 t5
-                , substUnifierInPartialType u (makePartial t5) t4))
+             in (applyType e3 t5, subst u (makePartial t5) t4))
           (e2, t3)
           usAndAs
   -- Unify the original type against the inferred type with eliminated
