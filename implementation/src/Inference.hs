@@ -54,13 +54,13 @@ instance FreeTVars PartialType where
   freeTVars (PTArrow t1 t2) = freeTVars t1 ++ freeTVars t2
   freeTVars (PTForAll a t) = filter (/= a) (freeTVars t)
 
-instance CollectParams PartialType String where
+instance CollectParams PartialType TVar where
   collectParams (PTUnifier u) = ([], PTUnifier u)
   collectParams (PTVar a) = ([], PTVar a)
   collectParams (PTArrow t1 t2) = ([], PTArrow t1 t2)
   collectParams (PTForAll a t1) =
     let (as, t2) = collectParams t1
-    in (show a : as, t2)
+    in (a : as, t2)
 
 instance Eq PartialType where
   PTUnifier u1 == PTUnifier u2 = u1 == u2
