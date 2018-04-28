@@ -178,8 +178,8 @@ makeTotal (PTForAll a t1) = do
   t2 <- makeTotal t1
   return $ TForAll a t2
 
--- Instantiate outer quantifiers with fresh unifiers. Returns the type
--- and a map from fresh unifiers to eliminated type variables.
+-- Instantiate outer quantifiers with fresh unifiers. Returns the type and a
+-- list of fresh unifiers paired with the eliminated type variables.
 open :: PartialType -> TypeCheck (PartialType, [(Unifier, TVar)])
 open (PTUnifier u) = return (PTUnifier u, [])
 open (PTVar a) = return (PTVar a, [])
@@ -189,8 +189,8 @@ open (PTForAll a t1) = do
   (t2, us) <- open (substVarInPartialType a (PTUnifier u) t1)
   return (t2, (u, a) : us)
 
--- This is needed when we need to eliminate type abstractions and we don't
--- care what type we use.
+-- This is needed when we need to eliminate type abstractions and we don't care
+-- what type we use.
 unitType :: Type
 unitType = TForAll (FreshTVar "a") (TVar $ FreshTVar "a")
 
@@ -209,9 +209,12 @@ checkInst uToT1 uToT2 s =
     then return ()
     else throwError s
 
--- Find an instantiation that turns the second PartialType into the first.
+-- Find an instantiation that equates two PartialTypes.
 unify :: PartialType -> PartialType -> TypeCheck (Map Unifier Type)
 unify t1 (PTUnifier u) = do
+  t2 <- makeTotal t1
+  return $ Map.singleton u t2
+unify (PTUnifier u) t1 = do
   t2 <- makeTotal t1
   return $ Map.singleton u t2
 unify (PTVar a1) (PTVar a2) =
