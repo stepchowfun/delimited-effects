@@ -3,6 +3,7 @@ module Main
   ) where
 
 import Data.Char (isSpace)
+import Evaluation (eval)
 import Inference (typeCheck)
 import Lexer (scan)
 import Parser (parse)
@@ -16,11 +17,15 @@ runProgram program =
     else do
       let result = do
             tokens <- scan program
-            term <- parse tokens
-            typeCheck term
+            iterm <- parse tokens
+            (fterm, ftype) <- typeCheck iterm
+            rterm <- eval fterm
+            return (fterm, ftype, rterm)
       case result of
         Left s -> putStrLn ("  " ++ s)
-        Right (e, t) -> putStrLn ("  " ++ show e ++ "\n  : " ++ show t)
+        Right (e, t, r) ->
+          putStrLn
+            ("  " ++ show e ++ "\n  : " ++ show t ++ "\n  => " ++ show r)
 
 main :: IO ()
 main = do

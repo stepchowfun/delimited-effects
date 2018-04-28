@@ -152,7 +152,7 @@ eLookupVar x = do
   context <- ask
   case Map.lookup x (fst context) of
     Just t -> return t
-    Nothing -> throwError $ "Undefined term variable: " ++ show x
+    Nothing -> throwError $ "Undefined variable: " ++ show x
 
 -- Check that a type variable is in the context.
 tLookupVar :: TVar -> TypeCheck ()
