@@ -15,7 +15,8 @@ cabal-version:       >= 1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Inference
+  exposed-modules:     Evaluation
+                     , Inference
                      , Lexer
                      , Parser
                      , Syntax
@@ -41,7 +42,8 @@ test-suite implementation-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             LibSpec.hs
-  other-modules:       InferenceSpec
+  other-modules:       EvaluationSpec
+                     , InferenceSpec
                      , LexerSpec
                      , ParserSpec
                      , SyntaxSpec
