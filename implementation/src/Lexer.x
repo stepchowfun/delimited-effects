@@ -2,7 +2,7 @@
 
 {-# OPTIONS_GHC -Wwarn=unused-imports #-}
 
-module Lexer (scan, Token(..)) where
+module Lexer (Token(..), scan) where
 
 }
 

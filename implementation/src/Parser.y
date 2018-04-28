@@ -3,7 +3,7 @@
 module Parser (parse) where
 
 import Lexer (Token(..))
-import Syntax (EVar(..), TVar(..), ITerm(..), Type(..))
+import Syntax (EVar(..), ITerm(..), TVar(..), Type(..))
 
 }
 
