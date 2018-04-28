@@ -6,22 +6,21 @@ module Syntax
   ( CollectParams
   , EVar(..)
   , FTerm(..)
+  , FreeEVars
+  , FreeTVars
   , ITerm(..)
   , PresentParams
   , TVar(..)
   , Type(..)
   , collectParams
-  , fFreeEVars
-  , fFreeTVars
-  , iFreeEVars
-  , iFreeTVars
+  , freeEVars
+  , freeTVars
   , presentParams
   , substEVarInFTerm
   , substEVarInTerm
   , substTVarInFTerm
   , substTVarInTerm
   , substVarInType
-  , tFreeVars
   ) where
 
 import Data.Function (on)
@@ -85,47 +84,53 @@ data Type
             Type
 
 -- Free variables
-iFreeEVars :: ITerm -> [EVar]
-iFreeEVars (IEIntLit _) = []
-iFreeEVars (IEAddInt e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
-iFreeEVars (IEVar x) = [x]
-iFreeEVars (IEAbs x _ e) = filter (/= x) (iFreeEVars e)
-iFreeEVars (IEApp e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
-iFreeEVars (IELet x e1 e2) = iFreeEVars e1 ++ filter (/= x) (iFreeEVars e2)
-iFreeEVars (IEAnno e _) = iFreeEVars e
+class FreeEVars a where
+  freeEVars :: a -> [EVar]
 
-iFreeTVars :: ITerm -> [TVar]
-iFreeTVars (IEIntLit _) = []
-iFreeTVars (IEAddInt e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
-iFreeTVars (IEVar _) = []
-iFreeTVars (IEAbs _ (Just t) e) = tFreeVars t ++ iFreeTVars e
-iFreeTVars (IEAbs _ Nothing e) = iFreeTVars e
-iFreeTVars (IEApp e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
-iFreeTVars (IELet _ e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
-iFreeTVars (IEAnno _ t) = tFreeVars t
+class FreeTVars a where
+  freeTVars :: a -> [TVar]
 
-fFreeEVars :: FTerm -> [EVar]
-fFreeEVars (FEIntLit _) = []
-fFreeEVars (FEAddInt e1 e2) = fFreeEVars e1 ++ fFreeEVars e2
-fFreeEVars (FEVar x) = [x]
-fFreeEVars (FEAbs x _ e) = filter (/= x) (fFreeEVars e)
-fFreeEVars (FEApp e1 e2) = fFreeEVars e1 ++ fFreeEVars e2
-fFreeEVars (FETAbs _ e) = fFreeEVars e
-fFreeEVars (FETApp e _) = fFreeEVars e
+instance FreeEVars ITerm where
+  freeEVars (IEIntLit _) = []
+  freeEVars (IEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IEVar x) = [x]
+  freeEVars (IEAbs x _ e) = filter (/= x) (freeEVars e)
+  freeEVars (IEApp e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IELet x e1 e2) = freeEVars e1 ++ filter (/= x) (freeEVars e2)
+  freeEVars (IEAnno e _) = freeEVars e
 
-fFreeTVars :: FTerm -> [TVar]
-fFreeTVars (FEIntLit _) = []
-fFreeTVars (FEAddInt e1 e2) = fFreeTVars e1 ++ fFreeTVars e2
-fFreeTVars (FEVar _) = []
-fFreeTVars (FEAbs _ t e) = tFreeVars t ++ fFreeTVars e
-fFreeTVars (FEApp e1 e2) = fFreeTVars e1 ++ fFreeTVars e2
-fFreeTVars (FETAbs a e) = filter (/= a) (fFreeTVars e)
-fFreeTVars (FETApp e t) = fFreeTVars e ++ tFreeVars t
+instance FreeTVars ITerm where
+  freeTVars (IEIntLit _) = []
+  freeTVars (IEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IEVar _) = []
+  freeTVars (IEAbs _ (Just t) e) = freeTVars t ++ freeTVars e
+  freeTVars (IEAbs _ Nothing e) = freeTVars e
+  freeTVars (IEApp e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IELet _ e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IEAnno _ t) = freeTVars t
 
-tFreeVars :: Type -> [TVar]
-tFreeVars (TVar a) = [a]
-tFreeVars (TArrow t1 t2) = tFreeVars t1 ++ tFreeVars t2
-tFreeVars (TForAll a t) = filter (/= a) (tFreeVars t)
+instance FreeEVars FTerm where
+  freeEVars (FEIntLit _) = []
+  freeEVars (FEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FEVar x) = [x]
+  freeEVars (FEAbs x _ e) = filter (/= x) (freeEVars e)
+  freeEVars (FEApp e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FETAbs _ e) = freeEVars e
+  freeEVars (FETApp e _) = freeEVars e
+
+instance FreeTVars FTerm where
+  freeTVars (FEIntLit _) = []
+  freeTVars (FEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FEVar _) = []
+  freeTVars (FEAbs _ t e) = freeTVars t ++ freeTVars e
+  freeTVars (FEApp e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FETAbs a e) = filter (/= a) (freeTVars e)
+  freeTVars (FETApp e t) = freeTVars e ++ freeTVars t
+
+instance FreeTVars Type where
+  freeTVars (TVar a) = [a]
+  freeTVars (TArrow t1 t2) = freeTVars t1 ++ freeTVars t2
+  freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
 
 -- Substitution
 substEVarInTerm :: EVar -> ITerm -> ITerm -> ITerm
