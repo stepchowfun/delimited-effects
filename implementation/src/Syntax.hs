@@ -49,6 +49,7 @@ instance Show TVar where
 data ITerm
   = IEVar EVar
   | IEAbs EVar
+          (Maybe Type)
           ITerm
   | IEApp ITerm
           ITerm
@@ -77,13 +78,14 @@ data Type
 -- Free variables
 iFreeEVars :: ITerm -> [EVar]
 iFreeEVars (IEVar x) = [x]
-iFreeEVars (IEAbs x e) = filter (/= x) (iFreeEVars e)
+iFreeEVars (IEAbs x _ e) = filter (/= x) (iFreeEVars e)
 iFreeEVars (IEApp e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
 iFreeEVars (IEAnno e _) = iFreeEVars e
 
 iFreeTVars :: ITerm -> [TVar]
 iFreeTVars (IEVar _) = []
-iFreeTVars (IEAbs _ e) = iFreeTVars e
+iFreeTVars (IEAbs _ (Just t) e) = tFreeVars t ++ iFreeTVars e
+iFreeTVars (IEAbs _ Nothing e) = iFreeTVars e
 iFreeTVars (IEApp e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
 iFreeTVars (IEAnno _ t) = tFreeVars t
 
@@ -112,8 +114,8 @@ substEVarInTerm x1 e (IEVar x2) =
   if x1 == x2
     then e
     else IEVar x2
-substEVarInTerm x1 e1 (IEAbs x2 e2) =
-  IEAbs x2 $
+substEVarInTerm x1 e1 (IEAbs x2 t e2) =
+  IEAbs x2 t $
   if x1 == x2
     then e2
     else substEVarInTerm x1 e1 e2
@@ -123,7 +125,8 @@ substEVarInTerm x e1 (IEAnno e2 t) = IEAnno (substEVarInTerm x e1 e2) t
 
 substTVarInTerm :: TVar -> Type -> ITerm -> ITerm
 substTVarInTerm _ _ (IEVar x) = IEVar x
-substTVarInTerm a t (IEAbs x e2) = IEAbs x (substTVarInTerm a t e2)
+substTVarInTerm a t1 (IEAbs x t2 e2) =
+  IEAbs x (substVarInType a t1 <$> t2) (substTVarInTerm a t1 e2)
 substTVarInTerm a t (IEApp e1 e2) =
   IEApp (substTVarInTerm a t e1) (substTVarInTerm a t e2)
 substTVarInTerm a t1 (IEAnno e t2) =
@@ -170,7 +173,8 @@ substVarInType a1 t1 (TForAll a2 t2) =
 -- Equality
 instance Eq ITerm where
   IEVar x1 == IEVar x2 = x1 == x2
-  IEAbs x1 e1 == IEAbs x2 e2 =
+  IEAbs x1 t1 e1 == IEAbs x2 t2 e2 =
+    t1 == t2 &&
     e1 == substEVarInTerm x2 (IEVar x1) e2 &&
     e2 == substEVarInTerm x1 (IEVar x2) e1
   IEApp e1 e2 == IEApp e3 e4 = e1 == e3 && e2 == e4
@@ -201,11 +205,11 @@ instance Eq Type where
 class CollectParams a b | a -> b where
   collectParams :: a -> ([b], a)
 
-instance CollectParams ITerm String where
+instance CollectParams ITerm (String, String) where
   collectParams (IEVar x) = ([], IEVar x)
-  collectParams (IEAbs x e1) =
+  collectParams (IEAbs x t e1) =
     let (xs, e2) = collectParams e1
-    in (show x : xs, e2)
+    in ((show x, show t) : xs, e2)
   collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
   collectParams (IEAnno e t) = ([], IEAnno e t)
 
@@ -243,12 +247,16 @@ instance PresentParams (String, String) where
 
 instance Show ITerm where
   show (IEVar x) = show x
-  show (IEAbs x e1) =
-    let (xs, e2) = collectParams (IEAbs x e1)
+  show (IEAbs x Nothing e1) =
+    let (xs, e2) = collectParams (IEAbs x Nothing e1)
     in "λ" ++ presentParams xs ++ " . " ++ show e2
-  show (IEApp (IEAbs x e1) (IEApp e2 e3)) =
-    "(" ++ show (IEAbs x e1) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
-  show (IEApp (IEAbs x e1) e2) = "(" ++ show (IEAbs x e1) ++ ") " ++ show e2
+  show (IEAbs x (Just t) e1) =
+    let (xs, e2) = collectParams (IEAbs x (Just t) e1)
+    in "λ" ++ presentParams xs ++ " : " ++ show t ++ " . " ++ show e2
+  show (IEApp (IEAbs x t e1) (IEApp e2 e3)) =
+    "(" ++ show (IEAbs x t e1) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
+  show (IEApp (IEAbs x t e1) e2) =
+    "(" ++ show (IEAbs x t e1) ++ ") " ++ show e2
   show (IEApp (IEAnno e1 t) (IEApp e2 e3)) =
     "(" ++ show (IEAnno e1 t) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
   show (IEApp (IEAnno e1 t) e2) = "(" ++ show (IEAnno e1 t) ++ ") " ++ show e2

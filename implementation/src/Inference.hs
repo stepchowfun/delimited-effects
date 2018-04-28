@@ -202,6 +202,16 @@ applyType :: FTerm -> Type -> FTerm
 applyType (FETAbs a e) t = substTVarInFTerm a t e
 applyType e t = FETApp e t
 
+-- Check that two unification results agree. Upon failure, a given error
+-- message is thrown.
+checkInst :: Map Unifier Type -> Map Unifier Type -> String -> TypeCheck ()
+checkInst uToT1 uToT2 s =
+  if all
+       (\u -> Map.lookup u uToT1 == Map.lookup u uToT2)
+       (Map.keys (Map.intersection uToT1 uToT2))
+    then return ()
+    else throwError s
+
 -- Find an instantiation that turns the second PartialType into the first.
 unify :: PartialType -> PartialType -> TypeCheck (Map Unifier Type)
 unify t1 (PTUnifier u) = do
@@ -212,16 +222,12 @@ unify (PTVar a1) (PTVar a2) =
     then return Map.empty
     else throwError $ "Unable to unify " ++ show a1 ++ " with " ++ show a2
 unify (PTArrow t1 t2) (PTArrow t3 t4) = do
-  is1 <- unify t1 t3
-  is2 <- unify t2 t4
-  if all
-       (\u -> Map.lookup u is1 == Map.lookup u is2)
-       (Map.keys (Map.intersection is1 is2))
-    then return ()
-    else throwError $
-         "Unable to unify " ++
-         show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
-  return $ Map.union is1 is2
+  uToT1 <- unify t1 t3
+  uToT2 <- unify t2 t4
+  checkInst uToT1 uToT2 $
+    "Unable to unify " ++
+    show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
+  return $ Map.union uToT1 uToT2
 unify (PTForAll a1 t1) (PTForAll a2 t2) = do
   when (a1 `elem` ptFreeVars (PTForAll a2 t2)) $
     throwError $
@@ -236,16 +242,26 @@ infer :: ITerm -> TypeCheck (FTerm, Type)
 infer (IEVar x) = do
   t <- eLookupVar x
   return (FEVar x, t)
-infer (IEAbs x1 e1) = do
-  a <- freshTVar "a"
+infer (IEAbs x1 t1 e1) = do
+  (xt, xa) <-
+    case t1 of
+      Just t2 -> return (t2, Nothing)
+      Nothing -> do
+        a <- freshTVar "a"
+        return (TVar a, Just a)
   x2 <- freshEVar (show x1)
   catchError
-    (do (e2, t) <-
-          local (first (Map.insert x2 (TVar a))) $
+    (do (e2, t2) <-
+          local (first (Map.insert x2 xt)) $
           infer (substEVarInTerm x1 (IEVar x2) e1)
-        return (FETAbs a (FEAbs x2 t e2), TForAll a (TArrow (TVar a) t)))
+        let e3 = FEAbs x2 xt e2
+        let t4 = TArrow xt t2
+        return $
+          case xa of
+            Just a -> (FETAbs a e3, TForAll a t4)
+            Nothing -> (e3, t4))
     (const $
-     throwError $ "Unable to infer the type of: " ++ show (IEAbs x1 e1))
+     throwError $ "Unable to infer the type of: " ++ show (IEAbs x1 t1 e1))
 infer (IEApp e1 e2)
   -- Infer the type of e1.
  = do
@@ -297,13 +313,29 @@ check e1 (PTForAll a1 t) = do
     local (second (Set.insert a2)) $
     check e1 (substVarInPartialType a1 (PTVar a2) t)
   return (FETAbs a2 e2, uToT)
-check (IEAbs x1 e1) (PTArrow t1 t2) = do
+check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
+  (t3, t4, uToT1) <-
+    case xt of
+      Just t3 -> do
+        uToT <- unify (makePartial t3) t1
+        let (t6, t7) =
+              Map.foldrWithKey
+                (\k v (t4, t5) ->
+                   ( substUnifierInPartialType k v t4
+                   , substUnifierInPartialType k v t5))
+                (t1, t2)
+                (makePartial <$> uToT)
+        return (t6, t7, uToT)
+      Nothing -> return (t1, t2, Map.empty)
   x2 <- freshEVar (show x1)
-  t3 <- makeTotal t1
-  (e2, uToT) <-
-    local (first (Map.insert x2 t3)) $
-    check (substEVarInTerm x1 (IEVar x2) e1) t2
-  return (FEAbs x2 t3 e2, uToT)
+  t5 <- makeTotal t3
+  (e2, uToT2) <-
+    local (first (Map.insert x2 t5)) $
+    check (substEVarInTerm x1 (IEVar x2) e1) t4
+  checkInst uToT1 uToT2 $
+    "Unable to unify " ++
+    show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
+  return (FEAbs x2 t5 e2, Map.union uToT1 uToT2)
 check e1 t1
   -- Infer the type of e1.
  = do
