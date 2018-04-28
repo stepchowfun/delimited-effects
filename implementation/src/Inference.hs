@@ -79,7 +79,6 @@ instance Show PartialType where
     let (as, t2) = collectParams (PTForAll a t1)
     in "∀" ++ presentParams as ++ " . " ++ show t2
 
--- Substitution
 instance Subst TVar PartialType PartialType where
   subst _ _ (PTUnifier u) = PTUnifier u
   subst a1 t (PTVar a2) =
@@ -241,7 +240,14 @@ infer (IEAddInt e1 e2) = do
 infer (IEVar x) = do
   t <- eLookupVar x
   return (FEVar x, t)
-infer (IEAbs x1 t1 e1) = do
+infer (IEAbs x1 t1 e1)
+  -- In traditional bidirectional type inference, abstractions can only be
+  -- checked, not inferred. But if we are asked to infer the type of an
+  -- abstraction, there is one thing we can try: assume the function is
+  -- polymorphic in the type of its argument and infer the return type. This
+  -- allows us to infer the type of functions like:
+  --   (\x y -> x) (\u v -> v) (\m n -> m)
+ = do
   (xt, xa) <-
     case t1 of
       Just t2 -> return (t2, Nothing)
