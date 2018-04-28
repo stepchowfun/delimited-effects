@@ -121,23 +121,23 @@ type TypeCheck = ExceptT String (StateT Int (Reader Context))
 freshEVar :: String -> TypeCheck EVar
 freshEVar x = do
   context <- ask
-  case Map.lookup (ToEVar x) (fst context) of
+  case Map.lookup (FreshEVar x) (fst context) of
     Just _ -> do
       i <- get
       put (i + 1)
-      return $ ToEVar ("@" ++ show i)
-    Nothing -> return $ ToEVar x
+      return $ FreshEVar ("@" ++ show i)
+    Nothing -> return $ FreshEVar x
 
 -- Generate a fresh type variable.
 freshTVar :: String -> TypeCheck TVar
 freshTVar a = do
   context <- ask
-  if Set.member (ToTVar a) (snd context)
+  if Set.member (FreshTVar a) (snd context)
     then do
       i <- get
       put (i + 1)
-      return $ ToTVar ("@" ++ show i)
-    else return $ ToTVar a
+      return $ FreshTVar ("@" ++ show i)
+    else return $ FreshTVar a
 
 -- Generate a fresh unifier.
 freshUnifier :: TypeCheck Unifier
@@ -195,7 +195,7 @@ open (PTForAll a t1) = do
 -- This is needed when we need to eliminate type abstractions and we don't
 -- care what type we use.
 unitType :: Type
-unitType = TForAll (ToTVar "a") (TVar $ ToTVar "a")
+unitType = TForAll (FreshTVar "a") (TVar $ FreshTVar "a")
 
 -- This function applies a term and a type, doing beta reduction if possible.
 applyType :: FTerm -> Type -> FTerm
@@ -238,7 +238,7 @@ infer (IEVar x) = do
   return (FEVar x, t)
 infer (IEAbs x1 e1) = do
   a <- freshTVar "a"
-  x2 <- freshEVar (fromEVar x1)
+  x2 <- freshEVar (show x1)
   catchError
     (do (e2, t) <-
           local (first (Map.insert x2 (TVar a))) $
@@ -268,7 +268,7 @@ infer (IEApp e1 e2)
            case Map.lookup u uToT of
              Just t6 -> return (t6, as)
              Nothing -> do
-               a2 <- freshTVar (fromTVar a1)
+               a2 <- freshTVar (show a1)
                return (TVar a2, a2 : as)
          return
            ( applyType e5 t6
@@ -292,13 +292,13 @@ check e1 (PTUnifier u) = do
   (e2, t) <- infer e1
   return (e2, Map.singleton u t)
 check e1 (PTForAll a1 t) = do
-  a2 <- freshTVar (fromTVar a1)
+  a2 <- freshTVar (show a1)
   (e2, uToT) <-
     local (second (Set.insert a2)) $
     check e1 (substVarInPartialType a1 (PTVar a2) t)
   return (FETAbs a2 e2, uToT)
 check (IEAbs x1 e1) (PTArrow t1 t2) = do
-  x2 <- freshEVar (fromEVar x1)
+  x2 <- freshEVar (show x1)
   t3 <- makeTotal t1
   (e2, uToT) <-
     local (first (Map.insert x2 t3)) $

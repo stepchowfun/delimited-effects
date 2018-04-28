@@ -28,19 +28,23 @@ import Data.Function (on)
 import Data.List (groupBy)
 
 -- Data types
-newtype EVar = ToEVar
-  { fromEVar :: String
-  } deriving (Eq, Ord)
+data EVar
+  = UserEVar String
+  | FreshEVar String
+  deriving (Eq, Ord)
 
 instance Show EVar where
-  show = fromEVar
+  show (UserEVar s) = s
+  show (FreshEVar s) = s
 
-newtype TVar = ToTVar
-  { fromTVar :: String
-  } deriving (Eq, Ord)
+data TVar
+  = UserTVar String
+  | FreshTVar String
+  deriving (Eq, Ord)
 
 instance Show TVar where
-  show = fromTVar
+  show (UserTVar s) = s
+  show (FreshTVar s) = s
 
 data ITerm
   = IEVar EVar

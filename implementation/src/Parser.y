@@ -30,15 +30,15 @@ import Syntax (EVar(..), TVar(..), ITerm(..), Type(..))
 
 %%
 
-ITerm : x                         { IEVar (ToEVar $1) }
-     | lambda VarList '->' ITerm  { foldr (\x e -> IEAbs (ToEVar x) e) $4 (reverse $2) }
+ITerm : x                         { IEVar (UserEVar $1) }
+     | lambda VarList '->' ITerm  { foldr (\x e -> IEAbs (UserEVar x) e) $4 (reverse $2) }
      | ITerm ITerm %prec APP      { IEApp $1 $2 }
      | ITerm ':' Type             { IEAnno $1 $3 }
      | '(' ITerm ')'              { $2 }
 
-Type : x                          { TVar (ToTVar $1) }
+Type : x                          { TVar (UserTVar $1) }
      | Type '->' Type             { TArrow $1 $3 }
-     | forall VarList '.' Type    { foldr (\x t -> TForAll (ToTVar x) t) $4 (reverse $2) }
+     | forall VarList '.' Type    { foldr (\x t -> TForAll (UserTVar x) t) $4 (reverse $2) }
      | '(' Type ')'               { $2 }
 
 VarList : x                       { [$1] }

@@ -1,1 +1,1 @@
-\x . x : forall a . a -> a
+\x -> x : forall a . a -> a
