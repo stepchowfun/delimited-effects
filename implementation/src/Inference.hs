@@ -140,8 +140,11 @@ freshTVar a = do
     else return $ ToTVar a
 
 -- Generate a fresh unifier.
-freshUnifier :: String -> TypeCheck Unifier
-freshUnifier u = return $ ToUnifier (u ++ "?")
+freshUnifier :: TypeCheck Unifier
+freshUnifier = do
+  i <- get
+  put (i + 1)
+  return $ ToUnifier ("@" ++ show i)
 
 -- Look up a term variable in the context.
 eLookupVar :: EVar -> TypeCheck Type
@@ -185,7 +188,7 @@ open (PTUnifier u) = return (PTUnifier u, [])
 open (PTVar a) = return (PTVar a, [])
 open (PTArrow t1 t2) = return (PTArrow t1 t2, [])
 open (PTForAll a t1) = do
-  u <- freshUnifier (fromTVar a)
+  u <- freshUnifier
   (t2, us) <- open (substVarInPartialType a (PTUnifier u) t1)
   return (t2, (u, a) : us)
 
