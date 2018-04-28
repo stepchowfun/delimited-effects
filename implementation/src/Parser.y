@@ -30,19 +30,24 @@ import Syntax (EVar(..), TVar(..), ITerm(..), Type(..))
 
 %%
 
-ITerm : x                         { IEVar (UserEVar $1) }
-     | lambda VarList '->' ITerm  { foldr (\x e -> IEAbs (UserEVar x) e) $4 (reverse $2) }
-     | ITerm ITerm %prec APP      { IEApp $1 $2 }
-     | ITerm ':' Type             { IEAnno $1 $3 }
-     | '(' ITerm ')'              { $2 }
+ITerm : x                             { IEVar (UserEVar $1) }
+     | lambda EVarList '->' ITerm     { foldr (\(x, t) e -> IEAbs (UserEVar x) t e) $4 (reverse $2) }
+     | ITerm ITerm %prec APP          { IEApp $1 $2 }
+     | ITerm ':' Type                 { IEAnno $1 $3 }
+     | '(' ITerm ')'                  { $2 }
 
-Type : x                          { TVar (UserTVar $1) }
-     | Type '->' Type             { TArrow $1 $3 }
-     | forall VarList '.' Type    { foldr (\x t -> TForAll (UserTVar x) t) $4 (reverse $2) }
-     | '(' Type ')'               { $2 }
+Type : x                              { TVar (UserTVar $1) }
+     | Type '->' Type                 { TArrow $1 $3 }
+     | forall TVarList '.' Type       { foldr (\x t -> TForAll (UserTVar x) t) $4 (reverse $2) }
+     | '(' Type ')'                   { $2 }
 
-VarList : x                       { [$1] }
-        | VarList x               { $2 : $1 }
+EVarList : x                          { [($1, Nothing)] }
+        | '(' x ':' Type ')'          { [($2, Just $4)] }
+        | EVarList x                  { ($2, Nothing) : $1 }
+        | EVarList '(' x ':' Type ')' { ($3, Just $5) : $1 }
+
+TVarList : x                          { [$1] }
+        | TVarList x                  { $2 : $1 }
 
 {
 
