@@ -1,1 +1,2 @@
-\x -> x : forall a . a -> a
+let f = (\x -> x)
+in f (\y -> y)

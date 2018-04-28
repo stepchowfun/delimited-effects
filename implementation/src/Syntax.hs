@@ -53,6 +53,9 @@ data ITerm
           ITerm
   | IEApp ITerm
           ITerm
+  | IELet EVar
+          ITerm
+          ITerm
   | IEAnno ITerm
            Type
 
@@ -80,6 +83,7 @@ iFreeEVars :: ITerm -> [EVar]
 iFreeEVars (IEVar x) = [x]
 iFreeEVars (IEAbs x _ e) = filter (/= x) (iFreeEVars e)
 iFreeEVars (IEApp e1 e2) = iFreeEVars e1 ++ iFreeEVars e2
+iFreeEVars (IELet x e1 e2) = iFreeEVars e1 ++ filter (/= x) (iFreeEVars e2)
 iFreeEVars (IEAnno e _) = iFreeEVars e
 
 iFreeTVars :: ITerm -> [TVar]
@@ -87,6 +91,7 @@ iFreeTVars (IEVar _) = []
 iFreeTVars (IEAbs _ (Just t) e) = tFreeVars t ++ iFreeTVars e
 iFreeTVars (IEAbs _ Nothing e) = iFreeTVars e
 iFreeTVars (IEApp e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
+iFreeTVars (IELet _ e1 e2) = iFreeTVars e1 ++ iFreeTVars e2
 iFreeTVars (IEAnno _ t) = tFreeVars t
 
 fFreeEVars :: FTerm -> [EVar]
@@ -121,6 +126,13 @@ substEVarInTerm x1 e1 (IEAbs x2 t e2) =
     else substEVarInTerm x1 e1 e2
 substEVarInTerm x e1 (IEApp e2 e3) =
   IEApp (substEVarInTerm x e1 e2) (substEVarInTerm x e1 e3)
+substEVarInTerm x1 e1 (IELet x2 e2 e3) =
+  IELet
+    x2
+    (substEVarInTerm x1 e1 e2)
+    (if x1 == x2
+       then e3
+       else substEVarInTerm x1 e1 e3)
 substEVarInTerm x e1 (IEAnno e2 t) = IEAnno (substEVarInTerm x e1 e2) t
 
 substTVarInTerm :: TVar -> Type -> ITerm -> ITerm
@@ -129,6 +141,8 @@ substTVarInTerm a t1 (IEAbs x t2 e2) =
   IEAbs x (substVarInType a t1 <$> t2) (substTVarInTerm a t1 e2)
 substTVarInTerm a t (IEApp e1 e2) =
   IEApp (substTVarInTerm a t e1) (substTVarInTerm a t e2)
+substTVarInTerm a t (IELet x e1 e2) =
+  IELet x (substTVarInTerm a t e1) (substTVarInTerm a t e2)
 substTVarInTerm a t1 (IEAnno e t2) =
   IEAnno (substTVarInTerm a t1 e) (substVarInType a t1 t2)
 
@@ -211,6 +225,7 @@ instance CollectParams ITerm (String, String) where
     let (xs, e2) = collectParams e1
     in ((show x, show t) : xs, e2)
   collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
+  collectParams (IELet x e1 e2) = ([], IELet x e1 e2)
   collectParams (IEAnno e t) = ([], IEAnno e t)
 
 instance CollectParams FTerm (String, String) where
@@ -257,11 +272,17 @@ instance Show ITerm where
     "(" ++ show (IEAbs x t e1) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
   show (IEApp (IEAbs x t e1) e2) =
     "(" ++ show (IEAbs x t e1) ++ ") " ++ show e2
+  show (IEApp (IELet x e1 e2) (IEApp e3 e4)) =
+    "(" ++ show (IELet x e1 e2) ++ ") (" ++ show (IEApp e3 e4) ++ ")"
+  show (IEApp (IELet x e1 e2) e3) =
+    "(" ++ show (IELet x e1 e2) ++ ") " ++ show e3
   show (IEApp (IEAnno e1 t) (IEApp e2 e3)) =
     "(" ++ show (IEAnno e1 t) ++ ") (" ++ show (IEApp e2 e3) ++ ")"
   show (IEApp (IEAnno e1 t) e2) = "(" ++ show (IEAnno e1 t) ++ ") " ++ show e2
   show (IEApp e1 (IEApp e2 e3)) = show e1 ++ " (" ++ show (IEApp e2 e3) ++ ")"
   show (IEApp e1 e2) = show e1 ++ " " ++ show e2
+  show (IELet x e1 e2) =
+    "let " ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2
   show (IEAnno e t) = show e ++ " : " ++ show t
 
 instance Show FTerm where
