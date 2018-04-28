@@ -20,14 +20,15 @@ import Syntax
   ( CollectParams
   , EVar(..)
   , FTerm(..)
+  , FreeTVars
   , ITerm(..)
   , TVar(..)
   , Type(..)
   , collectParams
+  , freeTVars
   , presentParams
   , substEVarInTerm
   , substTVarInFTerm
-  , tFreeVars
   )
 
 -- Unification variables are holes in a type.
@@ -47,11 +48,11 @@ data PartialType
   | PTForAll TVar
              PartialType
 
-ptFreeVars :: PartialType -> [TVar]
-ptFreeVars (PTUnifier _) = []
-ptFreeVars (PTVar a) = [a]
-ptFreeVars (PTArrow t1 t2) = ptFreeVars t1 ++ ptFreeVars t2
-ptFreeVars (PTForAll a t) = filter (/= a) (ptFreeVars t)
+instance FreeTVars PartialType where
+  freeTVars (PTUnifier _) = []
+  freeTVars (PTVar a) = [a]
+  freeTVars (PTArrow t1 t2) = freeTVars t1 ++ freeTVars t2
+  freeTVars (PTForAll a t) = filter (/= a) (freeTVars t)
 
 instance CollectParams PartialType String where
   collectParams (PTUnifier u) = ([], PTUnifier u)
@@ -229,7 +230,7 @@ unify (PTArrow t1 t2) (PTArrow t3 t4) = do
     show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
   return $ Map.union uToT1 uToT2
 unify (PTForAll a1 t1) (PTForAll a2 t2) = do
-  when (a1 `elem` ptFreeVars (PTForAll a2 t2)) $
+  when (a1 `elem` freeTVars (PTForAll a2 t2)) $
     throwError $
     "Unable to unify " ++
     show (PTForAll a1 t1) ++ " with " ++ show (PTForAll a2 t2)
@@ -310,7 +311,7 @@ infer (IELet x1 e1 e2) = do
     infer (substEVarInTerm x1 (IEVar x2) e2)
   return (FEApp (FEAbs x2 t1 e4) e3, t2)
 infer (IEAnno e1 t) = do
-  mapM_ tLookupVar (tFreeVars t)
+  mapM_ tLookupVar (freeTVars t)
   (e2, _) <- check e1 (makePartial t)
   return (e2, t)
 
