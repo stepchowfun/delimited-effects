@@ -297,6 +297,13 @@ infer (IEApp e1 e2)
   let e6 = FEApp e5 e4
   -- Re-generalize the result.
   return $ foldl' (\(e7, t7) a -> (FETAbs a e7, TForAll a t7)) (e6, t6) as
+infer (IELet x1 e1 e2) = do
+  (e3, t1) <- infer e1
+  x2 <- freshEVar (show x1)
+  (e4, t2) <-
+    local (first (Map.insert x2 t1)) $
+    infer (substEVarInTerm x1 (IEVar x2) e2)
+  return (FEApp (FEAbs x2 t1 e4) e3, t2)
 infer (IEAnno e1 t) = do
   mapM_ tLookupVar (tFreeVars t)
   (e2, _) <- check e1 (makePartial t)
@@ -336,6 +343,13 @@ check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
     "Unable to unify " ++
     show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
   return (FEAbs x2 t5 e2, Map.union uToT1 uToT2)
+check (IELet x1 e1 e2) t1 = do
+  (e3, t2) <- infer e1
+  x2 <- freshEVar (show x1)
+  (e4, uToT) <-
+    local (first (Map.insert x2 t2)) $
+    check (substEVarInTerm x1 (IEVar x2) e2) t1
+  return (FEApp (FEAbs x2 t2 e4) e3, uToT)
 check e1 t1
   -- Infer the type of e1.
  = do

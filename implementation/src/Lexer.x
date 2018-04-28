@@ -14,16 +14,19 @@ $alpha = [a-zA-Z]
 
 :-
 
-$white+                         ;
-"#".*                           ;
-":"                             { tokenAtom TokenAnno }
-"->"                            { tokenAtom TokenArrow }
-"."                             { tokenAtom TokenDot }
-"forall"                        { tokenAtom TokenForAll }
-@identifier                     { tokenString TokenId }
-"("                             { tokenAtom TokenLParen }
-"\"                             { tokenAtom TokenLambda }
-")"                             { tokenAtom TokenRParen }
+$white+     ;
+"#".*       ;
+"("         { tokenAtom TokenLParen }
+")"         { tokenAtom TokenRParen }
+"->"        { tokenAtom TokenArrow }
+"."         { tokenAtom TokenDot }
+":"         { tokenAtom TokenAnno }
+"="         { tokenAtom TokenEquals }
+"\"         { tokenAtom TokenLambda }
+"forall"    { tokenAtom TokenForAll }
+"in"        { tokenAtom TokenIn }
+"let"       { tokenAtom TokenLet }
+@identifier { tokenString TokenId }
 
 {
 
@@ -31,21 +34,27 @@ data Token
   = TokenAnno
   | TokenArrow
   | TokenDot
+  | TokenEquals
   | TokenForAll
   | TokenId String
+  | TokenIn
   | TokenLParen
   | TokenLambda
+  | TokenLet
   | TokenRParen
   deriving Eq
 
 instance Show Token where
+  show (TokenId x) = x
   show TokenAnno = ":"
   show TokenArrow = "->"
   show TokenDot = "."
+  show TokenEquals = "="
   show TokenForAll = "forall"
-  show (TokenId x) = x
+  show TokenIn = "in"
   show TokenLParen = "("
   show TokenLambda = "\\"
+  show TokenLet = "let"
   show TokenRParen = ")"
 
 alexScanAction :: Alex (Maybe Token)
