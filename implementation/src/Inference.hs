@@ -244,8 +244,8 @@ infer (IEAbs x1 t1 e1)
   -- In traditional bidirectional type inference, abstractions can only be
   -- checked, not inferred. But if we are asked to infer the type of an
   -- abstraction, there is one thing we can try: assume the function is
-  -- polymorphic in the type of its argument and infer the return type. This
-  -- allows us to infer the type of functions like:
+  -- polymorphic in its argument type and infer the return type. This allows us
+  -- to infer the type of functions like:
   --   (\x y -> x) (\u v -> v) (\m n -> m)
  = do
   (xt, xa) <-
@@ -311,9 +311,6 @@ infer (IEAnno e1 t) = do
 
 -- Check a term against a type and possibly instantiate unifiers in the type.
 check :: ITerm -> PartialType -> TypeCheck (FTerm, Map Unifier Type)
-check e1 (PTUnifier u) = do
-  (e2, t) <- infer e1
-  return (e2, Map.singleton u t)
 check e1 (PTForAll a1 t) = do
   a2 <- freshTVar (show a1)
   (e2, uToT) <-
@@ -345,6 +342,9 @@ check (IELet x1 e1 e2) t1 = do
   (e4, uToT) <-
     local (first (Map.insert x2 t2)) $ check (subst x1 (IEVar x2) e2) t1
   return (FEApp (FEAbs x2 t2 e4) e3, uToT)
+check e1 (PTUnifier u) = do
+  (e2, t) <- infer e1
+  return (e2, Map.singleton u t)
 check e1 t1
   -- Infer the type of e1.
  = do
