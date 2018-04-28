@@ -20,6 +20,7 @@ module Syntax
   , subst
   ) where
 
+import Control.Arrow ((***))
 import Data.Function (on)
 import Data.List (groupBy)
 
@@ -235,59 +236,63 @@ instance Eq Type where
 class CollectParams a b | a -> b where
   collectParams :: a -> ([b], a)
 
-instance CollectParams ITerm (String, Maybe String) where
+instance CollectParams ITerm (EVar, Maybe Type) where
   collectParams (IEIntLit i) = ([], IEIntLit i)
   collectParams (IEAddInt e1 e2) = ([], IEAddInt e1 e2)
   collectParams (IEVar x) = ([], IEVar x)
   collectParams (IEAbs x Nothing e1) =
     let (xs, e2) = collectParams e1
-    in ((show x, Nothing) : xs, e2)
+    in ((x, Nothing) : xs, e2)
   collectParams (IEAbs x (Just t) e1) =
     let (xs, e2) = collectParams e1
-    in ((show x, Just $ show t) : xs, e2)
+    in ((x, Just t) : xs, e2)
   collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
   collectParams (IELet x e1 e2) = ([], IELet x e1 e2)
   collectParams (IEAnno e t) = ([], IEAnno e t)
 
-instance CollectParams FTerm (String, String) where
+instance CollectParams FTerm (Either (EVar, Type) TVar) where
   collectParams (FEIntLit i) = ([], FEIntLit i)
   collectParams (FEAddInt e1 e2) = ([], FEAddInt e1 e2)
   collectParams (FEVar x) = ([], FEVar x)
   collectParams (FEAbs x t e1) =
     let (xs, e2) = collectParams e1
-    in ((show x, show t) : xs, e2)
+    in (Left (x, t) : xs, e2)
   collectParams (FEApp e1 e2) = ([], FEApp e1 e2)
   collectParams (FETAbs a e1) =
     let (xs, e2) = collectParams e1
-    in ((show a, "*") : xs, e2)
+    in (Right a : xs, e2)
   collectParams (FETApp e t) = ([], FETApp e t)
 
-instance CollectParams Type String where
+instance CollectParams Type TVar where
   collectParams (TVar a) = ([], TVar a)
   collectParams (TArrow t1 t2) = ([], TArrow t1 t2)
   collectParams (TForAll a t1) =
     let (as, t2) = collectParams t1
-    in (show a : as, t2)
+    in (a : as, t2)
 
 class PresentParams a where
   presentParams :: [a] -> String
 
-instance PresentParams String where
-  presentParams = unwords
+instance PresentParams TVar where
+  presentParams as = unwords $ show <$> as
 
-instance PresentParams (String, Maybe String) where
+instance PresentParams (EVar, Maybe Type) where
   presentParams xs =
     unwords $ do
       group <- groupBy (on (==) snd) xs
       let ys = fst <$> group
       case snd (head group) of
-        Just t -> return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
-        Nothing -> return $ unwords ys
+        Just t ->
+          return $ "(" ++ unwords (show <$> ys) ++ " : " ++ show t ++ ")"
+        Nothing -> return $ unwords $ show <$> ys
 
-instance PresentParams (String, String) where
+instance PresentParams (Either (EVar, Type) TVar) where
   presentParams xs =
     unwords $ do
-      group <- groupBy (on (==) snd) xs
+      group <-
+        groupBy
+          (on (==) snd)
+          (either (show *** show) (\a -> (show a, "*")) <$> xs)
       let ys = fst <$> group
       let t = snd (head group)
       return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
