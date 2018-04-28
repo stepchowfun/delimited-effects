@@ -5,6 +5,7 @@ module Inference
   ( typeCheck
   ) where
 
+import Context (Context, initialContext, intType)
 import Control.Arrow (first, second)
 import Control.Monad (foldM, when)
 import Control.Monad.Except (ExceptT, catchError, runExceptT, throwError)
@@ -14,7 +15,6 @@ import Data.List (foldl')
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
-import Data.Set (Set)
 import qualified Data.Set as Set
 import Syntax
   ( CollectParams
@@ -107,9 +107,6 @@ substUnifierInPartialType u t1 (PTArrow t2 t3) =
     (substUnifierInPartialType u t1 t3)
 substUnifierInPartialType u t1 (PTForAll a t2) =
   PTForAll a (substUnifierInPartialType u t1 t2)
-
--- Contexts can hold term variables and type variables.
-type Context = (Map EVar Type, Set TVar)
 
 -- The TypeCheck monad provides:
 -- 1. The ability to read the context (via Reader).
@@ -239,6 +236,11 @@ unify t1 t2 =
 
 -- Infer the type of a term.
 infer :: ITerm -> TypeCheck (FTerm, Type)
+infer (IEIntLit i) = return (FEIntLit i, intType)
+infer (IEAddInt e1 e2) = do
+  (e3, _) <- check e1 (makePartial intType)
+  (e4, _) <- check e2 (makePartial intType)
+  return (FEAddInt e3 e4, intType)
 infer (IEVar x) = do
   t <- eLookupVar x
   return (FEVar x, t)
@@ -378,5 +380,5 @@ check e1 t1
 typeCheck :: ITerm -> Either String (FTerm, Type)
 typeCheck e =
   let (result, _) =
-        runReader (runStateT (runExceptT (infer e)) 0) (Map.empty, Set.empty)
+        runReader (runStateT (runExceptT (infer e)) 0) initialContext
   in result

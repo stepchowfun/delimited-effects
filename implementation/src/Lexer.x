@@ -18,6 +18,7 @@ $white+     ;
 "#".*       ;
 "("         { tokenAtom TokenLParen }
 ")"         { tokenAtom TokenRParen }
+"+"         { tokenAtom TokenPlus }
 "->"        { tokenAtom TokenArrow }
 "."         { tokenAtom TokenDot }
 ":"         { tokenAtom TokenAnno }
@@ -26,6 +27,7 @@ $white+     ;
 "forall"    { tokenAtom TokenForAll }
 "in"        { tokenAtom TokenIn }
 "let"       { tokenAtom TokenLet }
+$digit+     { tokenInteger TokenIntLit }
 @identifier { tokenString TokenId }
 
 {
@@ -38,14 +40,17 @@ data Token
   | TokenForAll
   | TokenId String
   | TokenIn
+  | TokenIntLit Integer
   | TokenLParen
   | TokenLambda
   | TokenLet
+  | TokenPlus
   | TokenRParen
   deriving Eq
 
 instance Show Token where
   show (TokenId x) = x
+  show (TokenIntLit x) = show x
   show TokenAnno = ":"
   show TokenArrow = "->"
   show TokenDot = "."
@@ -55,6 +60,7 @@ instance Show Token where
   show TokenLParen = "("
   show TokenLambda = "\\"
   show TokenLet = "let"
+  show TokenPlus = "+"
   show TokenRParen = ")"
 
 alexScanAction :: Alex (Maybe Token)
@@ -88,5 +94,8 @@ tokenAtom t = token (\_ _ -> Just t)
 
 tokenString :: (String -> Token) -> AlexAction (Maybe Token)
 tokenString t = token (\(_, _, _, s) len -> Just $ t (take len s))
+
+tokenInteger :: (Integer -> Token) -> AlexAction (Maybe Token)
+tokenInteger t = token (\(_, _, _, s) len -> Just $ t (read (take len s) :: Integer))
 
 }
