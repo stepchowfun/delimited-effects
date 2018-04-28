@@ -7,7 +7,7 @@ module Inference
 
 import Control.Arrow (first, second)
 import Control.Monad (foldM, when)
-import Control.Monad.Except (ExceptT, runExceptT, throwError)
+import Control.Monad.Except (ExceptT, catchError, runExceptT, throwError)
 import Control.Monad.Reader (Reader, ask, local, runReader)
 import Control.Monad.State (StateT, get, put, runStateT)
 import Data.List (foldl')
@@ -236,6 +236,16 @@ infer :: ITerm -> TypeCheck (FTerm, Type)
 infer (IEVar x) = do
   t <- eLookupVar x
   return (FEVar x, t)
+infer (IEAbs x1 e1) = do
+  a <- freshTVar "a"
+  x2 <- freshEVar (fromEVar x1)
+  catchError
+    (do (e2, t) <-
+          local (first (Map.insert x2 (TVar a))) $
+          infer (substEVarInTerm x1 (IEVar x2) e1)
+        return (FETAbs a (FEAbs x2 t e2), TForAll a (TArrow (TVar a) t)))
+    (const $
+     throwError $ "Unable to infer the type of: " ++ show (IEAbs x1 e1))
 infer (IEApp e1 e2)
   -- Infer the type of e1.
  = do
@@ -275,7 +285,6 @@ infer (IEAnno e1 t) = do
   mapM_ tLookupVar (tFreeVars t)
   (e2, _) <- check e1 (makePartial t)
   return (e2, t)
-infer t = throwError $ "Unable to infer the type of: " ++ show t
 
 -- Check a term against a type and possibly instantiate unifiers in the type.
 check :: ITerm -> PartialType -> TypeCheck (FTerm, Map Unifier Type)
