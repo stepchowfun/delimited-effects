@@ -42,6 +42,7 @@ import Syntax (EVar(..), ITerm(..), TVar(..), Type(..))
 ITerm
   : i                          { IEIntLit $1 }
   | x                          { IEVar (UserEVar $1) }
+  | x '->' ITerm               { IEAbs (UserEVar $1) Nothing $3 }
   | lambda EVarList '->' ITerm { foldr (\(x, t) e -> IEAbs (UserEVar x) t e) $4 (reverse $2) }
   | ITerm ITerm %prec APP      { IEApp $1 $2 }
   | ITerm ':' Type             { IEAnno $1 $3 }
