@@ -78,7 +78,7 @@ alexScanAction = do
   sc <- alexGetStartCode
   case alexScan input sc of
     AlexEOF -> alexEOF
-    AlexError _ -> alexError $ "Lexical error."
+    AlexError (_, _, _, s) -> alexError $ "Lexical error: " ++ s
     AlexSkip  newInp _ -> do
         alexSetInput newInp
         alexScanAction
