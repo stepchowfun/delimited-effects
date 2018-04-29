@@ -9,28 +9,33 @@ module Lexer (Token(..), scan) where
 %wrapper "monad"
 
 $digit = 0-9
-$alpha = [a-zA-Z]
-@identifier = $alpha [$alpha $digit _]*
+$lower = a-z
+$upper = A-Z
+$idChar = [_ $lower $upper $digit]
+@idLower = $lower $idChar*
+@idUpper = $upper $idChar*
 
 :-
 
-$white+     ;
-"#".*       ;
-"("         { tokenAtom TokenLParen }
-")"         { tokenAtom TokenRParen }
-"*"         { tokenAtom TokenAsterisk }
-"+"         { tokenAtom TokenPlus }
-"-"         { tokenAtom TokenDash }
-"->"        { tokenAtom TokenArrow }
-"."         { tokenAtom TokenDot }
-"/"         { tokenAtom TokenSlash }
-":"         { tokenAtom TokenAnno }
-"="         { tokenAtom TokenEquals }
-"\"         { tokenAtom TokenLambda }
-"forall"    { tokenAtom TokenForAll }
-"in"        { tokenAtom TokenIn }
-$digit+     { tokenInteger TokenIntLit }
-@identifier { tokenString TokenId }
+"#".*          ;
+"("            { tokenAtom TokenLParen }
+")"            { tokenAtom TokenRParen }
+"*"            { tokenAtom TokenAsterisk }
+"+"            { tokenAtom TokenPlus }
+"-"            { tokenAtom TokenDash }
+"->" | "→"     { tokenAtom TokenArrow }
+"."            { tokenAtom TokenDot }
+"/"            { tokenAtom TokenSlash }
+":"            { tokenAtom TokenAnno }
+"="            { tokenAtom TokenEquals }
+"\" | "λ"      { tokenAtom TokenLambda }
+"exists" | "∃" { tokenAtom TokenExists }
+"forall" | "∀" { tokenAtom TokenForAll }
+"in"           { tokenAtom TokenIn }
+$digit+        { tokenInteger TokenIntLit }
+$white+        ;
+@idLower       { tokenString TokenIdLower }
+@idUpper       { tokenString TokenIdUpper }
 
 {
 
@@ -41,8 +46,10 @@ data Token
   | TokenDash
   | TokenDot
   | TokenEquals
+  | TokenExists
   | TokenForAll
-  | TokenId String
+  | TokenIdLower String
+  | TokenIdUpper String
   | TokenIn
   | TokenIntLit Integer
   | TokenLParen
@@ -53,18 +60,20 @@ data Token
   deriving Eq
 
 instance Show Token where
-  show (TokenId x) = x
+  show (TokenIdLower x) = x
+  show (TokenIdUpper c) = c
   show (TokenIntLit x) = show x
   show TokenAnno = ":"
-  show TokenArrow = "->"
+  show TokenArrow = "→"
   show TokenAsterisk = "*"
   show TokenDash = "-"
   show TokenDot = "."
   show TokenEquals = "="
-  show TokenForAll = "forall"
+  show TokenExists = "∃"
+  show TokenForAll = "∀"
   show TokenIn = "in"
   show TokenLParen = "("
-  show TokenLambda = "\\"
+  show TokenLambda = "λ"
   show TokenPlus = "+"
   show TokenRParen = ")"
   show TokenSlash = "/"
