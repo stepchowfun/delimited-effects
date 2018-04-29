@@ -27,7 +27,6 @@ import Syntax (EVar(..), ITerm(..), TVar(..), Type(..))
   i      { TokenIntLit $$ }
   in     { TokenIn }
   lambda { TokenLambda }
-  let    { TokenLet }
   x      { TokenId $$ }
 
 %nonassoc ':' '=' in '.'
@@ -50,7 +49,7 @@ ITerm
   | ITerm '-' ITerm            { IESubInt $1 $3 }
   | ITerm '*' ITerm            { IEMulInt $1 $3 }
   | ITerm '/' ITerm            { IEDivInt $1 $3 }
-  | let x '=' ITerm in ITerm   { IELet (UserEVar $2) $4 $6 }
+  | x '=' ITerm in ITerm       { IELet (UserEVar $1) $3 $5 }
   | '(' ITerm ')'              { $2 }
 
 Type
