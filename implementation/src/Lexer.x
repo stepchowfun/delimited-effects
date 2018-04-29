@@ -18,9 +18,12 @@ $white+     ;
 "#".*       ;
 "("         { tokenAtom TokenLParen }
 ")"         { tokenAtom TokenRParen }
+"*"         { tokenAtom TokenAsterisk }
 "+"         { tokenAtom TokenPlus }
+"-"         { tokenAtom TokenDash }
 "->"        { tokenAtom TokenArrow }
 "."         { tokenAtom TokenDot }
+"/"         { tokenAtom TokenSlash }
 ":"         { tokenAtom TokenAnno }
 "="         { tokenAtom TokenEquals }
 "\"         { tokenAtom TokenLambda }
@@ -35,6 +38,8 @@ $digit+     { tokenInteger TokenIntLit }
 data Token
   = TokenAnno
   | TokenArrow
+  | TokenAsterisk
+  | TokenDash
   | TokenDot
   | TokenEquals
   | TokenForAll
@@ -46,6 +51,7 @@ data Token
   | TokenLet
   | TokenPlus
   | TokenRParen
+  | TokenSlash
   deriving Eq
 
 instance Show Token where
@@ -53,6 +59,8 @@ instance Show Token where
   show (TokenIntLit x) = show x
   show TokenAnno = ":"
   show TokenArrow = "->"
+  show TokenAsterisk = "*"
+  show TokenDash = "-"
   show TokenDot = "."
   show TokenEquals = "="
   show TokenForAll = "forall"
@@ -62,6 +70,7 @@ instance Show Token where
   show TokenLet = "let"
   show TokenPlus = "+"
   show TokenRParen = ")"
+  show TokenSlash = "/"
 
 alexScanAction :: Alex (Maybe Token)
 alexScanAction = do

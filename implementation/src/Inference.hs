@@ -237,6 +237,18 @@ infer (IEAddInt e1 e2) = do
   (e3, _) <- check e1 (makePartial intType)
   (e4, _) <- check e2 (makePartial intType)
   return (FEAddInt e3 e4, intType)
+infer (IESubInt e1 e2) = do
+  (e3, _) <- check e1 (makePartial intType)
+  (e4, _) <- check e2 (makePartial intType)
+  return (FESubInt e3 e4, intType)
+infer (IEMulInt e1 e2) = do
+  (e3, _) <- check e1 (makePartial intType)
+  (e4, _) <- check e2 (makePartial intType)
+  return (FEMulInt e3 e4, intType)
+infer (IEDivInt e1 e2) = do
+  (e3, _) <- check e1 (makePartial intType)
+  (e4, _) <- check e2 (makePartial intType)
+  return (FEDivInt e3 e4, intType)
 infer (IEVar x) = do
   t <- eLookupVar x
   return (FEVar x, t)

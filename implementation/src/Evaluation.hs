@@ -14,6 +14,34 @@ eval (FEAddInt e1 e2) = do
     (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 + i2)
     _ ->
       throwError $ "Type error: cannot add " ++ show e3 ++ " and " ++ show e4
+eval (FESubInt e1 e2) = do
+  e3 <- eval e1
+  e4 <- eval e2
+  case (e3, e4) of
+    (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 - i2)
+    _ ->
+      throwError $
+      "Type error: cannot subtract " ++ show e3 ++ " and " ++ show e4
+eval (FEMulInt e1 e2) = do
+  e3 <- eval e1
+  e4 <- eval e2
+  case (e3, e4) of
+    (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 * i2)
+    _ ->
+      throwError $
+      "Type error: cannot multiply " ++ show e3 ++ " and " ++ show e4
+eval (FEDivInt e1 e2) = do
+  e3 <- eval e1
+  e4 <- eval e2
+  case (e3, e4) of
+    (FEIntLit i1, FEIntLit i2) ->
+      if i2 == 0
+        then throwError $
+             "Runtime error: cannot divide " ++ show i1 ++ " by 0"
+        else return $ FEIntLit (i1 `div` i2)
+    _ ->
+      throwError $
+      "Type error: cannot divide " ++ show e3 ++ " and " ++ show e4
 eval (FEVar x) = throwError $ "Unbound variable: " ++ show x
 eval (FEAbs x t e) = return $ FEAbs x t e
 eval (FEApp e1 e2) = do
