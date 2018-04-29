@@ -47,6 +47,12 @@ data ITerm
   = IEIntLit Integer
   | IEAddInt ITerm
              ITerm
+  | IESubInt ITerm
+             ITerm
+  | IEMulInt ITerm
+             ITerm
+  | IEDivInt ITerm
+             ITerm
   | IEVar EVar
   | IEAbs EVar
           (Maybe Type)
@@ -62,6 +68,12 @@ data ITerm
 data FTerm
   = FEIntLit Integer
   | FEAddInt FTerm
+             FTerm
+  | FESubInt FTerm
+             FTerm
+  | FEMulInt FTerm
+             FTerm
+  | FEDivInt FTerm
              FTerm
   | FEVar EVar
   | FEAbs EVar
@@ -91,6 +103,9 @@ class FreeTVars a where
 instance FreeEVars ITerm where
   freeEVars (IEIntLit _) = []
   freeEVars (IEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IESubInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IEMulInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IEDivInt e1 e2) = freeEVars e1 ++ freeEVars e2
   freeEVars (IEVar x) = [x]
   freeEVars (IEAbs x _ e) = filter (/= x) (freeEVars e)
   freeEVars (IEApp e1 e2) = freeEVars e1 ++ freeEVars e2
@@ -100,6 +115,9 @@ instance FreeEVars ITerm where
 instance FreeTVars ITerm where
   freeTVars (IEIntLit _) = []
   freeTVars (IEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IESubInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IEMulInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IEDivInt e1 e2) = freeTVars e1 ++ freeTVars e2
   freeTVars (IEVar _) = []
   freeTVars (IEAbs _ (Just t) e) = freeTVars t ++ freeTVars e
   freeTVars (IEAbs _ Nothing e) = freeTVars e
@@ -110,6 +128,9 @@ instance FreeTVars ITerm where
 instance FreeEVars FTerm where
   freeEVars (FEIntLit _) = []
   freeEVars (FEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FESubInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FEMulInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FEDivInt e1 e2) = freeEVars e1 ++ freeEVars e2
   freeEVars (FEVar x) = [x]
   freeEVars (FEAbs x _ e) = filter (/= x) (freeEVars e)
   freeEVars (FEApp e1 e2) = freeEVars e1 ++ freeEVars e2
@@ -119,6 +140,9 @@ instance FreeEVars FTerm where
 instance FreeTVars FTerm where
   freeTVars (FEIntLit _) = []
   freeTVars (FEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FESubInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FEMulInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FEDivInt e1 e2) = freeTVars e1 ++ freeTVars e2
   freeTVars (FEVar _) = []
   freeTVars (FEAbs _ t e) = freeTVars t ++ freeTVars e
   freeTVars (FEApp e1 e2) = freeTVars e1 ++ freeTVars e2
@@ -137,6 +161,9 @@ class Subst a b c where
 instance Subst EVar ITerm ITerm where
   subst _ _ (IEIntLit i) = IEIntLit i
   subst x e1 (IEAddInt e2 e3) = IEAddInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (IESubInt e2 e3) = IESubInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (IEMulInt e2 e3) = IEMulInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (IEDivInt e2 e3) = IEDivInt (subst x e1 e2) (subst x e1 e3)
   subst x1 e (IEVar x2) =
     if x1 == x2
       then e
@@ -159,6 +186,9 @@ instance Subst EVar ITerm ITerm where
 instance Subst TVar Type ITerm where
   subst _ _ (IEIntLit i) = IEIntLit i
   subst a t (IEAddInt e1 e2) = IEAddInt (subst a t e1) (subst a t e2)
+  subst a t (IESubInt e1 e2) = IESubInt (subst a t e1) (subst a t e2)
+  subst a t (IEMulInt e1 e2) = IEMulInt (subst a t e1) (subst a t e2)
+  subst a t (IEDivInt e1 e2) = IEDivInt (subst a t e1) (subst a t e2)
   subst _ _ (IEVar x) = IEVar x
   subst a t1 (IEAbs x t2 e2) = IEAbs x (subst a t1 <$> t2) (subst a t1 e2)
   subst a t (IEApp e1 e2) = IEApp (subst a t e1) (subst a t e2)
@@ -168,6 +198,9 @@ instance Subst TVar Type ITerm where
 instance Subst EVar FTerm FTerm where
   subst _ _ (FEIntLit i) = FEIntLit i
   subst x e1 (FEAddInt e2 e3) = FEAddInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FESubInt e2 e3) = FESubInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FEMulInt e2 e3) = FEMulInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FEDivInt e2 e3) = FEDivInt (subst x e1 e2) (subst x e1 e3)
   subst x1 e (FEVar x2) =
     if x1 == x2
       then e
@@ -184,6 +217,9 @@ instance Subst EVar FTerm FTerm where
 instance Subst TVar Type FTerm where
   subst _ _ (FEIntLit i) = FEIntLit i
   subst a t (FEAddInt e1 e2) = FEAddInt (subst a t e1) (subst a t e2)
+  subst a t (FESubInt e1 e2) = FESubInt (subst a t e1) (subst a t e2)
+  subst a t (FEMulInt e1 e2) = FEMulInt (subst a t e1) (subst a t e2)
+  subst a t (FEDivInt e1 e2) = FEDivInt (subst a t e1) (subst a t e2)
   subst _ _ (FEVar x) = FEVar x
   subst a t1 (FEAbs x t2 e) = FEAbs x (subst a t1 t2) (subst a t1 e)
   subst a t (FEApp e1 e2) = FEApp (subst a t e1) (subst a t e2)
@@ -203,28 +239,6 @@ instance Subst TVar Type Type where
       else subst a1 t1 t2
 
 -- Equality
-instance Eq ITerm where
-  IEIntLit i1 == IEIntLit i2 = i1 == i2
-  IEAddInt e1 e2 == IEAddInt e3 e4 = e1 == e3 && e2 == e4
-  IEVar x1 == IEVar x2 = x1 == x2
-  IEAbs x1 t1 e1 == IEAbs x2 t2 e2 =
-    t1 == t2 && e1 == subst x2 (IEVar x1) e2 && e2 == subst x1 (IEVar x2) e1
-  IEApp e1 e2 == IEApp e3 e4 = e1 == e3 && e2 == e4
-  IEAnno e1 t1 == IEAnno e2 t2 = e1 == e2 && t1 == t2
-  _ == _ = False
-
-instance Eq FTerm where
-  FEIntLit i1 == FEIntLit i2 = i1 == i2
-  FEAddInt e1 e2 == FEAddInt e3 e4 = e1 == e3 && e2 == e4
-  FEVar x1 == FEVar x2 = x1 == x2
-  FEAbs x1 t1 e1 == FEAbs x2 t2 e2 =
-    e1 == subst x2 (FEVar x1) e2 && e2 == subst x1 (FEVar x2) e1 && t1 == t2
-  FEApp e1 e2 == FEApp e3 e4 = e1 == e3 && e2 == e4
-  FETAbs a1 e1 == FETAbs a2 e2 =
-    e1 == subst a2 (TVar a1) e2 && e2 == subst a1 (TVar a2) e1
-  FETApp e1 t1 == FETApp e2 t2 = e1 == e2 && t1 == t2
-  _ == _ = False
-
 instance Eq Type where
   TVar a1 == TVar a2 = a1 == a2
   TArrow t1 t2 == TArrow t3 t4 = t1 == t3 && t2 == t4
@@ -239,6 +253,9 @@ class CollectParams a b | a -> b where
 instance CollectParams ITerm (EVar, Maybe Type) where
   collectParams (IEIntLit i) = ([], IEIntLit i)
   collectParams (IEAddInt e1 e2) = ([], IEAddInt e1 e2)
+  collectParams (IESubInt e1 e2) = ([], IESubInt e1 e2)
+  collectParams (IEMulInt e1 e2) = ([], IEMulInt e1 e2)
+  collectParams (IEDivInt e1 e2) = ([], IEDivInt e1 e2)
   collectParams (IEVar x) = ([], IEVar x)
   collectParams (IEAbs x Nothing e1) =
     let (xs, e2) = collectParams e1
@@ -253,6 +270,9 @@ instance CollectParams ITerm (EVar, Maybe Type) where
 instance CollectParams FTerm (Either (EVar, Type) TVar) where
   collectParams (FEIntLit i) = ([], FEIntLit i)
   collectParams (FEAddInt e1 e2) = ([], FEAddInt e1 e2)
+  collectParams (FESubInt e1 e2) = ([], FESubInt e1 e2)
+  collectParams (FEMulInt e1 e2) = ([], FEMulInt e1 e2)
+  collectParams (FEDivInt e1 e2) = ([], FEDivInt e1 e2)
   collectParams (FEVar x) = ([], FEVar x)
   collectParams (FEAbs x t e1) =
     let (xs, e2) = collectParams e1
@@ -300,6 +320,9 @@ instance PresentParams (Either (EVar, Type) TVar) where
 instance Show ITerm where
   show (IEIntLit i) = show i
   show (IEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
+  show (IESubInt e1 e2) = "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
+  show (IEMulInt e1 e2) = "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
+  show (IEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
   show (IEVar x) = show x
   show (IEAbs x t e1) =
     let (xs, e2) = collectParams (IEAbs x t e1)
@@ -312,6 +335,9 @@ instance Show ITerm where
 instance Show FTerm where
   show (FEIntLit i) = show i
   show (FEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
+  show (FESubInt e1 e2) = "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
+  show (FEMulInt e1 e2) = "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
+  show (FEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
   show (FEVar x) = show x
   show (FEAbs x t e1) =
     let (xs, e2) = collectParams (FEAbs x t e1)

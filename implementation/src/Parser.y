@@ -15,9 +15,12 @@ import Syntax (EVar(..), ITerm(..), TVar(..), Type(..))
 %token
   '('    { TokenLParen }
   ')'    { TokenRParen }
+  '*'    { TokenAsterisk }
   '+'    { TokenPlus }
+  '-'    { TokenDash }
   '->'   { TokenArrow }
   '.'    { TokenDot }
+  '/'    { TokenSlash }
   ':'    { TokenAnno }
   '='    { TokenEquals }
   forall { TokenForAll }
@@ -29,7 +32,8 @@ import Syntax (EVar(..), ITerm(..), TVar(..), Type(..))
 
 %nonassoc ':' '=' in '.'
 %right '->'
-%left '+'
+%left '+' '-'
+%left '*' '/'
 %nonassoc let forall lambda '(' ')' x i
 %nonassoc APP
 
@@ -42,6 +46,9 @@ ITerm
   | ITerm ITerm %prec APP      { IEApp $1 $2 }
   | ITerm ':' Type             { IEAnno $1 $3 }
   | ITerm '+' ITerm            { IEAddInt $1 $3 }
+  | ITerm '-' ITerm            { IESubInt $1 $3 }
+  | ITerm '*' ITerm            { IEMulInt $1 $3 }
+  | ITerm '/' ITerm            { IEDivInt $1 $3 }
   | let x '=' ITerm in ITerm   { IELet (UserEVar $2) $4 $6 }
   | '(' ITerm ')'              { $2 }
 
