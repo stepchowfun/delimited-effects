@@ -29,7 +29,6 @@ $white+     ;
 "\"         { tokenAtom TokenLambda }
 "forall"    { tokenAtom TokenForAll }
 "in"        { tokenAtom TokenIn }
-"let"       { tokenAtom TokenLet }
 $digit+     { tokenInteger TokenIntLit }
 @identifier { tokenString TokenId }
 
@@ -48,7 +47,6 @@ data Token
   | TokenIntLit Integer
   | TokenLParen
   | TokenLambda
-  | TokenLet
   | TokenPlus
   | TokenRParen
   | TokenSlash
@@ -67,7 +65,6 @@ instance Show Token where
   show TokenIn = "in"
   show TokenLParen = "("
   show TokenLambda = "\\"
-  show TokenLet = "let"
   show TokenPlus = "+"
   show TokenRParen = ")"
   show TokenSlash = "/"
