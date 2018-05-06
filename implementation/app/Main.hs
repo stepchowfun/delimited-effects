@@ -7,8 +7,8 @@ import Evaluation (eval)
 import Inference (typeCheck)
 import Lexer (scan)
 import Parser (parse)
+import System.Console.Readline (addHistory, readline)
 import System.Environment (getArgs)
-import System.IO (hFlush, stdout)
 
 runProgram :: String -> IO ()
 runProgram program =
@@ -36,10 +36,12 @@ main = do
       runProgram program
     [] ->
       let repl = do
-            putStr "> "
-            hFlush stdout
-            program <- getLine
-            runProgram program
-            repl
+            input <- readline "> "
+            case input of
+              Just program -> do
+                addHistory program
+                runProgram program
+                repl
+              Nothing -> return ()
       in repl
     _ -> putStrLn "Usage:\n  implementation-exe\n  implementation-exe <path>"
