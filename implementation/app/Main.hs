@@ -2,6 +2,7 @@ module Main
   ( main
   ) where
 
+import Control.Monad.Except (ExceptT(..), lift, runExceptT)
 import Data.Char (isSpace)
 import Evaluation (eval)
 import Inference (typeCheck)
@@ -15,17 +16,20 @@ runProgram program =
   if all isSpace program
     then return ()
     else do
-      let result = do
-            tokens <- scan program
-            iterm <- parse tokens
-            (fterm, ftype) <- typeCheck iterm
-            rterm <- eval fterm
-            return (fterm, ftype, rterm)
+      result <-
+        runExceptT $ do
+          tokens <- ExceptT . return $ scan program
+          iterm <- ExceptT . return $ parse tokens
+          lift . putStrLn $ "    Parsed term: " ++ show iterm
+          (fterm, ftype) <- ExceptT . return $ typeCheck iterm
+          lift . putStrLn $ "  Inferred term: " ++ show fterm
+          lift . putStrLn $ "  Inferred type: " ++ show ftype
+          rterm <- ExceptT . return $ eval fterm
+          lift . putStrLn $ "         Result: " ++ show rterm
+          return ()
       case result of
-        Left s -> putStrLn ("  " ++ s)
-        Right (e, t, r) ->
-          putStrLn
-            ("  " ++ show e ++ "\n  : " ++ show t ++ "\n  => " ++ show r)
+        Left s -> putStrLn ("          Error: " ++ s)
+        Right () -> return ()
 
 main :: IO ()
 main = do

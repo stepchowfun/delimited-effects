@@ -12,7 +12,7 @@ cons = \x l i f -> l (f x i) f
   -> forall b . b -> (a -> b -> b) -> b in
 
 # This computes the sum of a list of integers.
-sum = l -> l 0 (\x y -> x + y)
+sum = \l -> l 0 (\x y -> x + y)
   : (forall a . a -> (Int -> a -> a) -> a)
   -> Int in
 
