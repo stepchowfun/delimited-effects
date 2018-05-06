@@ -4,6 +4,7 @@ RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
     'build-essential=12.3' \
+    'libreadline-dev=7.0-*' \
     'python-pip=9.0.*' \
     'ruby=1:2.3.*' \
     'texlive-full=2016.*' && \
