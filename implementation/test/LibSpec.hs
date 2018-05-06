@@ -1,4 +1,3 @@
-import ContextSpec (contextSpec)
 import EvaluationSpec (evaluationSpec)
 import InferenceSpec (inferenceSpec)
 import LexerSpec (lexerSpec)
@@ -10,7 +9,6 @@ import Test.Hspec (hspec)
 main :: IO ()
 main =
   hspec $ do
-    contextSpec
     evaluationSpec
     inferenceSpec
     lexerSpec

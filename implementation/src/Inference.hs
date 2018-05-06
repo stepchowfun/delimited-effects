@@ -1,388 +1,371 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+-- The algorithm presented here is based on the paper by Daan Leijen called
+-- "HMF: Simple type inference for first-class polymorphism". That paper was
+-- published in The 13th ACM SIGPLAN International Conference on Functional
+-- Programming (ICFP 2008).
 module Inference
   ( typeCheck
   ) where
 
-import Context (Context, initialContext, intType)
-import Control.Arrow (first, second)
-import Control.Monad (foldM, when)
-import Control.Monad.Except (ExceptT, catchError, runExceptT, throwError)
+import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Control.Monad.Reader (Reader, ask, local, runReader)
-import Control.Monad.State (StateT, get, put, runStateT)
-import Data.List (foldl')
+import Data.List (nub)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (isJust)
+import Data.Set (Set)
 import qualified Data.Set as Set
 import Syntax
-  ( CollectParams
-  , EVar(..)
+  ( BExists(..)
+  , EVarName(..)
   , FTerm(..)
-  , FreeTVars
   , ITerm(..)
-  , Subst
-  , TVar(..)
+  , TConstName(..)
+  , TVarName(..)
   , Type(..)
-  , collectParams
+  , collectBinders
+  , freeTConsts
   , freeTVars
-  , presentParams
   , subst
   )
 
--- Unification variables are holes in a type.
-newtype Unifier = ToUnifier
-  { fromUnifier :: String
-  } deriving (Eq, Ord)
+-- Contexts can hold term variables, type variables, and type constants.
+type Context = (Map EVarName Type, Set TVarName, Set TConstName)
 
-instance Show Unifier where
-  show = fromUnifier
+intName :: TConstName
+intName = TConstName "Int"
 
--- A PartialType is like a Type but it may contain unification variables.
-data PartialType
-  = PTUnifier Unifier
-  | PTVar TVar
-  | PTArrow PartialType
-            PartialType
-  | PTForAll TVar
-             PartialType
+intType :: Type
+intType = TConst intName
 
-instance FreeTVars PartialType where
-  freeTVars (PTUnifier _) = []
-  freeTVars (PTVar a) = [a]
-  freeTVars (PTArrow t1 t2) = freeTVars t1 ++ freeTVars t2
-  freeTVars (PTForAll a t) = filter (/= a) (freeTVars t)
-
-instance CollectParams PartialType TVar where
-  collectParams (PTUnifier u) = ([], PTUnifier u)
-  collectParams (PTVar a) = ([], PTVar a)
-  collectParams (PTArrow t1 t2) = ([], PTArrow t1 t2)
-  collectParams (PTForAll a t1) =
-    let (as, t2) = collectParams t1
-    in (a : as, t2)
-
-instance Eq PartialType where
-  PTUnifier u1 == PTUnifier u2 = u1 == u2
-  PTVar a1 == PTVar a2 = a1 == a2
-  PTArrow t1 t2 == PTArrow t3 t4 = t1 == t3 && t2 == t4
-  PTForAll a1 t1 == PTForAll a2 t2 =
-    t1 == subst a2 (PTVar a1) t2 && t2 == subst a1 (PTVar a2) t1
-  _ == _ = False
-
-instance Show PartialType where
-  show (PTUnifier u) = fromUnifier u ++ "?"
-  show (PTVar a) = show a
-  show (PTArrow (PTVar a) t) = show a ++ " -> " ++ show t
-  show (PTArrow t1 t2) = "(" ++ show t1 ++ ") -> " ++ show t2
-  show (PTForAll a t1) =
-    let (as, t2) = collectParams (PTForAll a t1)
-    in "∀" ++ presentParams as ++ " . " ++ show t2
-
-instance Subst TVar PartialType PartialType where
-  subst _ _ (PTUnifier u) = PTUnifier u
-  subst a1 t (PTVar a2) =
-    if a1 == a2
-      then t
-      else PTVar a2
-  subst a t1 (PTArrow t2 t3) = PTArrow (subst a t1 t2) (subst a t1 t3)
-  subst a1 t1 (PTForAll a2 t2) =
-    PTForAll a2 $
-    if a1 == a2
-      then t2
-      else subst a1 t1 t2
-
-instance Subst Unifier PartialType PartialType where
-  subst u1 t (PTUnifier u2) =
-    if u1 == u2
-      then t
-      else PTUnifier u2
-  subst _ _ (PTVar a) = PTVar a
-  subst u t1 (PTArrow t2 t3) = PTArrow (subst u t1 t2) (subst u t1 t3)
-  subst u t1 (PTForAll a t2) = PTForAll a (subst u t1 t2)
+initialContext :: Context
+initialContext = (Map.empty, Set.empty, Set.fromList [intName])
 
 -- The TypeCheck monad provides:
 -- 1. The ability to read the context (via Reader).
--- 2. The ability to generate fresh variables (via StateT).
--- 3. The ability to throw errors (via ExceptT).
-type TypeCheck = ExceptT String (StateT Int (Reader Context))
+-- 2. The ability to throw errors (via ExceptT).
+type TypeCheck = ExceptT String (Reader Context)
 
 -- Generate a fresh term variable.
-freshEVar :: String -> TypeCheck EVar
-freshEVar x = do
-  context <- ask
-  case Map.lookup (FreshEVar x) (fst context) of
-    Just _ -> do
-      i <- get
-      put (i + 1)
-      return $ FreshEVar ("@" ++ show i)
-    Nothing -> return $ FreshEVar x
+withFreshEVar ::
+     Maybe String -> Type -> (EVarName -> TypeCheck a) -> TypeCheck a
+withFreshEVar x1 t k = do
+  (cx, ca, cc) <- ask
+  let names =
+        ["x", "y", "z", "u", "v", "m", "n", "p", "q"] ++ ((++ "′") <$> names)
+      x2 =
+        EVarName $
+        head $
+        dropWhile
+          (\x3 -> isJust $ Map.lookup (EVarName x3) cx)
+          (case x1 of
+             Just x4 -> x4 : names
+             Nothing -> names)
+  local (const (Map.insert x2 t cx, ca, cc)) $ k x2
 
 -- Generate a fresh type variable.
-freshTVar :: String -> TypeCheck TVar
-freshTVar a = do
-  context <- ask
-  if Set.member (FreshTVar a) (snd context)
-    then do
-      i <- get
-      put (i + 1)
-      return $ FreshTVar ("@" ++ show i)
-    else return $ FreshTVar a
+withFreshTVar :: Maybe String -> (TVarName -> TypeCheck a) -> TypeCheck a
+withFreshTVar a1 k = do
+  (cx, ca, cc) <- ask
+  let names =
+        ["a", "b", "c", "d", "e", "f", "g", "h", "i"] ++ ((++ "′") <$> names)
+      a2 =
+        TVarName $
+        head $
+        dropWhile
+          (\a3 -> Set.member (TVarName a3) ca)
+          (case a1 of
+             Just a4 -> a4 : names
+             Nothing -> names)
+  local (const (cx, Set.insert a2 ca, cc)) $ k a2
 
--- Generate a fresh unifier.
-freshUnifier :: TypeCheck Unifier
-freshUnifier = do
-  i <- get
-  put (i + 1)
-  return $ ToUnifier ("@" ++ show i)
+-- Generate a fresh type constant.
+withFreshTConst :: Maybe String -> (TConstName -> TypeCheck a) -> TypeCheck a
+withFreshTConst c1 k = do
+  (cx, ca, cc) <- ask
+  let names =
+        ["A", "B", "C", "D", "E", "F", "G", "H", "I"] ++ ((++ "′") <$> names)
+      c2 =
+        TConstName $
+        head $
+        dropWhile
+          (\c3 -> Set.member (TConstName c3) cc)
+          (case c1 of
+             Just c4 -> c4 : names
+             Nothing -> names)
+  local (const (cx, ca, Set.insert c2 cc)) $ k c2
 
--- Look up a term variable in the context.
-eLookupVar :: EVar -> TypeCheck Type
-eLookupVar x = do
-  context <- ask
-  case Map.lookup x (fst context) of
-    Just t -> return t
-    Nothing -> throwError $ "Undefined variable: " ++ show x
+-- A substitution maps type variables to types. We maintain the invariant that
+-- all substitutions are idempotent.
+type Substitution = Map TVarName Type
 
--- Check that a type variable is in the context.
-tLookupVar :: TVar -> TypeCheck ()
-tLookupVar a = do
-  context <- ask
-  if Set.member a (snd context)
-    then return ()
-    else throwError $ "Undefined type variable: " ++ show a
+-- Compose two substitutions.
+composeSubst :: Substitution -> Substitution -> Substitution
+composeSubst theta1 theta2 =
+  Map.union theta2 (Map.map (applySubst theta2) theta1)
 
--- Convert a Type to a PartialType.
-makePartial :: Type -> PartialType
-makePartial (TVar a) = PTVar a
-makePartial (TArrow t1 t2) = PTArrow (makePartial t1) (makePartial t2)
-makePartial (TForAll a t) = PTForAll a (makePartial t)
+-- Apply a substitution to a type.
+class ApplySubst a where
+  applySubst :: Substitution -> a -> a
 
--- Convert a PartialType to a Type. An error will be thrown if the type
--- contains any unifiers.
-makeTotal :: PartialType -> TypeCheck Type
-makeTotal (PTUnifier u) = throwError $ "Unexpected unifier: " ++ show u
-makeTotal (PTVar a) = return $ TVar a
-makeTotal (PTArrow t1 t2) = do
-  t3 <- makeTotal t1
-  t4 <- makeTotal t2
-  return $ TArrow t3 t4
-makeTotal (PTForAll a t1) = do
-  t2 <- makeTotal t1
-  return $ TForAll a t2
+instance ApplySubst FTerm where
+  applySubst theta e = Map.foldrWithKey subst e theta
 
--- Instantiate outer quantifiers with fresh unifiers. Returns the type and a
--- list of fresh unifiers paired with the eliminated type variables.
-open :: PartialType -> TypeCheck (PartialType, [(Unifier, TVar)])
-open (PTUnifier u) = return (PTUnifier u, [])
-open (PTVar a) = return (PTVar a, [])
-open (PTArrow t1 t2) = return (PTArrow t1 t2, [])
-open (PTForAll a t1) = do
-  u <- freshUnifier
-  (t2, us) <- open (subst a (PTUnifier u) t1)
-  return (t2, (u, a) : us)
+instance ApplySubst Type where
+  applySubst theta t = Map.foldrWithKey subst t theta
 
--- This is needed when we need to eliminate type abstractions and we don't care
--- what type we use.
-unitType :: Type
-unitType = TForAll (FreshTVar "a") (TVar $ FreshTVar "a")
+-- Apply a substitution to a context.
+withSubstContext :: Substitution -> TypeCheck a -> TypeCheck a
+withSubstContext theta =
+  local (\(cx, ca, cc) -> (Map.map (applySubst theta) cx, ca, cc))
 
--- This function applies a term and a type, doing beta reduction if possible.
-applyType :: FTerm -> Type -> FTerm
-applyType (FETAbs a e) t = subst a t e
-applyType e t = FETApp e t
+-- Generalize a term and a type.
+generalize :: FTerm -> Type -> TypeCheck (FTerm, Type)
+generalize e1 t1 = do
+  (_, ca, _) <- ask
+  let fv =
+        filter
+          (\a -> not $ Set.member a ca)
+          (nub $ freeTVars e1 ++ freeTVars t1)
+  return $ foldr (\a (e2, t2) -> (FETAbs a e2, TForAll a t2)) (e1, t1) fv
 
--- Check that two unification results agree. Upon failure, a given error
--- message is thrown.
-checkInst :: Map Unifier Type -> Map Unifier Type -> String -> TypeCheck ()
-checkInst uToT1 uToT2 s =
-  if all
-       (\u -> Map.lookup u uToT1 == Map.lookup u uToT2)
-       (Map.keys (Map.intersection uToT1 uToT2))
-    then return ()
-    else throwError s
+-- Instantiate outer universal quantifiers with fresh type variables.
+openUniversals ::
+     FTerm -> Type -> (FTerm -> Type -> TypeCheck a) -> TypeCheck a
+openUniversals e (TForAll a1 t) k =
+  withFreshTVar (Just $ fromTVarName a1) $ \a2 ->
+    openUniversals (FETApp e (TVar a2)) (subst a1 (TVar a2) t) k
+openUniversals e t k = k e t
 
--- Find an instantiation that equates two PartialTypes.
-unify :: PartialType -> PartialType -> TypeCheck (Map Unifier Type)
-unify t1 (PTUnifier u) = do
-  t2 <- makeTotal t1
-  return $ Map.singleton u t2
-unify (PTUnifier u) t1 = do
-  t2 <- makeTotal t1
-  return $ Map.singleton u t2
-unify (PTVar a1) (PTVar a2) =
-  if a1 == a2
-    then return Map.empty
-    else throwError $ "Unable to unify " ++ show a1 ++ " with " ++ show a2
-unify (PTArrow t1 t2) (PTArrow t3 t4) = do
-  uToT1 <- unify t1 t3
-  uToT2 <- unify t2 t4
-  checkInst uToT1 uToT2 $
-    "Unable to unify " ++
-    show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
-  return $ Map.union uToT1 uToT2
-unify (PTForAll a1 t1) (PTForAll a2 t2) = do
-  when (a1 `elem` freeTVars (PTForAll a2 t2)) $
-    throwError $
-    "Unable to unify " ++
-    show (PTForAll a1 t1) ++ " with " ++ show (PTForAll a2 t2)
-  unify t1 (subst a2 (PTVar a1) t2)
+-- Instantiate outer existential quantifiers with fresh type variables.
+openExistentials :: Type -> (Type -> TypeCheck a) -> TypeCheck a
+openExistentials (TExists a1 t) k =
+  withFreshTVar (Just $ fromTVarName a1) $ \a2 ->
+    openExistentials (subst a1 (TVar a2) t) k
+openExistentials t k = k t
+
+-- Find a substitution that equates two types.
+unify :: Type -> Type -> TypeCheck Substitution
+unify (TVar a1) (TVar a2)
+  | a1 == a2 = return Map.empty
+unify (TVar a) t
+  | a `notElem` freeTVars t = return $ Map.singleton a t
+unify t (TVar a)
+  | a `notElem` freeTVars t = return $ Map.singleton a t
+unify (TConst c1) (TConst c2)
+  | c1 == c2 = return Map.empty
+unify (TArrow t1 t2) (TArrow t3 t4) = do
+  theta1 <- unify t1 t3
+  theta2 <- unify (applySubst theta1 t2) (applySubst theta1 t4)
+  return $ composeSubst theta1 theta2
+unify (TForAll a1 t1) (TForAll a2 t2) =
+  withFreshTConst Nothing $ \c -> do
+    theta <- unify (subst a1 (TConst c) t1) (subst a2 (TConst c) t2)
+    if c `elem` Map.foldr (\t3 fc -> fc ++ freeTConsts t3) [] theta
+      then throwError $
+           "Unable to unify " ++
+           show (TForAll a1 t1) ++ " with " ++ show (TForAll a2 t2)
+      else return theta
+unify (TExists a1 t1) (TExists a2 t2) =
+  withFreshTConst Nothing $ \c -> do
+    theta <- unify (subst a1 (TConst c) t1) (subst a2 (TConst c) t2)
+    if c `elem` Map.foldr (\t3 fc -> fc ++ freeTConsts t3) [] theta
+      then throwError $
+           "Unable to unify " ++
+           show (TExists a1 t1) ++ " with " ++ show (TExists a2 t2)
+      else return theta
 unify t1 t2 =
   throwError $ "Unable to unify " ++ show t1 ++ " with " ++ show t2
 
--- Infer the type of a term.
-infer :: ITerm -> TypeCheck (FTerm, Type)
-infer (IEIntLit i) = return (FEIntLit i, intType)
-infer (IEAddInt e1 e2) = do
-  (e3, _) <- check e1 (makePartial intType)
-  (e4, _) <- check e2 (makePartial intType)
-  return (FEAddInt e3 e4, intType)
-infer (IESubInt e1 e2) = do
-  (e3, _) <- check e1 (makePartial intType)
-  (e4, _) <- check e2 (makePartial intType)
-  return (FESubInt e3 e4, intType)
-infer (IEMulInt e1 e2) = do
-  (e3, _) <- check e1 (makePartial intType)
-  (e4, _) <- check e2 (makePartial intType)
-  return (FEMulInt e3 e4, intType)
-infer (IEDivInt e1 e2) = do
-  (e3, _) <- check e1 (makePartial intType)
-  (e4, _) <- check e2 (makePartial intType)
-  return (FEDivInt e3 e4, intType)
-infer (IEVar x) = do
-  t <- eLookupVar x
-  return (FEVar x, t)
-infer (IEAbs x1 t1 e1)
-  -- In traditional bidirectional type inference, abstractions can only be
-  -- checked, not inferred. But if we are asked to infer the type of an
-  -- abstraction, there is one thing we can try: assume the function is
-  -- polymorphic in its argument type and infer the return type. This allows us
-  -- to infer the type of functions like:
-  --   (\x y -> x) (\u v -> v) (\m n -> m)
- = do
-  (xt, xa) <-
-    case t1 of
-      Just t2 -> return (t2, Nothing)
-      Nothing -> do
-        a <- freshTVar "a"
-        return (TVar a, Just a)
-  x2 <- freshEVar (show x1)
-  catchError
-    (do (e2, t2) <-
-          local (first (Map.insert x2 xt)) $ infer (subst x1 (IEVar x2) e1)
-        let e3 = FEAbs x2 xt e2
-        let t4 = TArrow xt t2
-        return $
-          case xa of
-            Just a -> (FETAbs a e3, TForAll a t4)
-            Nothing -> (e3, t4))
-    (const $
-     throwError $ "Unable to infer the type of: " ++ show (IEAbs x1 t1 e1))
-infer (IEApp e1 e2)
-  -- Infer the type of e1.
- = do
-  (e3, t1) <- infer e1
-  -- Instantiate all the outer quantifiers with fresh unifiers.
-  (t2, usAndAs) <- open (makePartial t1)
-  -- Get the argument and return types.
-  (t3, t4) <-
-    case t2 of
-      PTArrow t3 t4 -> return (t3, t4)
-      _ -> throwError $ "Not a function type: " ++ show t2
-  -- Check the argument.
-  (e4, uToT) <- check e2 t3
-  -- Wrap the applicand in type applications and substitute away the unifiers
-  -- in the return type.
-  (e5, t5, as) <-
-    foldM
-      (\(e5, t5, as) (u, a1) -> do
-         (t6, newAs) <-
-           case Map.lookup u uToT of
-             Just t6 -> return (t6, as)
-             Nothing -> do
-               a2 <- freshTVar (show a1)
-               return (TVar a2, a2 : as)
-         return (applyType e5 t6, subst u (makePartial t6) t5, newAs))
-      (e3, t4, [])
-      usAndAs
-  t6 <- makeTotal t5
-  -- Construct the application
-  let e6 = FEApp e5 e4
-  -- Re-generalize the result.
-  return $ foldl' (\(e7, t7) a -> (FETAbs a e7, TForAll a t7)) (e6, t6) as
-infer (IELet x1 e1 e2) = do
-  (e3, t1) <- infer e1
-  x2 <- freshEVar (show x1)
-  (e4, t2) <-
-    local (first (Map.insert x2 t1)) $ infer (subst x1 (IEVar x2) e2)
-  return (FEApp (FEAbs x2 t1 e4) e3, t2)
-infer (IEAnno e1 t) = do
-  mapM_ tLookupVar (freeTVars t)
-  (e2, _) <- check e1 (makePartial t)
-  return (e2, t)
+-- Compute the most general substitution that makes the second type a
+-- generalization of the first. If underdetermined type applications are
+-- necessary, this function will introduce fresh type variables into the
+-- context to use as type arguments.
+subsume ::
+     Type
+  -> FTerm
+  -> Type
+  -> (FTerm -> Substitution -> TypeCheck a)
+  -> TypeCheck a
+subsume (TForAll a1 t1) e1 t2 k =
+  withFreshTConst (Just $ fromTVarName a1) $ \c ->
+    subsume (subst a1 (TConst c) t1) e1 t2 $ \e2 theta ->
+      if c `elem` Map.foldr (\t3 cs -> freeTConsts t3 ++ cs) [] theta
+        then throwError $
+             show (TForAll a1 t1) ++ " is not subsumed by " ++ show t2
+        else withFreshTVar (Just $ fromTVarName a1) $ \a2 ->
+               k (FETAbs a2 (subst c (TVar a2) e2)) theta
+subsume t1 e1 (TForAll a1 t2) k =
+  withFreshTVar (Just $ fromTVarName a1) $ \a2 ->
+    subsume t1 (subst a1 (TVar a2) e1) (subst a1 (TVar a2) t2) $ \e2 theta ->
+      case Map.lookup a2 theta of
+        Just t3 -> k (FETApp e2 t3) (Map.delete a2 theta)
+        Nothing ->
+          withFreshTVar Nothing $ \a3 -> k (FETApp e2 (TVar a3)) theta
+subsume t1 e t2 k = do
+  theta <- unify t1 t2
+  k e theta
 
--- Check a term against a type and possibly instantiate unifiers in the type.
-check :: ITerm -> PartialType -> TypeCheck (FTerm, Map Unifier Type)
-check e1 (PTForAll a1 t) = do
-  a2 <- freshTVar (show a1)
-  (e2, uToT) <-
-    local (second (Set.insert a2)) $ check e1 (subst a1 (PTVar a2) t)
-  return (FETAbs a2 e2, uToT)
-check (IEAbs x1 xt e1) (PTArrow t1 t2) = do
-  (t3, t4, uToT1) <-
-    case xt of
-      Just t3 -> do
-        uToT <- unify (makePartial t3) t1
-        let (t6, t7) =
-              Map.foldrWithKey
-                (\k v (t4, t5) -> (subst k v t4, subst k v t5))
-                (t1, t2)
-                (makePartial <$> uToT)
-        return (t6, t7, uToT)
-      Nothing -> return (t1, t2, Map.empty)
-  x2 <- freshEVar (show x1)
-  t5 <- makeTotal t3
-  (e2, uToT2) <-
-    local (first (Map.insert x2 t5)) $ check (subst x1 (IEVar x2) e1) t4
-  checkInst uToT1 uToT2 $
-    "Unable to unify " ++
-    show (PTArrow t1 t2) ++ " with " ++ show (PTArrow t3 t4)
-  return (FEAbs x2 t5 e2, Map.union uToT1 uToT2)
-check (IELet x1 e1 e2) t1 = do
-  (e3, t2) <- infer e1
-  x2 <- freshEVar (show x1)
-  (e4, uToT) <-
-    local (first (Map.insert x2 t2)) $ check (subst x1 (IEVar x2) e2) t1
-  return (FEApp (FEAbs x2 t2 e4) e3, uToT)
-check e1 (PTUnifier u) = do
-  (e2, t) <- infer e1
-  return (e2, Map.singleton u t)
-check e1 t1
-  -- Infer the type of e1.
- = do
-  (e2, t2) <- infer e1
-  -- Instantiate all the outer quantifiers with fresh unifiers.
-  (t3, usAndAs) <- open (makePartial t2)
-  -- Unify the result with t1.
-  uToT1 <- unify t1 t3
-  -- Wrap the term in type applications and substitute away the unifiers in the
-  -- type.
-  let (e4, t6) =
-        foldl'
-          (\(e3, t4) (u, _) ->
-             let t5 = fromMaybe unitType (Map.lookup u uToT1)
-             in (applyType e3 t5, subst u (makePartial t5) t4))
-          (e2, t3)
-          usAndAs
-  -- Unify the original type against the inferred type with eliminated
-  -- quantifiers.
-  uToT2 <- unify t6 t1
-  return (e4, uToT2)
+-- Check that a given type satisfies the following criteria:
+-- 1. All free type variables are bound in the initial context.
+-- 2. All free type constants are bound in the initial context.
+-- 3. The type contains no inner existential quantifiers.
+-- 4. If outerExistentialsAllowed is False, the type contains no outer
+--    existential quantifiers.
+checkAnnotation :: Bool -> Type -> TypeCheck ()
+checkAnnotation outerExistentialsAllowed t1 = do
+  let fv = freeTVars t1
+      fc = freeTConsts t1
+      (_, ca, cc) = initialContext
+  if Set.isSubsetOf (Set.fromList fv) ca
+    then return ()
+    else throwError $
+         "Type annotation contains unbound type variables: " ++ show t1
+  if Set.isSubsetOf (Set.fromList fc) cc
+    then return ()
+    else throwError $
+         "Type annotation contains unbound type constants: " ++ show t1
+  checkForExistentials $
+    if outerExistentialsAllowed
+      then let (BExists _, t2) = collectBinders t1
+           in t2
+      else t1
+  where
+    checkForExistentials :: Type -> TypeCheck ()
+    checkForExistentials (TVar _) = return ()
+    checkForExistentials (TConst _) = return ()
+    checkForExistentials (TArrow t2 t3) = do
+      checkForExistentials t2
+      checkForExistentials t3
+    checkForExistentials (TForAll _ t2) = checkForExistentials t2
+    checkForExistentials (TExists a t2) =
+      throwError $ "Unexpected existential: " ++ show (TExists a t2)
+
+-- Infer the type of a term. The returned substitution is guaranteed to be a
+-- "monomorphic" substitution, meaning the types in the codomain do not have
+-- any outer quantifiers.
+infer :: ITerm -> TypeCheck (FTerm, Type, Substitution)
+infer (IEIntLit i) = return (FEIntLit i, intType, Map.empty)
+infer (IEAddInt e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  (e4, theta2) <-
+    subsume intType e3 t1 $ \e4 theta2 -> do
+      let theta3 = composeSubst theta1 theta2
+      withSubstContext theta3 $ do
+        (e5, t2, theta4) <- infer e2
+        let theta5 = composeSubst theta3 theta4
+        subsume intType e5 t2 $ \e6 theta6 -> do
+          let theta7 = composeSubst theta5 theta6
+          return (FEAddInt e4 e6, theta7)
+  (e5, t2) <- generalize e4 intType
+  return (e5, t2, composeSubst theta1 theta2)
+infer (IESubInt e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  (e4, theta2) <-
+    subsume intType e3 t1 $ \e4 theta2 -> do
+      let theta3 = composeSubst theta1 theta2
+      withSubstContext theta3 $ do
+        (e5, t2, theta4) <- infer e2
+        let theta5 = composeSubst theta3 theta4
+        subsume intType e5 t2 $ \e6 theta6 -> do
+          let theta7 = composeSubst theta5 theta6
+          return (FESubInt e4 e6, theta7)
+  (e5, t2) <- generalize e4 intType
+  return (e5, t2, composeSubst theta1 theta2)
+infer (IEMulInt e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  (e4, theta2) <-
+    subsume intType e3 t1 $ \e4 theta2 -> do
+      let theta3 = composeSubst theta1 theta2
+      withSubstContext theta3 $ do
+        (e5, t2, theta4) <- infer e2
+        let theta5 = composeSubst theta3 theta4
+        subsume intType e5 t2 $ \e6 theta6 -> do
+          let theta7 = composeSubst theta5 theta6
+          return (FEMulInt e4 e6, theta7)
+  (e5, t2) <- generalize e4 intType
+  return (e5, t2, composeSubst theta1 theta2)
+infer (IEDivInt e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  (e4, theta2) <-
+    subsume intType e3 t1 $ \e4 theta2 -> do
+      let theta3 = composeSubst theta1 theta2
+      withSubstContext theta3 $ do
+        (e5, t2, theta4) <- infer e2
+        let theta5 = composeSubst theta3 theta4
+        subsume intType e5 t2 $ \e6 theta6 -> do
+          let theta7 = composeSubst theta5 theta6
+          return (FEDivInt e4 e6, theta7)
+  (e5, t2) <- generalize e4 intType
+  return (e5, t2, composeSubst theta1 theta2)
+infer (IEVar x) = do
+  (cx, _, _) <- ask
+  case Map.lookup x cx of
+    Just t -> return (FEVar x, t, Map.empty)
+    Nothing -> throwError $ "Undefined variable: " ++ show x
+infer (IEAbs x1 t1 e1) = do
+  checkAnnotation True t1
+  (e2, t2, theta) <-
+    openExistentials t1 $ \t2 ->
+      withFreshEVar (Just $ fromEVarName x1) t2 $ \x2 -> do
+        (e2, t3, theta) <- infer (subst x1 (IEVar x2) e1)
+        openUniversals e2 t3 $ \e3 t4 ->
+          return
+            ( FEAbs x2 (applySubst theta t2) (applySubst theta e3)
+            , applySubst theta (TArrow t2 t4)
+            , theta)
+  (e3, t3) <- generalize e2 t2
+  return (e3, t3, theta)
+infer (IEApp e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  (e4, t2, theta2) <-
+    withSubstContext theta1 $
+    withFreshTVar Nothing $ \a1 ->
+      withFreshTVar Nothing $ \a2 ->
+        subsume (TArrow (TVar a1) (TVar a2)) e3 t1 $ \e4 theta2 -> do
+          let theta3 = composeSubst theta1 theta2
+              t2 = applySubst theta3 (TVar a1)
+              t3 = applySubst theta3 (TVar a2)
+          withSubstContext theta3 $ do
+            (e5, t4, theta4) <- infer e2
+            let theta5 = composeSubst theta3 theta4
+            subsume (applySubst theta5 t2) e5 t4 $ \e6 theta6 -> do
+              let theta7 = composeSubst theta5 theta6
+                  (theta8, theta9) =
+                    Map.partition
+                      (\case
+                         TForAll _ _ -> True
+                         _ -> False)
+                      theta6
+              (_, ca, _) <- ask
+              if Set.null $ Map.keysSet theta8 `Set.intersection` ca
+                then return
+                       ( applySubst theta7 (FEApp e4 e6)
+                       , applySubst theta7 t3
+                       , composeSubst theta5 theta9)
+                else throwError $
+                     "Unable to determine the type of " ++ show (IEApp e1 e2)
+  (e5, t3) <- generalize e4 t2
+  return (e5, t3, theta2)
+infer (IELet x1 e1 e2) = do
+  (e3, t1, theta1) <- infer e1
+  withSubstContext theta1 $
+    withFreshEVar (Just $ fromEVarName x1) t1 $ \x2 -> do
+      (e4, t2, theta2) <- infer (subst x1 (IEVar x2) e2)
+      return (FEApp (FEAbs x2 t1 e4) e3, t2, composeSubst theta1 theta2)
+infer (IEAnno e1 t1) = do
+  checkAnnotation False t1
+  (e2, t2, theta1) <- infer e1
+  (e3, theta2) <- subsume (applySubst theta1 t1) e2 t2 $ curry return
+  (e4, t3) <- generalize e3 t1
+  return (e4, t3, composeSubst theta1 theta2)
 
 -- Given a term in the untyped language, return a term in the typed language
 -- together with its type.
 typeCheck :: ITerm -> Either String (FTerm, Type)
-typeCheck e =
-  let (result, _) =
-        runReader (runStateT (runExceptT (infer e)) 0) initialContext
-  in result
+typeCheck e1 =
+  (\(e2, t, _) -> (e2, t)) <$>
+  runReader (runExceptT (infer e1)) initialContext

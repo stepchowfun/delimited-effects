@@ -1,47 +1,54 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Syntax
-  ( CollectParams
-  , EVar(..)
+  ( BBigLambda(..)
+  , BExists(..)
+  , BForAll(..)
+  , BSmallLambda(..)
+  , EVarName(..)
   , FTerm(..)
   , FreeEVars
+  , FreeTConsts
   , FreeTVars
   , ITerm(..)
-  , PresentParams
   , Subst
-  , TVar(..)
+  , TConstName(..)
+  , TVarName(..)
   , Type(..)
-  , collectParams
+  , collectBinders
   , freeEVars
+  , freeTConsts
   , freeTVars
-  , presentParams
+  , hole
+  , annotate
   , subst
   ) where
 
-import Control.Arrow ((***))
 import Data.Function (on)
-import Data.List (groupBy)
+import Data.List (groupBy, nub)
 
 -- Data types
-data EVar
-  = UserEVar String
-  | FreshEVar String
-  deriving (Eq, Ord)
+newtype EVarName = EVarName
+  { fromEVarName :: String
+  } deriving (Eq, Ord)
 
-instance Show EVar where
-  show (UserEVar s) = s
-  show (FreshEVar s) = s
+instance Show EVarName where
+  show (EVarName s) = s
 
-data TVar
-  = UserTVar String
-  | FreshTVar String
-  deriving (Eq, Ord)
+newtype TVarName = TVarName
+  { fromTVarName :: String
+  } deriving (Eq, Ord)
 
-instance Show TVar where
-  show (UserTVar s) = s
-  show (FreshTVar s) = s
+instance Show TVarName where
+  show (TVarName s) = s
+
+newtype TConstName = TConstName
+  { fromTConstName :: String
+  } deriving (Eq, Ord)
+
+instance Show TConstName where
+  show (TConstName s) = s
 
 data ITerm
   = IEIntLit Integer
@@ -53,13 +60,13 @@ data ITerm
              ITerm
   | IEDivInt ITerm
              ITerm
-  | IEVar EVar
-  | IEAbs EVar
-          (Maybe Type)
+  | IEVar EVarName
+  | IEAbs EVarName
+          Type
           ITerm
   | IEApp ITerm
           ITerm
-  | IELet EVar
+  | IELet EVarName
           ITerm
           ITerm
   | IEAnno ITerm
@@ -75,90 +82,133 @@ data FTerm
              FTerm
   | FEDivInt FTerm
              FTerm
-  | FEVar EVar
-  | FEAbs EVar
+  | FEVar EVarName
+  | FEAbs EVarName
           Type
           FTerm
   | FEApp FTerm
           FTerm
-  | FETAbs TVar
+  | FETAbs TVarName
            FTerm
   | FETApp FTerm
            Type
 
 data Type
-  = TVar TVar
+  = TVar TVarName
+  | TConst TConstName
   | TArrow Type
            Type
-  | TForAll TVar
+  | TForAll TVarName
             Type
+  | TExists TVarName
+            Type
+
+-- A type that represents a hole.
+hole :: Type
+hole = TExists (TVarName "a") (TVar $ TVarName "a")
 
 -- Free variables
 class FreeEVars a where
-  freeEVars :: a -> [EVar]
+  freeEVars :: a -> [EVarName]
 
 class FreeTVars a where
-  freeTVars :: a -> [TVar]
+  freeTVars :: a -> [TVarName]
+
+class FreeTConsts a where
+  freeTConsts :: a -> [TConstName]
 
 instance FreeEVars ITerm where
   freeEVars (IEIntLit _) = []
-  freeEVars (IEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (IESubInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (IEMulInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (IEDivInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (IEAddInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (IESubInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (IEMulInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (IEDivInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (IEVar x) = [x]
   freeEVars (IEAbs x _ e) = filter (/= x) (freeEVars e)
-  freeEVars (IEApp e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (IELet x e1 e2) = freeEVars e1 ++ filter (/= x) (freeEVars e2)
+  freeEVars (IEApp e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (IELet x e1 e2) =
+    nub $ freeEVars e1 ++ filter (/= x) (freeEVars e2)
   freeEVars (IEAnno e _) = freeEVars e
 
 instance FreeTVars ITerm where
   freeTVars (IEIntLit _) = []
-  freeTVars (IEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (IESubInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (IEMulInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (IEDivInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (IEAddInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (IESubInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (IEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (IEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEVar _) = []
-  freeTVars (IEAbs _ (Just t) e) = freeTVars t ++ freeTVars e
-  freeTVars (IEAbs _ Nothing e) = freeTVars e
-  freeTVars (IEApp e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (IELet _ e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (IEAnno _ t) = freeTVars t
+  freeTVars (IEAbs _ t e) = nub $ freeTVars t ++ freeTVars e
+  freeTVars (IEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (IELet _ e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (IEAnno e t) = nub $ freeTVars e ++ freeTVars t
+
+instance FreeTConsts ITerm where
+  freeTConsts (IEIntLit _) = []
+  freeTConsts (IEAddInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IESubInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IEVar _) = []
+  freeTConsts (IEAbs _ t e) = nub $ freeTConsts t ++ freeTConsts e
+  freeTConsts (IEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IELet _ e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (IEAnno e t) = nub $ freeTConsts e ++ freeTConsts t
 
 instance FreeEVars FTerm where
   freeEVars (FEIntLit _) = []
-  freeEVars (FEAddInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (FESubInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (FEMulInt e1 e2) = freeEVars e1 ++ freeEVars e2
-  freeEVars (FEDivInt e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FEAddInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FESubInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FEMulInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FEDivInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (FEVar x) = [x]
   freeEVars (FEAbs x _ e) = filter (/= x) (freeEVars e)
-  freeEVars (FEApp e1 e2) = freeEVars e1 ++ freeEVars e2
+  freeEVars (FEApp e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (FETAbs _ e) = freeEVars e
   freeEVars (FETApp e _) = freeEVars e
 
 instance FreeTVars FTerm where
   freeTVars (FEIntLit _) = []
-  freeTVars (FEAddInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (FESubInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (FEMulInt e1 e2) = freeTVars e1 ++ freeTVars e2
-  freeTVars (FEDivInt e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FEAddInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FESubInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (FEVar _) = []
-  freeTVars (FEAbs _ t e) = freeTVars t ++ freeTVars e
-  freeTVars (FEApp e1 e2) = freeTVars e1 ++ freeTVars e2
+  freeTVars (FEAbs _ t e) = nub $ freeTVars t ++ freeTVars e
+  freeTVars (FEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (FETAbs a e) = filter (/= a) (freeTVars e)
-  freeTVars (FETApp e t) = freeTVars e ++ freeTVars t
+  freeTVars (FETApp e t) = nub $ freeTVars e ++ freeTVars t
+
+instance FreeTConsts FTerm where
+  freeTConsts (FEIntLit _) = []
+  freeTConsts (FEAddInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FESubInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEVar _) = []
+  freeTConsts (FEAbs _ t e) = nub $ freeTConsts t ++ freeTConsts e
+  freeTConsts (FEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FETAbs _ e) = freeTConsts e
+  freeTConsts (FETApp e t) = nub $ freeTConsts e ++ freeTConsts t
 
 instance FreeTVars Type where
   freeTVars (TVar a) = [a]
-  freeTVars (TArrow t1 t2) = freeTVars t1 ++ freeTVars t2
+  freeTVars (TConst _) = []
+  freeTVars (TArrow t1 t2) = nub $ freeTVars t1 ++ freeTVars t2
   freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
+  freeTVars (TExists a t) = filter (/= a) (freeTVars t)
+
+instance FreeTConsts Type where
+  freeTConsts (TVar _) = []
+  freeTConsts (TConst c) = [c]
+  freeTConsts (TArrow t1 t2) = nub $ freeTConsts t1 ++ freeTConsts t2
+  freeTConsts (TForAll _ t) = freeTConsts t
+  freeTConsts (TExists _ t) = freeTConsts t
 
 -- Substitution
 class Subst a b c where
   subst :: a -> b -> c -> c
 
-instance Subst EVar ITerm ITerm where
+instance Subst EVarName ITerm ITerm where
   subst _ _ (IEIntLit i) = IEIntLit i
   subst x e1 (IEAddInt e2 e3) = IEAddInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (IESubInt e2 e3) = IESubInt (subst x e1 e2) (subst x e1 e3)
@@ -183,19 +233,31 @@ instance Subst EVar ITerm ITerm where
          else subst x1 e1 e3)
   subst x e1 (IEAnno e2 t) = IEAnno (subst x e1 e2) t
 
-instance Subst TVar Type ITerm where
+instance Subst TVarName Type ITerm where
   subst _ _ (IEIntLit i) = IEIntLit i
   subst a t (IEAddInt e1 e2) = IEAddInt (subst a t e1) (subst a t e2)
   subst a t (IESubInt e1 e2) = IESubInt (subst a t e1) (subst a t e2)
   subst a t (IEMulInt e1 e2) = IEMulInt (subst a t e1) (subst a t e2)
   subst a t (IEDivInt e1 e2) = IEDivInt (subst a t e1) (subst a t e2)
   subst _ _ (IEVar x) = IEVar x
-  subst a t1 (IEAbs x t2 e2) = IEAbs x (subst a t1 <$> t2) (subst a t1 e2)
+  subst a t1 (IEAbs x t2 e) = IEAbs x (subst a t1 t2) (subst a t1 e)
   subst a t (IEApp e1 e2) = IEApp (subst a t e1) (subst a t e2)
   subst a t (IELet x e1 e2) = IELet x (subst a t e1) (subst a t e2)
   subst a t1 (IEAnno e t2) = IEAnno (subst a t1 e) (subst a t1 t2)
 
-instance Subst EVar FTerm FTerm where
+instance Subst TConstName Type ITerm where
+  subst _ _ (IEIntLit i) = IEIntLit i
+  subst c t (IEAddInt e1 e2) = IEAddInt (subst c t e1) (subst c t e2)
+  subst c t (IESubInt e1 e2) = IESubInt (subst c t e1) (subst c t e2)
+  subst c t (IEMulInt e1 e2) = IEMulInt (subst c t e1) (subst c t e2)
+  subst c t (IEDivInt e1 e2) = IEDivInt (subst c t e1) (subst c t e2)
+  subst _ _ (IEVar x) = IEVar x
+  subst c t1 (IEAbs x t2 e) = IEAbs x (subst c t1 t2) (subst c t1 e)
+  subst c t (IEApp e1 e2) = IEApp (subst c t e1) (subst c t e2)
+  subst c t (IELet x e1 e2) = IELet x (subst c t e1) (subst c t e2)
+  subst c t1 (IEAnno e t2) = IEAnno (subst c t1 e) (subst c t1 t2)
+
+instance Subst EVarName FTerm FTerm where
   subst _ _ (FEIntLit i) = FEIntLit i
   subst x e1 (FEAddInt e2 e3) = FEAddInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (FESubInt e2 e3) = FESubInt (subst x e1 e2) (subst x e1 e3)
@@ -214,7 +276,7 @@ instance Subst EVar FTerm FTerm where
   subst x e1 (FETAbs a e2) = FETAbs a (subst x e1 e2)
   subst x e1 (FETApp e2 t) = FETApp (subst x e1 e2) t
 
-instance Subst TVar Type FTerm where
+instance Subst TVarName Type FTerm where
   subst _ _ (FEIntLit i) = FEIntLit i
   subst a t (FEAddInt e1 e2) = FEAddInt (subst a t e1) (subst a t e2)
   subst a t (FESubInt e1 e2) = FESubInt (subst a t e1) (subst a t e2)
@@ -224,98 +286,161 @@ instance Subst TVar Type FTerm where
   subst a t1 (FEAbs x t2 e) = FEAbs x (subst a t1 t2) (subst a t1 e)
   subst a t (FEApp e1 e2) = FEApp (subst a t e1) (subst a t e2)
   subst a1 t (FETAbs a2 e) = FETAbs a2 (subst a1 t e)
-  subst a t1 (FETApp e t2) = FETApp (subst a t2 e) (subst a t1 t2)
+  subst a t1 (FETApp e t2) = FETApp (subst a t1 e) (subst a t1 t2)
 
-instance Subst TVar Type Type where
+instance Subst TConstName Type FTerm where
+  subst _ _ (FEIntLit i) = FEIntLit i
+  subst c t (FEAddInt e1 e2) = FEAddInt (subst c t e1) (subst c t e2)
+  subst c t (FESubInt e1 e2) = FESubInt (subst c t e1) (subst c t e2)
+  subst c t (FEMulInt e1 e2) = FEMulInt (subst c t e1) (subst c t e2)
+  subst c t (FEDivInt e1 e2) = FEDivInt (subst c t e1) (subst c t e2)
+  subst _ _ (FEVar x) = FEVar x
+  subst c t1 (FEAbs x t2 e) = FEAbs x (subst c t1 t2) (subst c t1 e)
+  subst c t (FEApp e1 e2) = FEApp (subst c t e1) (subst c t e2)
+  subst c t (FETAbs a e) = FETAbs a (subst c t e)
+  subst c t1 (FETApp e t2) = FETApp (subst c t1 e) (subst c t1 t2)
+
+instance Subst TVarName Type Type where
   subst a1 t (TVar a2) =
     if a1 == a2
       then t
       else TVar a2
+  subst _ _ (TConst c) = TConst c
   subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
   subst a1 t1 (TForAll a2 t2) =
     TForAll a2 $
     if a1 == a2
       then t2
       else subst a1 t1 t2
+  subst a1 t1 (TExists a2 t2) =
+    TExists a2 $
+    if a1 == a2
+      then t2
+      else subst a1 t1 t2
 
--- Equality
-instance Eq Type where
-  TVar a1 == TVar a2 = a1 == a2
-  TArrow t1 t2 == TArrow t3 t4 = t1 == t3 && t2 == t4
-  TForAll a1 t1 == TForAll a2 t2 =
-    t1 == subst a2 (TVar a1) t2 && t2 == subst a1 (TVar a2) t1
-  _ == _ = False
+instance Subst TConstName Type Type where
+  subst _ _ (TVar c) = TVar c
+  subst c1 t (TConst c2) =
+    if c1 == c2
+      then t
+      else TConst c2
+  subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
+  subst a1 t1 (TForAll a2 t2) = TForAll a2 (subst a1 t1 t2)
+  subst a1 t1 (TExists a2 t2) = TExists a2 (subst a1 t1 t2)
+
+-- Collecting binders
+newtype BSmallLambda =
+  BSmallLambda [(EVarName, Type)]
+
+newtype BBigLambda =
+  BBigLambda [TVarName]
+
+newtype BForAll =
+  BForAll [TVarName]
+
+newtype BExists =
+  BExists [TVarName]
+
+class CollectBinders a b where
+  collectBinders :: a -> (b, a)
+
+instance CollectBinders ITerm BSmallLambda where
+  collectBinders (IEIntLit i) = (BSmallLambda [], IEIntLit i)
+  collectBinders (IEAddInt e1 e2) = (BSmallLambda [], IEAddInt e1 e2)
+  collectBinders (IESubInt e1 e2) = (BSmallLambda [], IESubInt e1 e2)
+  collectBinders (IEMulInt e1 e2) = (BSmallLambda [], IEMulInt e1 e2)
+  collectBinders (IEDivInt e1 e2) = (BSmallLambda [], IEDivInt e1 e2)
+  collectBinders (IEVar x) = (BSmallLambda [], IEVar x)
+  collectBinders (IEAbs x t e1) =
+    let (BSmallLambda xs, e2) = collectBinders e1
+    in (BSmallLambda ((x, t) : xs), e2)
+  collectBinders (IEApp e1 e2) = (BSmallLambda [], IEApp e1 e2)
+  collectBinders (IELet x e1 e2) = (BSmallLambda [], IELet x e1 e2)
+  collectBinders (IEAnno e t) = (BSmallLambda [], IEAnno e t)
+
+instance CollectBinders FTerm BSmallLambda where
+  collectBinders (FEIntLit i) = (BSmallLambda [], FEIntLit i)
+  collectBinders (FEAddInt e1 e2) = (BSmallLambda [], FEAddInt e1 e2)
+  collectBinders (FESubInt e1 e2) = (BSmallLambda [], FESubInt e1 e2)
+  collectBinders (FEMulInt e1 e2) = (BSmallLambda [], FEMulInt e1 e2)
+  collectBinders (FEDivInt e1 e2) = (BSmallLambda [], FEDivInt e1 e2)
+  collectBinders (FEVar x) = (BSmallLambda [], FEVar x)
+  collectBinders (FEAbs x t e1) =
+    let (BSmallLambda xs, e2) = collectBinders e1
+    in (BSmallLambda ((x, t) : xs), e2)
+  collectBinders (FEApp e1 e2) = (BSmallLambda [], FEApp e1 e2)
+  collectBinders (FETAbs a e) = (BSmallLambda [], FETAbs a e)
+  collectBinders (FETApp e t) = (BSmallLambda [], FETApp e t)
+
+instance CollectBinders FTerm BBigLambda where
+  collectBinders (FEIntLit i) = (BBigLambda [], FEIntLit i)
+  collectBinders (FEAddInt e1 e2) = (BBigLambda [], FEAddInt e1 e2)
+  collectBinders (FESubInt e1 e2) = (BBigLambda [], FESubInt e1 e2)
+  collectBinders (FEMulInt e1 e2) = (BBigLambda [], FEMulInt e1 e2)
+  collectBinders (FEDivInt e1 e2) = (BBigLambda [], FEDivInt e1 e2)
+  collectBinders (FEVar x) = (BBigLambda [], FEVar x)
+  collectBinders (FEAbs x t e) = (BBigLambda [], FEAbs x t e)
+  collectBinders (FEApp e1 e2) = (BBigLambda [], FEApp e1 e2)
+  collectBinders (FETAbs a e1) =
+    let (BBigLambda as, e2) = collectBinders e1
+    in (BBigLambda (a : as), e2)
+  collectBinders (FETApp e t) = (BBigLambda [], FETApp e t)
+
+instance CollectBinders Type BForAll where
+  collectBinders (TVar a) = (BForAll [], TVar a)
+  collectBinders (TConst c) = (BForAll [], TConst c)
+  collectBinders (TArrow t1 t2) = (BForAll [], TArrow t1 t2)
+  collectBinders (TForAll a t1) =
+    let (BForAll as, t2) = collectBinders t1
+    in (BForAll (a : as), t2)
+  collectBinders (TExists a t) = (BForAll [], TExists a t)
+
+instance CollectBinders Type BExists where
+  collectBinders (TVar a) = (BExists [], TVar a)
+  collectBinders (TConst c) = (BExists [], TConst c)
+  collectBinders (TArrow t1 t2) = (BExists [], TArrow t1 t2)
+  collectBinders (TForAll a t) = (BExists [], TForAll a t)
+  collectBinders (TExists a t1) =
+    let (BExists as, t2) = collectBinders t1
+    in (BExists (a : as), t2)
+
+-- Type annotation propagation
+annotate :: ITerm -> Type -> ITerm
+annotate (IEAbs x t1 e) t2 =
+  let (BExists as1, t3) = collectBinders t2
+      (BForAll as2, t4) = collectBinders t3
+  in case t4 of
+       TArrow t5 t6 ->
+         IEAbs
+           x
+           (existentialize (as1 ++ as2) t5)
+           (annotate e $ existentialize (as1 ++ as2) t6)
+       _ -> IEAnno (IEAbs x t1 e) t2
+  where
+    existentialize as t3 =
+      foldr TExists t3 (filter (\a -> a `elem` freeTVars t3) as)
+annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
+annotate e _ = e
 
 -- Pretty printing
-class CollectParams a b | a -> b where
-  collectParams :: a -> ([b], a)
+instance Show BSmallLambda where
+  show (BSmallLambda xs1) =
+    "λ" ++
+    unwords
+      ((\group ->
+          "(" ++
+          unwords (show . fst <$> group) ++
+          " : " ++ show (snd (head group)) ++ ")") <$>
+       groupBy (on (==) (show . snd)) xs1)
 
-instance CollectParams ITerm (EVar, Maybe Type) where
-  collectParams (IEIntLit i) = ([], IEIntLit i)
-  collectParams (IEAddInt e1 e2) = ([], IEAddInt e1 e2)
-  collectParams (IESubInt e1 e2) = ([], IESubInt e1 e2)
-  collectParams (IEMulInt e1 e2) = ([], IEMulInt e1 e2)
-  collectParams (IEDivInt e1 e2) = ([], IEDivInt e1 e2)
-  collectParams (IEVar x) = ([], IEVar x)
-  collectParams (IEAbs x Nothing e1) =
-    let (xs, e2) = collectParams e1
-    in ((x, Nothing) : xs, e2)
-  collectParams (IEAbs x (Just t) e1) =
-    let (xs, e2) = collectParams e1
-    in ((x, Just t) : xs, e2)
-  collectParams (IEApp e1 e2) = ([], IEApp e1 e2)
-  collectParams (IELet x e1 e2) = ([], IELet x e1 e2)
-  collectParams (IEAnno e t) = ([], IEAnno e t)
+instance Show BBigLambda where
+  show (BBigLambda as) = "Λ" ++ unwords (show <$> as)
 
-instance CollectParams FTerm (Either (EVar, Type) TVar) where
-  collectParams (FEIntLit i) = ([], FEIntLit i)
-  collectParams (FEAddInt e1 e2) = ([], FEAddInt e1 e2)
-  collectParams (FESubInt e1 e2) = ([], FESubInt e1 e2)
-  collectParams (FEMulInt e1 e2) = ([], FEMulInt e1 e2)
-  collectParams (FEDivInt e1 e2) = ([], FEDivInt e1 e2)
-  collectParams (FEVar x) = ([], FEVar x)
-  collectParams (FEAbs x t e1) =
-    let (xs, e2) = collectParams e1
-    in (Left (x, t) : xs, e2)
-  collectParams (FEApp e1 e2) = ([], FEApp e1 e2)
-  collectParams (FETAbs a e1) =
-    let (xs, e2) = collectParams e1
-    in (Right a : xs, e2)
-  collectParams (FETApp e t) = ([], FETApp e t)
+instance Show BForAll where
+  show (BForAll as) = "∀" ++ unwords (show <$> as)
 
-instance CollectParams Type TVar where
-  collectParams (TVar a) = ([], TVar a)
-  collectParams (TArrow t1 t2) = ([], TArrow t1 t2)
-  collectParams (TForAll a t1) =
-    let (as, t2) = collectParams t1
-    in (a : as, t2)
-
-class PresentParams a where
-  presentParams :: [a] -> String
-
-instance PresentParams TVar where
-  presentParams as = unwords $ show <$> as
-
-instance PresentParams (EVar, Maybe Type) where
-  presentParams xs =
-    unwords $ do
-      group <- groupBy (on (==) snd) xs
-      let ys = fst <$> group
-      case snd (head group) of
-        Just t ->
-          return $ "(" ++ unwords (show <$> ys) ++ " : " ++ show t ++ ")"
-        Nothing -> return $ unwords $ show <$> ys
-
-instance PresentParams (Either (EVar, Type) TVar) where
-  presentParams xs =
-    unwords $ do
-      group <-
-        groupBy
-          (on (==) snd)
-          (either (show *** show) (\a -> (show a, "*")) <$> xs)
-      let ys = fst <$> group
-      let t = snd (head group)
-      return $ "(" ++ unwords ys ++ " : " ++ t ++ ")"
+instance Show BExists where
+  show (BExists as) = "∃" ++ unwords (show <$> as)
 
 instance Show ITerm where
   show (IEIntLit i) = show i
@@ -325,11 +450,11 @@ instance Show ITerm where
   show (IEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
   show (IEVar x) = show x
   show (IEAbs x t e1) =
-    let (xs, e2) = collectParams (IEAbs x t e1)
-    in "(λ" ++ presentParams xs ++ " . " ++ show e2 ++ ")"
+    let (xs, e2) = collectBinders (IEAbs x t e1)
+    in "(" ++ show (xs :: BSmallLambda) ++ " → " ++ show e2 ++ ")"
   show (IEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
   show (IELet x e1 e2) =
-    "(let " ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2 ++ ")"
+    "(" ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2 ++ ")"
   show (IEAnno e t) = "(" ++ show e ++ " : " ++ show t ++ ")"
 
 instance Show FTerm where
@@ -340,18 +465,23 @@ instance Show FTerm where
   show (FEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
   show (FEVar x) = show x
   show (FEAbs x t e1) =
-    let (xs, e2) = collectParams (FEAbs x t e1)
-    in "(λ" ++ presentParams xs ++ " . " ++ show e2 ++ ")"
+    let (xs, e2) = collectBinders (FEAbs x t e1)
+    in "(" ++ show (xs :: BSmallLambda) ++ " → " ++ show e2 ++ ")"
   show (FEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
   show (FETAbs a e1) =
-    let (as, e2) = collectParams (FETAbs a e1)
-    in "(λ" ++ presentParams as ++ " . " ++ show e2 ++ ")"
+    let (as, e2) = collectBinders (FETAbs a e1)
+    in "(" ++ show (as :: BBigLambda) ++ " → " ++ show e2 ++ ")"
   show (FETApp e t) = "(" ++ show e ++ " " ++ show t ++ ")"
 
 instance Show Type where
   show (TVar a) = show a
-  show (TArrow (TVar a) t) = show a ++ " -> " ++ show t
-  show (TArrow t1 t2) = "(" ++ show t1 ++ ") -> " ++ show t2
+  show (TConst c) = show c
+  show (TArrow (TVar a) t) = show a ++ " → " ++ show t
+  show (TArrow (TConst c) t) = show c ++ " → " ++ show t
+  show (TArrow t1 t2) = "(" ++ show t1 ++ ") → " ++ show t2
   show (TForAll a t1) =
-    let (as, t2) = collectParams (TForAll a t1)
-    in "∀" ++ presentParams as ++ " . " ++ show t2
+    let (as, t2) = collectBinders (TForAll a t1)
+    in show (as :: BForAll) ++ " . " ++ show t2
+  show (TExists a t1) =
+    let (as, t2) = collectBinders (TExists a t1)
+    in show (as :: BExists) ++ " . " ++ show t2
