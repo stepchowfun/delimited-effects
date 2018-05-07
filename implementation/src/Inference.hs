@@ -18,6 +18,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Syntax
   ( BExists(..)
+  , BForAll(..)
   , EVarName(..)
   , FTerm(..)
   , ITerm(..)
@@ -194,23 +195,34 @@ unify t1 t2 =
 -- type match another given type. The returned substitution is also applied to
 -- the context.
 subsume :: FTerm -> Type -> Type -> TypeCheck (FTerm, Substitution)
-subsume e1 (TForAll a1 t1) t2 = do
-  a2 <- freshTVar (Just $ fromTVarName a1)
-  (e2, theta) <- subsume (FETApp e1 (TVar a2)) (subst a1 (TVar a2) t1) t2
-  return (e2, Map.delete a2 theta)
-subsume e1 t1 t3@(TForAll a1 t2) = do
-  c <- freshTConst (Just $ fromTVarName a1)
-  (e2, theta) <- subsume e1 t1 (subst a1 (TConst c) t2)
-  if c `elem` Map.foldr (\t4 cs -> freeTConsts t4 ++ cs) [] theta
-    then throwError $ show t3 ++ " is not subsumed by " ++ show t1
-    else do
-      deleteTConst c
-      a2 <- freshTVar (Just $ fromTVarName a1)
-      deleteTVar a2
-      return (FETAbs a2 (subst c (TVar a2) e2), theta)
-subsume e t1 t2 = do
-  theta <- unify t1 t2
-  return (applySubst theta e, theta)
+subsume e1 t1 t2 = do
+  let (BForAll as1, t3) = collectBinders t1
+      (BForAll as2, t4) = collectBinders t2
+  as3 <- mapM (\a -> freshTVar (Just $ fromTVarName a)) as1
+  cs1 <- mapM (\a -> freshTConst (Just $ fromTVarName a)) as2
+  let e3 = foldr (\a e2 -> FETApp e2 (TVar a)) e1 as3
+      t5 = foldr (\(a1, a2) -> subst a1 (TVar a2)) t3 (zip as1 as3)
+      t6 = foldr (\(a, c) -> subst a (TConst c)) t4 (zip as2 cs1)
+  theta1 <- unify t5 t6
+  let theta2 = Map.withoutKeys theta1 (Set.fromList as3)
+  if Set.null $
+     Set.intersection
+       (Set.fromList cs1)
+       (Map.foldr
+          (\t7 cs -> Set.union (Set.fromList $ freeTConsts t7) cs)
+          Set.empty
+          theta2)
+    then return ()
+    else throwError $ show t2 ++ " is not subsumed by " ++ show t1
+  as4 <- mapM (\c -> freshTVar (Just $ fromTConstName c)) cs1
+  let e5 =
+        foldr
+          (\(c, a) e4 -> FETAbs a (subst c (TVar a) e4))
+          (applySubst theta1 e3)
+          (zip cs1 as4)
+  mapM_ deleteTConst cs1
+  mapM_ deleteTVar as4
+  return (e5, theta2)
 
 -- Generalize a term and a type.
 generalize :: FTerm -> Type -> TypeCheck (FTerm, Type)
