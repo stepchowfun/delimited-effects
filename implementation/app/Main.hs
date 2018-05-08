@@ -20,15 +20,13 @@ runProgram program =
         runExceptT $ do
           tokens <- ExceptT . return $ scan program
           iterm <- ExceptT . return $ parse tokens
-          lift . putStrLn $ "    Parsed term: " ++ show iterm
           (fterm, ftype) <- ExceptT . return $ typeCheck iterm
-          lift . putStrLn $ "  Inferred term: " ++ show fterm
-          lift . putStrLn $ "  Inferred type: " ++ show ftype
           rterm <- ExceptT . return $ eval fterm
-          lift . putStrLn $ "         Result: " ++ show rterm
+          lift . putStrLn $ "  ⇒ " ++ show rterm
+          lift . putStrLn $ "  : " ++ show ftype
           return ()
       case result of
-        Left s -> putStrLn ("          Error: " ++ s)
+        Left s -> putStrLn ("  Error: " ++ s)
         Right () -> return ()
 
 main :: IO ()
@@ -40,7 +38,7 @@ main = do
       runProgram program
     [] ->
       let repl = do
-            input <- readline "> "
+            input <- readline "⨠ "
             case input of
               Just program -> do
                 addHistory program

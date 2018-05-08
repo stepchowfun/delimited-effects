@@ -51,6 +51,7 @@ import Syntax
 ITerm
   : i                          { IEIntLit $1 }
   | x                          { IEVar (EVarName $1) }
+  | x '->' ITerm               { IEAbs (EVarName $1) hole $3 }
   | lambda EVarList '->' ITerm { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
   | ITerm ITerm %prec APP      { IEApp $1 $2 }
   | ITerm ':' Type             { IEAnno (annotate $1 $3) $3 }
