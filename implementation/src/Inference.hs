@@ -227,10 +227,9 @@ subsume e1 t1 t2 = do
 -- Generalize a term and a type.
 generalize :: FTerm -> Type -> TypeCheck (FTerm, Type)
 generalize e1 t1 = do
-  (cx, _, cc) <- get
+  (cx, _, _) <- get
   let cfv = Set.fromList $ Map.foldr (\t2 as -> freeTVars t2 ++ as) [] cx
       tfv = filter (`Set.notMember` cfv) $ nub $ freeTVars e1 ++ freeTVars t1
-  put (cx, cfv, cc)
   return (foldr FETAbs e1 tfv, foldr TForAll t1 tfv)
 
 -- Instantiate outer universal quantifiers with fresh type variables.
