@@ -418,43 +418,126 @@ instance Show BBigLambda where
 instance Show BForAll where
   show (BForAll as) = "∀" ++ unwords (show <$> as)
 
+data Assoc
+  = LeftAssoc
+  | RightAssoc
+  | NoAssoc
+  deriving (Eq)
+
+class Prec a where
+  prec :: a -> Integer
+  assoc :: a -> Assoc
+
+instance Prec ITerm where
+  prec IEIntLit {} = 10
+  prec IEAddInt {} = 5
+  prec IESubInt {} = 5
+  prec IEMulInt {} = 6
+  prec IEDivInt {} = 6
+  prec IEVar {} = 10
+  prec IEAbs {} = 2
+  prec IEApp {} = 10
+  prec IELet {} = 2
+  prec IEAnno {} = 1
+  assoc IEIntLit {} = NoAssoc
+  assoc IEAddInt {} = LeftAssoc
+  assoc IESubInt {} = LeftAssoc
+  assoc IEMulInt {} = LeftAssoc
+  assoc IEDivInt {} = LeftAssoc
+  assoc IEVar {} = NoAssoc
+  assoc IEAbs {} = RightAssoc
+  assoc IEApp {} = LeftAssoc
+  assoc IELet {} = RightAssoc
+  assoc IEAnno {} = NoAssoc
+
+instance Prec FTerm where
+  prec FEIntLit {} = 10
+  prec FEAddInt {} = 5
+  prec FESubInt {} = 5
+  prec FEMulInt {} = 6
+  prec FEDivInt {} = 6
+  prec FEVar {} = 10
+  prec FEAbs {} = 2
+  prec FEApp {} = 10
+  prec FETAbs {} = 2
+  prec FETApp {} = 10
+  assoc FEIntLit {} = NoAssoc
+  assoc FEAddInt {} = LeftAssoc
+  assoc FESubInt {} = LeftAssoc
+  assoc FEMulInt {} = LeftAssoc
+  assoc FEDivInt {} = LeftAssoc
+  assoc FEVar {} = NoAssoc
+  assoc FEAbs {} = RightAssoc
+  assoc FEApp {} = LeftAssoc
+  assoc FETAbs {} = RightAssoc
+  assoc FETApp {} = LeftAssoc
+
+instance Prec Type where
+  prec TVar {} = 10
+  prec TConst {} = 10
+  prec TArrow {} = 1
+  prec TForAll {} = 1
+  assoc TVar {} = NoAssoc
+  assoc TConst {} = NoAssoc
+  assoc TArrow {} = RightAssoc
+  assoc TForAll {} = RightAssoc
+
+-- The first node is the current one. The second is the one to be embedded.
+embed :: (Prec a, Show a) => Assoc -> a -> a -> String
+embed a e1 e2
+  | prec e2 < prec e1 = "(" ++ show e2 ++ ")"
+  | prec e2 == prec e1 && a == LeftAssoc && assoc e2 == RightAssoc =
+    "(" ++ show e2 ++ ")"
+  | prec e2 == prec e1 && a == RightAssoc && assoc e2 == LeftAssoc =
+    "(" ++ show e2 ++ ")"
+  | otherwise = show e2
+
 instance Show ITerm where
   show (IEIntLit i) = show i
-  show (IEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
-  show (IESubInt e1 e2) = "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
-  show (IEMulInt e1 e2) = "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
-  show (IEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
+  show e1@(IEAddInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
+  show e1@(IESubInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
+  show e1@(IEMulInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
+  show e1@(IEDivInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
   show (IEVar x) = show x
-  show (IEAbs x t e1) =
-    let (xs, e2) = collectBinders (IEAbs x t e1)
-    in "(" ++ show (xs :: BSmallLambda) ++ " → " ++ show e2 ++ ")"
-  show (IEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
-  show (IELet x e1 e2) =
-    "(" ++ show x ++ " = " ++ show e1 ++ " in " ++ show e2 ++ ")"
-  show (IEAnno e t) = "(" ++ show e ++ " : " ++ show t ++ ")"
+  show e1@(IEAbs x t e2) =
+    let (xs, e3) = collectBinders (IEAbs x t e2)
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  show e1@(IEApp e2 e3) =
+    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
+  show e1@(IELet x e2 e3) =
+    show x ++ " = " ++ embed NoAssoc e1 e2 ++ " in " ++ embed RightAssoc e1 e3
+  show e1@(IEAnno e2 t) = embed LeftAssoc e1 e2 ++ " : " ++ show t
 
 instance Show FTerm where
   show (FEIntLit i) = show i
-  show (FEAddInt e1 e2) = "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
-  show (FESubInt e1 e2) = "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
-  show (FEMulInt e1 e2) = "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
-  show (FEDivInt e1 e2) = "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
+  show e1@(FEAddInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
+  show e1@(FESubInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
+  show e1@(FEMulInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
+  show e1@(FEDivInt e2 e3) =
+    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
   show (FEVar x) = show x
-  show (FEAbs x t e1) =
-    let (xs, e2) = collectBinders (FEAbs x t e1)
-    in "(" ++ show (xs :: BSmallLambda) ++ " → " ++ show e2 ++ ")"
-  show (FEApp e1 e2) = "(" ++ show e1 ++ " " ++ show e2 ++ ")"
-  show (FETAbs a e1) =
-    let (as, e2) = collectBinders (FETAbs a e1)
-    in "(" ++ show (as :: BBigLambda) ++ " → " ++ show e2 ++ ")"
-  show (FETApp e t) = "(" ++ show e ++ " " ++ show t ++ ")"
+  show e1@(FEAbs x t e2) =
+    let (xs, e3) = collectBinders (FEAbs x t e2)
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  show e1@(FEApp e2 e3) =
+    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
+  show e1@(FETAbs a e2) =
+    let (as, e3) = collectBinders (FETAbs a e2)
+    in show (as :: BBigLambda) ++ " → " ++ embed RightAssoc e1 e3
+  show e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ show t
 
 instance Show Type where
   show (TVar a) = show a
   show (TConst c) = show c
-  show (TArrow (TVar a) t) = show a ++ " → " ++ show t
-  show (TArrow (TConst c) t) = show c ++ " → " ++ show t
-  show (TArrow t1 t2) = "(" ++ show t1 ++ ") → " ++ show t2
-  show (TForAll a t1) =
-    let (as, t2) = collectBinders (TForAll a t1)
-    in show (as :: BForAll) ++ " . " ++ show t2
+  show t1@(TArrow t2 t3) =
+    embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
+  show t1@(TForAll a t2) =
+    let (as, t3) = collectBinders (TForAll a t2)
+    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3

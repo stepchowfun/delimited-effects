@@ -266,7 +266,8 @@ simplify (FETApp e t) = FETApp (simplify e) t
 freshUserTVarName :: Set TVarName -> TVarName
 freshUserTVarName as =
   let names =
-        ["a", "b", "c", "d", "e", "f", "g", "h", "i"] ++ ((++ "′") <$> names)
+        ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"] ++
+        ((++ "′") <$> names)
   in UserTVarName $
      head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
 
