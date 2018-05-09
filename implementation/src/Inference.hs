@@ -67,20 +67,6 @@ withUserEVar x t k = do
   put (i2, Map.delete x cx2, ca2, cc2)
   return result
 
--- Add a type variable to the context.
--- withUserTVar :: TVarName -> TypeCheck a -> TypeCheck a
--- withUserTVar a k = do
---   (i1, cx1, ca1, cc1) <- get
---   case a of
---     UserTVarName _ -> return ()
---     _ -> error $ show a ++ " is not a UserTVarName."
---   when (Set.member a ca1) $
---     throwError $ "Type variable already exists: " ++ show a
---   put (i1, cx1, Set.insert a ca1, cc1)
---   result <- k
---   (i2, cx2, ca2, cc2) <- get
---   put (i2, cx2, Set.delete a ca2, cc2)
---   return result
 -- Generate a fresh type variable and add it to the context.
 freshTVar :: TypeCheck TVarName
 freshTVar = do
@@ -284,6 +270,26 @@ freshUserTVarName as =
   in UserTVarName $
      head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
 
+-- Get all the "user" type variables of a term, not just the free type ones.
+allTVarsTerm :: FTerm -> Set TVarName
+allTVarsTerm (FEIntLit _) = Set.empty
+allTVarsTerm (FEAddInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FESubInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEMulInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEDivInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEVar _) = Set.empty
+allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
+allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FETAbs a e) = Set.insert a (allTVarsTerm e)
+allTVarsTerm (FETApp e t) = Set.union (allTVarsTerm e) (allTVarsType t)
+
+-- Get all the "user" type variables of a type, not just the free type ones.
+allTVarsType :: Type -> Set TVarName
+allTVarsType (TVar a) = Set.singleton a
+allTVarsType (TConst _) = Set.empty
+allTVarsType (TArrow t1 t2) = Set.union (allTVarsType t1) (allTVarsType t2)
+allTVarsType (TForAll a t) = Set.insert a (allTVarsType t)
+
 -- Convert "auto" type variables into "user" type variables for nicer printing.
 -- This version of the function operates on terms.
 elimAutoVarsTerm :: Set TVarName -> FTerm -> FTerm
@@ -304,7 +310,7 @@ elimAutoVarsTerm as (FETAbs a1@(AutoTVarName _) e) =
   let a2 = freshUserTVarName as
   in FETAbs a2 (elimAutoVarsTerm (Set.insert a2 as) (subst a1 (TVar a2) e))
 elimAutoVarsTerm as (FETAbs a@(UserTVarName _) e) =
-  FETAbs a (elimAutoVarsTerm as e)
+  FETAbs a (elimAutoVarsTerm (Set.insert a as) e)
 elimAutoVarsTerm as (FETApp e t) = FETApp (elimAutoVarsTerm as e) t
 
 -- Convert "auto" type variables into "user" type variables for nicer printing.
@@ -318,7 +324,7 @@ elimAutoVarsType as (TForAll a1@(AutoTVarName _) t) =
   let a2 = freshUserTVarName as
   in TForAll a2 (elimAutoVarsType (Set.insert a2 as) (subst a1 (TVar a2) t))
 elimAutoVarsType as (TForAll a@(UserTVarName _) t) =
-  TForAll a (elimAutoVarsType as t)
+  TForAll a (elimAutoVarsType (Set.insert a as) t)
 
 -- Given a term in the untyped language, return a term in the typed language
 -- together with its type.
@@ -331,6 +337,6 @@ typeCheck e1 =
   in case result of
        Left s -> Left s
        Right (e2, t, _) ->
-         Right
-           ( elimAutoVarsTerm Set.empty $ simplify e2
-           , elimAutoVarsType Set.empty t)
+         let e3 = simplify e2
+             as = Set.union (allTVarsTerm e3) (allTVarsType t)
+         in Right (elimAutoVarsTerm as e3, elimAutoVarsType as t)
