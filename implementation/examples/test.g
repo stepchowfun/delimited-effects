@@ -6,13 +6,13 @@ nil = \i f -> i
   -> b in
 
 cons = \x l i f -> l (f x i) f
-  : forall a
+  : forall a b
   . a
-  -> (forall b . b -> (a -> b -> b) -> b)
-  -> forall b . b -> (a -> b -> b) -> b in
+  -> (forall c . c -> (a -> c -> c) -> c)
+  -> b -> (a -> b -> b) -> b in
 
 # This computes the sum of a list of integers.
-sum = \l -> l 0 (\x y -> x + y)
+sum = l -> l 0 (\x y -> x + y)
   : (forall a . a -> (Int -> a -> a) -> a)
   -> Int in
 
@@ -20,4 +20,4 @@ sum = \l -> l 0 (\x y -> x + y)
 myList = cons 3 (cons 4 (cons 5 nil)) in
 
 # Let's take its sum.
-myList
+sum myList
