@@ -9,7 +9,7 @@ module Lexer (Token(..), scan) where
 %wrapper "monad"
 
 $digit = 0-9
-$lower = a-z
+$lower = [a-z α-κ]
 $upper = A-Z
 $idChar = [_ $lower $upper $digit]
 @idLower = $lower $idChar*
