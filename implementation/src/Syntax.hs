@@ -3,7 +3,6 @@
 
 module Syntax
   ( BBigLambda(..)
-  , BExists(..)
   , BForAll(..)
   , BSmallLambda(..)
   , EVarName(..)
@@ -16,12 +15,11 @@ module Syntax
   , TConstName(..)
   , TVarName(..)
   , Type(..)
+  , annotate
   , collectBinders
   , freeEVars
   , freeTConsts
   , freeTVars
-  , hole
-  , annotate
   , subst
   ) where
 
@@ -29,26 +27,30 @@ import Data.Function (on)
 import Data.List (groupBy, nub)
 
 -- Data types
-newtype EVarName = EVarName
-  { fromEVarName :: String
-  } deriving (Eq, Ord)
+newtype EVarName =
+  EVarName String
+  deriving (Eq, Ord)
 
 instance Show EVarName where
   show (EVarName s) = s
 
-newtype TVarName = TVarName
-  { fromTVarName :: String
-  } deriving (Eq, Ord)
+data TVarName
+  = UserTVarName String -- Can be referred to in source programs
+  | AutoTVarName Integer -- Cannot be referred to in source programs
+  deriving (Eq, Ord)
 
 instance Show TVarName where
-  show (TVarName s) = s
+  show (UserTVarName s) = s
+  show (AutoTVarName i) = "$" ++ show i
 
-newtype TConstName = TConstName
-  { fromTConstName :: String
-  } deriving (Eq, Ord)
+data TConstName
+  = UserTConstName String -- Can be referred to in source programs
+  | AutoTConstName Integer -- Cannot be referred to in source programs
+  deriving (Eq, Ord)
 
 instance Show TConstName where
-  show (TConstName s) = s
+  show (UserTConstName s) = s
+  show (AutoTConstName i) = "$" ++ show i
 
 data ITerm
   = IEIntLit Integer
@@ -62,7 +64,7 @@ data ITerm
              ITerm
   | IEVar EVarName
   | IEAbs EVarName
-          Type
+          (Maybe Type)
           ITerm
   | IEApp ITerm
           ITerm
@@ -100,12 +102,6 @@ data Type
            Type
   | TForAll TVarName
             Type
-  | TExists TVarName
-            Type
-
--- A type that represents a hole.
-hole :: Type
-hole = TExists (TVarName "a") (TVar $ TVarName "a")
 
 -- Free variables
 class FreeEVars a where
@@ -137,7 +133,8 @@ instance FreeTVars ITerm where
   freeTVars (IEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEVar _) = []
-  freeTVars (IEAbs _ t e) = nub $ freeTVars t ++ freeTVars e
+  freeTVars (IEAbs _ Nothing e) = nub $ freeTVars e
+  freeTVars (IEAbs _ (Just t) e) = nub $ freeTVars t ++ freeTVars e
   freeTVars (IEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IELet _ e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEAnno e t) = nub $ freeTVars e ++ freeTVars t
@@ -149,7 +146,8 @@ instance FreeTConsts ITerm where
   freeTConsts (IEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IEVar _) = []
-  freeTConsts (IEAbs _ t e) = nub $ freeTConsts t ++ freeTConsts e
+  freeTConsts (IEAbs _ Nothing e) = nub $ freeTConsts e
+  freeTConsts (IEAbs _ (Just t) e) = nub $ freeTConsts t ++ freeTConsts e
   freeTConsts (IEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IELet _ e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IEAnno e t) = nub $ freeTConsts e ++ freeTConsts t
@@ -195,14 +193,12 @@ instance FreeTVars Type where
   freeTVars (TConst _) = []
   freeTVars (TArrow t1 t2) = nub $ freeTVars t1 ++ freeTVars t2
   freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
-  freeTVars (TExists a t) = filter (/= a) (freeTVars t)
 
 instance FreeTConsts Type where
   freeTConsts (TVar _) = []
   freeTConsts (TConst c) = [c]
   freeTConsts (TArrow t1 t2) = nub $ freeTConsts t1 ++ freeTConsts t2
   freeTConsts (TForAll _ t) = freeTConsts t
-  freeTConsts (TExists _ t) = freeTConsts t
 
 -- Substitution
 class Subst a b c where
@@ -240,7 +236,9 @@ instance Subst TVarName Type ITerm where
   subst a t (IEMulInt e1 e2) = IEMulInt (subst a t e1) (subst a t e2)
   subst a t (IEDivInt e1 e2) = IEDivInt (subst a t e1) (subst a t e2)
   subst _ _ (IEVar x) = IEVar x
-  subst a t1 (IEAbs x t2 e) = IEAbs x (subst a t1 t2) (subst a t1 e)
+  subst a t (IEAbs x Nothing e) = IEAbs x Nothing (subst a t e)
+  subst a t1 (IEAbs x (Just t2) e) =
+    IEAbs x (Just $ subst a t1 t2) (subst a t1 e)
   subst a t (IEApp e1 e2) = IEApp (subst a t e1) (subst a t e2)
   subst a t (IELet x e1 e2) = IELet x (subst a t e1) (subst a t e2)
   subst a t1 (IEAnno e t2) = IEAnno (subst a t1 e) (subst a t1 t2)
@@ -252,7 +250,9 @@ instance Subst TConstName Type ITerm where
   subst c t (IEMulInt e1 e2) = IEMulInt (subst c t e1) (subst c t e2)
   subst c t (IEDivInt e1 e2) = IEDivInt (subst c t e1) (subst c t e2)
   subst _ _ (IEVar x) = IEVar x
-  subst c t1 (IEAbs x t2 e) = IEAbs x (subst c t1 t2) (subst c t1 e)
+  subst c t (IEAbs x Nothing e) = IEAbs x Nothing (subst c t e)
+  subst c t1 (IEAbs x (Just t2) e) =
+    IEAbs x (Just $ subst c t1 t2) (subst c t1 e)
   subst c t (IEApp e1 e2) = IEApp (subst c t e1) (subst c t e2)
   subst c t (IELet x e1 e2) = IELet x (subst c t e1) (subst c t e2)
   subst c t1 (IEAnno e t2) = IEAnno (subst c t1 e) (subst c t1 t2)
@@ -312,11 +312,6 @@ instance Subst TVarName Type Type where
     if a1 == a2
       then t2
       else subst a1 t1 t2
-  subst a1 t1 (TExists a2 t2) =
-    TExists a2 $
-    if a1 == a2
-      then t2
-      else subst a1 t1 t2
 
 instance Subst TConstName Type Type where
   subst _ _ (TVar c) = TVar c
@@ -326,20 +321,16 @@ instance Subst TConstName Type Type where
       else TConst c2
   subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
   subst a1 t1 (TForAll a2 t2) = TForAll a2 (subst a1 t1 t2)
-  subst a1 t1 (TExists a2 t2) = TExists a2 (subst a1 t1 t2)
 
 -- Collecting binders
 newtype BSmallLambda =
-  BSmallLambda [(EVarName, Type)]
+  BSmallLambda [(EVarName, Maybe Type)]
 
 newtype BBigLambda =
   BBigLambda [TVarName]
 
 newtype BForAll =
   BForAll [TVarName]
-
-newtype BExists =
-  BExists [TVarName]
 
 class CollectBinders a b where
   collectBinders :: a -> (b, a)
@@ -367,7 +358,7 @@ instance CollectBinders FTerm BSmallLambda where
   collectBinders (FEVar x) = (BSmallLambda [], FEVar x)
   collectBinders (FEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
-    in (BSmallLambda ((x, t) : xs), e2)
+    in (BSmallLambda ((x, Just t) : xs), e2)
   collectBinders (FEApp e1 e2) = (BSmallLambda [], FEApp e1 e2)
   collectBinders (FETAbs a e) = (BSmallLambda [], FETAbs a e)
   collectBinders (FETApp e t) = (BSmallLambda [], FETApp e t)
@@ -393,32 +384,15 @@ instance CollectBinders Type BForAll where
   collectBinders (TForAll a t1) =
     let (BForAll as, t2) = collectBinders t1
     in (BForAll (a : as), t2)
-  collectBinders (TExists a t) = (BForAll [], TExists a t)
-
-instance CollectBinders Type BExists where
-  collectBinders (TVar a) = (BExists [], TVar a)
-  collectBinders (TConst c) = (BExists [], TConst c)
-  collectBinders (TArrow t1 t2) = (BExists [], TArrow t1 t2)
-  collectBinders (TForAll a t) = (BExists [], TForAll a t)
-  collectBinders (TExists a t1) =
-    let (BExists as, t2) = collectBinders t1
-    in (BExists (a : as), t2)
 
 -- Type annotation propagation
 annotate :: ITerm -> Type -> ITerm
 annotate (IEAbs x t1 e) t2 =
-  let (BExists as1, t3) = collectBinders t2
-      (BForAll as2, t4) = collectBinders t3
-  in case t4 of
-       TArrow t5 t6 ->
-         IEAbs
-           x
-           (existentialize (as1 ++ as2) t5)
-           (annotate e $ existentialize (as1 ++ as2) t6)
-       _ -> IEAnno (IEAbs x t1 e) t2
-  where
-    existentialize as t3 =
-      foldr TExists t3 (filter (\a -> a `elem` freeTVars t3) as)
+  let (BForAll _, t3) = collectBinders t2
+  in case (t1, t3) of
+       (Nothing, TArrow t4 t5) -> IEAbs x (Just t4) (annotate e t5)
+       (Just t4, TArrow _ t5) -> IEAbs x (Just t4) (annotate e t5)
+       _ -> IEAbs x t1 e
 annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
 annotate e _ = e
 
@@ -428,9 +402,14 @@ instance Show BSmallLambda where
     "λ" ++
     unwords
       ((\group ->
-          "(" ++
-          unwords (show . fst <$> group) ++
-          " : " ++ show (snd (head group)) ++ ")") <$>
+          let t1 = snd (head group)
+          in "(" ++
+             unwords (show . fst <$> group) ++
+             " : " ++
+             (case t1 of
+                Nothing -> "?"
+                Just t2 -> show t2) ++
+             ")") <$>
        groupBy (on (==) (show . snd)) xs1)
 
 instance Show BBigLambda where
@@ -438,9 +417,6 @@ instance Show BBigLambda where
 
 instance Show BForAll where
   show (BForAll as) = "∀" ++ unwords (show <$> as)
-
-instance Show BExists where
-  show (BExists as) = "∃" ++ unwords (show <$> as)
 
 instance Show ITerm where
   show (IEIntLit i) = show i
@@ -482,6 +458,3 @@ instance Show Type where
   show (TForAll a t1) =
     let (as, t2) = collectBinders (TForAll a t1)
     in show (as :: BForAll) ++ " . " ++ show t2
-  show (TExists a t1) =
-    let (as, t2) = collectBinders (TExists a t1)
-    in show (as :: BExists) ++ " . " ++ show t2

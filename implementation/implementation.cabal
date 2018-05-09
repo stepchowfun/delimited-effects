@@ -19,6 +19,7 @@ library
                      , Inference
                      , Lexer
                      , Parser
+                     , Substitution
                      , Syntax
   build-depends:       QuickCheck
                      , array
@@ -48,6 +49,7 @@ test-suite implementation-test
                      , InferenceSpec
                      , LexerSpec
                      , ParserSpec
+                     , SubstitutionSpec
                      , SyntaxSpec
   build-depends:       QuickCheck
                      , base

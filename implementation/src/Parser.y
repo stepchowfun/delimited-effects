@@ -10,7 +10,6 @@ import Syntax
   , TVarName(..)
   , Type(..)
   , annotate
-  , hole
   )
 
 }
@@ -31,7 +30,6 @@ import Syntax
   '/'    { TokenSlash }
   ':'    { TokenAnno }
   '='    { TokenEquals }
-  exists { TokenExists }
   forall { TokenForAll }
   i      { TokenIntLit $$ }
   in     { TokenIn }
@@ -51,7 +49,7 @@ import Syntax
 ITerm
   : i                          { IEIntLit $1 }
   | x                          { IEVar (EVarName $1) }
-  | x '->' ITerm               { IEAbs (EVarName $1) hole $3 }
+  | x '->' ITerm               { IEAbs (EVarName $1) Nothing $3 }
   | lambda EVarList '->' ITerm { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
   | ITerm ITerm %prec APP      { IEApp $1 $2 }
   | ITerm ':' Type             { IEAnno (annotate $1 $3) $3 }
@@ -63,19 +61,18 @@ ITerm
   | '(' ITerm ')'              { $2 }
 
 Type
-  : x                        { TVar (TVarName $1) }
-  | X                        { TConst (TConstName $1) }
+  : x                        { TVar (UserTVarName $1) }
+  | X                        { TConst (UserTConstName $1) }
   | Type '->' Type           { TArrow $1 $3 }
-  | exists TVarList '.' Type { foldr (\x t -> TExists x t) $4 (reverse $2) }
   | forall TVarList '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
   | '(' Type ')'             { $2 }
 
 EVar
-  : x                  { (EVarName $1, hole) }
-  | '(' x ':' Type ')' { (EVarName $2, $4) }
+  : x                  { (EVarName $1, Nothing) }
+  | '(' x ':' Type ')' { (EVarName $2, Just $4) }
 
 TVar
-  : x { TVarName $1 }
+  : x { UserTVarName $1 }
 
 EVarList
   : EVar          { [$1] }

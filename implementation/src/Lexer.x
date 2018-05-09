@@ -29,7 +29,6 @@ $idChar = [_ $lower $upper $digit]
 ":"            { tokenAtom TokenAnno }
 "="            { tokenAtom TokenEquals }
 "\" | "λ"      { tokenAtom TokenLambda }
-"exists" | "∃" { tokenAtom TokenExists }
 "forall" | "∀" { tokenAtom TokenForAll }
 "in"           { tokenAtom TokenIn }
 $digit+        { tokenInteger TokenIntLit }
@@ -46,7 +45,6 @@ data Token
   | TokenDash
   | TokenDot
   | TokenEquals
-  | TokenExists
   | TokenForAll
   | TokenIdLower String
   | TokenIdUpper String
@@ -69,7 +67,6 @@ instance Show Token where
   show TokenDash = "-"
   show TokenDot = "."
   show TokenEquals = "="
-  show TokenExists = "∃"
   show TokenForAll = "∀"
   show TokenIn = "in"
   show TokenLParen = "("
