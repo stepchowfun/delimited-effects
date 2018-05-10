@@ -9,7 +9,7 @@ module Inference
   ( typeCheck
   ) where
 
-import Control.Monad (replicateM, when)
+import Control.Monad (foldM, replicateM, when)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Control.Monad.State (State, evalState, get, put)
 import Data.List (nub)
@@ -40,17 +40,23 @@ import Syntax
   )
 
 -- Built-in constants
-intName :: TConstName
-intName = UserTConstName "Int"
-
 boolName :: TConstName
 boolName = UserTConstName "Bool"
 
-intType :: Type
-intType = TConst intName
-
 boolType :: Type
-boolType = TConst boolName
+boolType = TConst boolName []
+
+intName :: TConstName
+intName = UserTConstName "Int"
+
+intType :: Type
+intType = TConst intName []
+
+listName :: TConstName
+listName = UserTConstName "List"
+
+listType :: Type -> Type
+listType t = TConst listName [t]
 
 -- The TypeCheck monad provides:
 -- 1. The ability to generate fresh variables (via State)
@@ -60,7 +66,7 @@ type TypeCheck
    = ExceptT String (State ( Integer
                            , Map EVarName Type
                            , Set TVarName
-                           , Set TConstName))
+                           , Map TConstName Integer))
 
 -- Add a term variable to the context.
 withUserEVar :: EVarName -> Type -> TypeCheck a -> TypeCheck a
@@ -82,11 +88,11 @@ freshTVar = do
   return a
 
 -- Generate a fresh type constant and add it to the context.
-freshTConst :: TypeCheck TConstName
-freshTConst = do
+freshTConst :: Integer -> TypeCheck TConstName
+freshTConst n = do
   (i, cx, ca, cc) <- get
   let c = AutoTConstName i
-  put (i + 1, cx, ca, Set.insert c cc)
+  put (i + 1, cx, ca, Map.insert c n cc)
   return c
 
 -- Substitute a type for a type variable in the context.
@@ -108,15 +114,24 @@ unify t (TVar a)
   | a `notElem` freeTVars t = do
     substInContext a t
     return $ singletonSubst a t
-unify (TConst c1) (TConst c2)
-  | c1 == c2 = return emptySubst
+unify t1@(TConst c1 ts1) t2@(TConst c2 ts2)
+  | c1 == c2 = do
+    if length ts1 == length ts2
+      then return ()
+      else throwError $ "Unable to unify " ++ show t1 ++ " with " ++ show t2
+    foldM
+      (\theta1 (t3, t4) -> do
+         theta2 <- unify (applySubst theta1 t3) (applySubst theta1 t4)
+         return $ composeSubst theta1 theta2)
+      emptySubst
+      (zip ts1 ts2)
 unify (TArrow t1 t2) (TArrow t3 t4) = do
   theta1 <- unify t1 t3
   theta2 <- unify (applySubst theta1 t2) (applySubst theta1 t4)
   return $ composeSubst theta1 theta2
 unify t3@(TForAll a1 t1) t4@(TForAll a2 t2) = do
-  c <- freshTConst
-  theta <- unify (subst a1 (TConst c) t1) (subst a2 (TConst c) t2)
+  c <- freshTConst 0
+  theta <- unify (subst a1 (TConst c []) t1) (subst a2 (TConst c []) t2)
   if c `elem` freeTConsts theta
     then throwError $ "Unable to unify " ++ show t3 ++ " with " ++ show t4
     else return theta
@@ -131,10 +146,10 @@ subsume e1 t1 t2 = do
   let (BForAll as1, t3) = collectBinders t1
       (BForAll as2, t4) = collectBinders t2
   as3 <- replicateM (length as1) freshTVar
-  cs1 <- replicateM (length as2) freshTConst
+  cs1 <- replicateM (length as2) (freshTConst 0)
   let e3 = foldr (\a e2 -> FETApp e2 (TVar a)) e1 as3
       t5 = foldr (\(a1, a2) -> subst a1 (TVar a2)) t3 (zip as1 as3)
-      t6 = foldr (\(a, c) -> subst a (TConst c)) t4 (zip as2 cs1)
+      t6 = foldr (\(a, c) -> subst a (TConst c [])) t4 (zip as2 cs1)
   theta1 <- unify t5 t6
   let theta2 = substRemoveKeys (Set.fromList as3) theta1
   if Set.null $
@@ -216,6 +231,21 @@ infer (IEIf e1 e2 e3) = do
       (FEIf (applySubst theta9 e5) (applySubst theta9 e6) e8)
       (applySubst theta9 t7)
   return (e9, t8, theta9)
+infer (IEList es1) = do
+  a <- freshTVar
+  (es2, t1, theta) <-
+    foldM
+      (\(es2, t1, theta1) e1 -> do
+         (e2, t2, theta2) <- infer e1
+         (e3, theta3) <- subsume e2 t2 t1
+         return
+           ( e3 : es2
+           , applySubst theta3 t2
+           , composeSubst (composeSubst theta1 theta2) theta3))
+      ([], TVar a, emptySubst)
+      es1
+  (e, t2) <- generalize (FEList $ reverse es2) (listType t1)
+  return (e, t2, theta)
 infer (IEVar x) = do
   (_, cx, _, _) <- get
   case Map.lookup x cx of
@@ -280,6 +310,7 @@ simplify (FEDivInt e1 e2) = FEDivInt (simplify e1) (simplify e2)
 simplify FETrue = FETrue
 simplify FEFalse = FEFalse
 simplify (FEIf e1 e2 e3) = FEIf (simplify e1) (simplify e2) (simplify e3)
+simplify (FEList es) = FEList $ simplify <$> es
 simplify e@(FEVar _) = e
 simplify (FEAbs x t e) = FEAbs x t (simplify e)
 simplify (FEApp e1 e2) = FEApp (simplify e1) (simplify e2)
@@ -309,6 +340,8 @@ allTVarsTerm FETrue = Set.empty
 allTVarsTerm FEFalse = Set.empty
 allTVarsTerm (FEIf e1 e2 e3) =
   allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
+allTVarsTerm (FEList es) =
+  foldr (\e as -> Set.union (allTVarsTerm e) as) Set.empty es
 allTVarsTerm (FEVar _) = Set.empty
 allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
 allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
@@ -318,7 +351,8 @@ allTVarsTerm (FETApp e t) = Set.union (allTVarsTerm e) (allTVarsType t)
 -- Get all the "user" type variables of a type, not just the free type ones.
 allTVarsType :: Type -> Set TVarName
 allTVarsType (TVar a) = Set.singleton a
-allTVarsType (TConst _) = Set.empty
+allTVarsType (TConst _ ts) =
+  foldr (\t as -> Set.union (allTVarsType t) as) Set.empty ts
 allTVarsType (TArrow t1 t2) = Set.union (allTVarsType t1) (allTVarsType t2)
 allTVarsType (TForAll a t) = Set.insert a (allTVarsType t)
 
@@ -341,6 +375,7 @@ elimAutoVarsTerm as (FEIf e1 e2 e3) =
     (elimAutoVarsTerm as e1)
     (elimAutoVarsTerm as e2)
     (elimAutoVarsTerm as e3)
+elimAutoVarsTerm as (FEList es) = FEList $ elimAutoVarsTerm as <$> es
 elimAutoVarsTerm _ e@(FEVar _) = e
 elimAutoVarsTerm as (FEAbs x t e) = FEAbs x t (elimAutoVarsTerm as e)
 elimAutoVarsTerm as (FEApp e1 e2) =
@@ -356,7 +391,7 @@ elimAutoVarsTerm as (FETApp e t) = FETApp (elimAutoVarsTerm as e) t
 -- This version of the function operates on types.
 elimAutoVarsType :: Set TVarName -> Type -> Type
 elimAutoVarsType _ t@(TVar _) = t
-elimAutoVarsType _ t@(TConst _) = t
+elimAutoVarsType as (TConst c ts) = TConst c (elimAutoVarsType as <$> ts)
 elimAutoVarsType as (TArrow t1 t2) =
   TArrow (elimAutoVarsType as t1) (elimAutoVarsType as t2)
 elimAutoVarsType as (TForAll a1@(AutoTVarName _) t) =
@@ -372,7 +407,10 @@ typeCheck e1 =
   let result =
         evalState
           (runExceptT (infer e1))
-          (0, Map.empty, Set.empty, Set.fromList [intName, boolName])
+          ( 0
+          , Map.empty
+          , Set.empty
+          , Map.fromList [(boolName, 0), (intName, 0), (listName, 1)])
   in case result of
        Left s -> Left s
        Right (e2, t, _) ->

@@ -24,6 +24,7 @@ import Syntax
   ')'    { TokenRParen }
   '*'    { TokenAsterisk }
   '+'    { TokenPlus }
+  ','    { TokenComma }
   '-'    { TokenDash }
   '->'   { TokenArrow }
   '.'    { TokenDot }
@@ -31,6 +32,8 @@ import Syntax
   ':'    { TokenAnno }
   ';'    { TokenSemicolon }
   '='    { TokenEquals }
+  '['    { TokenLSquare }
+  ']'    { TokenRSquare }
   X      { TokenIdUpper $$ }
   else   { TokenElse }
   false  { TokenFalse }
@@ -42,19 +45,19 @@ import Syntax
   true   { TokenTrue }
   x      { TokenIdLower $$ }
 
+%nonassoc TCONST
+
 %nonassoc ':' ';' '.' else
 %right '->'
-%nonassoc forall
 %left '+' '-'
 %left '*' '/'
 
--- Tokens which may start an ITerm (see the comment on the APP token below)
-%nonassoc i true false if x lambda '('
+%nonassoc forall X
 
--- Make sure all tokens which may start an ITerm have lower precedence than
--- this! See this for details:
---   https://ptival.github.io/2017/05/16/parser-generators-and-function-application/
+%nonassoc i true false if x lambda '(' '['
+
 %nonassoc APP
+%nonassoc TAPP
 
 %%
 
@@ -67,6 +70,7 @@ ITerm
   | true                           { IETrue }
   | false                          { IEFalse }
   | if ITerm then ITerm else ITerm { IEIf $2 $4 $6 }
+  | '[' EListItems ']'             { IEList (reverse $2) }
   | x                              { IEVar (EVarName $1) }
   | x '->' ITerm                   { IEAbs (EVarName $1) Nothing $3 }
   | lambda EVarList '->' ITerm     { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
@@ -77,10 +81,15 @@ ITerm
 
 Type
   : x                        { TVar (UserTVarName $1) }
-  | X                        { TConst (UserTConstName $1) }
+  | TConst %prec TCONST      { TConst (UserTConstName $ fst $1) (reverse $ snd $1) }
   | Type '->' Type           { TArrow $1 $3 }
   | forall TVarList '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
   | '(' Type ')'             { $2 }
+
+EListItems
+  :                      { [] }
+  | ITerm                { [$1] }
+  | EListItems ',' ITerm { $3 : $1 }
 
 EVar
   : x                  { (EVarName $1, Nothing) }
@@ -96,6 +105,10 @@ EVarList
 TVarList
   : TVar          { [$1] }
   | TVarList TVar { $2 : $1 }
+
+TConst
+  : X                      { ($1, []) }
+  | TConst Type %prec TAPP { (fst $1, $2 : snd $1) }
 
 {
 
