@@ -30,7 +30,12 @@ $idChar = [_ $lower $upper $digit]
 ";"            { tokenAtom TokenSemicolon }
 "="            { tokenAtom TokenEquals }
 "\" | "λ"      { tokenAtom TokenLambda }
+"else"         { tokenAtom TokenElse }
+"false"        { tokenAtom TokenFalse }
 "forall" | "∀" { tokenAtom TokenForAll }
+"if"           { tokenAtom TokenIf }
+"then"         { tokenAtom TokenThen }
+"true"         { tokenAtom TokenTrue }
 $digit+        { tokenInteger TokenIntLit }
 $white+        ;
 @idLower       { tokenString TokenIdLower }
@@ -44,10 +49,13 @@ data Token
   | TokenAsterisk
   | TokenDash
   | TokenDot
+  | TokenElse
   | TokenEquals
+  | TokenFalse
   | TokenForAll
   | TokenIdLower String
   | TokenIdUpper String
+  | TokenIf
   | TokenIntLit Integer
   | TokenLParen
   | TokenLambda
@@ -55,6 +63,8 @@ data Token
   | TokenRParen
   | TokenSemicolon
   | TokenSlash
+  | TokenThen
+  | TokenTrue
   deriving Eq
 
 instance Show Token where
@@ -66,14 +76,19 @@ instance Show Token where
   show TokenAsterisk = "*"
   show TokenDash = "-"
   show TokenDot = "."
+  show TokenElse = "else"
   show TokenEquals = "="
+  show TokenFalse = "false"
   show TokenForAll = "∀"
+  show TokenIf = "if"
   show TokenLParen = "("
   show TokenLambda = "λ"
   show TokenPlus = "+"
   show TokenRParen = ")"
   show TokenSemicolon = ";"
   show TokenSlash = "/"
+  show TokenThen = "then"
+  show TokenTrue = "true"
 
 alexScanAction :: Alex (Maybe Token)
 alexScanAction = do

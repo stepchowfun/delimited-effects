@@ -43,8 +43,14 @@ import Syntax
 intName :: TConstName
 intName = UserTConstName "Int"
 
+boolName :: TConstName
+boolName = UserTConstName "Bool"
+
 intType :: Type
 intType = TConst intName
+
+boolType :: Type
+boolType = TConst boolName
 
 -- The TypeCheck monad provides:
 -- 1. The ability to generate fresh variables (via State)
@@ -192,6 +198,24 @@ infer (IEDivInt e1 e2) = do
   (e3, e4, theta) <- checkBinary e1 intType e2 intType
   (e5, t) <- generalize (FEDivInt e3 e4) intType
   return (e5, t, theta)
+infer IETrue = return (FETrue, boolType, emptySubst)
+infer IEFalse = return (FEFalse, boolType, emptySubst)
+infer (IEIf e1 e2 e3) = do
+  (e4, t4, theta1) <- infer e1
+  (e5, theta2) <- subsume e4 t4 boolType
+  let theta3 = composeSubst theta1 theta2
+  (e6, t5, theta4) <- infer e2
+  let theta5 = composeSubst theta3 theta4
+  (e7, t6, theta6) <- infer e3
+  let theta7 = composeSubst theta5 theta6
+  let t7 = applySubst theta7 t5
+  (e8, theta8) <- subsume e7 t6 t7
+  let theta9 = composeSubst theta7 theta8
+  (e9, t8) <-
+    generalize
+      (FEIf (applySubst theta9 e5) (applySubst theta9 e6) e8)
+      (applySubst theta9 t7)
+  return (e9, t8, theta9)
 infer (IEVar x) = do
   (_, cx, _, _) <- get
   case Map.lookup x cx of
@@ -253,6 +277,9 @@ simplify (FEAddInt e1 e2) = FEAddInt (simplify e1) (simplify e2)
 simplify (FESubInt e1 e2) = FESubInt (simplify e1) (simplify e2)
 simplify (FEMulInt e1 e2) = FEMulInt (simplify e1) (simplify e2)
 simplify (FEDivInt e1 e2) = FEDivInt (simplify e1) (simplify e2)
+simplify FETrue = FETrue
+simplify FEFalse = FEFalse
+simplify (FEIf e1 e2 e3) = FEIf (simplify e1) (simplify e2) (simplify e3)
 simplify e@(FEVar _) = e
 simplify (FEAbs x t e) = FEAbs x t (simplify e)
 simplify (FEApp e1 e2) = FEApp (simplify e1) (simplify e2)
@@ -278,6 +305,10 @@ allTVarsTerm (FEAddInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FESubInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FEMulInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FEDivInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm FETrue = Set.empty
+allTVarsTerm FEFalse = Set.empty
+allTVarsTerm (FEIf e1 e2 e3) =
+  allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
 allTVarsTerm (FEVar _) = Set.empty
 allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
 allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
@@ -303,6 +334,13 @@ elimAutoVarsTerm as (FEMulInt e1 e2) =
   FEMulInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
 elimAutoVarsTerm as (FEDivInt e1 e2) =
   FEDivInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
+elimAutoVarsTerm _ FETrue = FETrue
+elimAutoVarsTerm _ FEFalse = FEFalse
+elimAutoVarsTerm as (FEIf e1 e2 e3) =
+  FEIf
+    (elimAutoVarsTerm as e1)
+    (elimAutoVarsTerm as e2)
+    (elimAutoVarsTerm as e3)
 elimAutoVarsTerm _ e@(FEVar _) = e
 elimAutoVarsTerm as (FEAbs x t e) = FEAbs x t (elimAutoVarsTerm as e)
 elimAutoVarsTerm as (FEApp e1 e2) =
@@ -334,7 +372,7 @@ typeCheck e1 =
   let result =
         evalState
           (runExceptT (infer e1))
-          (0, Map.empty, Set.empty, Set.fromList [intName])
+          (0, Map.empty, Set.empty, Set.fromList [intName, boolName])
   in case result of
        Left s -> Left s
        Right (e2, t, _) ->

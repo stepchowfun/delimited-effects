@@ -42,6 +42,16 @@ eval (FEDivInt e1 e2) = do
     _ ->
       throwError $
       "Type error: cannot divide " ++ show e3 ++ " and " ++ show e4
+eval FETrue = return FETrue
+eval FEFalse = return FEFalse
+eval (FEIf e1 e2 e3) = do
+  e4 <- eval e1
+  e5 <- eval e2
+  e6 <- eval e3
+  case e4 of
+    FETrue -> return e5
+    FEFalse -> return e6
+    _ -> throwError $ "Type error: " ++ show e4 ++ " is not a Boolean"
 eval (FEVar x) = throwError $ "Unbound variable: " ++ show x
 eval (FEAbs x t e) = return $ FEAbs x t e
 eval (FEApp e1 e2) = do

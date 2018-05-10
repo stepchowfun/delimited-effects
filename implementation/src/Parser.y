@@ -32,33 +32,41 @@ import Syntax
   ';'    { TokenSemicolon }
   '='    { TokenEquals }
   X      { TokenIdUpper $$ }
+  else   { TokenElse }
+  false  { TokenFalse }
   forall { TokenForAll }
   i      { TokenIntLit $$ }
+  if     { TokenIf }
   lambda { TokenLambda }
+  then   { TokenThen }
+  true   { TokenTrue }
   x      { TokenIdLower $$ }
 
-%nonassoc ':' '=' ';' '.'
+%nonassoc ':' '=' ';' '.' true false then else
 %right '->'
 %left '+' '-'
 %left '*' '/'
-%nonassoc let exists forall lambda '(' ')' x i
+%nonassoc let exists forall lambda '(' ')' x i if
 %nonassoc APP
 
 %%
 
 ITerm
-  : i                          { IEIntLit $1 }
-  | x                          { IEVar (EVarName $1) }
-  | x '->' ITerm               { IEAbs (EVarName $1) Nothing $3 }
-  | lambda EVarList '->' ITerm { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
-  | ITerm ITerm %prec APP      { IEApp $1 $2 }
-  | ITerm ':' Type             { IEAnno (annotate $1 $3) $3 }
-  | ITerm '+' ITerm            { IEAddInt $1 $3 }
-  | ITerm '-' ITerm            { IESubInt $1 $3 }
-  | ITerm '*' ITerm            { IEMulInt $1 $3 }
-  | ITerm '/' ITerm            { IEDivInt $1 $3 }
-  | x '=' ITerm ';' ITerm       { IELet (EVarName $1) $3 $5 }
-  | '(' ITerm ')'              { $2 }
+  : i                              { IEIntLit $1 }
+  | ITerm '+' ITerm                { IEAddInt $1 $3 }
+  | ITerm '-' ITerm                { IESubInt $1 $3 }
+  | ITerm '*' ITerm                { IEMulInt $1 $3 }
+  | ITerm '/' ITerm                { IEDivInt $1 $3 }
+  | true                           { IETrue }
+  | false                          { IEFalse }
+  | if ITerm then ITerm else ITerm { IEIf $2 $4 $6 }
+  | x                              { IEVar (EVarName $1) }
+  | x '->' ITerm                   { IEAbs (EVarName $1) Nothing $3 }
+  | lambda EVarList '->' ITerm     { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
+  | ITerm ITerm %prec APP          { IEApp $1 $2 }
+  | ITerm ':' Type                 { IEAnno (annotate $1 $3) $3 }
+  | x '=' ITerm ';' ITerm          { IELet (EVarName $1) $3 $5 }
+  | '(' ITerm ')'                  { $2 }
 
 Type
   : x                        { TVar (UserTVarName $1) }

@@ -62,6 +62,11 @@ data ITerm
              ITerm
   | IEDivInt ITerm
              ITerm
+  | IETrue
+  | IEFalse
+  | IEIf ITerm
+         ITerm
+         ITerm
   | IEVar EVarName
   | IEAbs EVarName
           (Maybe Type)
@@ -84,6 +89,11 @@ data FTerm
              FTerm
   | FEDivInt FTerm
              FTerm
+  | FETrue
+  | FEFalse
+  | FEIf FTerm
+         FTerm
+         FTerm
   | FEVar EVarName
   | FEAbs EVarName
           Type
@@ -119,6 +129,10 @@ instance FreeEVars ITerm where
   freeEVars (IESubInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (IEMulInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (IEDivInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars IETrue = []
+  freeEVars IEFalse = []
+  freeEVars (IEIf e1 e2 e3) =
+    nub $ freeEVars e1 ++ freeEVars e2 ++ freeEVars e3
   freeEVars (IEVar x) = [x]
   freeEVars (IEAbs x _ e) = filter (/= x) (freeEVars e)
   freeEVars (IEApp e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
@@ -132,6 +146,10 @@ instance FreeTVars ITerm where
   freeTVars (IESubInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (IEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars IETrue = []
+  freeTVars IEFalse = []
+  freeTVars (IEIf e1 e2 e3) =
+    nub $ freeTVars e1 ++ freeTVars e2 ++ freeTVars e3
   freeTVars (IEVar _) = []
   freeTVars (IEAbs _ Nothing e) = nub $ freeTVars e
   freeTVars (IEAbs _ (Just t) e) = nub $ freeTVars t ++ freeTVars e
@@ -146,6 +164,10 @@ instance FreeTConsts ITerm where
   freeTConsts (IEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (IEVar _) = []
+  freeTConsts IETrue = []
+  freeTConsts IEFalse = []
+  freeTConsts (IEIf e1 e2 e3) =
+    nub $ freeTConsts e1 ++ freeTConsts e2 ++ freeTConsts e3
   freeTConsts (IEAbs _ Nothing e) = nub $ freeTConsts e
   freeTConsts (IEAbs _ (Just t) e) = nub $ freeTConsts t ++ freeTConsts e
   freeTConsts (IEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
@@ -158,6 +180,10 @@ instance FreeEVars FTerm where
   freeEVars (FESubInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (FEMulInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (FEDivInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars FETrue = []
+  freeEVars FEFalse = []
+  freeEVars (FEIf e1 e2 e3) =
+    nub $ freeEVars e1 ++ freeEVars e2 ++ freeEVars e3
   freeEVars (FEVar x) = [x]
   freeEVars (FEAbs x _ e) = filter (/= x) (freeEVars e)
   freeEVars (FEApp e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
@@ -170,6 +196,10 @@ instance FreeTVars FTerm where
   freeTVars (FESubInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (FEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (FEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars FETrue = []
+  freeTVars FEFalse = []
+  freeTVars (FEIf e1 e2 e3) =
+    nub $ freeTVars e1 ++ freeTVars e2 ++ freeTVars e3
   freeTVars (FEVar _) = []
   freeTVars (FEAbs _ t e) = nub $ freeTVars t ++ freeTVars e
   freeTVars (FEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
@@ -182,6 +212,10 @@ instance FreeTConsts FTerm where
   freeTConsts (FESubInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (FEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (FEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts FETrue = []
+  freeTConsts FEFalse = []
+  freeTConsts (FEIf e1 e2 e3) =
+    nub $ freeTConsts e1 ++ freeTConsts e2 ++ freeTConsts e3
   freeTConsts (FEVar _) = []
   freeTConsts (FEAbs _ t e) = nub $ freeTConsts t ++ freeTConsts e
   freeTConsts (FEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
@@ -210,6 +244,10 @@ instance Subst EVarName ITerm ITerm where
   subst x e1 (IESubInt e2 e3) = IESubInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (IEMulInt e2 e3) = IEMulInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (IEDivInt e2 e3) = IEDivInt (subst x e1 e2) (subst x e1 e3)
+  subst _ _ IETrue = IETrue
+  subst _ _ IEFalse = IEFalse
+  subst x e1 (IEIf e2 e3 e4) =
+    IEIf (subst x e1 e2) (subst x e1 e3) (subst x e1 e4)
   subst x1 e (IEVar x2) =
     if x1 == x2
       then e
@@ -235,6 +273,10 @@ instance Subst TVarName Type ITerm where
   subst a t (IESubInt e1 e2) = IESubInt (subst a t e1) (subst a t e2)
   subst a t (IEMulInt e1 e2) = IEMulInt (subst a t e1) (subst a t e2)
   subst a t (IEDivInt e1 e2) = IEDivInt (subst a t e1) (subst a t e2)
+  subst _ _ IETrue = IETrue
+  subst _ _ IEFalse = IEFalse
+  subst a t (IEIf e1 e2 e3) =
+    IEIf (subst a t e1) (subst a t e2) (subst a t e3)
   subst _ _ (IEVar x) = IEVar x
   subst a t (IEAbs x Nothing e) = IEAbs x Nothing (subst a t e)
   subst a t1 (IEAbs x (Just t2) e) =
@@ -249,6 +291,10 @@ instance Subst TConstName Type ITerm where
   subst c t (IESubInt e1 e2) = IESubInt (subst c t e1) (subst c t e2)
   subst c t (IEMulInt e1 e2) = IEMulInt (subst c t e1) (subst c t e2)
   subst c t (IEDivInt e1 e2) = IEDivInt (subst c t e1) (subst c t e2)
+  subst _ _ IETrue = IETrue
+  subst _ _ IEFalse = IEFalse
+  subst c t (IEIf e1 e2 e3) =
+    IEIf (subst c t e1) (subst c t e2) (subst c t e3)
   subst _ _ (IEVar x) = IEVar x
   subst c t (IEAbs x Nothing e) = IEAbs x Nothing (subst c t e)
   subst c t1 (IEAbs x (Just t2) e) =
@@ -263,6 +309,10 @@ instance Subst EVarName FTerm FTerm where
   subst x e1 (FESubInt e2 e3) = FESubInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (FEMulInt e2 e3) = FEMulInt (subst x e1 e2) (subst x e1 e3)
   subst x e1 (FEDivInt e2 e3) = FEDivInt (subst x e1 e2) (subst x e1 e3)
+  subst _ _ FETrue = FETrue
+  subst _ _ FEFalse = FEFalse
+  subst x e1 (FEIf e2 e3 e4) =
+    FEIf (subst x e1 e2) (subst x e1 e3) (subst x e1 e4)
   subst x1 e (FEVar x2) =
     if x1 == x2
       then e
@@ -282,6 +332,10 @@ instance Subst TVarName Type FTerm where
   subst a t (FESubInt e1 e2) = FESubInt (subst a t e1) (subst a t e2)
   subst a t (FEMulInt e1 e2) = FEMulInt (subst a t e1) (subst a t e2)
   subst a t (FEDivInt e1 e2) = FEDivInt (subst a t e1) (subst a t e2)
+  subst _ _ FETrue = FETrue
+  subst _ _ FEFalse = FEFalse
+  subst a t (FEIf e1 e2 e3) =
+    FEIf (subst a t e1) (subst a t e2) (subst a t e3)
   subst _ _ (FEVar x) = FEVar x
   subst a t1 (FEAbs x t2 e) = FEAbs x (subst a t1 t2) (subst a t1 e)
   subst a t (FEApp e1 e2) = FEApp (subst a t e1) (subst a t e2)
@@ -294,6 +348,10 @@ instance Subst TConstName Type FTerm where
   subst c t (FESubInt e1 e2) = FESubInt (subst c t e1) (subst c t e2)
   subst c t (FEMulInt e1 e2) = FEMulInt (subst c t e1) (subst c t e2)
   subst c t (FEDivInt e1 e2) = FEDivInt (subst c t e1) (subst c t e2)
+  subst _ _ FETrue = FETrue
+  subst _ _ FEFalse = FEFalse
+  subst c t (FEIf e1 e2 e3) =
+    FEIf (subst c t e1) (subst c t e2) (subst c t e3)
   subst _ _ (FEVar x) = FEVar x
   subst c t1 (FEAbs x t2 e) = FEAbs x (subst c t1 t2) (subst c t1 e)
   subst c t (FEApp e1 e2) = FEApp (subst c t e1) (subst c t e2)
@@ -341,6 +399,9 @@ instance CollectBinders ITerm BSmallLambda where
   collectBinders (IESubInt e1 e2) = (BSmallLambda [], IESubInt e1 e2)
   collectBinders (IEMulInt e1 e2) = (BSmallLambda [], IEMulInt e1 e2)
   collectBinders (IEDivInt e1 e2) = (BSmallLambda [], IEDivInt e1 e2)
+  collectBinders IETrue = (BSmallLambda [], IETrue)
+  collectBinders IEFalse = (BSmallLambda [], IEFalse)
+  collectBinders (IEIf e1 e2 e3) = (BSmallLambda [], IEIf e1 e2 e3)
   collectBinders (IEVar x) = (BSmallLambda [], IEVar x)
   collectBinders (IEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
@@ -355,6 +416,9 @@ instance CollectBinders FTerm BSmallLambda where
   collectBinders (FESubInt e1 e2) = (BSmallLambda [], FESubInt e1 e2)
   collectBinders (FEMulInt e1 e2) = (BSmallLambda [], FEMulInt e1 e2)
   collectBinders (FEDivInt e1 e2) = (BSmallLambda [], FEDivInt e1 e2)
+  collectBinders FETrue = (BSmallLambda [], FETrue)
+  collectBinders FEFalse = (BSmallLambda [], FEFalse)
+  collectBinders (FEIf e1 e2 e3) = (BSmallLambda [], FEIf e1 e2 e3)
   collectBinders (FEVar x) = (BSmallLambda [], FEVar x)
   collectBinders (FEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
@@ -369,6 +433,9 @@ instance CollectBinders FTerm BBigLambda where
   collectBinders (FESubInt e1 e2) = (BBigLambda [], FESubInt e1 e2)
   collectBinders (FEMulInt e1 e2) = (BBigLambda [], FEMulInt e1 e2)
   collectBinders (FEDivInt e1 e2) = (BBigLambda [], FEDivInt e1 e2)
+  collectBinders FETrue = (BBigLambda [], FETrue)
+  collectBinders FEFalse = (BBigLambda [], FEFalse)
+  collectBinders (FEIf e1 e2 e3) = (BBigLambda [], FEIf e1 e2 e3)
   collectBinders (FEVar x) = (BBigLambda [], FEVar x)
   collectBinders (FEAbs x t e) = (BBigLambda [], FEAbs x t e)
   collectBinders (FEApp e1 e2) = (BBigLambda [], FEApp e1 e2)
@@ -434,6 +501,9 @@ instance Prec ITerm where
   prec IESubInt {} = 5
   prec IEMulInt {} = 6
   prec IEDivInt {} = 6
+  prec IETrue {} = 10
+  prec IEFalse {} = 10
+  prec IEIf {} = 2
   prec IEVar {} = 10
   prec IEAbs {} = 2
   prec IEApp {} = 10
@@ -444,6 +514,9 @@ instance Prec ITerm where
   assoc IESubInt {} = LeftAssoc
   assoc IEMulInt {} = LeftAssoc
   assoc IEDivInt {} = LeftAssoc
+  assoc IETrue {} = NoAssoc
+  assoc IEFalse {} = NoAssoc
+  assoc IEIf {} = LeftAssoc
   assoc IEVar {} = NoAssoc
   assoc IEAbs {} = RightAssoc
   assoc IEApp {} = LeftAssoc
@@ -456,6 +529,9 @@ instance Prec FTerm where
   prec FESubInt {} = 5
   prec FEMulInt {} = 6
   prec FEDivInt {} = 6
+  prec FETrue {} = 10
+  prec FEFalse {} = 10
+  prec FEIf {} = 2
   prec FEVar {} = 10
   prec FEAbs {} = 2
   prec FEApp {} = 10
@@ -466,6 +542,9 @@ instance Prec FTerm where
   assoc FESubInt {} = LeftAssoc
   assoc FEMulInt {} = LeftAssoc
   assoc FEDivInt {} = LeftAssoc
+  assoc FETrue {} = NoAssoc
+  assoc FEFalse {} = NoAssoc
+  assoc FEIf {} = RightAssoc
   assoc FEVar {} = NoAssoc
   assoc FEAbs {} = RightAssoc
   assoc FEApp {} = LeftAssoc
@@ -502,6 +581,12 @@ instance Show ITerm where
     embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
   show e1@(IEDivInt e2 e3) =
     embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
+  show IETrue = "true"
+  show IEFalse = "false"
+  show e1@(IEIf e2 e3 e4) =
+    "if " ++
+    embed NoAssoc e1 e2 ++
+    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
   show (IEVar x) = show x
   show e1@(IEAbs x t e2) =
     let (xs, e3) = collectBinders (IEAbs x t e2)
@@ -522,6 +607,12 @@ instance Show FTerm where
     embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
   show e1@(FEDivInt e2 e3) =
     embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
+  show FETrue = "true"
+  show FEFalse = "false"
+  show e1@(FEIf e2 e3 e4) =
+    "if " ++
+    embed NoAssoc e1 e2 ++
+    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
   show (FEVar x) = show x
   show e1@(FEAbs x t e2) =
     let (xs, e3) = collectBinders (FEAbs x t e2)
