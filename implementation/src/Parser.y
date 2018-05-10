@@ -42,11 +42,18 @@ import Syntax
   true   { TokenTrue }
   x      { TokenIdLower $$ }
 
-%nonassoc ':' '=' ';' '.' true false then else
+%nonassoc ':' ';' '.' else
 %right '->'
+%nonassoc forall
 %left '+' '-'
 %left '*' '/'
-%nonassoc let exists forall lambda '(' ')' x i if
+
+-- Tokens which may start an ITerm (see the comment on the APP token below)
+%nonassoc i true false if x lambda '('
+
+-- Make sure all tokens which may start an ITerm have lower precedence than
+-- this! See this for details:
+--   https://ptival.github.io/2017/05/16/parser-generators-and-function-application/
 %nonassoc APP
 
 %%
