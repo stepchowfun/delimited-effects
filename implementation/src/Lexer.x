@@ -27,10 +27,10 @@ $idChar = [_ $lower $upper $digit]
 "."            { tokenAtom TokenDot }
 "/"            { tokenAtom TokenSlash }
 ":"            { tokenAtom TokenAnno }
+";"            { tokenAtom TokenSemicolon }
 "="            { tokenAtom TokenEquals }
 "\" | "λ"      { tokenAtom TokenLambda }
 "forall" | "∀" { tokenAtom TokenForAll }
-"in"           { tokenAtom TokenIn }
 $digit+        { tokenInteger TokenIntLit }
 $white+        ;
 @idLower       { tokenString TokenIdLower }
@@ -48,12 +48,12 @@ data Token
   | TokenForAll
   | TokenIdLower String
   | TokenIdUpper String
-  | TokenIn
   | TokenIntLit Integer
   | TokenLParen
   | TokenLambda
   | TokenPlus
   | TokenRParen
+  | TokenSemicolon
   | TokenSlash
   deriving Eq
 
@@ -68,11 +68,11 @@ instance Show Token where
   show TokenDot = "."
   show TokenEquals = "="
   show TokenForAll = "∀"
-  show TokenIn = "in"
   show TokenLParen = "("
   show TokenLambda = "λ"
   show TokenPlus = "+"
   show TokenRParen = ")"
+  show TokenSemicolon = ";"
   show TokenSlash = "/"
 
 alexScanAction :: Alex (Maybe Token)
