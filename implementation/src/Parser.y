@@ -100,6 +100,6 @@ TVarList
 {
 
 parseError :: [Token] -> Either String a
-parseError x = Left $ "Parse error: " ++ unwords (show <$> x)
+parseError x = Left $ "Cannot parse: " ++ unwords (show <$> x)
 
 }
