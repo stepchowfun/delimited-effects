@@ -96,7 +96,7 @@ alexScanAction = do
   sc <- alexGetStartCode
   case alexScan input sc of
     AlexEOF -> alexEOF
-    AlexError (_, _, _, s) -> alexError $ "Lexical error: " ++ s
+    AlexError (_, _, _, s) -> alexError $ "Cannot tokenize: " ++ s
     AlexSkip  newInp _ -> do
         alexSetInput newInp
         alexScanAction
