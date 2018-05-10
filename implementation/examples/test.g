@@ -3,21 +3,21 @@ nil = \i f -> i
   : forall a b
   . b
   -> (a -> b -> b)
-  -> b in
+  -> b;
 
 cons = \x l i f -> l (f x i) f
   : forall a b
   . a
   -> (forall c . c -> (a -> c -> c) -> c)
-  -> b -> (a -> b -> b) -> b in
+  -> b -> (a -> b -> b) -> b;
 
 # This computes the sum of a list of integers.
 sum = l -> l 0 (\x y -> x + y)
   : (forall a . a -> (Int -> a -> a) -> a)
-  -> Int in
+  -> Int;
 
 # Here's a list containing three numbers.
-myList = cons 3 (cons 4 (cons 5 nil)) in
+myList = cons 3 (cons 4 (cons 5 nil));
 
 # Let's take its sum.
 sum myList

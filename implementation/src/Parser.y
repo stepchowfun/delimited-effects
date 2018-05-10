@@ -29,15 +29,15 @@ import Syntax
   '.'    { TokenDot }
   '/'    { TokenSlash }
   ':'    { TokenAnno }
+  ';'    { TokenSemicolon }
   '='    { TokenEquals }
+  X      { TokenIdUpper $$ }
   forall { TokenForAll }
   i      { TokenIntLit $$ }
-  in     { TokenIn }
   lambda { TokenLambda }
   x      { TokenIdLower $$ }
-  X      { TokenIdUpper $$ }
 
-%nonassoc ':' '=' in '.'
+%nonassoc ':' '=' ';' '.'
 %right '->'
 %left '+' '-'
 %left '*' '/'
@@ -57,7 +57,7 @@ ITerm
   | ITerm '-' ITerm            { IESubInt $1 $3 }
   | ITerm '*' ITerm            { IEMulInt $1 $3 }
   | ITerm '/' ITerm            { IEDivInt $1 $3 }
-  | x '=' ITerm in ITerm       { IELet (EVarName $1) $3 $5 }
+  | x '=' ITerm ';' ITerm       { IELet (EVarName $1) $3 $5 }
   | '(' ITerm ')'              { $2 }
 
 Type
