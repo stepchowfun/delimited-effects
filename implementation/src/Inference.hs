@@ -167,80 +167,24 @@ open e (TForAll a1 t) = do
 open e t = return (e, t)
 
 -- A helper method for checking a term against a type.
-checkUnary :: ITerm -> Type -> TypeCheck (FTerm, Substitution)
-checkUnary e1 t1 = do
+check :: ITerm -> Type -> TypeCheck (FTerm, Substitution)
+check e1 t1 = do
   (e2, t2, theta1) <- infer e1
   (e3, theta2) <- subsume e2 t2 (applySubst theta1 t1)
-  let theta3 = composeSubst theta1 theta2
-  return (applySubst theta3 e3, theta3)
+  return (e3, composeSubst theta1 theta2)
 
 -- A helper method for type checking binary operations (e.g., arithmetic
 -- operations).
 checkBinary ::
      ITerm -> Type -> ITerm -> Type -> TypeCheck (FTerm, FTerm, Substitution)
 checkBinary e1 t1 e2 t2 = do
-  (e3, theta1) <- checkUnary e1 t1
-  (e4, theta2) <- checkUnary (applySubst theta1 e2) (applySubst theta1 t2)
+  (e3, theta1) <- check e1 t1
+  (e4, theta2) <- check (applySubst theta1 e2) (applySubst theta1 t2)
   return (applySubst theta2 e3, e4, composeSubst theta1 theta2)
 
 -- Infer the type of a term. Inference may involve unification. This function
 -- returns a substitution which is also applied to the context.
 infer :: ITerm -> TypeCheck (FTerm, Type, Substitution)
-infer (IEIntLit i) = return (FEIntLit i, intType, emptySubst)
-infer (IEAddInt e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEAddInt e3 e4) intType
-  return (e5, t, theta)
-infer (IESubInt e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FESubInt e3 e4) intType
-  return (e5, t, theta)
-infer (IEMulInt e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEMulInt e3 e4) intType
-  return (e5, t, theta)
-infer (IEDivInt e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEDivInt e3 e4) intType
-  return (e5, t, theta)
-infer IETrue = return (FETrue, boolType, emptySubst)
-infer IEFalse = return (FEFalse, boolType, emptySubst)
-infer (IEIf e1 e2 e3) = do
-  (e4, t4, theta1) <- infer e1
-  (e5, theta2) <- subsume e4 t4 boolType
-  let theta3 = composeSubst theta1 theta2
-  (e6, t5, theta4) <- infer e2
-  let theta5 = composeSubst theta3 theta4
-  (e7, t6, theta6) <- infer e3
-  let theta7 = composeSubst theta5 theta6
-  let t7 = applySubst theta7 t5
-  (e8, theta8) <- subsume e7 t6 t7
-  let theta9 = composeSubst theta7 theta8
-  (e9, t8) <-
-    generalize
-      (FEIf (applySubst theta9 e5) (applySubst theta9 e6) e8)
-      (applySubst theta9 t7)
-  return (e9, t8, theta9)
-infer (IEList es1) = do
-  a <- freshTVar
-  (es2, t1, theta) <-
-    foldM
-      (\(es2, t1, theta1) e1 -> do
-         (e2, t2, theta2) <- infer e1
-         (e3, theta3) <- subsume e2 t2 t1
-         (e4, t3) <- open e3 (applySubst theta3 t2)
-         return
-           (e4 : es2, t3, composeSubst (composeSubst theta1 theta2) theta3))
-      ([], TVar a, emptySubst)
-      es1
-  (e, t2) <- generalize (FEList $ reverse es2) (listType t1)
-  return (e, t2, theta)
-infer (IEConcat e1 e2) = do
-  a <- freshTVar
-  let t1 = listType $ TVar a
-  (e3, e4, theta) <- checkBinary e1 t1 e2 t1
-  (e5, t2) <- generalize (FEConcat e3 e4) (applySubst theta t1)
-  return (e5, t2, theta)
 infer (IEVar x) = do
   (_, cx, _, _) <- get
   case Map.lookup x cx of
@@ -265,20 +209,15 @@ infer (IEAbs x t1 e1) = do
   (e3, t4) <- generalize e2 t3
   return (e3, t4, theta)
 infer (IEApp e1 e2) = do
-  (e3, t1, theta1) <- infer e1
   a1 <- freshTVar
   a2 <- freshTVar
-  (e4, theta2) <- subsume e3 t1 (TArrow (TVar a1) (TVar a2))
-  let theta3 = composeSubst theta1 theta2
-      t2 = applySubst theta3 (TVar a1)
-      t3 = applySubst theta3 (TVar a2)
-  (e5, t4, theta4) <- infer e2
-  let theta5 = composeSubst theta3 theta4
-  (e6, theta6) <- subsume e5 t4 (applySubst theta5 t2)
-  let theta7 = composeSubst theta5 theta6
-  (e7, t5) <-
-    generalize (applySubst theta7 (FEApp e4 e6)) (applySubst theta7 t3)
-  return (e7, t5, theta7)
+  let (t1, t2) = (TVar a1, TVar a2)
+  (e3, theta1) <- check e1 (TArrow (TVar a1) (TVar a2))
+  let (t3, t4) = (applySubst theta1 t1, applySubst theta1 t2)
+  (e4, theta2) <- check (applySubst theta1 e2) t3
+  (e5, t5) <-
+    generalize (FEApp (applySubst theta2 e3) e4) (applySubst theta2 t4)
+  return (e5, t5, composeSubst theta1 theta2)
 infer (IELet x e1 e2) = do
   (e3, t1, theta1) <- infer e1
   withUserEVar x t1 $ do
@@ -288,15 +227,68 @@ infer (IELet x e1 e2) = do
       , t2
       , composeSubst theta1 theta2)
 infer (IEAnno e1 t1) = do
-  (e2, t2, theta1) <- infer e1
-  let t3 = applySubst theta1 t1
-  (e3, theta2) <- subsume e2 t2 t3
-  (e4, t4) <- generalize e3 t3
-  return (e4, t4, composeSubst theta1 theta2)
+  (e2, theta) <- check e1 t1
+  (e3, t2) <- generalize e2 t1
+  return (e3, t2, theta)
+infer IETrue = return (FETrue, boolType, emptySubst)
+infer IEFalse = return (FEFalse, boolType, emptySubst)
+infer (IEIf e1 e2 e3) = do
+  (e4, theta1) <- check e1 boolType
+  a <- freshTVar
+  let t1 = TVar a
+  (e5, e6, theta2) <-
+    checkBinary (applySubst theta1 e2) t1 (applySubst theta1 e3) t1
+  (e7, t2) <-
+    generalize (FEIf (applySubst theta2 e4) e5 e6) (applySubst theta2 t1)
+  return (e7, t2, composeSubst theta1 theta2)
+infer (IEIntLit i) = return (FEIntLit i, intType, emptySubst)
+infer (IEAdd e1 e2) = do
+  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e5, t) <- generalize (FEAddInt e3 e4) intType
+  return (e5, t, theta)
+infer (IESub e1 e2) = do
+  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e5, t) <- generalize (FESubInt e3 e4) intType
+  return (e5, t, theta)
+infer (IEMul e1 e2) = do
+  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e5, t) <- generalize (FEMulInt e3 e4) intType
+  return (e5, t, theta)
+infer (IEDiv e1 e2) = do
+  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e5, t) <- generalize (FEDivInt e3 e4) intType
+  return (e5, t, theta)
+infer (IEList es1) = do
+  a <- freshTVar
+  let t1 = TVar a
+  (es2, theta) <-
+    foldM
+      (\(es2, theta1) e1 -> do
+         (e2, theta2) <- check e1 (applySubst theta1 t1)
+         return (e2 : (applySubst theta2 <$> es2), composeSubst theta1 theta2))
+      ([], emptySubst)
+      es1
+  (e, t2) <-
+    generalize (FEList $ reverse es2) (listType (applySubst theta t1))
+  return (e, t2, theta)
+infer (IEConcat e1 e2) = do
+  a <- freshTVar
+  let t1 = listType $ TVar a
+  (e3, e4, theta) <- checkBinary e1 t1 e2 t1
+  (e5, t2) <- generalize (FEConcat e3 e4) (applySubst theta t1)
+  return (e5, t2, theta)
 
 -- Type inference can generate superfluous type abstractions and applications.
 -- This function removes them. This function is type-preserving.
 simplify :: FTerm -> FTerm
+simplify e@(FEVar _) = e
+simplify (FEAbs x t e) = FEAbs x t (simplify e)
+simplify (FEApp e1 e2) = FEApp (simplify e1) (simplify e2)
+simplify (FETAbs a1 (FETApp e (TVar a2)))
+  | a1 == a2 && a1 `notElem` freeTVars e = e
+simplify (FETAbs a e) = FETAbs a (simplify e)
+simplify (FETApp (FETAbs a e) t) = simplify (subst a t e)
+simplify (FETApp e t) = FETApp (simplify e) t
 simplify e@(FEIntLit _) = e
 simplify (FEAddInt e1 e2) = FEAddInt (simplify e1) (simplify e2)
 simplify (FESubInt e1 e2) = FESubInt (simplify e1) (simplify e2)
@@ -307,14 +299,6 @@ simplify FEFalse = FEFalse
 simplify (FEIf e1 e2 e3) = FEIf (simplify e1) (simplify e2) (simplify e3)
 simplify (FEList es) = FEList $ simplify <$> es
 simplify (FEConcat e1 e2) = FEConcat (simplify e1) (simplify e2)
-simplify e@(FEVar _) = e
-simplify (FEAbs x t e) = FEAbs x t (simplify e)
-simplify (FEApp e1 e2) = FEApp (simplify e1) (simplify e2)
-simplify (FETAbs a1 (FETApp e (TVar a2)))
-  | a1 == a2 && a1 `notElem` freeTVars e = e
-simplify (FETAbs a e) = FETAbs a (simplify e)
-simplify (FETApp (FETAbs a e) t) = simplify (subst a t e)
-simplify (FETApp e t) = FETApp (simplify e) t
 
 -- Generate a fresh type variable name.
 freshUserTVarName :: Set TVarName -> TVarName
@@ -327,23 +311,23 @@ freshUserTVarName as =
 
 -- Get all the "user" type variables of a term, not just the free type ones.
 allTVarsTerm :: FTerm -> Set TVarName
-allTVarsTerm (FEIntLit _) = Set.empty
-allTVarsTerm (FEAddInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FESubInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FEMulInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FEDivInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm FETrue = Set.empty
-allTVarsTerm FEFalse = Set.empty
-allTVarsTerm (FEIf e1 e2 e3) =
-  allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
-allTVarsTerm (FEList es) =
-  foldr (\e as -> Set.union (allTVarsTerm e) as) Set.empty es
-allTVarsTerm (FEConcat e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FEVar _) = Set.empty
 allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
 allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FETAbs a e) = Set.insert a (allTVarsTerm e)
 allTVarsTerm (FETApp e t) = Set.union (allTVarsTerm e) (allTVarsType t)
+allTVarsTerm FETrue = Set.empty
+allTVarsTerm FEFalse = Set.empty
+allTVarsTerm (FEIf e1 e2 e3) =
+  allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
+allTVarsTerm (FEIntLit _) = Set.empty
+allTVarsTerm (FEAddInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FESubInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEMulInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEDivInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
+allTVarsTerm (FEList es) =
+  foldr (\e as -> Set.union (allTVarsTerm e) as) Set.empty es
+allTVarsTerm (FEConcat e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 
 -- Get all the "user" type variables of a type, not just the free type ones.
 allTVarsType :: Type -> Set TVarName
@@ -356,25 +340,6 @@ allTVarsType (TForAll a t) = Set.insert a (allTVarsType t)
 -- Convert "auto" type variables into "user" type variables for nicer printing.
 -- This version of the function operates on terms.
 elimAutoVarsTerm :: Set TVarName -> FTerm -> FTerm
-elimAutoVarsTerm _ e@(FEIntLit _) = e
-elimAutoVarsTerm as (FEAddInt e1 e2) =
-  FEAddInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FESubInt e1 e2) =
-  FESubInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FEMulInt e1 e2) =
-  FEMulInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FEDivInt e1 e2) =
-  FEDivInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm _ FETrue = FETrue
-elimAutoVarsTerm _ FEFalse = FEFalse
-elimAutoVarsTerm as (FEIf e1 e2 e3) =
-  FEIf
-    (elimAutoVarsTerm as e1)
-    (elimAutoVarsTerm as e2)
-    (elimAutoVarsTerm as e3)
-elimAutoVarsTerm as (FEList es) = FEList $ elimAutoVarsTerm as <$> es
-elimAutoVarsTerm as (FEConcat e1 e2) =
-  FEConcat (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
 elimAutoVarsTerm _ e@(FEVar _) = e
 elimAutoVarsTerm as (FEAbs x t e) = FEAbs x t (elimAutoVarsTerm as e)
 elimAutoVarsTerm as (FEApp e1 e2) =
@@ -385,6 +350,25 @@ elimAutoVarsTerm as (FETAbs a1@(AutoTVarName _) e) =
 elimAutoVarsTerm as (FETAbs a@(UserTVarName _) e) =
   FETAbs a (elimAutoVarsTerm (Set.insert a as) e)
 elimAutoVarsTerm as (FETApp e t) = FETApp (elimAutoVarsTerm as e) t
+elimAutoVarsTerm _ FETrue = FETrue
+elimAutoVarsTerm _ FEFalse = FEFalse
+elimAutoVarsTerm as (FEIf e1 e2 e3) =
+  FEIf
+    (elimAutoVarsTerm as e1)
+    (elimAutoVarsTerm as e2)
+    (elimAutoVarsTerm as e3)
+elimAutoVarsTerm _ e@(FEIntLit _) = e
+elimAutoVarsTerm as (FEAddInt e1 e2) =
+  FEAddInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
+elimAutoVarsTerm as (FESubInt e1 e2) =
+  FESubInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
+elimAutoVarsTerm as (FEMulInt e1 e2) =
+  FEMulInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
+elimAutoVarsTerm as (FEDivInt e1 e2) =
+  FEDivInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
+elimAutoVarsTerm as (FEList es) = FEList $ elimAutoVarsTerm as <$> es
+elimAutoVarsTerm as (FEConcat e1 e2) =
+  FEConcat (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
 
 -- Convert "auto" type variables into "user" type variables for nicer printing.
 -- This version of the function operates on types.
