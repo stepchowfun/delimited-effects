@@ -10,6 +10,7 @@ import Syntax
   , TVarName(..)
   , Type(..)
   , annotate
+  , listType
   )
 
 }
@@ -80,7 +81,8 @@ ITerm
   | '(' ITerm ')'                  { $2 }
 
 Type
-  : x                        { TVar (UserTVarName $1) }
+  : '[' Type ']'             { listType $2 }
+  | x                        { TVar (UserTVarName $1) }
   | TConst %prec TCONST      { TConst (UserTConstName $ fst $1) (reverse $ snd $1) }
   | Type '->' Type           { TArrow $1 $3 }
   | forall TVarList '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }

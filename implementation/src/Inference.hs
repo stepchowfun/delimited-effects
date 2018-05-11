@@ -33,30 +33,17 @@ import Syntax
   , TConstName(..)
   , TVarName(..)
   , Type(..)
+  , boolName
+  , boolType
   , collectBinders
   , freeTConsts
   , freeTVars
+  , intName
+  , intType
+  , listName
+  , listType
   , subst
   )
-
--- Built-in constants
-boolName :: TConstName
-boolName = UserTConstName "Bool"
-
-boolType :: Type
-boolType = TConst boolName []
-
-intName :: TConstName
-intName = UserTConstName "Int"
-
-intType :: Type
-intType = TConst intName []
-
-listName :: TConstName
-listName = UserTConstName "List"
-
-listType :: Type -> Type
-listType t = TConst listName [t]
 
 -- The TypeCheck monad provides:
 -- 1. The ability to generate fresh variables (via State)

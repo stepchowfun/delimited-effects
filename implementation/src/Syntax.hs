@@ -16,10 +16,16 @@ module Syntax
   , TVarName(..)
   , Type(..)
   , annotate
+  , boolName
+  , boolType
   , collectBinders
   , freeEVars
   , freeTConsts
   , freeTVars
+  , intName
+  , intType
+  , listName
+  , listType
   , subst
   ) where
 
@@ -645,22 +651,47 @@ instance Show FTerm where
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
   show e1@(FETAbs a e2) =
     let (as, e3) = collectBinders (FETAbs a e2)
-    in show (as :: BBigLambda) ++ " → " ++ embed RightAssoc e1 e3
+    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e3
   show e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ show t
 
 instance Show Type where
   show (TVar a) = show a
   show (TConst c ts) =
-    unwords
-      (show c :
-       ((\t ->
-           let s = show t
-           in if ' ' `elem` s
-                then "(" ++ s ++ ")"
-                else s) <$>
-        ts))
+    let params =
+          unwords
+            ((\t ->
+                let s = show t
+                in if ' ' `elem` s
+                     then "(" ++ s ++ ")"
+                     else s) <$>
+             ts)
+    in if c == listName
+         then "[" ++ params ++ "]"
+         else show c ++
+              (if null params
+                 then ""
+                 else " " ++ params)
   show t1@(TArrow t2 t3) =
     embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
   show t1@(TForAll a t2) =
     let (as, t3) = collectBinders (TForAll a t2)
     in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
+
+-- Built-in type constants
+boolName :: TConstName
+boolName = UserTConstName "Bool"
+
+boolType :: Type
+boolType = TConst boolName []
+
+intName :: TConstName
+intName = UserTConstName "Int"
+
+intType :: Type
+intType = TConst intName []
+
+listName :: TConstName
+listName = UserTConstName "List"
+
+listType :: Type -> Type
+listType t = TConst listName [t]
