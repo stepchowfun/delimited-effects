@@ -22,6 +22,7 @@ $idChar = [_ $lower $upper $digit]
 ")"            { tokenAtom TokenRParen }
 "*"            { tokenAtom TokenAsterisk }
 "+"            { tokenAtom TokenPlus }
+","            { tokenAtom TokenComma }
 "-"            { tokenAtom TokenDash }
 "->" | "→"     { tokenAtom TokenArrow }
 "."            { tokenAtom TokenDot }
@@ -29,7 +30,9 @@ $idChar = [_ $lower $upper $digit]
 ":"            { tokenAtom TokenAnno }
 ";"            { tokenAtom TokenSemicolon }
 "="            { tokenAtom TokenEquals }
+"["            { tokenAtom TokenLSquare }
 "\" | "λ"      { tokenAtom TokenLambda }
+"]"            { tokenAtom TokenRSquare }
 "else"         { tokenAtom TokenElse }
 "false"        { tokenAtom TokenFalse }
 "forall" | "∀" { tokenAtom TokenForAll }
@@ -47,6 +50,7 @@ data Token
   = TokenAnno
   | TokenArrow
   | TokenAsterisk
+  | TokenComma
   | TokenDash
   | TokenDot
   | TokenElse
@@ -58,9 +62,11 @@ data Token
   | TokenIf
   | TokenIntLit Integer
   | TokenLParen
+  | TokenLSquare
   | TokenLambda
   | TokenPlus
   | TokenRParen
+  | TokenRSquare
   | TokenSemicolon
   | TokenSlash
   | TokenThen
@@ -74,6 +80,7 @@ instance Show Token where
   show TokenAnno = ":"
   show TokenArrow = "→"
   show TokenAsterisk = "*"
+  show TokenComma = ","
   show TokenDash = "-"
   show TokenDot = "."
   show TokenElse = "else"
@@ -82,9 +89,11 @@ instance Show Token where
   show TokenForAll = "∀"
   show TokenIf = "if"
   show TokenLParen = "("
+  show TokenLSquare = "["
   show TokenLambda = "λ"
   show TokenPlus = "+"
   show TokenRParen = ")"
+  show TokenRSquare = "]"
   show TokenSemicolon = ";"
   show TokenSlash = "/"
   show TokenThen = "then"

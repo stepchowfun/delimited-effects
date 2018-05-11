@@ -2,6 +2,7 @@ module Evaluation
   ( eval
   ) where
 
+import Control.Monad (foldM)
 import Control.Monad.Except (throwError)
 import Syntax (FTerm(..), subst)
 
@@ -44,6 +45,15 @@ eval (FEIf e1 e2 e3) = do
     FETrue -> return e5
     FEFalse -> return e6
     _ -> throwError $ show e4 ++ " is not a Boolean"
+eval (FEList es1) = do
+  es2 <-
+    foldM
+      (\es2 e1 -> do
+         e2 <- eval e1
+         return $ e2 : es2)
+      []
+      es1
+  return $ FEList $ reverse es2
 eval (FEVar x) = throwError $ "Unbound variable: " ++ show x
 eval (FEAbs x t e) = return $ FEAbs x t e
 eval (FEApp e1 e2) = do
