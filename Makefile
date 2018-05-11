@@ -1,3 +1,5 @@
+SHELL = bash
+
 .PHONY: \
   all test lint format clean \
   paper \
@@ -119,8 +121,16 @@ clean-formalization:
 	)
 
 implementation:
-	cd implementation && \
-	  stack build --pedantic --install-ghc --allow-different-user
+	(cd implementation && \
+	  set -o pipefail && \
+	  stack build --pedantic --install-ghc --allow-different-user 2>&1 | \
+	    tee ../build-log.txt) || \
+	  (rm -f build-log.txt && false) || \
+	  exit 1
+	(! grep conflict build-log.txt) || \
+	  (rm -f build-log.txt && false) || \
+	  exit 1
+	rm -f build-log.txt
 
 test-implementation: implementation
 	cd implementation && \
