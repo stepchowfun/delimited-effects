@@ -10,11 +10,12 @@ import Lexer (scan)
 import Parser (parse)
 import System.Console.Readline (addHistory, readline)
 import System.Environment (getArgs)
+import System.Exit (exitFailure, exitSuccess)
 
-runProgram :: String -> IO ()
+runProgram :: String -> IO Bool
 runProgram program =
   if all isSpace program
-    then return ()
+    then return True
     else do
       result <-
         runExceptT $ do
@@ -26,8 +27,10 @@ runProgram program =
           lift . putStrLn $ "  : " ++ show ftype
           return ()
       case result of
-        Left s -> putStrLn ("  Error: " ++ s)
-        Right () -> return ()
+        Left s -> do
+          putStrLn ("  Error: " ++ s)
+          return False
+        Right () -> return True
 
 main :: IO ()
 main = do
@@ -35,14 +38,17 @@ main = do
   case args of
     [file] -> do
       program <- readFile file
-      runProgram program
+      success <- runProgram program
+      if success
+        then exitSuccess
+        else exitFailure
     [] ->
       let repl = do
             input <- readline "⨠ "
             case input of
               Just program -> do
                 addHistory program
-                runProgram program
+                _ <- runProgram program
                 repl
               Nothing -> return ()
       in repl
