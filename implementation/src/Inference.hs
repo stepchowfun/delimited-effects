@@ -166,19 +166,22 @@ open e (TForAll a1 t) = do
   open (FETApp e (TVar a2)) (subst a1 (TVar a2) t)
 open e t = return (e, t)
 
+-- A helper method for checking a term against a type.
+checkUnary :: ITerm -> Type -> TypeCheck (FTerm, Substitution)
+checkUnary e1 t1 = do
+  (e2, t2, theta1) <- infer e1
+  (e3, theta2) <- subsume e2 t2 (applySubst theta1 t1)
+  let theta3 = composeSubst theta1 theta2
+  return (applySubst theta3 e3, theta3)
+
 -- A helper method for type checking binary operations (e.g., arithmetic
 -- operations).
 checkBinary ::
      ITerm -> Type -> ITerm -> Type -> TypeCheck (FTerm, FTerm, Substitution)
 checkBinary e1 t1 e2 t2 = do
-  (e3, t3, theta1) <- infer e1
-  (e4, theta2) <- subsume e3 t3 t1
-  let theta3 = composeSubst theta1 theta2
-  (e5, t4, theta4) <- infer e2
-  let theta5 = composeSubst theta3 theta4
-  (e6, theta6) <- subsume e5 t4 t2
-  let theta7 = composeSubst theta5 theta6
-  return (applySubst theta7 e4, e6, theta7)
+  (e3, theta1) <- checkUnary e1 t1
+  (e4, theta2) <- checkUnary (applySubst theta1 e2) (applySubst theta1 t2)
+  return (applySubst theta2 e3, e4, composeSubst theta1 theta2)
 
 -- Infer the type of a term. Inference may involve unification. This function
 -- returns a substitution which is also applied to the context.
@@ -225,14 +228,19 @@ infer (IEList es1) = do
       (\(es2, t1, theta1) e1 -> do
          (e2, t2, theta2) <- infer e1
          (e3, theta3) <- subsume e2 t2 t1
+         (e4, t3) <- open e3 (applySubst theta3 t2)
          return
-           ( e3 : es2
-           , applySubst theta3 t2
-           , composeSubst (composeSubst theta1 theta2) theta3))
+           (e4 : es2, t3, composeSubst (composeSubst theta1 theta2) theta3))
       ([], TVar a, emptySubst)
       es1
   (e, t2) <- generalize (FEList $ reverse es2) (listType t1)
   return (e, t2, theta)
+infer (IEConcat e1 e2) = do
+  a <- freshTVar
+  let t1 = listType $ TVar a
+  (e3, e4, theta) <- checkBinary e1 t1 e2 t1
+  (e5, t2) <- generalize (FEConcat e3 e4) (applySubst theta t1)
+  return (e5, t2, theta)
 infer (IEVar x) = do
   (_, cx, _, _) <- get
   case Map.lookup x cx of
@@ -298,6 +306,7 @@ simplify FETrue = FETrue
 simplify FEFalse = FEFalse
 simplify (FEIf e1 e2 e3) = FEIf (simplify e1) (simplify e2) (simplify e3)
 simplify (FEList es) = FEList $ simplify <$> es
+simplify (FEConcat e1 e2) = FEConcat (simplify e1) (simplify e2)
 simplify e@(FEVar _) = e
 simplify (FEAbs x t e) = FEAbs x t (simplify e)
 simplify (FEApp e1 e2) = FEApp (simplify e1) (simplify e2)
@@ -329,6 +338,7 @@ allTVarsTerm (FEIf e1 e2 e3) =
   allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
 allTVarsTerm (FEList es) =
   foldr (\e as -> Set.union (allTVarsTerm e) as) Set.empty es
+allTVarsTerm (FEConcat e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
 allTVarsTerm (FEVar _) = Set.empty
 allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
 allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
@@ -363,6 +373,8 @@ elimAutoVarsTerm as (FEIf e1 e2 e3) =
     (elimAutoVarsTerm as e2)
     (elimAutoVarsTerm as e3)
 elimAutoVarsTerm as (FEList es) = FEList $ elimAutoVarsTerm as <$> es
+elimAutoVarsTerm as (FEConcat e1 e2) =
+  FEConcat (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
 elimAutoVarsTerm _ e@(FEVar _) = e
 elimAutoVarsTerm as (FEAbs x t e) = FEAbs x t (elimAutoVarsTerm as e)
 elimAutoVarsTerm as (FEApp e1 e2) =
