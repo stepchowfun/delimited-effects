@@ -54,6 +54,12 @@ eval (FEList es1) = do
       []
       es1
   return $ FEList $ reverse es2
+eval (FEConcat e1 e2) = do
+  e3 <- eval e1
+  e4 <- eval e2
+  case (e3, e4) of
+    (FEList es1, FEList es2) -> return $ FEList (es1 ++ es2)
+    _ -> throwError $ "Cannot concatenate " ++ show e3 ++ " and " ++ show e4
 eval (FEVar x) = throwError $ "Unbound variable: " ++ show x
 eval (FEAbs x t e) = return $ FEAbs x t e
 eval (FEApp e1 e2) = do

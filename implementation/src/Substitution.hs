@@ -17,6 +17,7 @@ import Syntax
   ( FTerm(..)
   , FreeTConsts
   , FreeTVars
+  , ITerm(..)
   , TVarName(..)
   , Type(..)
   , freeTConsts
@@ -69,6 +70,9 @@ substRemoveKeys as (Substitution m) = Substitution $ Map.withoutKeys m as
 -- Substitutions can be applied to various entities.
 class ApplySubst a where
   applySubst :: Substitution -> a -> a
+
+instance ApplySubst ITerm where
+  applySubst (Substitution m) e = Map.foldrWithKey subst e m
 
 instance ApplySubst FTerm where
   applySubst (Substitution m) e = Map.foldrWithKey subst e m

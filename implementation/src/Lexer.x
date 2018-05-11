@@ -22,6 +22,7 @@ $idChar = [_ $lower $upper $digit]
 ")"            { tokenAtom TokenRParen }
 "*"            { tokenAtom TokenAsterisk }
 "+"            { tokenAtom TokenPlus }
+"++" | "⧺"     { tokenAtom TokenPlusPlus }
 ","            { tokenAtom TokenComma }
 "-"            { tokenAtom TokenDash }
 "->" | "→"     { tokenAtom TokenArrow }
@@ -65,6 +66,7 @@ data Token
   | TokenLSquare
   | TokenLambda
   | TokenPlus
+  | TokenPlusPlus
   | TokenRParen
   | TokenRSquare
   | TokenSemicolon
@@ -92,6 +94,7 @@ instance Show Token where
   show TokenLSquare = "["
   show TokenLambda = "λ"
   show TokenPlus = "+"
+  show TokenPlusPlus = "⧺"
   show TokenRParen = ")"
   show TokenRSquare = "]"
   show TokenSemicolon = ";"

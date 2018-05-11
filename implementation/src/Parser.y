@@ -25,6 +25,7 @@ import Syntax
   ')'    { TokenRParen }
   '*'    { TokenAsterisk }
   '+'    { TokenPlus }
+  '++'   { TokenPlusPlus }
   ','    { TokenComma }
   '-'    { TokenDash }
   '->'   { TokenArrow }
@@ -50,6 +51,7 @@ import Syntax
 
 %nonassoc ':' ';' '.' else
 %right '->'
+%left '++'
 %left '+' '-'
 %left '*' '/'
 
@@ -72,6 +74,7 @@ ITerm
   | false                          { IEFalse }
   | if ITerm then ITerm else ITerm { IEIf $2 $4 $6 }
   | '[' EListItems ']'             { IEList (reverse $2) }
+  | ITerm '++' ITerm               { IEConcat $1 $3 }
   | x                              { IEVar (EVarName $1) }
   | x '->' ITerm                   { IEAbs (EVarName $1) Nothing $3 }
   | lambda EVarList '->' ITerm     { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
