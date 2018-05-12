@@ -1,6 +1,6 @@
 \section{The calculus}
 
-  We adopt the convention that alpha-equivalent expressions are interchangeable in all contexts.
+  We adopt the familiar conventions that alpha-equivalent expressions are interchangeable in all contexts and that bound variables are distinct from free variables in all contexts. We have a monoidal structure on effect rows $\row$ with $\tPure$ as the identity element. Additionally, we identify effect rows up to commutativity and idempotency, that is, $\tUnion{\row_1}{\row_2} = \tUnion{\row_2}{\row_1}$ for any $\row_1, \row_2$ and $\tUnion{\row}{\row} = \row$ for any $\row$.
 
   \subsection{Syntax}
 
@@ -110,22 +110,15 @@
 
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\type}$}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
+          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
         \RightLabel{(\textsc{T-Pure})}
-        \BinaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\tVar}}$}
+        \BinaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\row}}$}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tPure}}$}
         \RightLabel{(\textsc{T-Run})}
         \UnaryInfC{$\hasType{\context}{\eRun{\term}}{\type}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\row_1}}$}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
-        \RightLabel{(\textsc{T-Subsumption})}
-        \BinaryInfC{$\hasType{\context}{\term}{\tComputation{\type}{\row_2}}$}
       \end{prooftree}
 
       \caption{Typing rules}
@@ -180,50 +173,6 @@
 
       \caption{Kinding rules}
       \label{fig:kinding}
-    \end{figure}
-
-    \begin{figure}[H]
-      \begin{center}
-        \framebox{$\rowSub{\context}{\row}{\row}$}
-      \end{center}
-
-      \medskip
-
-      \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kRow}$}
-        \RightLabel{(\textsc{R-Var})}
-        \UnaryInfC{$\rowSub{\context}{\tVar}{\tVar}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\row}{\kRow}$}
-        \RightLabel{(\textsc{R-Empty})}
-        \UnaryInfC{$\rowSub{\context}{\tPure}{\row}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_2}$}
-          \AxiomC{$\hasKind{\context}{\row_3}{\kRow}$}
-        \RightLabel{(\textsc{R-Weakening1})}
-        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-          \AxiomC{$\hasKind{\context}{\row_2}{\kRow}$}
-        \RightLabel{(\textsc{R-Weakening2})}
-        \BinaryInfC{$\rowSub{\context}{\row_1}{\tUnion{\row_2}{\row_3}}$}
-      \end{prooftree}
-
-      \begin{prooftree}
-          \AxiomC{$\rowSub{\context}{\row_1}{\row_3}$}
-          \AxiomC{$\rowSub{\context}{\row_2}{\row_3}$}
-        \RightLabel{(\textsc{R-Strengthening})}
-        \BinaryInfC{$\rowSub{\context}{\tUnion{\row_1}{\row_2}}{\row_3}$}
-      \end{prooftree}
-
-      \caption{Row subsumption}
-      \label{fig:row_subsumption}
     \end{figure}
 
   \subsection{Semantics}
