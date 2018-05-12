@@ -14,7 +14,7 @@
     \[ \eCombine \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\wildcard}{\eVar}}{\eReflect{\tVar_2}}{\eVar}}} \]
     Here's a polymorphic function which ``squares'' its argument using the monoid operation:
     \[ \eSquare \Coloneqq \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eAbs{\eVar}{\tVar_1}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\tVar_1}}{\tVar_2}}{\eVar}}{\eVar}}}} \]
-    Here, we create and use a local instance of the class which reifies the monoid structure of integers under multiplication:
+    Here, we create and use a local instance of the class which reifies the monoidal structure of integers under multiplication:
     \[ \eReify{\tVar}{\eMonoid{1}{\eMulInt}}{\eApp{\eSquare}{3}} \]
 
   \subsection{Effects and handlers}
