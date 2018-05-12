@@ -136,9 +136,9 @@ test-implementation: implementation
 	cd implementation && \
 	  stack test --pedantic --install-ghc --allow-different-user && \
 	  stack exec implementation-exe examples/bools.g && \
-	  stack exec implementation-exe examples/church-lists.g && \
+	  stack exec implementation-exe examples/church.g && \
 	  stack exec implementation-exe examples/ints.g && \
-	  stack exec implementation-exe examples/native-lists.g
+	  stack exec implementation-exe examples/lists.g
 
 lint-implementation:
 	hlint implementation
