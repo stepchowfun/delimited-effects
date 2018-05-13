@@ -31,6 +31,7 @@ module Syntax
 
 import Data.Function (on)
 import Data.List (groupBy, intercalate, nub, unwords)
+import Data.Maybe (maybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 
@@ -602,11 +603,17 @@ class RenameTVars a where
 instance RenameTVars ITerm where
   renameTVars _ e@(IEVar _) = e
   renameTVars as (IEAbs x t e) =
-    IEAbs x (renameTVars as <$> t) (renameTVars as e)
+    IEAbs
+      x
+      (renameTVars (Set.union as (Set.fromList $ maybe [] freeTVars t)) <$> t)
+      (renameTVars as e)
   renameTVars as (IEApp e1 e2) = IEApp (renameTVars as e1) (renameTVars as e2)
   renameTVars as (IELet x e1 e2) =
     IELet x (renameTVars as e1) (renameTVars as e2)
-  renameTVars as (IEAnno e t) = IEAnno (renameTVars as e) (renameTVars as t)
+  renameTVars as (IEAnno e t) =
+    IEAnno
+      (renameTVars as e)
+      (renameTVars (Set.union as (Set.fromList $ freeTVars t)) t)
   renameTVars _ IETrue = IETrue
   renameTVars _ IEFalse = IEFalse
   renameTVars as (IEIf e1 e2 e3) =
@@ -740,23 +747,23 @@ instance ShowRenamed Type where
     in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
 
 -- The first node is the current one. The second is the one to be embedded.
-embed :: (Prec a, Show a) => Assoc -> a -> a -> String
+embed :: (Prec a, ShowRenamed a) => Assoc -> a -> a -> String
 embed a e1 e2
-  | prec e2 < prec e1 = "(" ++ show e2 ++ ")"
+  | prec e2 < prec e1 = "(" ++ showRenamed e2 ++ ")"
   | prec e2 == prec e1 && a == LeftAssoc && assoc e2 == RightAssoc =
-    "(" ++ show e2 ++ ")"
+    "(" ++ showRenamed e2 ++ ")"
   | prec e2 == prec e1 && a == RightAssoc && assoc e2 == LeftAssoc =
-    "(" ++ show e2 ++ ")"
-  | otherwise = show e2
+    "(" ++ showRenamed e2 ++ ")"
+  | otherwise = showRenamed e2
 
 instance Show ITerm where
   show = showRenamed . renameTVars Set.empty
 
 instance Show FTerm where
-  show = showRenamed . renameTVars Set.empty
+  show e = showRenamed $ renameTVars (Set.fromList $ freeTVars e) e
 
 instance Show Type where
-  show = showRenamed . renameTVars Set.empty
+  show t = showRenamed $ renameTVars (Set.fromList $ freeTVars t) t
 
 -- Built-in type constants
 boolName :: TConstName

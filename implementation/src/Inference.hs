@@ -220,7 +220,8 @@ sanitizeAnnotation t1 =
       return $ TArrow t4 t5
     replaceBoundVars (TForAll a1 t2) = do
       a2 <- freshTVar
-      return $ TForAll a2 (subst a1 (TVar a2) t2)
+      t3 <- replaceBoundVars (subst a1 (TVar a2) t2)
+      return $ TForAll a2 t3
 
 -- Infer the type of a term. Inference may involve unification. This function
 -- returns a substitution which is also applied to the context.
