@@ -167,20 +167,30 @@ open e (TForAll a1 t) = do
 open e t = return (e, t)
 
 -- A helper method for checking a term against a type.
-check :: ITerm -> Type -> TypeCheck (FTerm, Substitution)
+check :: ITerm -> Type -> TypeCheck (FTerm, Type, Substitution)
 check e1 t1 = do
   (e2, t2, theta1) <- infer e1
   (e3, theta2) <- subsume e2 t2 (applySubst theta1 t1)
-  return (e3, composeSubst theta1 theta2)
+  let theta3 = composeSubst theta1 theta2
+  return (e3, applySubst theta3 t1, theta3)
 
 -- A helper method for type checking binary operations (e.g., arithmetic
 -- operations).
 checkBinary ::
-     ITerm -> Type -> ITerm -> Type -> TypeCheck (FTerm, FTerm, Substitution)
+     ITerm
+  -> Type
+  -> ITerm
+  -> Type
+  -> TypeCheck (FTerm, Type, FTerm, Type, Substitution)
 checkBinary e1 t1 e2 t2 = do
-  (e3, theta1) <- check e1 t1
-  (e4, theta2) <- check (applySubst theta1 e2) (applySubst theta1 t2)
-  return (applySubst theta2 e3, e4, composeSubst theta1 theta2)
+  (e3, t3, theta1) <- check e1 t1
+  (e4, t4, theta2) <- check (applySubst theta1 e2) (applySubst theta1 t2)
+  return
+    ( applySubst theta2 e3
+    , applySubst theta2 t3
+    , e4
+    , t4
+    , composeSubst theta1 theta2)
 
 -- Replace all variables in a type (both free and bound) with fresh type
 -- variables. This is used to sanitize type annotations, which would otherwise
@@ -239,13 +249,15 @@ infer (IEAbs x t1 e1) = do
 infer (IEApp e1 e2) = do
   a1 <- freshTVar
   a2 <- freshTVar
-  let (t1, t2) = (TVar a1, TVar a2)
-  (e3, theta1) <- check e1 (TArrow (TVar a1) (TVar a2))
-  let (t3, t4) = (applySubst theta1 t1, applySubst theta1 t2)
-  (e4, theta2) <- check (applySubst theta1 e2) t3
-  (e5, t5) <-
-    generalize (FEApp (applySubst theta2 e3) e4) (applySubst theta2 t4)
-  return (e5, t5, composeSubst theta1 theta2)
+  (e3, t1, theta1) <- check e1 $ TArrow (TVar a1) (TVar a2)
+  let (t4, t5) =
+        case t1 of
+          TArrow t2 t3 -> (t2, t3)
+          _ -> error "Something went wrong."
+  (e4, _, theta2) <- check (applySubst theta1 e2) t4
+  (e5, t6) <-
+    generalize (FEApp (applySubst theta2 e3) e4) (applySubst theta2 t5)
+  return (e5, t6, composeSubst theta1 theta2)
 infer (IELet x e1 e2) = do
   (e3, t1, theta1) <- infer e1
   withUserEVar x t1 $ do
@@ -256,44 +268,41 @@ infer (IELet x e1 e2) = do
       , composeSubst theta1 theta2)
 infer (IEAnno e1 t1) = do
   t2 <- sanitizeAnnotation t1
-  (e2, theta) <- check e1 t2
-  (e3, t3) <- generalize e2 t2
-  return (e3, t3, theta)
+  (e2, t3, theta) <- check e1 t2
+  (e3, t4) <- generalize e2 t3
+  return (e3, t4, theta)
 infer IETrue = return (FETrue, boolType, emptySubst)
 infer IEFalse = return (FEFalse, boolType, emptySubst)
 infer (IEIf e1 e2 e3) = do
-  (e4, theta1) <- check e1 boolType
-  a <- freshTVar
-  let t1 = TVar a
-  (e5, e6, theta2) <-
+  (e4, _, theta1) <- check e1 boolType
+  t1 <- TVar <$> freshTVar
+  (e5, t2, e6, _, theta2) <-
     checkBinary (applySubst theta1 e2) t1 (applySubst theta1 e3) t1
-  (e7, t2) <-
-    generalize (FEIf (applySubst theta2 e4) e5 e6) (applySubst theta2 t1)
-  return (e7, t2, composeSubst theta1 theta2)
+  (e7, t3) <- generalize (FEIf (applySubst theta2 e4) e5 e6) t2
+  return (e7, t3, composeSubst theta1 theta2)
 infer (IEIntLit i) = return (FEIntLit i, intType, emptySubst)
 infer (IEAdd e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
   (e5, t) <- generalize (FEAddInt e3 e4) intType
   return (e5, t, theta)
 infer (IESub e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
   (e5, t) <- generalize (FESubInt e3 e4) intType
   return (e5, t, theta)
 infer (IEMul e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
   (e5, t) <- generalize (FEMulInt e3 e4) intType
   return (e5, t, theta)
 infer (IEDiv e1 e2) = do
-  (e3, e4, theta) <- checkBinary e1 intType e2 intType
+  (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
   (e5, t) <- generalize (FEDivInt e3 e4) intType
   return (e5, t, theta)
 infer (IEList es1) = do
-  a <- freshTVar
-  let t1 = TVar a
+  t1 <- TVar <$> freshTVar
   (es2, theta) <-
     foldM
       (\(es2, theta1) e1 -> do
-         (e2, theta2) <- check e1 (applySubst theta1 t1)
+         (e2, _, theta2) <- check e1 (applySubst theta1 t1)
          return (e2 : (applySubst theta2 <$> es2), composeSubst theta1 theta2))
       ([], emptySubst)
       es1
@@ -301,11 +310,10 @@ infer (IEList es1) = do
     generalize (FEList $ reverse es2) (listType (applySubst theta t1))
   return (e, t2, theta)
 infer (IEConcat e1 e2) = do
-  a <- freshTVar
-  let t1 = listType $ TVar a
-  (e3, e4, theta) <- checkBinary e1 t1 e2 t1
-  (e5, t2) <- generalize (FEConcat e3 e4) (applySubst theta t1)
-  return (e5, t2, theta)
+  t1 <- listType . TVar <$> freshTVar
+  (e3, t2, e4, _, theta) <- checkBinary e1 t1 e2 t1
+  (e5, t3) <- generalize (FEConcat e3 e4) t2
+  return (e5, t3, theta)
 
 -- Type inference can generate superfluous type abstractions and applications.
 -- This function removes them. This function is type-preserving.
