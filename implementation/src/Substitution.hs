@@ -17,7 +17,6 @@ import Syntax
   ( FTerm(..)
   , FreeTConsts
   , FreeTVars
-  , ITerm(..)
   , TVarName(..)
   , Type(..)
   , freeTConsts
@@ -71,9 +70,10 @@ substRemoveKeys as (Substitution m) = Substitution $ Map.withoutKeys m as
 class ApplySubst a where
   applySubst :: Substitution -> a -> a
 
-instance ApplySubst ITerm where
-  applySubst (Substitution m) e = Map.foldrWithKey subst e m
-
+-- We deliberately omit an ApplySubst ITerm instance. The only free type
+-- variables of an ITerm come from type annotations, but free type variables in
+-- annotations are interpreted as implicitly existentially bound (i.e., they
+-- aren't really free).
 instance ApplySubst FTerm where
   applySubst (Substitution m) e = Map.foldrWithKey subst e m
 
