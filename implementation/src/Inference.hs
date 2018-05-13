@@ -195,7 +195,9 @@ checkBinary e1 t1 e2 t2 = do
 -- Replace all variables in a type (both free and bound) with fresh type
 -- variables. This is used to sanitize type annotations, which would otherwise
 -- be subject to issues related to variable capture (e.g., in type
--- applications).
+-- applications). Note that "free" variables in type annotations are implicitly
+-- existentially bound, so they are not really free (and thus we are justified
+-- in renaming them).
 sanitizeAnnotation :: Type -> TypeCheck Type
 sanitizeAnnotation t1 =
   let fv = freeTVars t1
@@ -282,19 +284,19 @@ infer (IEIf e1 e2 e3) = do
 infer (IEIntLit i) = return (FEIntLit i, intType, emptySubst)
 infer (IEAdd e1 e2) = do
   (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEAddInt e3 e4) intType
+  (e5, t) <- generalize (FEAdd e3 e4) intType
   return (e5, t, theta)
 infer (IESub e1 e2) = do
   (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FESubInt e3 e4) intType
+  (e5, t) <- generalize (FESub e3 e4) intType
   return (e5, t, theta)
 infer (IEMul e1 e2) = do
   (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEMulInt e3 e4) intType
+  (e5, t) <- generalize (FEMul e3 e4) intType
   return (e5, t, theta)
 infer (IEDiv e1 e2) = do
   (e3, _, e4, _, theta) <- checkBinary e1 intType e2 intType
-  (e5, t) <- generalize (FEDivInt e3 e4) intType
+  (e5, t) <- generalize (FEDiv e3 e4) intType
   return (e5, t, theta)
 infer (IEList es1) = do
   t1 <- TVar <$> freshTVar
@@ -315,7 +317,7 @@ infer (IEConcat e1 e2) = do
   return (e5, t3, theta)
 
 -- Type inference can generate superfluous type abstractions and applications.
--- This function removes them. This function is type-preserving.
+-- This function removes them. The simplification is type-preserving.
 simplify :: FTerm -> FTerm
 simplify e@(FEVar _) = e
 simplify (FEAbs x t e) = FEAbs x t (simplify e)
@@ -326,100 +328,15 @@ simplify (FETAbs a e) = FETAbs a (simplify e)
 simplify (FETApp (FETAbs a e) t) = simplify (subst a t e)
 simplify (FETApp e t) = FETApp (simplify e) t
 simplify e@(FEIntLit _) = e
-simplify (FEAddInt e1 e2) = FEAddInt (simplify e1) (simplify e2)
-simplify (FESubInt e1 e2) = FESubInt (simplify e1) (simplify e2)
-simplify (FEMulInt e1 e2) = FEMulInt (simplify e1) (simplify e2)
-simplify (FEDivInt e1 e2) = FEDivInt (simplify e1) (simplify e2)
+simplify (FEAdd e1 e2) = FEAdd (simplify e1) (simplify e2)
+simplify (FESub e1 e2) = FESub (simplify e1) (simplify e2)
+simplify (FEMul e1 e2) = FEMul (simplify e1) (simplify e2)
+simplify (FEDiv e1 e2) = FEDiv (simplify e1) (simplify e2)
 simplify FETrue = FETrue
 simplify FEFalse = FEFalse
 simplify (FEIf e1 e2 e3) = FEIf (simplify e1) (simplify e2) (simplify e3)
 simplify (FEList es) = FEList $ simplify <$> es
 simplify (FEConcat e1 e2) = FEConcat (simplify e1) (simplify e2)
-
--- Generate a fresh type variable name.
-freshUserTVarName :: Set TVarName -> TVarName
-freshUserTVarName as =
-  let names =
-        ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"] ++
-        ((++ "′") <$> names)
-  in UserTVarName $
-     head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
-
--- Get all the "user" type variables of a term, not just the free type ones.
-allTVarsTerm :: FTerm -> Set TVarName
-allTVarsTerm (FEVar _) = Set.empty
-allTVarsTerm (FEAbs _ t e) = Set.union (allTVarsType t) (allTVarsTerm e)
-allTVarsTerm (FEApp e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FETAbs a e) = Set.insert a (allTVarsTerm e)
-allTVarsTerm (FETApp e t) = Set.union (allTVarsTerm e) (allTVarsType t)
-allTVarsTerm FETrue = Set.empty
-allTVarsTerm FEFalse = Set.empty
-allTVarsTerm (FEIf e1 e2 e3) =
-  allTVarsTerm e1 `Set.union` allTVarsTerm e2 `Set.union` allTVarsTerm e3
-allTVarsTerm (FEIntLit _) = Set.empty
-allTVarsTerm (FEAddInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FESubInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FEMulInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FEDivInt e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-allTVarsTerm (FEList es) =
-  foldr (\e as -> Set.union (allTVarsTerm e) as) Set.empty es
-allTVarsTerm (FEConcat e1 e2) = Set.union (allTVarsTerm e1) (allTVarsTerm e2)
-
--- Get all the "user" type variables of a type, not just the free type ones.
-allTVarsType :: Type -> Set TVarName
-allTVarsType (TVar a) = Set.singleton a
-allTVarsType (TConst _ ts) =
-  foldr (\t as -> Set.union (allTVarsType t) as) Set.empty ts
-allTVarsType (TArrow t1 t2) = Set.union (allTVarsType t1) (allTVarsType t2)
-allTVarsType (TForAll a t) = Set.insert a (allTVarsType t)
-
--- Convert "auto" type variables into "user" type variables for nicer printing.
--- This version of the function operates on terms.
-elimAutoVarsTerm :: Set TVarName -> FTerm -> FTerm
-elimAutoVarsTerm _ e@(FEVar _) = e
-elimAutoVarsTerm as (FEAbs x t e) =
-  FEAbs x (elimAutoVarsType as t) (elimAutoVarsTerm as e)
-elimAutoVarsTerm as (FEApp e1 e2) =
-  FEApp (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FETAbs a1@(AutoTVarName _) e) =
-  let a2 = freshUserTVarName as
-  in FETAbs a2 (elimAutoVarsTerm (Set.insert a2 as) (subst a1 (TVar a2) e))
-elimAutoVarsTerm as (FETAbs a@(UserTVarName _) e) =
-  FETAbs a (elimAutoVarsTerm (Set.insert a as) e)
-elimAutoVarsTerm as (FETApp e t) =
-  FETApp (elimAutoVarsTerm as e) (elimAutoVarsType as t)
-elimAutoVarsTerm _ FETrue = FETrue
-elimAutoVarsTerm _ FEFalse = FEFalse
-elimAutoVarsTerm as (FEIf e1 e2 e3) =
-  FEIf
-    (elimAutoVarsTerm as e1)
-    (elimAutoVarsTerm as e2)
-    (elimAutoVarsTerm as e3)
-elimAutoVarsTerm _ e@(FEIntLit _) = e
-elimAutoVarsTerm as (FEAddInt e1 e2) =
-  FEAddInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FESubInt e1 e2) =
-  FESubInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FEMulInt e1 e2) =
-  FEMulInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FEDivInt e1 e2) =
-  FEDivInt (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-elimAutoVarsTerm as (FEList es) = FEList $ elimAutoVarsTerm as <$> es
-elimAutoVarsTerm as (FEConcat e1 e2) =
-  FEConcat (elimAutoVarsTerm as e1) (elimAutoVarsTerm as e2)
-
--- Convert "auto" type variables into "user" type variables for nicer printing.
--- This version of the function operates on types.
-elimAutoVarsType :: Set TVarName -> Type -> Type
-elimAutoVarsType _ t@(TVar _) = t
-elimAutoVarsType as (TConst c ts) = TConst c (elimAutoVarsType as <$> ts)
-elimAutoVarsType as (TArrow t1 t2) =
-  TArrow (elimAutoVarsType as t1) (elimAutoVarsType as t2)
-elimAutoVarsType as (TForAll a1@(AutoTVarName _) t) =
-  let a2 = freshUserTVarName as
-  in TForAll a2 (elimAutoVarsType (Set.insert a2 as) (subst a1 (TVar a2) t))
-elimAutoVarsType as (TForAll a@(UserTVarName _) t) =
-  TForAll a (elimAutoVarsType (Set.insert a as) t)
 
 -- Given a term in the untyped language, return a term in the typed language
 -- together with its type.
@@ -434,7 +351,4 @@ typeCheck e1 =
           , Map.fromList [(boolName, 0), (intName, 0), (listName, 1)])
   in case result of
        Left s -> Left s
-       Right (e2, t, _) ->
-         let e3 = simplify e2
-             as = Set.union (allTVarsTerm e3) (allTVarsType t)
-         in Right (elimAutoVarsTerm as e3, elimAutoVarsType as t)
+       Right (e2, t, _) -> Right (simplify e2, t)

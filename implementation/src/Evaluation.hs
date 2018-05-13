@@ -32,25 +32,25 @@ eval (FEIf e1 e2 e3) = do
     FEFalse -> return e6
     _ -> throwError $ show e4 ++ " is not a Boolean"
 eval (FEIntLit i) = return $ FEIntLit i
-eval (FEAddInt e1 e2) = do
+eval (FEAdd e1 e2) = do
   e3 <- eval e1
   e4 <- eval e2
   case (e3, e4) of
     (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 + i2)
     _ -> throwError $ "Cannot add " ++ show e3 ++ " and " ++ show e4
-eval (FESubInt e1 e2) = do
+eval (FESub e1 e2) = do
   e3 <- eval e1
   e4 <- eval e2
   case (e3, e4) of
     (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 - i2)
     _ -> throwError $ "Cannot subtract " ++ show e3 ++ " and " ++ show e4
-eval (FEMulInt e1 e2) = do
+eval (FEMul e1 e2) = do
   e3 <- eval e1
   e4 <- eval e2
   case (e3, e4) of
     (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 * i2)
     _ -> throwError $ "Cannot multiply " ++ show e3 ++ " and " ++ show e4
-eval (FEDivInt e1 e2) = do
+eval (FEDiv e1 e2) = do
   e3 <- eval e1
   e4 <- eval e2
   case (e3, e4) of

@@ -31,8 +31,10 @@ module Syntax
 
 import Data.Function (on)
 import Data.List (groupBy, intercalate, nub, unwords)
+import Data.Set (Set)
+import qualified Data.Set as Set
 
--- Data types
+-- Core data types
 newtype EVarName =
   EVarName String
   deriving (Eq, Ord)
@@ -105,14 +107,14 @@ data FTerm
          FTerm
          FTerm
   | FEIntLit Integer
-  | FEAddInt FTerm
-             FTerm
-  | FESubInt FTerm
-             FTerm
-  | FEMulInt FTerm
-             FTerm
-  | FEDivInt FTerm
-             FTerm
+  | FEAdd FTerm
+          FTerm
+  | FESub FTerm
+          FTerm
+  | FEMul FTerm
+          FTerm
+  | FEDiv FTerm
+          FTerm
   | FEList [FTerm]
   | FEConcat FTerm
              FTerm
@@ -130,6 +132,9 @@ data Type
 class FreeEVars a where
   freeEVars :: a -> [EVarName]
 
+-- The freeTVars function should return type variables in the order they first
+-- appear. This is important for unification of types with universal
+-- quantifiers.
 class FreeTVars a where
   freeTVars :: a -> [TVarName]
 
@@ -189,10 +194,10 @@ instance FreeEVars FTerm where
   freeEVars (FEIf e1 e2 e3) =
     nub $ freeEVars e1 ++ freeEVars e2 ++ freeEVars e3
   freeEVars (FEIntLit _) = []
-  freeEVars (FEAddInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
-  freeEVars (FESubInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
-  freeEVars (FEMulInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
-  freeEVars (FEDivInt e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FEAdd e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FESub e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FEMul e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
+  freeEVars (FEDiv e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
   freeEVars (FEList es) = nub $ es >>= freeEVars
   freeEVars (FEConcat e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
 
@@ -207,10 +212,10 @@ instance FreeTVars FTerm where
   freeTVars (FEIf e1 e2 e3) =
     nub $ freeTVars e1 ++ freeTVars e2 ++ freeTVars e3
   freeTVars (FEIntLit _) = []
-  freeTVars (FEAddInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (FESubInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (FEMulInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (FEDivInt e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FEAdd e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FESub e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FEMul e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
+  freeTVars (FEDiv e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
   freeTVars (FEList es) = nub $ es >>= freeTVars
   freeTVars (FEConcat e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
 
@@ -225,10 +230,10 @@ instance FreeTConsts FTerm where
   freeTConsts (FEIf e1 e2 e3) =
     nub $ freeTConsts e1 ++ freeTConsts e2 ++ freeTConsts e3
   freeTConsts (FEIntLit _) = []
-  freeTConsts (FEAddInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FESubInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEMulInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEDivInt e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEAdd e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FESub e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEMul e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+  freeTConsts (FEDiv e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (FEConcat e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
   freeTConsts (FEList es) = nub $ es >>= freeTConsts
 
@@ -321,10 +326,10 @@ instance Subst EVarName FTerm FTerm where
   subst x e1 (FEIf e2 e3 e4) =
     FEIf (subst x e1 e2) (subst x e1 e3) (subst x e1 e4)
   subst _ _ (FEIntLit i) = FEIntLit i
-  subst x e1 (FEAddInt e2 e3) = FEAddInt (subst x e1 e2) (subst x e1 e3)
-  subst x e1 (FESubInt e2 e3) = FESubInt (subst x e1 e2) (subst x e1 e3)
-  subst x e1 (FEMulInt e2 e3) = FEMulInt (subst x e1 e2) (subst x e1 e3)
-  subst x e1 (FEDivInt e2 e3) = FEDivInt (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FEAdd e2 e3) = FEAdd (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FESub e2 e3) = FESub (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FEMul e2 e3) = FEMul (subst x e1 e2) (subst x e1 e3)
+  subst x e1 (FEDiv e2 e3) = FEDiv (subst x e1 e2) (subst x e1 e3)
   subst x e (FEList es) = FEList $ subst x e <$> es
   subst x e1 (FEConcat e2 e3) = FEConcat (subst x e1 e2) (subst x e1 e3)
 
@@ -339,10 +344,10 @@ instance Subst TVarName Type FTerm where
   subst a t (FEIf e1 e2 e3) =
     FEIf (subst a t e1) (subst a t e2) (subst a t e3)
   subst _ _ (FEIntLit i) = FEIntLit i
-  subst a t (FEAddInt e1 e2) = FEAddInt (subst a t e1) (subst a t e2)
-  subst a t (FESubInt e1 e2) = FESubInt (subst a t e1) (subst a t e2)
-  subst a t (FEMulInt e1 e2) = FEMulInt (subst a t e1) (subst a t e2)
-  subst a t (FEDivInt e1 e2) = FEDivInt (subst a t e1) (subst a t e2)
+  subst a t (FEAdd e1 e2) = FEAdd (subst a t e1) (subst a t e2)
+  subst a t (FESub e1 e2) = FESub (subst a t e1) (subst a t e2)
+  subst a t (FEMul e1 e2) = FEMul (subst a t e1) (subst a t e2)
+  subst a t (FEDiv e1 e2) = FEDiv (subst a t e1) (subst a t e2)
   subst a e (FEList es) = FEList $ subst a e <$> es
   subst a t (FEConcat e1 e2) = FEConcat (subst a t e1) (subst a t e2)
 
@@ -357,10 +362,10 @@ instance Subst TConstName Type FTerm where
   subst c t (FEIf e1 e2 e3) =
     FEIf (subst c t e1) (subst c t e2) (subst c t e3)
   subst _ _ (FEIntLit i) = FEIntLit i
-  subst c t (FEAddInt e1 e2) = FEAddInt (subst c t e1) (subst c t e2)
-  subst c t (FESubInt e1 e2) = FESubInt (subst c t e1) (subst c t e2)
-  subst c t (FEMulInt e1 e2) = FEMulInt (subst c t e1) (subst c t e2)
-  subst c t (FEDivInt e1 e2) = FEDivInt (subst c t e1) (subst c t e2)
+  subst c t (FEAdd e1 e2) = FEAdd (subst c t e1) (subst c t e2)
+  subst c t (FESub e1 e2) = FESub (subst c t e1) (subst c t e2)
+  subst c t (FEMul e1 e2) = FEMul (subst c t e1) (subst c t e2)
+  subst c t (FEDiv e1 e2) = FEDiv (subst c t e1) (subst c t e2)
   subst c t (FEConcat e1 e2) = FEConcat (subst c t e1) (subst c t e2)
   subst c e (FEList es) = FEList $ subst c e <$> es
 
@@ -430,10 +435,10 @@ instance CollectBinders FTerm BSmallLambda where
   collectBinders FEFalse = (BSmallLambda [], FEFalse)
   collectBinders (FEIf e1 e2 e3) = (BSmallLambda [], FEIf e1 e2 e3)
   collectBinders (FEIntLit i) = (BSmallLambda [], FEIntLit i)
-  collectBinders (FEAddInt e1 e2) = (BSmallLambda [], FEAddInt e1 e2)
-  collectBinders (FESubInt e1 e2) = (BSmallLambda [], FESubInt e1 e2)
-  collectBinders (FEMulInt e1 e2) = (BSmallLambda [], FEMulInt e1 e2)
-  collectBinders (FEDivInt e1 e2) = (BSmallLambda [], FEDivInt e1 e2)
+  collectBinders (FEAdd e1 e2) = (BSmallLambda [], FEAdd e1 e2)
+  collectBinders (FESub e1 e2) = (BSmallLambda [], FESub e1 e2)
+  collectBinders (FEMul e1 e2) = (BSmallLambda [], FEMul e1 e2)
+  collectBinders (FEDiv e1 e2) = (BSmallLambda [], FEDiv e1 e2)
   collectBinders (FEList es) = (BSmallLambda [], FEList es)
   collectBinders (FEConcat e1 e2) = (BSmallLambda [], FEConcat e1 e2)
 
@@ -449,10 +454,10 @@ instance CollectBinders FTerm BBigLambda where
   collectBinders FEFalse = (BBigLambda [], FEFalse)
   collectBinders (FEIf e1 e2 e3) = (BBigLambda [], FEIf e1 e2 e3)
   collectBinders (FEIntLit i) = (BBigLambda [], FEIntLit i)
-  collectBinders (FEAddInt e1 e2) = (BBigLambda [], FEAddInt e1 e2)
-  collectBinders (FESubInt e1 e2) = (BBigLambda [], FESubInt e1 e2)
-  collectBinders (FEMulInt e1 e2) = (BBigLambda [], FEMulInt e1 e2)
-  collectBinders (FEDivInt e1 e2) = (BBigLambda [], FEDivInt e1 e2)
+  collectBinders (FEAdd e1 e2) = (BBigLambda [], FEAdd e1 e2)
+  collectBinders (FESub e1 e2) = (BBigLambda [], FESub e1 e2)
+  collectBinders (FEMul e1 e2) = (BBigLambda [], FEMul e1 e2)
+  collectBinders (FEDiv e1 e2) = (BBigLambda [], FEDiv e1 e2)
   collectBinders (FEList es) = (BBigLambda [], FEList es)
   collectBinders (FEConcat e1 e2) = (BBigLambda [], FEConcat e1 e2)
 
@@ -464,18 +469,6 @@ instance CollectBinders Type BForAll where
     let (BForAll as, t2) = collectBinders t1
     in (BForAll (a : as), t2)
 
--- Type annotation propagation
-annotate :: ITerm -> Type -> ITerm
-annotate (IEAbs x t1 e) t2 =
-  let (BForAll _, t3) = collectBinders t2
-  in case (t1, t3) of
-       (Nothing, TArrow t4 t5) -> IEAbs x (Just t4) (annotate e t5)
-       (Just t4, TArrow _ t5) -> IEAbs x (Just t4) (annotate e t5)
-       _ -> IEAbs x t1 e
-annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
-annotate e _ = e
-
--- Pretty printing
 instance Show BSmallLambda where
   show (BSmallLambda xs1) =
     "λ" ++
@@ -497,6 +490,18 @@ instance Show BBigLambda where
 instance Show BForAll where
   show (BForAll as) = "∀" ++ unwords (show <$> as)
 
+-- Type annotation propagation
+annotate :: ITerm -> Type -> ITerm
+annotate (IEAbs x t1 e) t2 =
+  let (BForAll _, t3) = collectBinders t2
+  in case (t1, t3) of
+       (Nothing, TArrow t4 t5) -> IEAbs x (Just t4) (annotate e t5)
+       (Just t4, TArrow _ t5) -> IEAbs x (Just t4) (annotate e t5)
+       _ -> IEAbs x t1 e
+annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
+annotate e _ = e
+
+-- Precedence and associativity of syntactic constructs
 data Assoc
   = LeftAssoc
   | RightAssoc
@@ -549,10 +554,10 @@ instance Prec FTerm where
   prec FEFalse {} = 10
   prec FEIf {} = 2
   prec FEIntLit {} = 10
-  prec FEAddInt {} = 5
-  prec FESubInt {} = 5
-  prec FEMulInt {} = 6
-  prec FEDivInt {} = 6
+  prec FEAdd {} = 5
+  prec FESub {} = 5
+  prec FEMul {} = 6
+  prec FEDiv {} = 6
   prec FEList {} = 2
   prec FEConcat {} = 4
   assoc FEVar {} = NoAssoc
@@ -564,10 +569,10 @@ instance Prec FTerm where
   assoc FEFalse {} = NoAssoc
   assoc FEIf {} = RightAssoc
   assoc FEIntLit {} = NoAssoc
-  assoc FEAddInt {} = LeftAssoc
-  assoc FESubInt {} = LeftAssoc
-  assoc FEMulInt {} = LeftAssoc
-  assoc FEDivInt {} = LeftAssoc
+  assoc FEAdd {} = LeftAssoc
+  assoc FESub {} = LeftAssoc
+  assoc FEMul {} = LeftAssoc
+  assoc FEDiv {} = LeftAssoc
   assoc FEList {} = NoAssoc
   assoc FEConcat {} = LeftAssoc
 
@@ -581,6 +586,159 @@ instance Prec Type where
   assoc TArrow {} = RightAssoc
   assoc TForAll {} = RightAssoc
 
+-- Generate a type variable name that is not in a given set.
+freshUserTVarName :: Set TVarName -> TVarName
+freshUserTVarName as =
+  let names =
+        ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"] ++
+        ((++ "′") <$> names)
+  in UserTVarName $
+     head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
+
+-- This class is for types that support renaming of type variables.
+class RenameTVars a where
+  renameTVars :: Set TVarName -> a -> a
+
+instance RenameTVars ITerm where
+  renameTVars _ e@(IEVar _) = e
+  renameTVars as (IEAbs x t e) =
+    IEAbs x (renameTVars as <$> t) (renameTVars as e)
+  renameTVars as (IEApp e1 e2) = IEApp (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IELet x e1 e2) =
+    IELet x (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IEAnno e t) = IEAnno (renameTVars as e) (renameTVars as t)
+  renameTVars _ IETrue = IETrue
+  renameTVars _ IEFalse = IEFalse
+  renameTVars as (IEIf e1 e2 e3) =
+    IEIf (renameTVars as e1) (renameTVars as e2) (renameTVars as e3)
+  renameTVars _ e@(IEIntLit _) = e
+  renameTVars as (IEAdd e1 e2) = IEAdd (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IESub e1 e2) = IESub (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IEMul e1 e2) = IEMul (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IEDiv e1 e2) = IEDiv (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (IEList es) = IEList $ renameTVars as <$> es
+  renameTVars as (IEConcat e1 e2) =
+    IEConcat (renameTVars as e1) (renameTVars as e2)
+
+instance RenameTVars FTerm where
+  renameTVars _ e@(FEVar _) = e
+  renameTVars as (FEAbs x t e) = FEAbs x (renameTVars as t) (renameTVars as e)
+  renameTVars as (FEApp e1 e2) = FEApp (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (FETAbs a1 e) =
+    let a2 = freshUserTVarName as
+    in FETAbs a2 (renameTVars (Set.insert a2 as) (subst a1 (TVar a2) e))
+  renameTVars as (FETApp e t) = FETApp (renameTVars as e) (renameTVars as t)
+  renameTVars _ FETrue = FETrue
+  renameTVars _ FEFalse = FEFalse
+  renameTVars as (FEIf e1 e2 e3) =
+    FEIf (renameTVars as e1) (renameTVars as e2) (renameTVars as e3)
+  renameTVars _ e@(FEIntLit _) = e
+  renameTVars as (FEAdd e1 e2) = FEAdd (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (FESub e1 e2) = FESub (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (FEMul e1 e2) = FEMul (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (FEDiv e1 e2) = FEDiv (renameTVars as e1) (renameTVars as e2)
+  renameTVars as (FEList es) = FEList $ renameTVars as <$> es
+  renameTVars as (FEConcat e1 e2) =
+    FEConcat (renameTVars as e1) (renameTVars as e2)
+
+instance RenameTVars Type where
+  renameTVars _ t@(TVar _) = t
+  renameTVars as (TConst c ts) = TConst c (renameTVars as <$> ts)
+  renameTVars as (TArrow t1 t2) =
+    TArrow (renameTVars as t1) (renameTVars as t2)
+  renameTVars as (TForAll a1 t) =
+    let a2 = freshUserTVarName as
+    in TForAll a2 (renameTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
+
+-- Pretty printing
+class ShowRenamed a where
+  showRenamed :: a -> String
+
+instance ShowRenamed ITerm where
+  showRenamed (IEVar x) = show x
+  showRenamed e1@(IEAbs x t e2) =
+    let (xs, e3) = collectBinders (IEAbs x t e2)
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IEApp e2 e3) =
+    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IELet x e2 e3) =
+    show x ++ " = " ++ embed NoAssoc e1 e2 ++ " in " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IEAnno e2 t) =
+    embed LeftAssoc e1 e2 ++ " : " ++ showRenamed t
+  showRenamed IETrue = "true"
+  showRenamed IEFalse = "false"
+  showRenamed e1@(IEIf e2 e3 e4) =
+    "if " ++
+    embed NoAssoc e1 e2 ++
+    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
+  showRenamed (IEIntLit i) = show i
+  showRenamed e1@(IEAdd e2 e3) =
+    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IESub e2 e3) =
+    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IEMul e2 e3) =
+    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
+  showRenamed e1@(IEDiv e2 e3) =
+    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
+  showRenamed e@(IEList es) =
+    "[" ++ intercalate ", " (embed NoAssoc e <$> es) ++ "]"
+  showRenamed e1@(IEConcat e2 e3) =
+    embed LeftAssoc e1 e2 ++ " ⧺ " ++ embed RightAssoc e1 e3
+
+instance ShowRenamed FTerm where
+  showRenamed (FEVar x) = show x
+  showRenamed e1@(FEAbs x t e2) =
+    let (xs, e3) = collectBinders (FEAbs x t e2)
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FEApp e2 e3) =
+    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FETAbs a e2) =
+    let (as, e3) = collectBinders (FETAbs a e2)
+    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ showRenamed t
+  showRenamed FETrue = "true"
+  showRenamed FEFalse = "false"
+  showRenamed e1@(FEIf e2 e3 e4) =
+    "if " ++
+    embed NoAssoc e1 e2 ++
+    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
+  showRenamed (FEIntLit i) = show i
+  showRenamed e1@(FEAdd e2 e3) =
+    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FESub e2 e3) =
+    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FEMul e2 e3) =
+    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
+  showRenamed e1@(FEDiv e2 e3) =
+    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
+  showRenamed e@(FEList es) =
+    "[" ++ intercalate ", " (embed NoAssoc e <$> es) ++ "]"
+  showRenamed e1@(FEConcat e2 e3) =
+    embed LeftAssoc e1 e2 ++ " ⧺ " ++ embed RightAssoc e1 e3
+
+instance ShowRenamed Type where
+  showRenamed (TVar a) = show a
+  showRenamed (TConst c ts) =
+    let params =
+          unwords
+            ((\t ->
+                let s = showRenamed t
+                in if ' ' `elem` s && (c /= listName || length ts > 1)
+                     then "(" ++ s ++ ")"
+                     else s) <$>
+             ts)
+    in if c == listName
+         then "[" ++ params ++ "]"
+         else show c ++
+              (if null params
+                 then ""
+                 else " " ++ params)
+  showRenamed t1@(TArrow t2 t3) =
+    embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
+  showRenamed t1@(TForAll a t2) =
+    let (as, t3) = collectBinders (TForAll a t2)
+    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
+
 -- The first node is the current one. The second is the one to be embedded.
 embed :: (Prec a, Show a) => Assoc -> a -> a -> String
 embed a e1 e2
@@ -592,86 +750,13 @@ embed a e1 e2
   | otherwise = show e2
 
 instance Show ITerm where
-  show (IEVar x) = show x
-  show e1@(IEAbs x t e2) =
-    let (xs, e3) = collectBinders (IEAbs x t e2)
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
-  show e1@(IEApp e2 e3) =
-    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
-  show e1@(IELet x e2 e3) =
-    show x ++ " = " ++ embed NoAssoc e1 e2 ++ " in " ++ embed RightAssoc e1 e3
-  show e1@(IEAnno e2 t) = embed LeftAssoc e1 e2 ++ " : " ++ show t
-  show IETrue = "true"
-  show IEFalse = "false"
-  show e1@(IEIf e2 e3 e4) =
-    "if " ++
-    embed NoAssoc e1 e2 ++
-    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
-  show (IEIntLit i) = show i
-  show e1@(IEAdd e2 e3) =
-    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
-  show e1@(IESub e2 e3) =
-    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
-  show e1@(IEMul e2 e3) =
-    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
-  show e1@(IEDiv e2 e3) =
-    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
-  show e@(IEList es) = "[" ++ intercalate ", " (embed NoAssoc e <$> es) ++ "]"
-  show e1@(IEConcat e2 e3) =
-    embed LeftAssoc e1 e2 ++ " ⧺ " ++ embed RightAssoc e1 e3
+  show = showRenamed . renameTVars Set.empty
 
 instance Show FTerm where
-  show (FEVar x) = show x
-  show e1@(FEAbs x t e2) =
-    let (xs, e3) = collectBinders (FEAbs x t e2)
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
-  show e1@(FEApp e2 e3) =
-    embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
-  show e1@(FETAbs a e2) =
-    let (as, e3) = collectBinders (FETAbs a e2)
-    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e3
-  show e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ show t
-  show FETrue = "true"
-  show FEFalse = "false"
-  show e1@(FEIf e2 e3 e4) =
-    "if " ++
-    embed NoAssoc e1 e2 ++
-    " then " ++ embed NoAssoc e1 e3 ++ " else " ++ embed RightAssoc e1 e4
-  show (FEIntLit i) = show i
-  show e1@(FEAddInt e2 e3) =
-    embed LeftAssoc e1 e2 ++ " + " ++ embed RightAssoc e1 e3
-  show e1@(FESubInt e2 e3) =
-    embed LeftAssoc e1 e2 ++ " - " ++ embed RightAssoc e1 e3
-  show e1@(FEMulInt e2 e3) =
-    embed LeftAssoc e1 e2 ++ " * " ++ embed RightAssoc e1 e3
-  show e1@(FEDivInt e2 e3) =
-    embed LeftAssoc e1 e2 ++ " / " ++ embed RightAssoc e1 e3
-  show e@(FEList es) = "[" ++ intercalate ", " (embed NoAssoc e <$> es) ++ "]"
-  show e1@(FEConcat e2 e3) =
-    embed LeftAssoc e1 e2 ++ " ⧺ " ++ embed RightAssoc e1 e3
+  show = showRenamed . renameTVars Set.empty
 
 instance Show Type where
-  show (TVar a) = show a
-  show (TConst c ts) =
-    let params =
-          unwords
-            ((\t ->
-                let s = show t
-                in if ' ' `elem` s && (c /= listName || length ts > 1)
-                     then "(" ++ s ++ ")"
-                     else s) <$>
-             ts)
-    in if c == listName
-         then "[" ++ params ++ "]"
-         else show c ++
-              (if null params
-                 then ""
-                 else " " ++ params)
-  show t1@(TArrow t2 t3) =
-    embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
-  show t1@(TForAll a t2) =
-    let (as, t3) = collectBinders (TForAll a t2)
-    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
+  show = showRenamed . renameTVars Set.empty
 
 -- Built-in type constants
 boolName :: TConstName
