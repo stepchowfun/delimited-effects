@@ -155,25 +155,10 @@ instance FreeEVars ITerm where
   freeEVars (IEList es) = nub $ es >>= freeEVars
   freeEVars (IEConcat e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
 
-instance FreeTVars ITerm where
-  freeTVars (IEVar _) = []
-  freeTVars (IEAbs _ Nothing e) = nub $ freeTVars e
-  freeTVars (IEAbs _ (Just t) e) = nub $ freeTVars t ++ freeTVars e
-  freeTVars (IEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IELet _ e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IEAnno e t) = nub $ freeTVars e ++ freeTVars t
-  freeTVars IETrue = []
-  freeTVars IEFalse = []
-  freeTVars (IEIf e1 e2 e3) =
-    nub $ freeTVars e1 ++ freeTVars e2 ++ freeTVars e3
-  freeTVars (IEIntLit _) = []
-  freeTVars (IEAdd e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IESub e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IEMul e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IEDiv e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (IEList es) = nub $ es >>= freeTVars
-  freeTVars (IEConcat e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-
+-- We deliberately omit a FreeTVars ITerm instance. The only free type
+-- variables of an ITerm come from type annotations, but free type variables in
+-- annotations are interpreted as implicitly existentially bound (i.e., they
+-- aren't really free).
 instance FreeTConsts ITerm where
   freeTConsts (IEVar _) = []
   freeTConsts (IEAbs _ Nothing e) = nub $ freeTConsts e
@@ -294,26 +279,10 @@ instance Subst EVarName ITerm ITerm where
   subst x e (IEList es) = IEList $ subst x e <$> es
   subst x e1 (IEConcat e2 e3) = IEConcat (subst x e1 e2) (subst x e1 e3)
 
-instance Subst TVarName Type ITerm where
-  subst _ _ (IEVar x) = IEVar x
-  subst a t (IEAbs x Nothing e) = IEAbs x Nothing (subst a t e)
-  subst a t1 (IEAbs x (Just t2) e) =
-    IEAbs x (Just $ subst a t1 t2) (subst a t1 e)
-  subst a t (IEApp e1 e2) = IEApp (subst a t e1) (subst a t e2)
-  subst a t (IELet x e1 e2) = IELet x (subst a t e1) (subst a t e2)
-  subst a t1 (IEAnno e t2) = IEAnno (subst a t1 e) (subst a t1 t2)
-  subst _ _ IETrue = IETrue
-  subst _ _ IEFalse = IEFalse
-  subst a t (IEIf e1 e2 e3) =
-    IEIf (subst a t e1) (subst a t e2) (subst a t e3)
-  subst _ _ (IEIntLit i) = IEIntLit i
-  subst a t (IEAdd e1 e2) = IEAdd (subst a t e1) (subst a t e2)
-  subst a t (IESub e1 e2) = IESub (subst a t e1) (subst a t e2)
-  subst a t (IEMul e1 e2) = IEMul (subst a t e1) (subst a t e2)
-  subst a t (IEDiv e1 e2) = IEDiv (subst a t e1) (subst a t e2)
-  subst a e (IEList es) = IEList $ subst a e <$> es
-  subst a t (IEConcat e1 e2) = IEConcat (subst a t e1) (subst a t e2)
-
+-- We deliberately omit a Subst TVarName Type ITerm instance. The only free
+-- type variables of an ITerm come from type annotations, but free type
+-- variables in annotations are interpreted as implicitly existentially bound
+-- (i.e., they aren't really free).
 instance Subst TConstName Type ITerm where
   subst _ _ (IEVar x) = IEVar x
   subst c t (IEAbs x Nothing e) = IEAbs x Nothing (subst c t e)

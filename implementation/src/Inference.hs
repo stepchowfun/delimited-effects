@@ -184,7 +184,7 @@ checkBinary ::
   -> TypeCheck (FTerm, Type, FTerm, Type, Substitution)
 checkBinary e1 t1 e2 t2 = do
   (e3, t3, theta1) <- check e1 t1
-  (e4, t4, theta2) <- check (applySubst theta1 e2) (applySubst theta1 t2)
+  (e4, t4, theta2) <- check e2 (applySubst theta1 t2)
   return
     ( applySubst theta2 e3
     , applySubst theta2 t3
@@ -254,7 +254,7 @@ infer (IEApp e1 e2) = do
         case t1 of
           TArrow t2 t3 -> (t2, t3)
           _ -> error "Something went wrong."
-  (e4, _, theta2) <- check (applySubst theta1 e2) t4
+  (e4, _, theta2) <- check e2 t4
   (e5, t6) <-
     generalize (FEApp (applySubst theta2 e3) e4) (applySubst theta2 t5)
   return (e5, t6, composeSubst theta1 theta2)
@@ -276,8 +276,7 @@ infer IEFalse = return (FEFalse, boolType, emptySubst)
 infer (IEIf e1 e2 e3) = do
   (e4, _, theta1) <- check e1 boolType
   t1 <- TVar <$> freshTVar
-  (e5, t2, e6, _, theta2) <-
-    checkBinary (applySubst theta1 e2) t1 (applySubst theta1 e3) t1
+  (e5, t2, e6, _, theta2) <- checkBinary e2 t1 e3 t1
   (e7, t3) <- generalize (FEIf (applySubst theta2 e4) e5 e6) t2
   return (e7, t3, composeSubst theta1 theta2)
 infer (IEIntLit i) = return (FEIntLit i, intType, emptySubst)
