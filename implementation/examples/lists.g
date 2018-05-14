@@ -10,7 +10,7 @@ singleton = x -> [x];
 # We can specialize the singleton function to work only on values that have the
 # same type as the polymorphic identity function. This essentially means it
 # only works on identity functions due to parametricity.
-idSingleton = singleton : (forall a . a -> a) -> [forall a . a -> a];
+idSingleton = singleton : (forall a . a -> a) -> List (forall a . a -> a);
 
 # Now we can put the polymorphic identity function into a list.
 idSingleton (x -> x)

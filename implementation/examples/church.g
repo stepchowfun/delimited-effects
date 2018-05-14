@@ -66,7 +66,7 @@ toInt = n -> n (x -> x + 1) 0
 
 # This function converts a Church list into a native list.
 toList = l -> l (\x y -> [x] ++ y) []
-       : forall a . (forall b. (a -> b -> b) -> b -> b) -> [a];
+       : forall a . (forall b. (a -> b -> b) -> b -> b) -> List a;
 
 # 3 ^ 4 = 81
 three = succ (succ (succ zero)) : (forall a . (a -> a) -> a -> a);
