@@ -86,7 +86,6 @@ Type
   | Type '->' Type        { TArrow $1 $3 }
   | forall TVars '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
   | '(' Type ')'          { $2 }
-  | '[' Type ']'          { listType $2 }
 
 EListItems
   :                      { [] }

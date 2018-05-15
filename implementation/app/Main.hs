@@ -50,6 +50,6 @@ main = do
                 addHistory program
                 _ <- runProgram program
                 repl
-              Nothing -> return ()
+              Nothing -> putStrLn ""
       in repl
     _ -> putStrLn "Usage:\n  implementation-exe\n  implementation-exe <path>"

@@ -728,19 +728,13 @@ instance PrettyPrint Type where
   prettyPrint (TVar a) = show a
   prettyPrint (TConst c ts) =
     let params =
-          unwords
-            ((\t ->
-                let s = prettyPrint t
-                in if ' ' `elem` s && (c /= listName || length ts > 1)
-                     then "(" ++ s ++ ")"
-                     else s) <$>
-             ts)
-    in if c == listName
-         then "[" ++ params ++ "]"
-         else show c ++
-              (if null params
-                 then ""
-                 else " " ++ params)
+          (\t ->
+             let s = prettyPrint t
+             in if ' ' `elem` s
+                  then "(" ++ s ++ ")"
+                  else s) <$>
+          ts
+    in show c ++ (params >>= (" " ++))
   prettyPrint t1@(TArrow t2 t3) =
     embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
   prettyPrint t1@(TForAll a t2) =
