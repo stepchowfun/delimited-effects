@@ -8,19 +8,21 @@ module Syntax
   , EVarName(..)
   , FTerm(..)
   , FreeEVars
-  , FreeTConsts
+  , FreeTCons
   , FreeTVars
   , ITerm(..)
   , Subst
-  , TConstName(..)
+  , TConName(..)
   , TVarName(..)
   , Type(..)
   , annotate
+  , arrowName
+  , arrowType
   , boolName
   , boolType
   , collectBinders
   , freeEVars
-  , freeTConsts
+  , freeTCons
   , freeTVars
   , intName
   , intType
@@ -52,14 +54,14 @@ instance Show TVarName where
   show (UserTVarName s) = s
   show (AutoTVarName i) = "$" ++ show i
 
-data TConstName
-  = UserTConstName String -- Can be referred to in source programs
-  | AutoTConstName Integer -- Cannot be referred to in source programs
+data TConName
+  = UserTConName String -- Can be referred to in source programs
+  | AutoTConName Integer -- Cannot be referred to in source programs
   deriving (Eq, Ord)
 
-instance Show TConstName where
-  show (UserTConstName s) = s
-  show (AutoTConstName i) = "$" ++ show i
+instance Show TConName where
+  show (UserTConName s) = s
+  show (AutoTConName i) = "%" ++ show i
 
 data ITerm
   = IEVar EVarName
@@ -122,12 +124,35 @@ data FTerm
 
 data Type
   = TVar TVarName
-  | TConst TConstName
-           [Type]
-  | TArrow Type
-           Type
+  | TCon TConName
+         [Type]
   | TForAll TVarName
             Type
+
+-- Built-in type constructors
+boolName :: TConName
+boolName = UserTConName "Bool"
+
+boolType :: Type
+boolType = TCon boolName []
+
+intName :: TConName
+intName = UserTConName "Int"
+
+intType :: Type
+intType = TCon intName []
+
+arrowName :: TConName
+arrowName = UserTConName "Arrow"
+
+arrowType :: Type -> Type -> Type
+arrowType t1 t2 = TCon arrowName [t1, t2]
+
+listName :: TConName
+listName = UserTConName "List"
+
+listType :: Type -> Type
+listType t = TCon listName [t]
 
 -- Free variables
 class FreeEVars a where
@@ -139,8 +164,8 @@ class FreeEVars a where
 class FreeTVars a where
   freeTVars :: a -> [TVarName]
 
-class FreeTConsts a where
-  freeTConsts :: a -> [TConstName]
+class FreeTCons a where
+  freeTCons :: a -> [TConName]
 
 instance FreeEVars ITerm where
   freeEVars (IEVar x) = [x]
@@ -165,24 +190,24 @@ instance FreeEVars ITerm where
 -- variables of an ITerm come from type annotations, but free type variables in
 -- annotations are interpreted as implicitly existentially bound (i.e., they
 -- aren't really free).
-instance FreeTConsts ITerm where
-  freeTConsts (IEVar _) = []
-  freeTConsts (IEAbs _ Nothing e) = nub $ freeTConsts e
-  freeTConsts (IEAbs _ (Just t) e) = nub $ freeTConsts t ++ freeTConsts e
-  freeTConsts (IEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IELet _ e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IEAnno e t) = nub $ freeTConsts e ++ freeTConsts t
-  freeTConsts IETrue = []
-  freeTConsts IEFalse = []
-  freeTConsts (IEIf e1 e2 e3) =
-    nub $ freeTConsts e1 ++ freeTConsts e2 ++ freeTConsts e3
-  freeTConsts (IEIntLit _) = []
-  freeTConsts (IEAdd e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IESub e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IEMul e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IEDiv e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (IEList es) = nub $ es >>= freeTConsts
-  freeTConsts (IEConcat e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
+instance FreeTCons ITerm where
+  freeTCons (IEVar _) = []
+  freeTCons (IEAbs _ Nothing e) = nub $ freeTCons e
+  freeTCons (IEAbs _ (Just t) e) = nub $ freeTCons t ++ freeTCons e
+  freeTCons (IEApp e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IELet _ e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IEAnno e t) = nub $ freeTCons e ++ freeTCons t
+  freeTCons IETrue = []
+  freeTCons IEFalse = []
+  freeTCons (IEIf e1 e2 e3) =
+    nub $ freeTCons e1 ++ freeTCons e2 ++ freeTCons e3
+  freeTCons (IEIntLit _) = []
+  freeTCons (IEAdd e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IESub e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IEMul e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IEDiv e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (IEList es) = nub $ es >>= freeTCons
+  freeTCons (IEConcat e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
 
 instance FreeEVars FTerm where
   freeEVars (FEVar x) = [x]
@@ -220,35 +245,33 @@ instance FreeTVars FTerm where
   freeTVars (FEList es) = nub $ es >>= freeTVars
   freeTVars (FEConcat e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
 
-instance FreeTConsts FTerm where
-  freeTConsts (FEVar _) = []
-  freeTConsts (FEAbs _ t e) = nub $ freeTConsts t ++ freeTConsts e
-  freeTConsts (FEApp e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FETAbs _ e) = freeTConsts e
-  freeTConsts (FETApp e t) = nub $ freeTConsts e ++ freeTConsts t
-  freeTConsts FETrue = []
-  freeTConsts FEFalse = []
-  freeTConsts (FEIf e1 e2 e3) =
-    nub $ freeTConsts e1 ++ freeTConsts e2 ++ freeTConsts e3
-  freeTConsts (FEIntLit _) = []
-  freeTConsts (FEAdd e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FESub e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEMul e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEDiv e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEConcat e1 e2) = nub $ freeTConsts e1 ++ freeTConsts e2
-  freeTConsts (FEList es) = nub $ es >>= freeTConsts
+instance FreeTCons FTerm where
+  freeTCons (FEVar _) = []
+  freeTCons (FEAbs _ t e) = nub $ freeTCons t ++ freeTCons e
+  freeTCons (FEApp e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FETAbs _ e) = freeTCons e
+  freeTCons (FETApp e t) = nub $ freeTCons e ++ freeTCons t
+  freeTCons FETrue = []
+  freeTCons FEFalse = []
+  freeTCons (FEIf e1 e2 e3) =
+    nub $ freeTCons e1 ++ freeTCons e2 ++ freeTCons e3
+  freeTCons (FEIntLit _) = []
+  freeTCons (FEAdd e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FESub e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FEMul e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FEDiv e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FEConcat e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
+  freeTCons (FEList es) = nub $ es >>= freeTCons
 
 instance FreeTVars Type where
   freeTVars (TVar a) = [a]
-  freeTVars (TConst _ ts) = foldr (\t as -> freeTVars t ++ as) [] ts
-  freeTVars (TArrow t1 t2) = nub $ freeTVars t1 ++ freeTVars t2
+  freeTVars (TCon _ ts) = foldr (\t as -> freeTVars t ++ as) [] ts
   freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
 
-instance FreeTConsts Type where
-  freeTConsts (TVar _) = []
-  freeTConsts (TConst c ts) = c : foldr (\t cs -> freeTConsts t ++ cs) [] ts
-  freeTConsts (TArrow t1 t2) = nub $ freeTConsts t1 ++ freeTConsts t2
-  freeTConsts (TForAll _ t) = freeTConsts t
+instance FreeTCons Type where
+  freeTCons (TVar _) = []
+  freeTCons (TCon c ts) = c : foldr (\t cs -> freeTCons t ++ cs) [] ts
+  freeTCons (TForAll _ t) = freeTCons t
 
 -- Substitution
 class Subst a b c where
@@ -289,7 +312,7 @@ instance Subst EVarName ITerm ITerm where
 -- type variables of an ITerm come from type annotations, but free type
 -- variables in annotations are interpreted as implicitly existentially bound
 -- (i.e., they aren't really free).
-instance Subst TConstName Type ITerm where
+instance Subst TConName Type ITerm where
   subst _ _ (IEVar x) = IEVar x
   subst c t (IEAbs x Nothing e) = IEAbs x Nothing (subst c t e)
   subst c t1 (IEAbs x (Just t2) e) =
@@ -352,7 +375,7 @@ instance Subst TVarName Type FTerm where
   subst a e (FEList es) = FEList $ subst a e <$> es
   subst a t (FEConcat e1 e2) = FEConcat (subst a t e1) (subst a t e2)
 
-instance Subst TConstName Type FTerm where
+instance Subst TConName Type FTerm where
   subst _ _ (FEVar x) = FEVar x
   subst c t1 (FEAbs x t2 e) = FEAbs x (subst c t1 t2) (subst c t1 e)
   subst c t (FEApp e1 e2) = FEApp (subst c t e1) (subst c t e2)
@@ -375,21 +398,19 @@ instance Subst TVarName Type Type where
     if a1 == a2
       then t
       else TVar a2
-  subst a t (TConst c ts) = TConst c (subst a t <$> ts)
-  subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
+  subst a t (TCon c ts) = TCon c (subst a t <$> ts)
   subst a1 t1 (TForAll a2 t2) =
     TForAll a2 $
     if a1 == a2
       then t2
       else subst a1 t1 t2
 
-instance Subst TConstName Type Type where
+instance Subst TConName Type Type where
   subst _ _ (TVar c) = TVar c
-  subst c1 t (TConst c2 ts) =
+  subst c1 t (TCon c2 ts) =
     if c1 == c2
       then t
-      else TConst c2 ts
-  subst a t1 (TArrow t2 t3) = TArrow (subst a t1 t2) (subst a t1 t3)
+      else TCon c2 ts
   subst a1 t1 (TForAll a2 t2) = TForAll a2 (subst a1 t1 t2)
 
 -- Collecting binders
@@ -464,8 +485,7 @@ instance CollectBinders FTerm BBigLambda where
 
 instance CollectBinders Type BForAll where
   collectBinders (TVar a) = (BForAll [], TVar a)
-  collectBinders (TConst c ts) = (BForAll [], TConst c ts)
-  collectBinders (TArrow t1 t2) = (BForAll [], TArrow t1 t2)
+  collectBinders (TCon c ts) = (BForAll [], TCon c ts)
   collectBinders (TForAll a t1) =
     let (BForAll as, t2) = collectBinders t1
     in (BForAll (a : as), t2)
@@ -496,8 +516,10 @@ annotate :: ITerm -> Type -> ITerm
 annotate (IEAbs x t1 e) t2 =
   let (BForAll _, t3) = collectBinders t2
   in case (t1, t3) of
-       (Nothing, TArrow t4 t5) -> IEAbs x (Just t4) (annotate e t5)
-       (Just t4, TArrow _ t5) -> IEAbs x (Just t4) (annotate e t5)
+       (Nothing, TCon c [t4, t5])
+         | c == arrowName -> IEAbs x (Just t4) (annotate e t5)
+       (Just t4, TCon c [_, t5])
+         | c == arrowName -> IEAbs x (Just t4) (annotate e t5)
        _ -> IEAbs x t1 e
 annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
 annotate e _ = e
@@ -579,12 +601,14 @@ instance Prec FTerm where
 
 instance Prec Type where
   prec TVar {} = 10
-  prec TConst {} = 10
-  prec TArrow {} = 1
+  prec (TCon c _)
+    | c == arrowName = 1
+  prec TCon {} = 10
   prec TForAll {} = 1
   assoc TVar {} = NoAssoc
-  assoc TConst {} = NoAssoc
-  assoc TArrow {} = RightAssoc
+  assoc (TCon c _)
+    | c == arrowName = RightAssoc
+  assoc TCon {} = NoAssoc
   assoc TForAll {} = RightAssoc
 
 -- Generate a type variable name that is not in a given set.
@@ -652,8 +676,7 @@ instance CleanTVars FTerm where
 
 instance CleanTVars Type where
   cleanTVars _ t@(TVar _) = t
-  cleanTVars as (TConst c ts) = TConst c (cleanTVars as <$> ts)
-  cleanTVars as (TArrow t1 t2) = TArrow (cleanTVars as t1) (cleanTVars as t2)
+  cleanTVars as (TCon c ts) = TCon c (cleanTVars as <$> ts)
   cleanTVars as (TForAll a1 t) =
     let a2 = freshUserTVarName as
     in TForAll a2 (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
@@ -726,7 +749,10 @@ instance PrettyPrint FTerm where
 
 instance PrettyPrint Type where
   prettyPrint (TVar a) = show a
-  prettyPrint (TConst c ts) =
+  prettyPrint t1@(TCon c [t2, t3])
+    | c == arrowName =
+      embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
+  prettyPrint (TCon c ts) =
     let params =
           (\t ->
              let s = prettyPrint t
@@ -735,8 +761,6 @@ instance PrettyPrint Type where
                   else s) <$>
           ts
     in show c ++ (params >>= (" " ++))
-  prettyPrint t1@(TArrow t2 t3) =
-    embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
   prettyPrint t1@(TForAll a t2) =
     let (as, t3) = collectBinders (TForAll a t2)
     in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
@@ -759,22 +783,3 @@ instance Show FTerm where
 
 instance Show Type where
   show t = prettyPrint $ cleanTVars (Set.fromList $ freeTVars t) t
-
--- Built-in type constants
-boolName :: TConstName
-boolName = UserTConstName "Bool"
-
-boolType :: Type
-boolType = TConst boolName []
-
-intName :: TConstName
-intName = UserTConstName "Int"
-
-intType :: Type
-intType = TConst intName []
-
-listName :: TConstName
-listName = UserTConstName "List"
-
-listType :: Type -> Type
-listType t = TConst listName [t]
