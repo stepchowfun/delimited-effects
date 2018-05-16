@@ -104,8 +104,10 @@ TVar
   : x { UserTVarName $1 }
 
 TConst
-  : X                      { ($1, []) }
-  | TConst Type %prec HIGH { (fst $1, $2 : snd $1) }
+  : X %prec LOW         { ($1, []) }
+  | TConst TVar         { (fst $1, TVar $2 : snd $1) }
+  | TConst X            { (fst $1, (TConst (UserTConstName $2) []) : snd $1) }
+  | TConst '(' Type ')' { (fst $1, $3 : snd $1) }
 
 TVars
   : TVar          { [$1] }
