@@ -15,11 +15,11 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Syntax
   ( FTerm(..)
-  , FreeTConsts
+  , FreeTCons
   , FreeTVars
   , TVarName(..)
   , Type(..)
-  , freeTConsts
+  , freeTCons
   , freeTVars
   , subst
   )
@@ -34,10 +34,10 @@ instance FreeTVars Substitution where
   freeTVars (Substitution m) =
     nub $ Map.foldr (\t as -> freeTVars t ++ as) [] m
 
--- The free type constants of the codomain of a substitution
-instance FreeTConsts Substitution where
-  freeTConsts (Substitution m) =
-    nub $ Map.foldr (\t cs -> freeTConsts t ++ cs) [] m
+-- The free type constructors of the codomain of a substitution
+instance FreeTCons Substitution where
+  freeTCons (Substitution m) =
+    nub $ Map.foldr (\t cs -> freeTCons t ++ cs) [] m
 
 -- Check that a substitution is idempotent.
 idempotencyCheck :: Substitution -> Substitution

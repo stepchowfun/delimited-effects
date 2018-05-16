@@ -30,13 +30,15 @@ import Syntax
   , EVarName(..)
   , FTerm(..)
   , ITerm(..)
-  , TConstName(..)
+  , TConName(..)
   , TVarName(..)
   , Type(..)
+  , arrowName
+  , arrowType
   , boolName
   , boolType
   , collectBinders
-  , freeTConsts
+  , freeTCons
   , freeTVars
   , intName
   , intType
@@ -53,7 +55,7 @@ type TypeCheck
    = ExceptT String (State ( Integer
                            , Map EVarName Type
                            , Set TVarName
-                           , Map TConstName Integer))
+                           , Map TConName Integer))
 
 -- Add a term variable to the context.
 withUserEVar :: EVarName -> Type -> TypeCheck a -> TypeCheck a
@@ -74,11 +76,11 @@ freshTVar = do
   put (i + 1, cx, Set.insert a ca, cc)
   return a
 
--- Generate a fresh type constant and add it to the context.
-freshTConst :: Integer -> TypeCheck TConstName
-freshTConst n = do
+-- Generate a fresh type constructor and add it to the context.
+freshTCon :: Integer -> TypeCheck TConName
+freshTCon n = do
   (i, cx, ca, cc) <- get
-  let c = AutoTConstName i
+  let c = AutoTConName i
   put (i + 1, cx, ca, Map.insert c n cc)
   return c
 
@@ -101,7 +103,7 @@ unify t (TVar a)
   | a `notElem` freeTVars t = do
     substInContext a t
     return $ singletonSubst a t
-unify t1@(TConst c1 ts1) t2@(TConst c2 ts2)
+unify t1@(TCon c1 ts1) t2@(TCon c2 ts2)
   | c1 == c2 = do
     if length ts1 == length ts2
       then return ()
@@ -112,14 +114,10 @@ unify t1@(TConst c1 ts1) t2@(TConst c2 ts2)
          return $ composeSubst theta1 theta2)
       emptySubst
       (zip ts1 ts2)
-unify (TArrow t1 t2) (TArrow t3 t4) = do
-  theta1 <- unify t1 t3
-  theta2 <- unify (applySubst theta1 t2) (applySubst theta1 t4)
-  return $ composeSubst theta1 theta2
 unify t3@(TForAll a1 t1) t4@(TForAll a2 t2) = do
-  c <- freshTConst 0
-  theta <- unify (subst a1 (TConst c []) t1) (subst a2 (TConst c []) t2)
-  if c `elem` freeTConsts theta
+  c <- freshTCon 0
+  theta <- unify (subst a1 (TCon c []) t1) (subst a2 (TCon c []) t2)
+  if c `elem` freeTCons theta
     then throwError $ "Unable to unify " ++ show t3 ++ " with " ++ show t4
     else return theta
 unify t1 t2 =
@@ -133,14 +131,14 @@ subsume e1 t1 t2 = do
   let (BForAll as1, t3) = collectBinders t1
       (BForAll as2, t4) = collectBinders t2
   as3 <- replicateM (length as1) freshTVar
-  cs1 <- replicateM (length as2) (freshTConst 0)
+  cs1 <- replicateM (length as2) (freshTCon 0)
   let e3 = foldr (\a e2 -> FETApp e2 (TVar a)) e1 as3
       t5 = foldr (\(a1, a2) -> subst a1 (TVar a2)) t3 (zip as1 as3)
-      t6 = foldr (\(a, c) -> subst a (TConst c [])) t4 (zip as2 cs1)
+      t6 = foldr (\(a, c) -> subst a (TCon c [])) t4 (zip as2 cs1)
   theta1 <- unify t5 t6
   let theta2 = substRemoveKeys (Set.fromList as3) theta1
   if Set.null $
-     Set.intersection (Set.fromList cs1) (Set.fromList $ freeTConsts theta2)
+     Set.intersection (Set.fromList cs1) (Set.fromList $ freeTCons theta2)
     then return ()
     else throwError $ show t2 ++ " is not subsumed by " ++ show t1
   as4 <- replicateM (length cs1) freshTVar
@@ -211,13 +209,9 @@ sanitizeAnnotation t1 =
         replaceBoundVars t2
   where
     replaceBoundVars t2@(TVar _) = return t2
-    replaceBoundVars (TConst c ts1) = do
+    replaceBoundVars (TCon c ts1) = do
       ts2 <- mapM replaceBoundVars ts1
-      return $ TConst c ts2
-    replaceBoundVars (TArrow t2 t3) = do
-      t4 <- replaceBoundVars t2
-      t5 <- replaceBoundVars t3
-      return $ TArrow t4 t5
+      return $ TCon c ts2
     replaceBoundVars (TForAll a1 t2) = do
       a2 <- freshTVar
       t3 <- replaceBoundVars (subst a1 (TVar a2) t2)
@@ -246,16 +240,17 @@ infer (IEAbs x t1 e1) = do
           throwError $ "Inferred polymorphic argument type: " ++ show t4
         _ -> return ()
       (e3, t5) <- open e2 t3
-      return (FEAbs x t4 e3, TArrow t4 t5, theta)
+      return (FEAbs x t4 e3, arrowType t4 t5, theta)
   (e3, t4) <- generalize e2 t3
   return (e3, t4, theta)
 infer (IEApp e1 e2) = do
   a1 <- freshTVar
   a2 <- freshTVar
-  (e3, t1, theta1) <- check e1 $ TArrow (TVar a1) (TVar a2)
+  (e3, t1, theta1) <- check e1 $ arrowType (TVar a1) (TVar a2)
   let (t4, t5) =
         case t1 of
-          TArrow t2 t3 -> (t2, t3)
+          TCon c [t2, t3]
+            | c == arrowName -> (t2, t3)
           _ -> error "Something went wrong."
   (e4, _, theta2) <- check e2 t4
   (e5, t6) <-

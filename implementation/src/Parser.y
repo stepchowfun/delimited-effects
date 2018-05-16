@@ -6,10 +6,11 @@ import Lexer (Token(..))
 import Syntax
   ( EVarName(..)
   , ITerm(..)
-  , TConstName(..)
+  , TConName(..)
   , TVarName(..)
   , Type(..)
   , annotate
+  , arrowType
   , listType
   )
 
@@ -82,8 +83,8 @@ ITerm
 
 Type
   : x                     { TVar (UserTVarName $1) }
-  | TConst %prec LOW      { TConst (UserTConstName $ fst $1) (reverse $ snd $1) }
-  | Type '->' Type        { TArrow $1 $3 }
+  | TCon %prec LOW      { TCon (UserTConName $ fst $1) (reverse $ snd $1) }
+  | Type '->' Type        { arrowType $1 $3 }
   | forall TVars '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
   | '(' Type ')'          { $2 }
 
@@ -103,11 +104,11 @@ EVars
 TVar
   : x { UserTVarName $1 }
 
-TConst
+TCon
   : X %prec LOW         { ($1, []) }
-  | TConst TVar         { (fst $1, TVar $2 : snd $1) }
-  | TConst X            { (fst $1, (TConst (UserTConstName $2) []) : snd $1) }
-  | TConst '(' Type ')' { (fst $1, $3 : snd $1) }
+  | TCon TVar         { (fst $1, TVar $2 : snd $1) }
+  | TCon X            { (fst $1, (TCon (UserTConName $2) []) : snd $1) }
+  | TCon '(' Type ')' { (fst $1, $3 : snd $1) }
 
 TVars
   : TVar          { [$1] }
