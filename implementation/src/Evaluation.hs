@@ -43,7 +43,7 @@ eval (FESub e1 e2) = do
   e4 <- eval e2
   case (e3, e4) of
     (FEIntLit i1, FEIntLit i2) -> return $ FEIntLit (i1 - i2)
-    _ -> throwError $ "Cannot subtract " ++ show e3 ++ " and " ++ show e4
+    _ -> throwError $ "Cannot subtract " ++ show e4 ++ " from " ++ show e3
 eval (FEMul e1 e2) = do
   e3 <- eval e1
   e4 <- eval e2
@@ -58,7 +58,7 @@ eval (FEDiv e1 e2) = do
       if i2 == 0
         then throwError $ "Cannot divide " ++ show i1 ++ " by 0"
         else return $ FEIntLit (i1 `div` i2)
-    _ -> throwError $ "Cannot divide " ++ show e3 ++ " and " ++ show e4
+    _ -> throwError $ "Cannot divide " ++ show e3 ++ " by " ++ show e4
 eval (FEList es1) = do
   es2 <-
     foldM
