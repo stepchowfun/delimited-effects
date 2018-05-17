@@ -17,8 +17,6 @@
   \documentclass[format=acmsmall, review=false, screen=true]{acmart}
 \fi
 
-\usepackage[T1]{fontenc} % The font encoding
-\usepackage[varqu]{zi4} % Inconsolata font with straight quotes
 \usepackage{amssymb} % For \varnothing
 \usepackage{bussproofs} % For inference rules
 \usepackage{float} % For the [H] option in \begin{figure}[H]. NOTE: Stop using this when we have more content
@@ -27,7 +25,11 @@
 \usepackage{stmaryrd} % For \llbracket and \rrbracket
 
 \ifnoacm
+  \usepackage[T1]{fontenc} % The font encoding
+  \usepackage[libertine]{newtxmath} % Math font
   \usepackage[margin=1in]{geometry} % For setting the margin
+  \usepackage[tt=false]{libertine} % Text font
+  \usepackage[varqu]{zi4} % Inconsolata font with straight quotes
   \usepackage{natbib} % For citations and references
 \fi
 

@@ -1,3 +1,9 @@
+% Typesetting
+\newcommand\constructorName[1]{\textsf{\textsc{#1}}}
+\newcommand\keyword[1]{\textsf{\textbf{#1}}}
+\newcommand\numberName[1]{\textsf{#1}}
+\newcommand\variableName[1]{\textsf{#1}}
+
 % Misc
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\dom[1]{\apply{\operatorname{dom}}{#1}}
@@ -14,11 +20,11 @@
 \newcommand\eTAbs[3]{\Lambda \kAnno{#1}{#2} \; . \; #3}
 \newcommand\eTAbsNoKind[2]{\Lambda #1 \; . \; #2}
 \newcommand\eTApp[2]{#1 \; #2}
-\newcommand\eReify[3]{\mathbf{reify} \; #1 \leftarrow #2 \; \mathbf{in} \; #3}
-\newcommand\eReflect[1]{\mathbf{reflect} \; #1}
-\newcommand\ePure[1]{\mathbf{pure} \; #1}
-\newcommand\eRun[1]{\mathbf{run} \; #1}
-\newcommand\eDo[3]{\mathbf{do} \; #1 \leftarrow #2 \; \mathbf{in} \; #3}
+\newcommand\eReify[3]{\keyword{reify} \; #1 \leftarrow #2 \; \keyword{in} \; #3}
+\newcommand\eReflect[1]{\keyword{reflect} \; #1}
+\newcommand\ePure[1]{\keyword{pure} \; #1}
+\newcommand\eRun[1]{\keyword{run} \; #1}
+\newcommand\eDo[3]{\keyword{do} \; #1 \leftarrow #2 \; \keyword{in} \; #3}
 \newcommand\eUnit{\parens{}}
 
 % Types and rows
@@ -30,8 +36,8 @@
 \newcommand\tComputation[2]{#1 \; ! \; #2}
 \newcommand\effect{\varepsilon}
 \newcommand\tPure{\circ}
-\newcommand\tVoid{\mathbf{0}}
-\newcommand\tUnit{\mathbf{1}}
+\newcommand\tVoid{\constructorName{0}}
+\newcommand\tUnit{\constructorName{1}}
 
 % Kinds
 \newcommand\kind{\kappa}
@@ -51,14 +57,14 @@
 \newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
 
 % Pseudo-constructs used for exposition
-\newcommand\eMulInt{\mathit{multiplyInt}}
-\newcommand\eCombine{\mathit{combine}}
-\newcommand\eData[2]{\mathbf{data} \; #1 \Coloneqq #2}
-\newcommand\eIdentity{\mathit{identity}}
-\newcommand\eLet[3]{\mathbf{let} \; #1 = #2 \; \mathbf{in} \; #3}
+\newcommand\eMulInt{\variableName{multiplyInt}}
+\newcommand\eCombine{\variableName{combine}}
+\newcommand\eData[2]{\keyword{data} \; #1 = #2}
+\newcommand\eIdentity{\variableName{identity}}
+\newcommand\eLet[3]{\keyword{let} \; #1 = #2 \; \keyword{in} \; #3}
 \newcommand\eMonoid[2]{\eApp{\eApp{\monoid}{#1}}{#2}}
-\newcommand\eSquare{\mathit{square}}
-\newcommand\monoid{\mathit{Monoid}}
+\newcommand\eSquare{\variableName{square}}
+\newcommand\monoid{\constructorName{Monoid}}
 \newcommand\tApp[2]{#1 \; #2}
 \newcommand\tMonoid[1]{\tApp{\monoid}{#1}}
 \newcommand\wildcard{\_}
