@@ -57,13 +57,19 @@
 \newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
 
 % Pseudo-constructs used for exposition
-\newcommand\eMulInt{\variableName{multiplyInt}}
+\newcommand\eClass[1]{\keyword{class} \; #1 \; \keyword{where}}
 \newcommand\eCombine{\variableName{combine}}
 \newcommand\eData[2]{\keyword{data} \; #1 = #2}
 \newcommand\eIdentity{\variableName{identity}}
+\newcommand\eInstance[1]{\keyword{instance} \; #1 \; \keyword{where}}
 \newcommand\eLet[3]{\keyword{let} \; #1 = #2 \; \keyword{in} \; #3}
 \newcommand\eMonoid[2]{\eApp{\eApp{\monoid}{#1}}{#2}}
+\newcommand\eMultiply{\variableName{multiply}}
 \newcommand\eSquare{\variableName{square}}
+\newcommand\eX{\variableName{x}}
+\newcommand\eY{\variableName{y}}
+\newcommand\eZ{\variableName{z}}
+\newcommand\integer{\constructorName{Integer}}
 \newcommand\monoid{\constructorName{Monoid}}
 \newcommand\tApp[2]{#1 \; #2}
 \newcommand\tMonoid[1]{\tApp{\monoid}{#1}}

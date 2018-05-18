@@ -71,6 +71,7 @@ PRELUDE_ARITIES = {
   'end' => [1],
   'endAcm' => [0],
   'endNonAcm' => [0],
+  'enspace' => [0],
   'fbox' => [1],
   'fboxsep' => [0],
   'fi' => [0],
