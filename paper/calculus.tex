@@ -6,35 +6,34 @@
 
     \begin{figure}[H]
       \begin{center}
-        \begin{tabular}{l l l}
-          $\term \Coloneqq$ & & terms: \\
-          & $\eVar$ & variable \\
-          & $\eAbs{\eVar}{\type}{\term}$ & term abstraction \\
-          & $\eApp{\term}{\term}$ & term application \\
-          & $\eTAbs{\tVar}{\kind}{\term}$ & type abstraction \\
-          & $\eTApp{\term}{\type}$ & type application \\
-          & $\eReify{\tVar}{\term}{\term}$ & reification \\
-          & $\eReflect{\tVar}$ & reflection \\
-          & $\ePure{\term}$ & computation introduction \\
-          & $\eRun{\term}$ & computation elimination \\
-          & $\eDo{\eVar}{\term}{\term}$ & computation sequencing \\
-          \\
-          $\type, \effect \Coloneqq$ & & types: \\
-          & $\tVar$ & type variable \\
-          & $\tArrow{\type}{\type}$ & arrow type \\
-          & $\tForAll{\tVar}{\kind}{\type}$ & universal type \\
-          & $\tComputation{\type}{\effect}$ & computation type \\
-          & $\tPure$ & pure effect \\
-          \\
-          $\kind \Coloneqq$ & & kinds: \\
-          & $\kType$ & kind of proper types \\
-          & $\kEffect$ & kind of rows \\
-          & $\kWitness{\type}$ & kind of witnesses \\
-          \\
-          $\context \Coloneqq$ & & contexts: \\
-          & $\cEmpty$ & empty context \\
-          & $\cEExtend{\context}{\eVar}{\type}$ & term variable binding \\
-          & $\cTExtend{\context}{\tVar}{\kind}$ & type variable binding \\
+        \begin{tabular}{r l c l}
+          terms & $\term$ & $\Coloneqq$ & $
+            \eVar                                           \enspace | \enspace
+            \eAbs{\eVar}{\type}{\term}                      \enspace | \enspace
+            \eApp{\term}{\term}                             \enspace | \enspace
+            \eTAbs{\tVar}{\kind}{\term}                     \enspace | \enspace
+            \eTApp{\term}{\type}                            $ \\
+          & & $|$ & $
+            \eReify{\tVar}{\term}{\term}                    \enspace | \enspace
+            \eReflect{\tVar}                                $ \\
+          & & $|$ & $
+            \ePure{\term}                                   \enspace | \enspace
+            \eRun{\term}                                    \enspace | \enspace
+            \eDo{\eVar}{\term}{\term}                       $ \\ \\
+          types & $\type, \effect$ & $\Coloneqq$ & $
+            \tVar                                           \enspace | \enspace
+            \tArrow{\type}{\type}                           \enspace | \enspace
+            \tForAll{\tVar}{\kind}{\type}                   \enspace | \enspace
+            \tComputation{\type}{\effect}                   \enspace | \enspace
+            \tPure                                          $ \\ \\
+          kinds & $\kind$ & $\Coloneqq$ & $
+            \kType                                          \enspace | \enspace
+            \kEffect                                        \enspace | \enspace
+            \kWitness{\type}                                $ \\ \\
+          contexts & $\context$ & $\Coloneqq$ & $
+            \cEmpty                                         \enspace | \enspace
+            \cEExtend{\context}{\eVar}{\type}               \enspace | \enspace
+            \cTExtend{\context}{\tVar}{\kind}               $
         \end{tabular}
       \end{center}
 
