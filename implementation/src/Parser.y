@@ -83,7 +83,7 @@ ITerm
 
 Type
   : x                     { TVar (UserTVarName $1) }
-  | TCon %prec LOW      { TCon (UserTConName $ fst $1) (reverse $ snd $1) }
+  | TCon %prec LOW        { TCon (UserTConName $ fst $1) (reverse $ snd $1) }
   | Type '->' Type        { arrowType $1 $3 }
   | forall TVars '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
   | '(' Type ')'          { $2 }
@@ -98,20 +98,20 @@ EVar
   | '(' x ':' Type ')' { (EVarName $2, $4) }
 
 EVars
-  : EVar          { [$1] }
+  : EVar       { [$1] }
   | EVars EVar { $2 : $1 }
 
 TVar
   : x { UserTVarName $1 }
 
 TCon
-  : X %prec LOW         { ($1, []) }
+  : X %prec LOW       { ($1, []) }
   | TCon TVar         { (fst $1, TVar $2 : snd $1) }
   | TCon X            { (fst $1, (TCon (UserTConName $2) []) : snd $1) }
   | TCon '(' Type ')' { (fst $1, $3 : snd $1) }
 
 TVars
-  : TVar          { [$1] }
+  : TVar       { [$1] }
   | TVars TVar { $2 : $1 }
 
 {
