@@ -226,10 +226,7 @@ infer (IEVar x) = do
     Just t -> return (FEVar x, t, emptySubst)
     Nothing -> throwError $ "Undefined variable: " ++ show x
 infer (IEAbs x t1 e1) = do
-  t2 <-
-    case t1 of
-      Just t2 -> sanitizeAnnotation t2
-      Nothing -> TVar <$> freshTVar
+  t2 <- sanitizeAnnotation t1
   (e2, t3, theta) <-
     withUserEVar x t2 $ do
       (e2, t3, theta) <- infer e1

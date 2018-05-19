@@ -9,9 +9,9 @@ import Syntax
   , TConName(..)
   , TVarName(..)
   , Type(..)
-  , annotate
   , arrowType
   , listType
+  , propagate
   )
 
 }
@@ -64,10 +64,10 @@ import Syntax
 
 ITerm
   : x                              { IEVar (EVarName $1) }
-  | x '->' ITerm                   { IEAbs (EVarName $1) Nothing $3 }
+  | x '->' ITerm                   { IEAbs (EVarName $1) existential $3 }
   | lambda EVars '->' ITerm        { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
   | ITerm ITerm %prec HIGH         { IEApp $1 $2 }
-  | ITerm ':' Type                 { IEAnno (annotate $1 $3) $3 }
+  | ITerm ':' Type                 { IEAnno (propagate $1 $3) $3 }
   | x '=' ITerm ';' ITerm          { IELet (EVarName $1) $3 $5 }
   | '(' ITerm ')'                  { $2 }
   | true                           { IETrue }
@@ -94,8 +94,8 @@ EListItems
   | EListItems ',' ITerm { $3 : $1 }
 
 EVar
-  : x                  { (EVarName $1, Nothing) }
-  | '(' x ':' Type ')' { (EVarName $2, Just $4) }
+  : x                  { (EVarName $1, existential) }
+  | '(' x ':' Type ')' { (EVarName $2, $4) }
 
 EVars
   : EVar          { [$1] }
@@ -115,6 +115,9 @@ TVars
   | TVars TVar { $2 : $1 }
 
 {
+
+existential :: Type
+existential = TVar $ UserTVarName "α"
 
 parseError :: [Token] -> Either String a
 parseError x = Left $ "Cannot parse: " ++ unwords (show <$> x)
