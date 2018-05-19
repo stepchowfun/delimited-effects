@@ -15,11 +15,11 @@ eval (FEApp e1 e2) = do
   case e3 of
     FEAbs x _ e5 -> eval $ subst x e4 e5
     _ -> throwError $ "Cannot apply " ++ show e3 ++ " to " ++ show e4
-eval (FETAbs a e) = return $ FETAbs a e
+eval (FETAbs a k e) = return $ FETAbs a k e
 eval (FETApp e1 t) = do
   e2 <- eval e1
   case e2 of
-    FETAbs a e3 -> eval $ subst a t e3
+    FETAbs a _ e3 -> eval $ subst a t e3
     _ -> throwError $ "Cannot apply " ++ show e2 ++ " to " ++ show t
 eval FETrue = return FETrue
 eval FEFalse = return FEFalse

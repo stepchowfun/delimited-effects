@@ -8,9 +8,12 @@ module Syntax
   , EVarName(..)
   , FTerm(..)
   , FreeEVars
+  , FreeKVars
   , FreeTCons
   , FreeTVars
   , ITerm(..)
+  , KVarName(..)
+  , Kind(..)
   , Subst
   , TConName(..)
   , TVarName(..)
@@ -21,6 +24,7 @@ module Syntax
   , boolType
   , collectBinders
   , freeEVars
+  , freeKVars
   , freeTCons
   , freeTVars
   , intName
@@ -62,6 +66,15 @@ instance Show TConName where
   show (UserTConName s) = s
   show (AutoTConName i) = "%" ++ show i
 
+data KVarName
+  = UserKVarName String -- Can be referred to in source programs
+  | AutoKVarName Integer -- Cannot be referred to in source programs
+  deriving (Eq, Ord)
+
+instance Show KVarName where
+  show (UserKVarName s) = s
+  show (AutoKVarName i) = "@" ++ show i
+
 data ITerm
   = IEVar EVarName
   | IEAbs EVarName
@@ -100,6 +113,7 @@ data FTerm
   | FEApp FTerm
           FTerm
   | FETAbs TVarName
+           Kind
            FTerm
   | FETApp FTerm
            Type
@@ -126,7 +140,12 @@ data Type
   | TCon TConName
          [Type]
   | TForAll TVarName
+            Kind
             Type
+
+data Kind
+  = KVar KVarName
+  | KType
 
 -- Built-in type constructors
 boolName :: TConName
@@ -166,6 +185,9 @@ class FreeTVars a where
 class FreeTCons a where
   freeTCons :: a -> [TConName]
 
+class FreeKVars a where
+  freeKVars :: a -> [KVarName]
+
 instance FreeEVars ITerm where
   freeEVars (IEVar x) = [x]
   freeEVars (IEAbs x _ e) = filter (/= x) (freeEVars e)
@@ -189,6 +211,9 @@ instance FreeEVars ITerm where
 -- variables of an ITerm come from type annotations, but free type variables in
 -- annotations are interpreted as implicitly existentially bound (i.e., they
 -- aren't really free).
+--
+-- We also deliberately omit a FreeKVars ITerm instance because ITerms
+-- shouldn't have any free kind variables. We don't even parse kind variables.
 instance FreeTCons ITerm where
   freeTCons (IEVar _) = []
   freeTCons (IEAbs _ t e) = nub $ freeTCons t ++ freeTCons e
@@ -211,7 +236,7 @@ instance FreeEVars FTerm where
   freeEVars (FEVar x) = [x]
   freeEVars (FEAbs x _ e) = filter (/= x) (freeEVars e)
   freeEVars (FEApp e1 e2) = nub $ freeEVars e1 ++ freeEVars e2
-  freeEVars (FETAbs _ e) = freeEVars e
+  freeEVars (FETAbs _ _ e) = freeEVars e
   freeEVars (FETApp e _) = freeEVars e
   freeEVars FETrue = []
   freeEVars FEFalse = []
@@ -229,7 +254,7 @@ instance FreeTVars FTerm where
   freeTVars (FEVar _) = []
   freeTVars (FEAbs _ t e) = nub $ freeTVars t ++ freeTVars e
   freeTVars (FEApp e1 e2) = nub $ freeTVars e1 ++ freeTVars e2
-  freeTVars (FETAbs a e) = filter (/= a) (freeTVars e)
+  freeTVars (FETAbs a k e) = nub $ freeTVars k ++ filter (/= a) (freeTVars e)
   freeTVars (FETApp e t) = nub $ freeTVars e ++ freeTVars t
   freeTVars FETrue = []
   freeTVars FEFalse = []
@@ -247,7 +272,7 @@ instance FreeTCons FTerm where
   freeTCons (FEVar _) = []
   freeTCons (FEAbs _ t e) = nub $ freeTCons t ++ freeTCons e
   freeTCons (FEApp e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
-  freeTCons (FETAbs _ e) = freeTCons e
+  freeTCons (FETAbs _ k e) = nub $ freeTCons k ++ freeTCons e
   freeTCons (FETApp e t) = nub $ freeTCons e ++ freeTCons t
   freeTCons FETrue = []
   freeTCons FEFalse = []
@@ -261,15 +286,50 @@ instance FreeTCons FTerm where
   freeTCons (FEConcat e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
   freeTCons (FEList es) = nub $ es >>= freeTCons
 
+instance FreeKVars FTerm where
+  freeKVars (FEVar _) = []
+  freeKVars (FEAbs _ t e) = nub $ freeKVars t ++ freeKVars e
+  freeKVars (FEApp e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+  freeKVars (FETAbs _ k e) = nub $ freeKVars k ++ freeKVars e
+  freeKVars (FETApp e t) = nub $ freeKVars e ++ freeKVars t
+  freeKVars FETrue = []
+  freeKVars FEFalse = []
+  freeKVars (FEIf e1 e2 e3) =
+    nub $ freeKVars e1 ++ freeKVars e2 ++ freeKVars e3
+  freeKVars (FEIntLit _) = []
+  freeKVars (FEAdd e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+  freeKVars (FESub e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+  freeKVars (FEMul e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+  freeKVars (FEDiv e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+  freeKVars (FEList es) = nub $ es >>= freeKVars
+  freeKVars (FEConcat e1 e2) = nub $ freeKVars e1 ++ freeKVars e2
+
 instance FreeTVars Type where
   freeTVars (TVar a) = [a]
   freeTVars (TCon _ ts) = foldr (\t as -> freeTVars t ++ as) [] ts
-  freeTVars (TForAll a t) = filter (/= a) (freeTVars t)
+  freeTVars (TForAll a k t) = nub $ freeTVars k ++ filter (/= a) (freeTVars t)
 
 instance FreeTCons Type where
   freeTCons (TVar _) = []
   freeTCons (TCon c ts) = c : foldr (\t cs -> freeTCons t ++ cs) [] ts
-  freeTCons (TForAll _ t) = freeTCons t
+  freeTCons (TForAll _ k t) = nub $ freeTCons k ++ freeTCons t
+
+instance FreeKVars Type where
+  freeKVars (TVar _) = []
+  freeKVars (TCon _ ts) = foldr (\t bs -> freeKVars t ++ bs) [] ts
+  freeKVars (TForAll _ k t) = nub $ freeKVars k ++ freeKVars t
+
+instance FreeTVars Kind where
+  freeTVars (KVar _) = []
+  freeTVars KType = []
+
+instance FreeTCons Kind where
+  freeTCons (KVar _) = []
+  freeTCons KType = []
+
+instance FreeKVars Kind where
+  freeKVars (KVar b) = [b]
+  freeKVars KType = []
 
 -- Substitution
 class Subst a b c where
@@ -339,7 +399,7 @@ instance Subst EVarName FTerm FTerm where
       then e2
       else subst x1 e1 e2
   subst x e1 (FEApp e2 e3) = FEApp (subst x e1 e2) (subst x e1 e3)
-  subst x e1 (FETAbs a e2) = FETAbs a (subst x e1 e2)
+  subst x e1 (FETAbs a k e2) = FETAbs a k (subst x e1 e2)
   subst x e1 (FETApp e2 t) = FETApp (subst x e1 e2) t
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
@@ -357,7 +417,7 @@ instance Subst TVarName Type FTerm where
   subst _ _ (FEVar x) = FEVar x
   subst a t1 (FEAbs x t2 e) = FEAbs x (subst a t1 t2) (subst a t1 e)
   subst a t (FEApp e1 e2) = FEApp (subst a t e1) (subst a t e2)
-  subst a1 t (FETAbs a2 e) = FETAbs a2 (subst a1 t e)
+  subst a1 t (FETAbs a2 k e) = FETAbs a2 (subst a1 t k) (subst a1 t e)
   subst a t1 (FETApp e t2) = FETApp (subst a t1 e) (subst a t1 t2)
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
@@ -375,7 +435,7 @@ instance Subst TConName Type FTerm where
   subst _ _ (FEVar x) = FEVar x
   subst c t1 (FEAbs x t2 e) = FEAbs x (subst c t1 t2) (subst c t1 e)
   subst c t (FEApp e1 e2) = FEApp (subst c t e1) (subst c t e2)
-  subst c t (FETAbs a e) = FETAbs a (subst c t e)
+  subst c t (FETAbs a k e) = FETAbs a (subst c t k) (subst c t e)
   subst c t1 (FETApp e t2) = FETApp (subst c t1 e) (subst c t1 t2)
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
@@ -389,14 +449,32 @@ instance Subst TConName Type FTerm where
   subst c t (FEConcat e1 e2) = FEConcat (subst c t e1) (subst c t e2)
   subst c t (FEList es) = FEList $ subst c t <$> es
 
+instance Subst KVarName Kind FTerm where
+  subst _ _ (FEVar x) = FEVar x
+  subst b k (FEAbs x t e) = FEAbs x (subst b k t) (subst b k e)
+  subst b k (FEApp e1 e2) = FEApp (subst b k e1) (subst b k e2)
+  subst b k1 (FETAbs a k2 e) = FETAbs a (subst b k1 k2) (subst b k1 e)
+  subst b k (FETApp e t) = FETApp (subst b k e) (subst b k t)
+  subst _ _ FETrue = FETrue
+  subst _ _ FEFalse = FEFalse
+  subst b k (FEIf e1 e2 e3) =
+    FEIf (subst b k e1) (subst b k e2) (subst b k e3)
+  subst _ _ (FEIntLit i) = FEIntLit i
+  subst b k (FEAdd e1 e2) = FEAdd (subst b k e1) (subst b k e2)
+  subst b k (FESub e1 e2) = FESub (subst b k e1) (subst b k e2)
+  subst b k (FEMul e1 e2) = FEMul (subst b k e1) (subst b k e2)
+  subst b k (FEDiv e1 e2) = FEDiv (subst b k e1) (subst b k e2)
+  subst b k (FEList es) = FEList $ subst b k <$> es
+  subst b k (FEConcat e1 e2) = FEConcat (subst b k e1) (subst b k e2)
+
 instance Subst TVarName Type Type where
   subst a1 t (TVar a2) =
     if a1 == a2
       then t
       else TVar a2
   subst a t (TCon c ts) = TCon c (subst a t <$> ts)
-  subst a1 t1 (TForAll a2 t2) =
-    TForAll a2 $
+  subst a1 t1 (TForAll a2 k t2) =
+    TForAll a2 (subst a1 t1 k) $
     if a1 == a2
       then t2
       else subst a1 t1 t2
@@ -407,17 +485,37 @@ instance Subst TConName Type Type where
     if c1 == c2
       then t
       else TCon c2 ts
-  subst a1 t1 (TForAll a2 t2) = TForAll a2 (subst a1 t1 t2)
+  subst a1 t1 (TForAll a2 k t2) = TForAll a2 (subst a1 t1 k) (subst a1 t1 t2)
+
+instance Subst KVarName Kind Type where
+  subst _ _ (TVar a) = TVar a
+  subst b k (TCon c ts) = TCon c (subst b k <$> ts)
+  subst b k1 (TForAll a k2 t) = TForAll a (subst b k1 k2) (subst b k1 t)
+
+instance Subst TVarName Type Kind where
+  subst _ _ (KVar b) = KVar b
+  subst _ _ KType = KType
+
+instance Subst TConName Type Kind where
+  subst _ _ (KVar b) = KVar b
+  subst _ _ KType = KType
+
+instance Subst KVarName Kind Kind where
+  subst b1 k (KVar b2) =
+    if b1 == b2
+      then k
+      else KVar b2
+  subst _ _ KType = KType
 
 -- Collecting binders
 newtype BSmallLambda =
   BSmallLambda [(EVarName, Type)]
 
 newtype BBigLambda =
-  BBigLambda [TVarName]
+  BBigLambda [(TVarName, Kind)]
 
 newtype BForAll =
-  BForAll [TVarName]
+  BForAll [(TVarName, Kind)]
 
 class CollectBinders a b where
   collectBinders :: a -> (b, a)
@@ -447,7 +545,7 @@ instance CollectBinders FTerm BSmallLambda where
     let (BSmallLambda xs, e2) = collectBinders e1
     in (BSmallLambda ((x, t) : xs), e2)
   collectBinders (FEApp e1 e2) = (BSmallLambda [], FEApp e1 e2)
-  collectBinders (FETAbs a e) = (BSmallLambda [], FETAbs a e)
+  collectBinders (FETAbs a k e) = (BSmallLambda [], FETAbs a k e)
   collectBinders (FETApp e t) = (BSmallLambda [], FETApp e t)
   collectBinders FETrue = (BSmallLambda [], FETrue)
   collectBinders FEFalse = (BSmallLambda [], FEFalse)
@@ -464,9 +562,9 @@ instance CollectBinders FTerm BBigLambda where
   collectBinders (FEVar x) = (BBigLambda [], FEVar x)
   collectBinders (FEAbs x t e) = (BBigLambda [], FEAbs x t e)
   collectBinders (FEApp e1 e2) = (BBigLambda [], FEApp e1 e2)
-  collectBinders (FETAbs a e1) =
-    let (BBigLambda as, e2) = collectBinders e1
-    in (BBigLambda (a : as), e2)
+  collectBinders (FETAbs a k e1) =
+    let (BBigLambda aks, e2) = collectBinders e1
+    in (BBigLambda ((a, k) : aks), e2)
   collectBinders (FETApp e t) = (BBigLambda [], FETApp e t)
   collectBinders FETrue = (BBigLambda [], FETrue)
   collectBinders FEFalse = (BBigLambda [], FEFalse)
@@ -482,25 +580,39 @@ instance CollectBinders FTerm BBigLambda where
 instance CollectBinders Type BForAll where
   collectBinders (TVar a) = (BForAll [], TVar a)
   collectBinders (TCon c ts) = (BForAll [], TCon c ts)
-  collectBinders (TForAll a t1) =
-    let (BForAll as, t2) = collectBinders t1
-    in (BForAll (a : as), t2)
+  collectBinders (TForAll a k t1) =
+    let (BForAll aks, t2) = collectBinders t1
+    in (BForAll ((a, k) : aks), t2)
 
 instance Show BSmallLambda where
-  show (BSmallLambda xs1) =
+  show (BSmallLambda xts) =
     "λ" ++
     unwords
       ((\group ->
           "(" ++
           unwords (show . fst <$> group) ++
-          " : " ++ show (snd (head group)) ++ ")") <$>
-       groupBy (on (==) (show . snd)) xs1)
+          " : " ++ prettyPrint (snd (head group)) ++ ")") <$>
+       groupBy (on (==) (prettyPrint . snd)) xts)
 
 instance Show BBigLambda where
-  show (BBigLambda as) = "Λ" ++ unwords (show <$> as)
+  show (BBigLambda aks) =
+    "Λ" ++
+    unwords
+      ((\group ->
+          "(" ++
+          unwords (show . fst <$> group) ++
+          " : " ++ prettyPrint (snd (head group)) ++ ")") <$>
+       groupBy (on (==) (prettyPrint . snd)) aks)
 
 instance Show BForAll where
-  show (BForAll as) = "∀" ++ unwords (show <$> as)
+  show (BForAll aks) =
+    "∀" ++
+    unwords
+      ((\group ->
+          "(" ++
+          unwords (show . fst <$> group) ++
+          " : " ++ prettyPrint (snd (head group)) ++ ")") <$>
+       groupBy (on (==) (prettyPrint . snd)) aks)
 
 -- Type annotation propagation
 propagate :: ITerm -> Type -> ITerm
@@ -646,9 +758,12 @@ instance CleanTVars FTerm where
   cleanTVars _ e@(FEVar _) = e
   cleanTVars as (FEAbs x t e) = FEAbs x (cleanTVars as t) (cleanTVars as e)
   cleanTVars as (FEApp e1 e2) = FEApp (cleanTVars as e1) (cleanTVars as e2)
-  cleanTVars as (FETAbs a1 e) =
+  cleanTVars as (FETAbs a1 k e) =
     let a2 = freshUserTVarName as
-    in FETAbs a2 (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) e))
+    in FETAbs
+         a2
+         (cleanTVars as k)
+         (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) e))
   cleanTVars as (FETApp e t) = FETApp (cleanTVars as e) (cleanTVars as t)
   cleanTVars _ FETrue = FETrue
   cleanTVars _ FEFalse = FEFalse
@@ -666,9 +781,16 @@ instance CleanTVars FTerm where
 instance CleanTVars Type where
   cleanTVars _ t@(TVar _) = t
   cleanTVars as (TCon c ts) = TCon c (cleanTVars as <$> ts)
-  cleanTVars as (TForAll a1 t) =
+  cleanTVars as (TForAll a1 k t) =
     let a2 = freshUserTVarName as
-    in TForAll a2 (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
+    in TForAll
+         a2
+         (cleanTVars as k)
+         (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
+
+instance CleanTVars Kind where
+  cleanTVars _ (KVar b) = KVar b
+  cleanTVars _ KType = KType
 
 -- Pretty printing
 class PrettyPrint a where
@@ -712,9 +834,9 @@ instance PrettyPrint FTerm where
     in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FEApp e2 e3) =
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
-  prettyPrint e1@(FETAbs _ _) =
-    let (as, e2) = collectBinders e1
-    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e2
+  prettyPrint e1@FETAbs {} =
+    let (aks, e2) = collectBinders e1
+    in show (aks :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ prettyPrint t
   prettyPrint FETrue = "true"
   prettyPrint FEFalse = "false"
@@ -750,9 +872,13 @@ instance PrettyPrint Type where
                   else s) <$>
           ts
     in show c ++ (params >>= (" " ++))
-  prettyPrint t1@(TForAll _ _) =
-    let (as, t2) = collectBinders t1
-    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t2
+  prettyPrint t1@TForAll {} =
+    let (aks, t2) = collectBinders t1
+    in show (aks :: BForAll) ++ " . " ++ embed RightAssoc t1 t2
+
+instance PrettyPrint Kind where
+  prettyPrint (KVar b) = show b
+  prettyPrint KType = "*"
 
 -- The first node is the current one. The second is the one to be embedded.
 embed :: (Prec a, PrettyPrint a) => Assoc -> a -> a -> String
@@ -772,3 +898,6 @@ instance Show FTerm where
 
 instance Show Type where
   show t = prettyPrint $ cleanTVars (Set.fromList $ freeTVars t) t
+
+instance Show Kind where
+  show k = prettyPrint $ cleanTVars (Set.fromList $ freeTVars k) k
