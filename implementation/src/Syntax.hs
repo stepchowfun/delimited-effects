@@ -15,7 +15,6 @@ module Syntax
   , TConName(..)
   , TVarName(..)
   , Type(..)
-  , annotate
   , arrowName
   , arrowType
   , boolName
@@ -28,12 +27,12 @@ module Syntax
   , intType
   , listName
   , listType
+  , propagate
   , subst
   ) where
 
 import Data.Function (on)
 import Data.List (groupBy, intercalate, nub, unwords)
-import Data.Maybe (maybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 
@@ -66,7 +65,7 @@ instance Show TConName where
 data ITerm
   = IEVar EVarName
   | IEAbs EVarName
-          (Maybe Type)
+          Type
           ITerm
   | IEApp ITerm
           ITerm
@@ -192,8 +191,7 @@ instance FreeEVars ITerm where
 -- aren't really free).
 instance FreeTCons ITerm where
   freeTCons (IEVar _) = []
-  freeTCons (IEAbs _ Nothing e) = nub $ freeTCons e
-  freeTCons (IEAbs _ (Just t) e) = nub $ freeTCons t ++ freeTCons e
+  freeTCons (IEAbs _ t e) = nub $ freeTCons t ++ freeTCons e
   freeTCons (IEApp e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
   freeTCons (IELet _ e1 e2) = nub $ freeTCons e1 ++ freeTCons e2
   freeTCons (IEAnno e t) = nub $ freeTCons e ++ freeTCons t
@@ -314,9 +312,7 @@ instance Subst EVarName ITerm ITerm where
 -- (i.e., they aren't really free).
 instance Subst TConName Type ITerm where
   subst _ _ (IEVar x) = IEVar x
-  subst c t (IEAbs x Nothing e) = IEAbs x Nothing (subst c t e)
-  subst c t1 (IEAbs x (Just t2) e) =
-    IEAbs x (Just $ subst c t1 t2) (subst c t1 e)
+  subst c t1 (IEAbs x t2 e) = IEAbs x (subst c t1 t2) (subst c t1 e)
   subst c t (IEApp e1 e2) = IEApp (subst c t e1) (subst c t e2)
   subst c t (IELet x e1 e2) = IELet x (subst c t e1) (subst c t e2)
   subst c t1 (IEAnno e t2) = IEAnno (subst c t1 e) (subst c t1 t2)
@@ -415,7 +411,7 @@ instance Subst TConName Type Type where
 
 -- Collecting binders
 newtype BSmallLambda =
-  BSmallLambda [(EVarName, Maybe Type)]
+  BSmallLambda [(EVarName, Type)]
 
 newtype BBigLambda =
   BBigLambda [TVarName]
@@ -449,7 +445,7 @@ instance CollectBinders FTerm BSmallLambda where
   collectBinders (FEVar x) = (BSmallLambda [], FEVar x)
   collectBinders (FEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
-    in (BSmallLambda ((x, Just t) : xs), e2)
+    in (BSmallLambda ((x, t) : xs), e2)
   collectBinders (FEApp e1 e2) = (BSmallLambda [], FEApp e1 e2)
   collectBinders (FETAbs a e) = (BSmallLambda [], FETAbs a e)
   collectBinders (FETApp e t) = (BSmallLambda [], FETApp e t)
@@ -495,14 +491,9 @@ instance Show BSmallLambda where
     "λ" ++
     unwords
       ((\group ->
-          let t1 = snd (head group)
-          in "(" ++
-             unwords (show . fst <$> group) ++
-             " : " ++
-             (case t1 of
-                Nothing -> "?"
-                Just t2 -> show t2) ++
-             ")") <$>
+          "(" ++
+          unwords (show . fst <$> group) ++
+          " : " ++ show (snd (head group)) ++ ")") <$>
        groupBy (on (==) (show . snd)) xs1)
 
 instance Show BBigLambda where
@@ -512,17 +503,15 @@ instance Show BForAll where
   show (BForAll as) = "∀" ++ unwords (show <$> as)
 
 -- Type annotation propagation
-annotate :: ITerm -> Type -> ITerm
-annotate (IEAbs x t1 e) t2 =
+propagate :: ITerm -> Type -> ITerm
+propagate (IEAbs x t1 e) t2 =
   let (BForAll _, t3) = collectBinders t2
   in case (t1, t3) of
-       (Nothing, TCon c [t4, t5])
-         | c == arrowName -> IEAbs x (Just t4) (annotate e t5)
-       (Just t4, TCon c [_, t5])
-         | c == arrowName -> IEAbs x (Just t4) (annotate e t5)
+       (TVar _, TCon c [t4, t5])
+         | c == arrowName -> IEAbs x t4 (propagate e t5)
        _ -> IEAbs x t1 e
-annotate (IELet x e1 e2) t = IELet x e1 (annotate e2 t)
-annotate e _ = e
+propagate (IELet x e1 e2) t = IELet x e1 (propagate e2 t)
+propagate e _ = e
 
 -- Precedence and associativity of syntactic constructs
 data Assoc
@@ -631,7 +620,7 @@ instance CleanTVars ITerm where
   cleanTVars as (IEAbs x t e) =
     IEAbs
       x
-      (cleanTVars (Set.union as (Set.fromList $ maybe [] freeTVars t)) <$> t)
+      (cleanTVars (Set.union as (Set.fromList $ freeTVars t)) t)
       (cleanTVars as e)
   cleanTVars as (IEApp e1 e2) = IEApp (cleanTVars as e1) (cleanTVars as e2)
   cleanTVars as (IELet x e1 e2) =
@@ -687,9 +676,9 @@ class PrettyPrint a where
 
 instance PrettyPrint ITerm where
   prettyPrint (IEVar x) = show x
-  prettyPrint e1@(IEAbs x t e2) =
-    let (xs, e3) = collectBinders (IEAbs x t e2)
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  prettyPrint e1@IEAbs {} =
+    let (xs, e2) = collectBinders e1
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
   prettyPrint e1@(IEApp e2 e3) =
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
   prettyPrint e1@(IELet x e2 e3) =
@@ -718,14 +707,14 @@ instance PrettyPrint ITerm where
 
 instance PrettyPrint FTerm where
   prettyPrint (FEVar x) = show x
-  prettyPrint e1@(FEAbs x t e2) =
-    let (xs, e3) = collectBinders (FEAbs x t e2)
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e3
+  prettyPrint e1@FEAbs {} =
+    let (xs, e2) = collectBinders e1
+    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FEApp e2 e3) =
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
-  prettyPrint e1@(FETAbs a e2) =
-    let (as, e3) = collectBinders (FETAbs a e2)
-    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e3
+  prettyPrint e1@(FETAbs _ _) =
+    let (as, e2) = collectBinders e1
+    in show (as :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ prettyPrint t
   prettyPrint FETrue = "true"
   prettyPrint FEFalse = "false"
@@ -761,9 +750,9 @@ instance PrettyPrint Type where
                   else s) <$>
           ts
     in show c ++ (params >>= (" " ++))
-  prettyPrint t1@(TForAll a t2) =
-    let (as, t3) = collectBinders (TForAll a t2)
-    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t3
+  prettyPrint t1@(TForAll _ _) =
+    let (as, t2) = collectBinders t1
+    in show (as :: BForAll) ++ " . " ++ embed RightAssoc t1 t2
 
 -- The first node is the current one. The second is the one to be embedded.
 embed :: (Prec a, PrettyPrint a) => Assoc -> a -> a -> String
