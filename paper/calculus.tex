@@ -7,33 +7,33 @@
     \begin{figure}[H]
       \begin{center}
         \begin{tabular}{r l c l}
-          terms & $\term$ & $\Coloneqq$ & $
+          terms & \(\term\) & \(\Coloneqq\) & \(
             \eVar                                           \enspace | \enspace
             \eAbs{\eVar}{\type}{\term}                      \enspace | \enspace
             \eApp{\term}{\term}                             \enspace | \enspace
             \eTAbs{\tVar}{\kind}{\term}                     \enspace | \enspace
-            \eTApp{\term}{\type}                            $ \\
-          & & $|$ & $
+            \eTApp{\term}{\type}                            \) \\
+          & & \(|\) & \(
             \eReify{\tVar}{\term}{\term}                    \enspace | \enspace
-            \eReflect{\tVar}                                $ \\
-          & & $|$ & $
+            \eReflect{\tVar}                                \) \\
+          & & \(|\) & \(
             \ePure{\term}                                   \enspace | \enspace
             \eRun{\term}                                    \enspace | \enspace
-            \eDo{\eVar}{\term}{\term}                       $ \\ \\
-          types & $\type, \effect$ & $\Coloneqq$ & $
+            \eDo{\eVar}{\term}{\term}                       \) \\ \\
+          types & \(\type, \effect\) & \(\Coloneqq\) & \(
             \tVar                                           \enspace | \enspace
             \tArrow{\type}{\type}                           \enspace | \enspace
             \tForAll{\tVar}{\kind}{\type}                   \enspace | \enspace
             \tComputation{\type}{\effect}                   \enspace | \enspace
-            \tPure                                          $ \\ \\
-          kinds & $\kind$ & $\Coloneqq$ & $
+            \tPure                                          \) \\ \\
+          kinds & \(\kind\) & \(\Coloneqq\) & \(
             \kType                                          \enspace | \enspace
             \kEffect                                        \enspace | \enspace
-            \kWitness{\type}                                $ \\ \\
-          contexts & $\context$ & $\Coloneqq$ & $
+            \kWitness{\type}                                \) \\ \\
+          contexts & \(\context\) & \(\Coloneqq\) & \(
             \cEmpty                                         \enspace | \enspace
             \cEExtend{\context}{\eVar}{\type}               \enspace | \enspace
-            \cTExtend{\context}{\tVar}{\kind}               $
+            \cTExtend{\context}{\tVar}{\kind}               \)
         \end{tabular}
       \end{center}
 
@@ -45,78 +45,78 @@
 
     \begin{figure}[H]
       \begin{center}
-        \framebox{$\hasType{\context}{\term}{\type}$}
+        \framebox{\(\hasType{\context}{\term}{\type}\)}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\apply{\context}{\eVar} = \type$}
+          \AxiomC{\(\apply{\context}{\eVar} = \type\)}
         \RightLabel{(\textsc{T-Var})}
-        \UnaryInfC{$\hasType{\context}{\eVar}{\type}$}
+        \UnaryInfC{\(\hasType{\context}{\eVar}{\type}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term}{\type_2}$}
-          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
+          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term}{\type_2}\)}
+          \AxiomC{\(\hasKind{\context}{\type_1}{\kType}\)}
         \RightLabel{(\textsc{T-Abs})}
-        \BinaryInfC{$\hasType{\context}{\parens{\eAbs{\eVar}{\type_1}{\term}}}{\tArrow{\type_1}{\type_2}}$}
+        \BinaryInfC{\(\hasType{\context}{\parens{\eAbs{\eVar}{\type_1}{\term}}}{\tArrow{\type_1}{\type_2}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\tArrow{\type_1}{\type_2}}$}
-          \AxiomC{$\hasType{\context}{\term_2}{\type_1}$}
+          \AxiomC{\(\hasType{\context}{\term_1}{\tArrow{\type_1}{\type_2}}\)}
+          \AxiomC{\(\hasType{\context}{\term_2}{\type_1}\)}
         \RightLabel{(\textsc{T-App})}
-        \BinaryInfC{$\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}$}
+        \BinaryInfC{\(\hasType{\context}{\eApp{\term_1}{\term_2}}{\type_2}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}$}
-          \AxiomC{$\tVar \notin \dom{\context}$}
+          \AxiomC{\(\hasType{\cTExtend{\context}{\tVar}{\kind}}{\term}{\type}\)}
+          \AxiomC{\(\tVar \notin \dom{\context}\)}
         \RightLabel{(\textsc{T-TAbs})}
-        \BinaryInfC{$\hasType{\context}{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\parens{\tForAll{\tVar}{\kind}{\type}}}$}
+        \BinaryInfC{\(\hasType{\context}{\parens{\eTAbs{\tVar}{\kind}{\term}}}{\parens{\tForAll{\tVar}{\kind}{\type}}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}}}$}
-          \AxiomC{$\hasKind{\context}{\type_2}{\kind}$}
+          \AxiomC{\(\hasType{\context}{\term}{\parens{\tForAll{\tVar}{\kind}{\type_1}}}\)}
+          \AxiomC{\(\hasKind{\context}{\type_2}{\kind}\)}
         \RightLabel{(\textsc{T-TApp})}
-        \BinaryInfC{$\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}$}
+        \BinaryInfC{\(\hasType{\context}{\eTApp{\term}{\type_2}}{\substitute{\type_1}{\tVar}{\type_2}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\type_1}$}
-          \AxiomC{$\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\type_2}$}
-          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
-          \AxiomC{$\tVar \notin \dom{\context}$}
+          \AxiomC{\(\hasType{\context}{\term_1}{\type_1}\)}
+          \AxiomC{\(\hasType{\cTExtend{\context}{\tVar}{\kWitness{\type_1}}}{\term_2}{\type_2}\)}
+          \AxiomC{\(\hasKind{\context}{\type_2}{\kType}\)}
+          \AxiomC{\(\tVar \notin \dom{\context}\)}
         \RightLabel{(\textsc{T-Reify})}
-        \QuaternaryInfC{$\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\type_2}$}
+        \QuaternaryInfC{\(\hasType{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\type_2}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+          \AxiomC{\(\hasKind{\context}{\tVar}{\kWitness{\type}}\)}
         \RightLabel{(\textsc{T-Reflect})}
-        \UnaryInfC{$\hasType{\context}{\eReflect{\tVar}}{\type}$}
+        \UnaryInfC{\(\hasType{\context}{\eReflect{\tVar}}{\type}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\tComputation{\type_1}{\effect}}$}
-          \AxiomC{$\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\effect}}$}
+          \AxiomC{\(\hasType{\context}{\term_1}{\tComputation{\type_1}{\effect}}\)}
+          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\effect}}\)}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{$\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\effect}}$}
+        \BinaryInfC{\(\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\effect}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\type}$}
-          \AxiomC{$\hasKind{\context}{\effect}{\kEffect}$}
+          \AxiomC{\(\hasType{\context}{\term}{\type}\)}
+          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
         \RightLabel{(\textsc{T-Pure})}
-        \BinaryInfC{$\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\effect}}$}
+        \BinaryInfC{\(\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\effect}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term}{\tComputation{\type}{\tPure}}$}
+          \AxiomC{\(\hasType{\context}{\term}{\tComputation{\type}{\tPure}}\)}
         \RightLabel{(\textsc{T-Run})}
-        \UnaryInfC{$\hasType{\context}{\eRun{\term}}{\type}$}
+        \UnaryInfC{\(\hasType{\context}{\eRun{\term}}{\type}\)}
       \end{prooftree}
 
       \caption{Typing rules}
@@ -125,41 +125,41 @@
 
     \begin{figure}[H]
       \begin{center}
-        \framebox{$\hasKind{\context}{\type}{\kind}$}
+        \framebox{\(\hasKind{\context}{\type}{\kind}\)}
       \end{center}
 
       \medskip
 
       \begin{prooftree}
-          \AxiomC{$\apply{\context}{\tVar} = \kind$}
+          \AxiomC{\(\apply{\context}{\tVar} = \kind\)}
         \RightLabel{(\textsc{K-Var})}
-        \UnaryInfC{$\hasKind{\context}{\tVar}{\kind}$}
+        \UnaryInfC{\(\hasKind{\context}{\tVar}{\kind}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\type_1}{\kType}$}
-          \AxiomC{$\hasKind{\context}{\type_2}{\kType}$}
+          \AxiomC{\(\hasKind{\context}{\type_1}{\kType}\)}
+          \AxiomC{\(\hasKind{\context}{\type_2}{\kType}\)}
         \RightLabel{(\textsc{K-Arrow})}
-        \BinaryInfC{$\hasKind{\context}{\tArrow{\type_1}{\type_2}}{\kType}$}
+        \BinaryInfC{\(\hasKind{\context}{\tArrow{\type_1}{\type_2}}{\kType}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}$}
+          \AxiomC{\(\hasKind{\cTExtend{\context}{\tVar}{\kind}}{\type}{\kType}\)}
         \RightLabel{(\textsc{K-ForAll})}
-        \UnaryInfC{$\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}}}{\kType}$}
+        \UnaryInfC{\(\hasKind{\context}{\parens{\tForAll{\tVar}{\kind}{\type}}}{\kType}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{$\hasKind{\context}{\type}{\kType}$}
-          \AxiomC{$\hasKind{\context}{\effect}{\kEffect}$}
+          \AxiomC{\(\hasKind{\context}{\type}{\kType}\)}
+          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
         \RightLabel{(\textsc{K-Computation})}
-        \BinaryInfC{$\hasKind{\context}{\tComputation{\type}{\effect}}{\kType}$}
+        \BinaryInfC{\(\hasKind{\context}{\tComputation{\type}{\effect}}{\kType}\)}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{}
         \RightLabel{(\textsc{K-Pure})}
-        \UnaryInfC{$\hasKind{\context}{\tPure}{\kEffect}$}
+        \UnaryInfC{\(\hasKind{\context}{\tPure}{\kEffect}\)}
       \end{prooftree}
 
       \caption{Kinding rules}
@@ -172,7 +172,7 @@
     \[
       \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
     \]
-    which is well-typed when $\hasType{\cEmpty}{\term}{\type_2}$. Intuition suggests the (weak) normal form $\eAbs{\eVar}{\type_1}{\term}$. What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
+    which is well-typed when \(\hasType{\cEmpty}{\term}{\type_2}\). Intuition suggests the (weak) normal form \(\eAbs{\eVar}{\type_1}{\term}\). What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
       \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
     \]
@@ -186,9 +186,9 @@
       \fi
 
       \begin{center}
-        \framebox{$\translatesTo{\context}{\term}{\term}$}
-        \framebox{$\translatesTo{\context}{\type}{\type}$}
-        \framebox{$\translatesTo{\context}{\type}{\term}$}
+        \framebox{\(\translatesTo{\context}{\term}{\term}\)}
+        \framebox{\(\translatesTo{\context}{\type}{\type}\)}
+        \framebox{\(\translatesTo{\context}{\type}{\term}\)}
       \end{center}
 
       \medskip
@@ -196,192 +196,192 @@
       \begin{center}
           \AxiomC{}
         \RightLabel{(\textsc{S-Var})}
-        \UnaryInfC{$\translatesTo{\context}{\eVar}{\eVar}$}
+        \UnaryInfC{\(\translatesTo{\context}{\eVar}{\eVar}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_2}{\term_4}\)}
         \RightLabel{(\textsc{S-App})}
-        \BinaryInfC{$\translatesTo{\context}{\eApp{\term_1}{\term_2}}{\eApp{\term_3}{\term_4}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eApp{\term_1}{\term_2}}{\eApp{\term_3}{\term_4}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-Abs1})}
-        \BinaryInfC{$\translatesTo{\context}{\eAbs{\eVar}{\type_1}{\term_1}}{\eAbs{\eVar}{\type_2}{\term_2}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eAbs{\eVar}{\type_1}{\term_1}}{\eAbs{\eVar}{\type_2}{\term_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type}{\term_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-Abs2})}
-        \BinaryInfC{$\translatesTo{\context}{\eAbs{\eVar}{\type}{\term_1}}{\eAbs{\eVar}{\tVoid}{\term_2}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eAbs{\eVar}{\type}{\term_1}}{\eAbs{\eVar}{\tVoid}{\term_2}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-TAbs1})}
-        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kType}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\eTAbs{\tVar}{\kType}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-TAbs2})}
-        \UnaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kEffect}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\eTAbs{\tVar}{\kEffect}{\term_1}}{\eTAbsNoKind{\tVar}{\term_2}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-TAbs3})}
-        \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type_1}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\type_2}{\term_2}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type_1}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\type_2}{\term_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type}{\term_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-TAbs4})}
-        \BinaryInfC{$\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\tVoid}{\term_2}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eTAbs{\tVar}{\kWitness{\type}}{\term_1}}{\eAbs{\eVar_{\tVar}}{\tVoid}{\term_2}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
         \RightLabel{(\textsc{S-TApp1})}
-        \BinaryInfC{$\translatesTo{\context}{\eTApp{\term_1}{\type_1}}{\eTApp{\term_2}{\type_2}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eTApp{\term_1}{\type_1}}{\eTApp{\term_2}{\type_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
-          \AxiomC{$\translatesTo{\context}{\type}{\term_3}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
+          \AxiomC{\(\translatesTo{\context}{\type}{\term_3}\)}
         \RightLabel{(\textsc{S-TApp2})}
-        \BinaryInfC{$\translatesTo{\context}{\eTApp{\term_1}{\type}}{\eApp{\term_2}{\term_3}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eTApp{\term_1}{\type}}{\eApp{\term_2}{\term_3}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_2}{\term_4}\)}
         \RightLabel{(\textsc{S-Reify})}
-        \BinaryInfC{$\translatesTo{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\substitute{\term_4}{\eVar_{\tVar}}{\term_3}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\eReify{\tVar}{\term_1}{\term_2}}{\substitute{\term_4}{\eVar_{\tVar}}{\term_3}}\)}
         \DisplayProof
         \qquad
           \AxiomC{}
         \RightLabel{(\textsc{S-Reflect})}
-        \UnaryInfC{$\translatesTo{\context}{\eReflect{\tVar}}{\eVar_{\tVar}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\eReflect{\tVar}}{\eVar_{\tVar}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-Pure})}
-        \UnaryInfC{$\translatesTo{\context}{\ePure{\term_1}}{\eAbs{\wildcard}{\tUnit}{\term_2}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\ePure{\term_1}}{\eAbs{\wildcard}{\tUnit}{\term_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_2}\)}
         \RightLabel{(\textsc{S-Run})}
-        \UnaryInfC{$\translatesTo{\context}{\eRun{\term_1}}{\eApp{\term_2}{\eUnit}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\eRun{\term_1}}{\eApp{\term_2}{\eUnit}}\)}
         \DisplayProof
       \end{center}
 
       \begin{prooftree}
-          \AxiomC{$\hasType{\context}{\term_1}{\type_1}$}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
-          \AxiomC{$\translatesTo{\context}{\term_1}{\term_3}$}
-          \AxiomC{$\translatesTo{\context}{\term_2}{\term_4}$}
+          \AxiomC{\(\hasType{\context}{\term_1}{\type_1}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_1}{\term_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\term_2}{\term_4}\)}
         \RightLabel{(\textsc{S-Do})}
-        \QuaternaryInfC{$\translatesTo{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\eApp{\parens{\eAbs{\eVar}{\type_2}{\term_4}}}{\term_3}}$}
+        \QuaternaryInfC{\(\translatesTo{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\eApp{\parens{\eAbs{\eVar}{\type_2}{\term_4}}}{\term_3}}\)}
       \end{prooftree}
 
       \begin{center}
-          \AxiomC{$\hasKind{\context}{\tVar}{\kType}$}
+          \AxiomC{\(\hasKind{\context}{\tVar}{\kType}\)}
         \RightLabel{(\textsc{S-TVar1})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\tVar}$}
+        \UnaryInfC{\(\translatesTo{\context}{\tVar}{\tVar}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\hasKind{\context}{\tVar}{\kWitness{\type}}$}
+          \AxiomC{\(\hasKind{\context}{\tVar}{\kWitness{\type}}\)}
         \RightLabel{(\textsc{S-TVar2})}
-        \UnaryInfC{$\translatesTo{\context}{\tVar}{\eVar_{\tVar}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\tVar}{\eVar_{\tVar}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\type_4}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\type_4}\)}
         \RightLabel{(\textsc{S-Arrow1})}
-        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\type_4}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\type_4}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\term}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\term}\)}
         \RightLabel{(\textsc{S-Arrow2})}
-        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\tVoid}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\type_3}{\tVoid}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\term}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\type_3}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\term}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\type_3}\)}
         \RightLabel{(\textsc{S-Arrow3})}
-        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\type_3}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\type_3}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type_1}{\term_1}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\term_1}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\term_2}\)}
         \RightLabel{(\textsc{S-Arrow4})}
-        \BinaryInfC{$\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\tVoid}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tArrow{\type_1}{\type_2}}{\tArrow{\tVoid}{\tVoid}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
         \RightLabel{(\textsc{S-ForAll1})}
-        \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type_1}}{\tForAllNoKind{\tVar}{\type_2}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type_1}}{\tForAllNoKind{\tVar}{\type_2}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type}{\term}$}
+          \AxiomC{\(\translatesTo{\context}{\type}{\term}\)}
         \RightLabel{(\textsc{S-ForAll2})}
-        \UnaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type}}{\tForAllNoKind{\tVar}{\tVoid}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kType}{\type}}{\tForAllNoKind{\tVar}{\tVoid}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\type_4}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\type_4}\)}
         \RightLabel{(\textsc{S-ForAll3})}
-        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\type_4}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\type_4}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_3}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\term}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_3}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\term}\)}
         \RightLabel{(\textsc{S-ForAll4})}
-        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\tVoid}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\type_3}{\tVoid}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\term}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\type_3}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\term}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\type_3}\)}
         \RightLabel{(\textsc{S-ForAll5})}
-        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\type_3}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\type_3}}\)}
         \DisplayProof
         \qquad
-          \AxiomC{$\translatesTo{\context}{\type_1}{\term_1}$}
-          \AxiomC{$\translatesTo{\context}{\type_2}{\term_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\term_1}\)}
+          \AxiomC{\(\translatesTo{\context}{\type_2}{\term_2}\)}
         \RightLabel{(\textsc{S-ForAll6})}
-        \BinaryInfC{$\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\tVoid}}$}
+        \BinaryInfC{\(\translatesTo{\context}{\tForAll{\tVar}{\kWitness{\type_1}}{\type_2}}{\tArrow{\tVoid}{\tVoid}}\)}
         \DisplayProof
       \end{center}
 
       \begin{center}
-          \AxiomC{$\translatesTo{\context}{\type_1}{\type_2}$}
+          \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
         \RightLabel{(\textsc{S-Computation})}
-        \UnaryInfC{$\translatesTo{\context}{\tComputation{\type_1}{\effect}}{\tArrow{\tUnit}{\type_2}}$}
+        \UnaryInfC{\(\translatesTo{\context}{\tComputation{\type_1}{\effect}}{\tArrow{\tUnit}{\type_2}}\)}
         \DisplayProof
-          \AxiomC{$\hasKind{\context}{\effect}{\kEffect}$}
+          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
         \RightLabel{(\textsc{S-Effect})}
-        \UnaryInfC{$\translatesTo{\context}{\effect}{\tUnit}$}
+        \UnaryInfC{\(\translatesTo{\context}{\effect}{\tUnit}\)}
         \DisplayProof
       \end{center}
 
