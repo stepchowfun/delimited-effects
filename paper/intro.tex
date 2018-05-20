@@ -1,6 +1,6 @@
 \section{Introduction}
 
-In the two decades since they were introduced by \citet{wadler89}, \emph{type classes} have proven a versatile apparatus for structuring programs. Consider a class intended to characterize types $\tVar$ for which a monoid can be defined:
+In the two decades since they were introduced by \citet{wadler89}, \emph{type classes} have proven a versatile apparatus for structuring programs. Consider a class intended to characterize types \(\tVar\) for which a monoid can be defined:
 \begin{flalign*}
   & \eClass{\tMonoid{\tVar}} & \\
   & \quad \tAnno{\eIdentity}{\tVar} & \\
@@ -17,6 +17,6 @@ Finally, an \emph{instance} of the class can be provided for a specific type:
   & \quad \eIdentity = \numberName{1} & \\
   & \quad \eCombine = \eMultiply &
 \end{flalign*}
-where $\tAnno{\numberName{1}}{\integer}$ and $\tAnno{\eMultiply}{\tArrow{\integer}{\tArrow{\integer}{\integer}}}$. The instance is a witness to justify the well-definedness of expressions like $\eApp{\eSquare}{\numberName{3}}$.
+where \(\tAnno{\numberName{1}}{\integer}\) and \(\tAnno{\eMultiply}{\tArrow{\integer}{\tArrow{\integer}{\integer}}}\). The instance is a witness to justify the well-definedness of expressions like \(\eApp{\eSquare}{\numberName{3}}\).
 
 More recently, algebraic effects \citep{plotkin03} and handlers \citep{plotkin09} have become an attractive alternative to monads for modeling computational effects due to their compositionality.
