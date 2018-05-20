@@ -325,7 +325,7 @@ instance Subst TConName Type ITerm where
   subst c t (IESub e1 e2) = IESub (subst c t e1) (subst c t e2)
   subst c t (IEMul e1 e2) = IEMul (subst c t e1) (subst c t e2)
   subst c t (IEDiv e1 e2) = IEDiv (subst c t e1) (subst c t e2)
-  subst c e (IEList es) = IEList $ subst c e <$> es
+  subst c t (IEList es) = IEList $ subst c t <$> es
   subst c t (IEConcat e1 e2) = IEConcat (subst c t e1) (subst c t e2)
 
 instance Subst EVarName FTerm FTerm where
@@ -368,7 +368,7 @@ instance Subst TVarName Type FTerm where
   subst a t (FESub e1 e2) = FESub (subst a t e1) (subst a t e2)
   subst a t (FEMul e1 e2) = FEMul (subst a t e1) (subst a t e2)
   subst a t (FEDiv e1 e2) = FEDiv (subst a t e1) (subst a t e2)
-  subst a e (FEList es) = FEList $ subst a e <$> es
+  subst a t (FEList es) = FEList $ subst a t <$> es
   subst a t (FEConcat e1 e2) = FEConcat (subst a t e1) (subst a t e2)
 
 instance Subst TConName Type FTerm where
@@ -387,7 +387,7 @@ instance Subst TConName Type FTerm where
   subst c t (FEMul e1 e2) = FEMul (subst c t e1) (subst c t e2)
   subst c t (FEDiv e1 e2) = FEDiv (subst c t e1) (subst c t e2)
   subst c t (FEConcat e1 e2) = FEConcat (subst c t e1) (subst c t e2)
-  subst c e (FEList es) = FEList $ subst c e <$> es
+  subst c t (FEList es) = FEList $ subst c t <$> es
 
 instance Subst TVarName Type Type where
   subst a1 t (TVar a2) =
@@ -402,7 +402,7 @@ instance Subst TVarName Type Type where
       else subst a1 t1 t2
 
 instance Subst TConName Type Type where
-  subst _ _ (TVar c) = TVar c
+  subst _ _ (TVar a) = TVar a
   subst c1 t (TCon c2 ts) =
     if c1 == c2
       then t
