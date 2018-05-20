@@ -6,6 +6,8 @@ import Lexer (Token(..))
 import Syntax
   ( EVarName(..)
   , ITerm(..)
+  , KVarName(..)
+  , Kind(..)
   , TConName(..)
   , TVarName(..)
   , Type(..)
@@ -50,7 +52,8 @@ import Syntax
 
 %nonassoc LOW
 
-%nonassoc ':' ';' '.' else
+%nonassoc ';' '.' else
+%nonassoc ':'
 %right '->'
 %left '++'
 %left '+' '-'
@@ -64,7 +67,7 @@ import Syntax
 
 ITerm
   : x                              { IEVar (EVarName $1) }
-  | x '->' ITerm                   { IEAbs (EVarName $1) existential $3 }
+  | x '->' ITerm                   { IEAbs (EVarName $1) existentialType $3 }
   | lambda EVars '->' ITerm        { foldr (\(x, t) e -> IEAbs x t e) $4 (reverse $2) }
   | ITerm ITerm %prec HIGH         { IEApp $1 $2 }
   | ITerm ':' Type                 { IEAnno (propagate $1 $3) $3 }
@@ -85,8 +88,11 @@ Type
   : x                     { TVar (UserTVarName $1) }
   | TCon %prec LOW        { TCon (UserTConName $ fst $1) (reverse $ snd $1) }
   | Type '->' Type        { arrowType $1 $3 }
-  | forall TVars '.' Type { foldr (\x t -> TForAll x t) $4 (reverse $2) }
+  | forall TVars '.' Type { foldr (\(a, k) t -> TForAll a k t) $4 (reverse $2) }
   | '(' Type ')'          { $2 }
+
+Kind
+  : '*' { KType }
 
 EListItems
   :                      { [] }
@@ -94,7 +100,7 @@ EListItems
   | EListItems ',' ITerm { $3 : $1 }
 
 EVar
-  : x                  { (EVarName $1, existential) }
+  : x                  { (EVarName $1, existentialType) }
   | '(' x ':' Type ')' { (EVarName $2, $4) }
 
 EVars
@@ -102,11 +108,12 @@ EVars
   | EVars EVar { $2 : $1 }
 
 TVar
-  : x { UserTVarName $1 }
+  : x                  { (UserTVarName $1, existentialKind) }
+  | '(' x ':' Kind ')' { (UserTVarName $2, $4) }
 
 TCon
   : X %prec LOW       { ($1, []) }
-  | TCon TVar         { (fst $1, TVar $2 : snd $1) }
+  | TCon x            { (fst $1, TVar (UserTVarName $2) : snd $1) }
   | TCon X            { (fst $1, (TCon (UserTConName $2) []) : snd $1) }
   | TCon '(' Type ')' { (fst $1, $3 : snd $1) }
 
@@ -116,8 +123,11 @@ TVars
 
 {
 
-existential :: Type
-existential = TVar $ UserTVarName "α"
+existentialType :: Type
+existentialType = TVar $ UserTVarName "α"
+
+existentialKind :: Kind
+existentialKind = KVar $ UserKVarName "ω"
 
 parseError :: [Token] -> Either String a
 parseError x = Left $ "Cannot parse: " ++ unwords (show <$> x)
