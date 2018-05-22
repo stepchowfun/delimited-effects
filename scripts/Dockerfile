@@ -46,6 +46,16 @@ RUN \
   rm -rf /usr/share/doc && \
   DEBIAN_FRONTEND=noninteractive apt-get -y purge --auto-remove curl
 
+RUN \
+  DEBIAN_FRONTEND=noninteractive apt-get -y update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install 'curl=7.52.*' && \
+  curl -LSfs \
+    https://raw.githubusercontent.com/stepchowfun/tagref/master/install.sh | \
+    sh && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /usr/share/doc && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y purge --auto-remove curl
+
 RUN useradd --user-group --create-home user
 
 USER user:user

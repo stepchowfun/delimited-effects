@@ -38,6 +38,7 @@ lint-general:
 	    -name 'Makefile' \
 	  \) -print \
 	)
+	tagref
 
 format: format-implementation
 
