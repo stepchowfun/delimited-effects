@@ -12,7 +12,8 @@ module Inference
 
 import Control.Monad (foldM, when)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.State (State, evalState, get, put)
+import Control.Monad.State (StateT, evalStateT, get, put)
+import Data.Functor.Identity (Identity, runIdentity)
 import Data.List (nub)
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -55,10 +56,7 @@ import Syntax
 -- 1. The ability to read and update the context (also via State)
 -- 2. The ability to throw errors (via ExceptT)
 type TypeCheck
-   = ExceptT String (State ( Integer
-                           , Map EVarName Type
-                           , Map TVarName Kind
-                           , Map TConName Kind))
+   = StateT (Integer, Map EVarName Type, Map TVarName Kind, Map TConName Kind) (ExceptT String Identity)
 
 -- Add a term variable to the context.
 withUserEVar :: EVarName -> Type -> TypeCheck a -> TypeCheck a
@@ -506,8 +504,10 @@ simplify (FEConcat e1 e2) = FEConcat (simplify e1) (simplify e2)
 typeCheck :: ITerm -> Either String (FTerm, Type)
 typeCheck e1 =
   let result =
-        evalState
-          (runExceptT (infer e1))
+        runIdentity $
+        runExceptT $
+        evalStateT
+          (infer e1)
           ( 0
           , Map.empty
           , Map.empty

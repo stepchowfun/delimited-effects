@@ -29,7 +29,6 @@ lint-general:
 	    -path ./.paper-build -o \
 	    -path ./implementation/.stack-work \
 	  \) -prune -o \( \
-	    -name '*.hs' -o \
 	    -name '*.rb' -o \
 	    -name '*.sh' -o \
 	    -name '*.v' -o \
