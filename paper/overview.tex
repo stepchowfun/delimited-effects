@@ -3,18 +3,18 @@
   \subsection{Reflection and reification}
 
     Here's a simple example of reification and reflection.
-    \[ \eReify{\tVar}{\numberName{4}}{\parens{\numberName{3} + \eReflect{\tVar}}} \]
+    \[ \eReify{\alpha}{\numberName{4}}{\parens{\numberName{3} + \eReflect{\alpha}}} \]
 
   \subsection{Type classes with local instances}
 
     We can represent a type class as an ordinary data type.
-    \[ \eData{\tMonoid{\tVar}}{\eMonoid{\tVar}{\parens{\tArrow{\tVar}{\tArrow{\tVar}{\tVar}}}}} \]
+    \[ \eData{\tMonoid{\alpha}}{\eMonoid{\alpha}{\parens{\tArrow{\alpha}{\tArrow{\alpha}{\alpha}}}}} \]
     For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance and project the appropriate components.
-    \[ \eIdentity = \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\eVar}{\wildcard}}{\eReflect{\tVar_2}}{\eVar}}} \]
-    \[ \eCombine = \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eLet{\eMonoid{\wildcard}{\eVar}}{\eReflect{\tVar_2}}{\eVar}}} \]
+    \[ \eIdentity = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eLet{\eMonoid{\eX}{\wildcard}}{\eReflect{\beta}}{\eX}}} \]
+    \[ \eCombine = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eLet{\eMonoid{\wildcard}{\eX}}{\eReflect{\beta}}{\eX}}} \]
     Here's a polymorphic function which ``squares'' its argument using the monoid operation:
-    \[ \eSquare = \eTAbs{\tVar_1}{\kType}{\eTAbs{\tVar_2}{\kWitness{\tMonoid{\tVar_1}}}{\eAbs{\eVar}{\tVar_1}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\tVar_1}}{\tVar_2}}{\eVar}}{\eVar}}}} \]
+    \[ \eSquare = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eAbs{\eX}{\alpha}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\alpha}}{\beta}}{\eX}}{\eX}}}} \]
     Here, we create and use a local instance of the class which reifies the monoidal structure of integers under multiplication:
-    \[ \eReify{\tVar}{\eMonoid{\numberName{1}}{\eMultiply}}{\eApp{\eSquare}{\numberName{3}}} \]
+    \[ \eReify{\alpha}{\eMonoid{\numberName{1}}{\eMultiply}}{\eApp{\eSquare}{\numberName{3}}} \]
 
   \subsection{Effects and handlers}

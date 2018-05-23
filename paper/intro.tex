@@ -1,14 +1,14 @@
 \section{Introduction}
 
-In the two decades since they were introduced by \citet{wadler89}, \emph{type classes} have proven a versatile apparatus for structuring programs. Consider a class intended to characterize types \(\tVar\) for which a monoid can be defined:
+In the two decades since they were introduced by \citet{wadler89}, \emph{type classes} have proven a versatile apparatus for structuring programs. Consider a class intended to characterize types \(\alpha\) for which a monoid can be defined:
 \begin{flalign*}
-  & \eClass{\tMonoid{\tVar}} & \\
-  & \quad \tAnno{\eIdentity}{\tVar} & \\
-  & \quad \tAnno{\eCombine}{\tArrow{\tVar}{\tArrow{\tVar}{\tVar}}} &
+  & \eClass{\tMonoid{\alpha}} & \\
+  & \quad \tAnno{\eIdentity}{\alpha} & \\
+  & \quad \tAnno{\eCombine}{\tArrow{\alpha}{\tArrow{\alpha}{\alpha}}} &
 \end{flalign*}
 Programmers can use this class to define polymorphic functions over all monoids:
 \begin{flalign*}
-  & \tAnno{\eSquare}{\tMonoid{\tVar} \Rightarrow \tArrow{\tVar}{\tVar}} & \\
+  & \tAnno{\eSquare}{\tMonoid{\alpha} \Rightarrow \tArrow{\alpha}{\alpha}} & \\
   & \eApp{\eSquare}{\eX} = \eApp{\eApp{\eCombine}{\eX}}{\eX} &
 \end{flalign*}
 Finally, an \emph{instance} of the class can be provided for a specific type:
