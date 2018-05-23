@@ -178,11 +178,11 @@
 
     Consider the program
     \[
-      \eReify{\alpha_1}{\term}{\eAbs{\eX}{\type_1}{\eTApp{\parens{\eTAbs{\alpha_2}{\kWitness{\type_2}}{\eReflect{\alpha_2}}}}{\alpha_1}}},
+      \eReify{\alpha}{\term}{\eAbs{\eX}{\type_1}{\eTApp{\parens{\eTAbs{\beta}{\kWitness{\type_2}}{\eReflect{\beta}}}}{\alpha}}},
     \]
     which is well-typed when \(\hasType{\cEmpty}{\term}{\type_2}\). Intuition suggests the (weak) normal form \(\eAbs{\eX}{\type_1}{\term}\). What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
-      \eReify{\alpha_1}{\term}{\eAbs{\eX}{\type_1}{\eReflect{\alpha_1}}}.
+      \eReify{\alpha}{\term}{\eAbs{\eX}{\type_1}{\eReflect{\alpha}}}.
     \]
     But that would be reduction under a lambda abstraction, which is ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
 
