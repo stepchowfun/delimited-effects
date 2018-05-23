@@ -7,6 +7,14 @@
     \begin{figure}[H]
       \begin{center}
         \begin{tabular}{r l c l}
+          term variables & \(\eVar\) & \(\Coloneqq\) & \(
+            \eX                                             \enspace | \enspace
+            \eY                                             \enspace | \enspace
+            \ldots                                          \) \\
+          type variables & \(\tVar\) & \(\Coloneqq\) & \(
+            \alpha                                          \enspace | \enspace
+            \beta                                           \enspace | \enspace
+            \ldots                                          \) \\
           terms & \(\term\) & \(\Coloneqq\) & \(
             \eVar                                           \enspace | \enspace
             \eAbs{\eVar}{\type}{\term}                      \enspace | \enspace
@@ -20,11 +28,11 @@
             \ePure{\term}                                   \enspace | \enspace
             \eRun{\term}                                    \enspace | \enspace
             \eDo{\eVar}{\term}{\term}                       \) \\ \\
-          types & \(\type, \effect\) & \(\Coloneqq\) & \(
+          types & \(\type\) & \(\Coloneqq\) & \(
             \tVar                                           \enspace | \enspace
             \tArrow{\type}{\type}                           \enspace | \enspace
             \tForAll{\tVar}{\kind}{\type}                   \enspace | \enspace
-            \tComputation{\type}{\effect}                   \enspace | \enspace
+            \tComputation{\type}{\type}                     \enspace | \enspace
             \tPure                                          \) \\ \\
           kinds & \(\kind\) & \(\Coloneqq\) & \(
             \kType                                          \enspace | \enspace
@@ -100,17 +108,17 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\(\hasType{\context}{\term_1}{\tComputation{\type_1}{\effect}}\)}
-          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\effect}}\)}
+          \AxiomC{\(\hasType{\context}{\term_1}{\tComputation{\type_1}{\type}}\)}
+          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\type}}\)}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{\(\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\effect}}\)}
+        \BinaryInfC{\(\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\type}}\)}
       \end{prooftree}
 
       \begin{prooftree}
           \AxiomC{\(\hasType{\context}{\term}{\type}\)}
-          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
+          \AxiomC{\(\hasKind{\context}{\type}{\kEffect}\)}
         \RightLabel{(\textsc{T-Pure})}
-        \BinaryInfC{\(\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\effect}}\)}
+        \BinaryInfC{\(\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\type}}\)}
       \end{prooftree}
 
       \begin{prooftree}
@@ -151,9 +159,9 @@
 
       \begin{prooftree}
           \AxiomC{\(\hasKind{\context}{\type}{\kType}\)}
-          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
+          \AxiomC{\(\hasKind{\context}{\type}{\kEffect}\)}
         \RightLabel{(\textsc{K-Computation})}
-        \BinaryInfC{\(\hasKind{\context}{\tComputation{\type}{\effect}}{\kType}\)}
+        \BinaryInfC{\(\hasKind{\context}{\tComputation{\type}{\type}}{\kType}\)}
       \end{prooftree}
 
       \begin{prooftree}
@@ -170,11 +178,11 @@
 
     Consider the program
     \[
-      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eTApp{\parens{\eTAbs{\tVar_2}{\kWitness{\type_2}}{\eReflect{\tVar_2}}}}{\tVar_1}}},
+      \eReify{\alpha_1}{\term}{\eAbs{\eX}{\type_1}{\eTApp{\parens{\eTAbs{\alpha_2}{\kWitness{\type_2}}{\eReflect{\alpha_2}}}}{\alpha_1}}},
     \]
-    which is well-typed when \(\hasType{\cEmpty}{\term}{\type_2}\). Intuition suggests the (weak) normal form \(\eAbs{\eVar}{\type_1}{\term}\). What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
+    which is well-typed when \(\hasType{\cEmpty}{\term}{\type_2}\). Intuition suggests the (weak) normal form \(\eAbs{\eX}{\type_1}{\term}\). What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
-      \eReify{\tVar_1}{\term}{\eAbs{\eVar}{\type_1}{\eReflect{\tVar_1}}}.
+      \eReify{\alpha_1}{\term}{\eAbs{\eX}{\type_1}{\eReflect{\alpha_1}}}.
     \]
     But that would be reduction under a lambda abstraction, which is ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
 
@@ -377,11 +385,11 @@
       \begin{center}
           \AxiomC{\(\translatesTo{\context}{\type_1}{\type_2}\)}
         \RightLabel{(\textsc{S-Computation})}
-        \UnaryInfC{\(\translatesTo{\context}{\tComputation{\type_1}{\effect}}{\tArrow{\tUnit}{\type_2}}\)}
+        \UnaryInfC{\(\translatesTo{\context}{\tComputation{\type_1}{\type}}{\tArrow{\tUnit}{\type_2}}\)}
         \DisplayProof
-          \AxiomC{\(\hasKind{\context}{\effect}{\kEffect}\)}
+          \AxiomC{\(\hasKind{\context}{\type}{\kEffect}\)}
         \RightLabel{(\textsc{S-Effect})}
-        \UnaryInfC{\(\translatesTo{\context}{\effect}{\tUnit}\)}
+        \UnaryInfC{\(\translatesTo{\context}{\type}{\tUnit}\)}
         \DisplayProof
       \end{center}
 
