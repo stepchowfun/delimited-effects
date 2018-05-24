@@ -85,7 +85,7 @@ instance SingletonSubst KVarName Kind where
     idempotencyCheck $ Substitution Map.empty (Map.singleton b k)
 
 -- Compose two substitutions. The substitutions are in diagrammatic order, that
--- is, theta2 comes after theta1.
+-- is, the second substitution comes after the first.
 composeSubst :: Substitution -> Substitution -> Substitution
 composeSubst (Substitution m1 n1) theta@(Substitution m2 n2) =
   idempotencyCheck $
