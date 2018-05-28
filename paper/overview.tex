@@ -10,10 +10,10 @@
     We can represent a type class as an ordinary data type.
     \[ \eData{\tMonoid{\alpha}}{\eMonoid{\alpha}{\parens{\tArrow{\alpha}{\tArrow{\alpha}{\alpha}}}}} \]
     For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance and project the appropriate components.
-    \[ \eIdentity = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eLet{\eMonoid{\eX}{\wildcard}}{\eReflect{\beta}}{\eX}}} \]
-    \[ \eCombine = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eLet{\eMonoid{\wildcard}{\eX}}{\eReflect{\beta}}{\eX}}} \]
+    \[ \eIdentity = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eLet{\eMonoid{\eX}{\wildcard}}{\eReflect{\beta}}{\eX}}} \]
+    \[ \eCombine = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eLet{\eMonoid{\wildcard}{\eX}}{\eReflect{\beta}}{\eX}}} \]
     Here's a polymorphic function which ``squares'' its argument using the monoid operation:
-    \[ \eSquare = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kWitness{\tMonoid{\alpha}}}{\eAbs{\eX}{\alpha}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\alpha}}{\beta}}{\eX}}{\eX}}}} \]
+    \[ \eSquare = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eAbs{\eX}{\alpha}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\alpha}}{\beta}}{\eX}}{\eX}}}} \]
     Here, we create and use a local instance of the class which reifies the monoidal structure of integers under multiplication:
     \[ \eReify{\alpha}{\eMonoid{\numberName{1}}{\eMultiply}}{\eApp{\eSquare}{\numberName{3}}} \]
 
