@@ -48,6 +48,7 @@ import Syntax
   lambda { TokenLambda }
   then   { TokenThen }
   true   { TokenTrue }
+  type   { TokenType }
   x      { TokenIdLower $$ }
 
 %nonassoc LOW
@@ -59,7 +60,7 @@ import Syntax
 %left '+' '-'
 %left '*' '/'
 
-%nonassoc true false if i x lambda '(' '[' forall X
+%nonassoc true false if i x lambda '(' '[' forall type X
 
 %nonassoc HIGH
 
@@ -92,7 +93,7 @@ Type
   | '(' Type ')'          { $2 }
 
 Kind
-  : '*' { KType }
+  : type { KType }
 
 EListItems
   :                      { [] }

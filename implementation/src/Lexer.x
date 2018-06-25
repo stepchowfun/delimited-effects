@@ -40,6 +40,7 @@ $idChar = [_ $lower $upper $digit]
 "if"           { tokenAtom TokenIf }
 "then"         { tokenAtom TokenThen }
 "true"         { tokenAtom TokenTrue }
+"type"         { tokenAtom TokenType }
 $digit+        { tokenInteger TokenIntLit }
 $white+        ;
 @idLower       { tokenString TokenIdLower }
@@ -73,6 +74,7 @@ data Token
   | TokenSlash
   | TokenThen
   | TokenTrue
+  | TokenType
   deriving Eq
 
 instance Show Token where
@@ -101,6 +103,7 @@ instance Show Token where
   show TokenSlash = "/"
   show TokenThen = "then"
   show TokenTrue = "true"
+  show TokenType = "type"
 
 alexScanAction :: Alex (Maybe Token)
 alexScanAction = do

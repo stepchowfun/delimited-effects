@@ -878,7 +878,7 @@ instance PrettyPrint Type where
 
 instance PrettyPrint Kind where
   prettyPrint (KVar b) = show b
-  prettyPrint KType = "*"
+  prettyPrint KType = "type"
 
 -- The first node is the current one. The second is the one to be embedded.
 embed :: (Prec a, PrettyPrint a) => Assoc -> a -> a -> String
