@@ -108,17 +108,17 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\(\hasType{\context}{\term_1}{\tComputation{\type_1}{\type}}\)}
-          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\type}}\)}
+          \AxiomC{\(\hasType{\context}{\term_1}{\tComputation{\type_1}{\type_3}}\)}
+          \AxiomC{\(\hasType{\cEExtend{\context}{\eVar}{\type_1}}{\term_2}{\tComputation{\type_2}{\type_3}}\)}
         \RightLabel{(\textsc{T-Do})}
-        \BinaryInfC{\(\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\type}}\)}
+        \BinaryInfC{\(\hasType{\context}{\eDo{\eVar}{\term_1}{\term_2}}{\tComputation{\type_2}{\type_3}}\)}
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\(\hasType{\context}{\term}{\type}\)}
-          \AxiomC{\(\hasKind{\context}{\type}{\kEffect}\)}
+          \AxiomC{\(\hasType{\context}{\term}{\type_1}\)}
+          \AxiomC{\(\hasKind{\context}{\type_2}{\kEffect}\)}
         \RightLabel{(\textsc{T-Pure})}
-        \BinaryInfC{\(\hasType{\context}{\ePure{\term}}{\tComputation{\type}{\type}}\)}
+        \BinaryInfC{\(\hasType{\context}{\ePure{\term}}{\tComputation{\type_1}{\type_2}}\)}
       \end{prooftree}
 
       \begin{prooftree}
@@ -158,10 +158,10 @@
       \end{prooftree}
 
       \begin{prooftree}
-          \AxiomC{\(\hasKind{\context}{\type}{\kType}\)}
-          \AxiomC{\(\hasKind{\context}{\type}{\kEffect}\)}
+          \AxiomC{\(\hasKind{\context}{\type_1}{\kType}\)}
+          \AxiomC{\(\hasKind{\context}{\type_2}{\kEffect}\)}
         \RightLabel{(\textsc{K-Computation})}
-        \BinaryInfC{\(\hasKind{\context}{\tComputation{\type}{\type}}{\kType}\)}
+        \BinaryInfC{\(\hasKind{\context}{\tComputation{\type_1}{\type_2}}{\kType}\)}
       \end{prooftree}
 
       \begin{prooftree}
