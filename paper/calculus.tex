@@ -12,8 +12,8 @@
             \eY                                             \enspace | \enspace
             \ldots                                          \) \\
           type variables & \(\tVar\) & \(\Coloneqq\) & \(
-            \alpha                                          \enspace | \enspace
-            \beta                                           \enspace | \enspace
+            \eA                                             \enspace | \enspace
+            \eB                                             \enspace | \enspace
             \ldots                                          \) \\
           terms & \(\term\) & \(\Coloneqq\) & \(
             \eVar                                           \enspace | \enspace
@@ -178,11 +178,11 @@
 
     Consider the program
     \[
-      \eReify{\alpha}{\term}{\eAbs{\eX}{\type_1}{\eTApp{\parens{\eTAbs{\beta}{\kProxy{\type_2}}{\eReflect{\beta}}}}{\alpha}}},
+      \eReify{\eA}{\term}{\eAbs{\eX}{\type_1}{\eTApp{\parens{\eTAbs{\eB}{\kProxy{\type_2}}{\eReflect{\eB}}}}{\eA}}},
     \]
     which is well-typed when \(\hasType{\cEmpty}{\term}{\type_2}\). Intuition suggests the (weak) normal form \(\eAbs{\eX}{\type_1}{\term}\). What might be the first step this program takes toward that normal form? One is tempted to eliminate the type application:
     \[
-      \eReify{\alpha}{\term}{\eAbs{\eX}{\type_1}{\eReflect{\alpha}}}.
+      \eReify{\eA}{\term}{\eAbs{\eX}{\type_1}{\eReflect{\eA}}}.
     \]
     But that would be reduction under a lambda abstraction, which is ordinarily forbidden in lambda calculi intended for programming. Indeed, this modest calculus defies a straightforward operational semantics.
 
