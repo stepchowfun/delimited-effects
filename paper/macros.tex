@@ -2,7 +2,7 @@
 \newcommand\constructorName[1]{\textsf{\textsc{#1}}}
 \newcommand\keyword[1]{\textsf{\textbf{#1}}}
 \newcommand\numberName[1]{\textsf{#1}}
-\newcommand\variableName[1]{\textsf{#1}}
+\newcommand\variableName[1]{\textit{#1}}
 
 % Misc
 \newcommand\apply[2]{#1\parens{#2}}
@@ -30,7 +30,7 @@
 
 % Types and rows
 \newcommand\type{\tau}
-\newcommand\tVar{a}
+\newcommand\tVar{\alpha}
 \newcommand\tArrow[2]{#1 \rightarrow #2}
 \newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
 \newcommand\tForAllNoKind[2]{\forall #1 \; . \; #2}
@@ -69,6 +69,9 @@
 \newcommand\eX{\variableName{x}}
 \newcommand\eY{\variableName{y}}
 \newcommand\eZ{\variableName{z}}
+\newcommand\eA{\alpha}
+\newcommand\eB{\beta}
+\newcommand\eC{\gamma}
 \newcommand\integer{\constructorName{Integer}}
 \newcommand\monoid{\constructorName{Monoid}}
 \newcommand\tApp[2]{#1 \; #2}

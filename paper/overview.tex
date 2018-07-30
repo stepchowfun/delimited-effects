@@ -3,18 +3,18 @@
   \subsection{Reflection and reification}
 
     Here's a simple example of reification and reflection.
-    \[ \eReify{\alpha}{\numberName{4}}{\parens{\numberName{3} + \eReflect{\alpha}}} \]
+    \[ \eReify{\eA}{\numberName{4}}{\parens{\numberName{3} + \eReflect{\eA}}} \]
 
   \subsection{Type classes with local instances}
 
     We can represent a type class as an ordinary data type.
-    \[ \eData{\tMonoid{\alpha}}{\eMonoid{\alpha}{\parens{\tArrow{\alpha}{\tArrow{\alpha}{\alpha}}}}} \]
+    \[ \eData{\tMonoid{\eA}}{\eMonoid{\eA}{\parens{\tArrow{\eA}{\tArrow{\eA}{\eA}}}}} \]
     For convenience, we define \emph{methods} for the class. These are functions that reflect a reified instance and project the appropriate components.
-    \[ \eIdentity = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eLet{\eMonoid{\eX}{\wildcard}}{\eReflect{\beta}}{\eX}}} \]
-    \[ \eCombine = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eLet{\eMonoid{\wildcard}{\eX}}{\eReflect{\beta}}{\eX}}} \]
+    \[ \eIdentity = \eTAbs{\eA}{\kType}{\eTAbs{\eB}{\kProxy{\tMonoid{\eA}}}{\eLet{\eMonoid{\eX}{\wildcard}}{\eReflect{\eB}}{\eX}}} \]
+    \[ \eCombine = \eTAbs{\eA}{\kType}{\eTAbs{\eB}{\kProxy{\tMonoid{\eA}}}{\eLet{\eMonoid{\wildcard}{\eX}}{\eReflect{\eB}}{\eX}}} \]
     Here's a polymorphic function which ``squares'' its argument using the monoid operation:
-    \[ \eSquare = \eTAbs{\alpha}{\kType}{\eTAbs{\beta}{\kProxy{\tMonoid{\alpha}}}{\eAbs{\eX}{\alpha}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\alpha}}{\beta}}{\eX}}{\eX}}}} \]
+    \[ \eSquare = \eTAbs{\eA}{\kType}{\eTAbs{\eB}{\kProxy{\tMonoid{\eA}}}{\eAbs{\eX}{\eA}{\eApp{\eApp{\eTApp{\eTApp{\eCombine}{\eA}}{\eB}}{\eX}}{\eX}}}} \]
     Here, we create and use a local instance of the class which reifies the monoidal structure of integers under multiplication:
-    \[ \eReify{\alpha}{\eMonoid{\numberName{1}}{\eMultiply}}{\eApp{\eSquare}{\numberName{3}}} \]
+    \[ \eReify{\eA}{\eMonoid{\numberName{1}}{\eMultiply}}{\eApp{\eSquare}{\numberName{3}}} \]
 
   \subsection{Effects and handlers}
