@@ -19,15 +19,15 @@ RUN \
     'ocaml=4.02.*' && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc && \
-  curl -fsSLo coq.tar.gz https://github.com/coq/coq/archive/V8.8.0.tar.gz && \
+  curl -fsSLo coq.tar.gz https://github.com/coq/coq/archive/V8.8.2.tar.gz && \
   tar -xzf coq.tar.gz && \
   rm coq.tar.gz && \
-  cd coq-8.8.0 && \
+  cd coq-8.8.2 && \
   ./configure -prefix /usr/local && \
   make && \
   make install && \
   cd .. && \
-  rm -rf coq-8.8.0 && \
+  rm -rf coq-8.8.2 && \
   DEBIAN_FRONTEND=noninteractive apt-get -y purge --auto-remove \
     camlp5 \
     curl \
