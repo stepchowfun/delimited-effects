@@ -4,19 +4,19 @@ RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
     'build-essential=12.3' \
-    'libreadline-dev=7.0-*' \
-    'python-pip=9.0.*' \
-    'ruby=1:2.3.*' \
-    'texlive-full=2016.*' && \
+    'libreadline-dev=7.0-3' \
+    'python-pip=9.0.1-2' \
+    'ruby=1:2.3.3' \
+    'texlive-full=2016.20170123-5' && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc
 
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    'camlp5=6.16-*' \
-    'curl=7.52.*' \
-    'ocaml=4.02.*' && \
+    'camlp5=6.16-1' \
+    'curl=7.52.1-5+deb9u7' \
+    'ocaml=4.02.3-9' && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc && \
   curl -fsSLo coq.tar.gz https://github.com/coq/coq/archive/V8.8.2.tar.gz && \
@@ -33,14 +33,15 @@ RUN \
     curl \
     ocaml
 
-RUN pip install 'awscli==1.14.*'
+RUN pip install 'awscli==1.16.40'
 
-RUN gem install octokit --version '~> 4.8.0'
+RUN gem install octokit --version '4.13.0'
 
 # The Stack installation script apparently uses apt-get.
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
-  DEBIAN_FRONTEND=noninteractive apt-get -y install 'curl=7.52.*' && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install \
+    'curl=7.52.1-5+deb9u7' && \
   curl -sSL https://get.haskellstack.org/ | sh && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /usr/share/doc && \
@@ -48,7 +49,8 @@ RUN \
 
 RUN \
   DEBIAN_FRONTEND=noninteractive apt-get -y update && \
-  DEBIAN_FRONTEND=noninteractive apt-get -y install 'curl=7.52.*' && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install \
+    'curl=7.52.1-5+deb9u7' && \
   curl -LSfs \
     https://raw.githubusercontent.com/stepchowfun/tagref/master/install.sh | \
     sh && \
@@ -70,6 +72,6 @@ RUN \
   mkdir -p "$HOME/.local/bin" && \
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 
-RUN stack setup --resolver lts-10.4
+RUN stack setup --resolver lts-12.14
 
 RUN stack install hindent hlint

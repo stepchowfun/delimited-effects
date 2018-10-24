@@ -378,8 +378,7 @@ instance Subst TConName Type ITerm where
   subst c t1 (IEAnno e t2) = IEAnno (subst c t1 e) (subst c t1 t2)
   subst _ _ IETrue = IETrue
   subst _ _ IEFalse = IEFalse
-  subst c t (IEIf e1 e2 e3) =
-    IEIf (subst c t e1) (subst c t e2) (subst c t e3)
+  subst c t (IEIf e1 e2 e3) = IEIf (subst c t e1) (subst c t e2) (subst c t e3)
   subst _ _ (IEIntLit i) = IEIntLit i
   subst c t (IEAdd e1 e2) = IEAdd (subst c t e1) (subst c t e2)
   subst c t (IESub e1 e2) = IESub (subst c t e1) (subst c t e2)
@@ -421,8 +420,7 @@ instance Subst TVarName Type FTerm where
   subst a t1 (FETApp e t2) = FETApp (subst a t1 e) (subst a t1 t2)
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
-  subst a t (FEIf e1 e2 e3) =
-    FEIf (subst a t e1) (subst a t e2) (subst a t e3)
+  subst a t (FEIf e1 e2 e3) = FEIf (subst a t e1) (subst a t e2) (subst a t e3)
   subst _ _ (FEIntLit i) = FEIntLit i
   subst a t (FEAdd e1 e2) = FEAdd (subst a t e1) (subst a t e2)
   subst a t (FESub e1 e2) = FESub (subst a t e1) (subst a t e2)
@@ -439,8 +437,7 @@ instance Subst TConName Type FTerm where
   subst c t1 (FETApp e t2) = FETApp (subst c t1 e) (subst c t1 t2)
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
-  subst c t (FEIf e1 e2 e3) =
-    FEIf (subst c t e1) (subst c t e2) (subst c t e3)
+  subst c t (FEIf e1 e2 e3) = FEIf (subst c t e1) (subst c t e2) (subst c t e3)
   subst _ _ (FEIntLit i) = FEIntLit i
   subst c t (FEAdd e1 e2) = FEAdd (subst c t e1) (subst c t e2)
   subst c t (FESub e1 e2) = FESub (subst c t e1) (subst c t e2)
@@ -457,8 +454,7 @@ instance Subst KVarName Kind FTerm where
   subst b k (FETApp e t) = FETApp (subst b k e) (subst b k t)
   subst _ _ FETrue = FETrue
   subst _ _ FEFalse = FEFalse
-  subst b k (FEIf e1 e2 e3) =
-    FEIf (subst b k e1) (subst b k e2) (subst b k e3)
+  subst b k (FEIf e1 e2 e3) = FEIf (subst b k e1) (subst b k e2) (subst b k e3)
   subst _ _ (FEIntLit i) = FEIntLit i
   subst b k (FEAdd e1 e2) = FEAdd (subst b k e1) (subst b k e2)
   subst b k (FESub e1 e2) = FESub (subst b k e1) (subst b k e2)
@@ -524,7 +520,7 @@ instance CollectBinders ITerm BSmallLambda where
   collectBinders (IEVar x) = (BSmallLambda [], IEVar x)
   collectBinders (IEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
-    in (BSmallLambda ((x, t) : xs), e2)
+     in (BSmallLambda ((x, t) : xs), e2)
   collectBinders (IEApp e1 e2) = (BSmallLambda [], IEApp e1 e2)
   collectBinders (IELet x e1 e2) = (BSmallLambda [], IELet x e1 e2)
   collectBinders (IEAnno e t) = (BSmallLambda [], IEAnno e t)
@@ -543,7 +539,7 @@ instance CollectBinders FTerm BSmallLambda where
   collectBinders (FEVar x) = (BSmallLambda [], FEVar x)
   collectBinders (FEAbs x t e1) =
     let (BSmallLambda xs, e2) = collectBinders e1
-    in (BSmallLambda ((x, t) : xs), e2)
+     in (BSmallLambda ((x, t) : xs), e2)
   collectBinders (FEApp e1 e2) = (BSmallLambda [], FEApp e1 e2)
   collectBinders (FETAbs a k e) = (BSmallLambda [], FETAbs a k e)
   collectBinders (FETApp e t) = (BSmallLambda [], FETApp e t)
@@ -564,7 +560,7 @@ instance CollectBinders FTerm BBigLambda where
   collectBinders (FEApp e1 e2) = (BBigLambda [], FEApp e1 e2)
   collectBinders (FETAbs a k e1) =
     let (BBigLambda aks, e2) = collectBinders e1
-    in (BBigLambda ((a, k) : aks), e2)
+     in (BBigLambda ((a, k) : aks), e2)
   collectBinders (FETApp e t) = (BBigLambda [], FETApp e t)
   collectBinders FETrue = (BBigLambda [], FETrue)
   collectBinders FEFalse = (BBigLambda [], FEFalse)
@@ -582,7 +578,7 @@ instance CollectBinders Type BForAll where
   collectBinders (TCon c ts) = (BForAll [], TCon c ts)
   collectBinders (TForAll a k t1) =
     let (BForAll aks, t2) = collectBinders t1
-    in (BForAll ((a, k) : aks), t2)
+     in (BForAll ((a, k) : aks), t2)
 
 instance Show BSmallLambda where
   show (BSmallLambda xts) =
@@ -618,10 +614,10 @@ instance Show BForAll where
 propagate :: ITerm -> Type -> ITerm
 propagate (IEAbs x t1 e) t2 =
   let (BForAll _, t3) = collectBinders t2
-  in case (t1, t3) of
-       (TVar _, TCon c [t4, t5])
-         | c == arrowName -> IEAbs x t4 (propagate e t5)
-       _ -> IEAbs x t1 e
+   in case (t1, t3) of
+        (TVar _, TCon c [t4, t5])
+          | c == arrowName -> IEAbs x t4 (propagate e t5)
+        _ -> IEAbs x t1 e
 propagate (IELet x e1 e2) t = IELet x e1 (propagate e2 t)
 propagate e _ = e
 
@@ -718,8 +714,8 @@ freshUserTVarName as =
   let names =
         ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"] ++
         ((++ "′") <$> names)
-  in UserTVarName $
-     head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
+   in UserTVarName $
+      head $ dropWhile (\a -> Set.member (UserTVarName a) as) names
 
 -- This class is provides functionality for renaming all bound type variables
 -- such that the minimum number of distinct variables is used and they appear
@@ -735,8 +731,7 @@ instance CleanTVars ITerm where
       (cleanTVars (Set.union as (Set.fromList $ freeTVars t)) t)
       (cleanTVars as e)
   cleanTVars as (IEApp e1 e2) = IEApp (cleanTVars as e1) (cleanTVars as e2)
-  cleanTVars as (IELet x e1 e2) =
-    IELet x (cleanTVars as e1) (cleanTVars as e2)
+  cleanTVars as (IELet x e1 e2) = IELet x (cleanTVars as e1) (cleanTVars as e2)
   cleanTVars as (IEAnno e t) =
     IEAnno
       (cleanTVars as e)
@@ -760,10 +755,10 @@ instance CleanTVars FTerm where
   cleanTVars as (FEApp e1 e2) = FEApp (cleanTVars as e1) (cleanTVars as e2)
   cleanTVars as (FETAbs a1 k e) =
     let a2 = freshUserTVarName as
-    in FETAbs
-         a2
-         (cleanTVars as k)
-         (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) e))
+     in FETAbs
+          a2
+          (cleanTVars as k)
+          (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) e))
   cleanTVars as (FETApp e t) = FETApp (cleanTVars as e) (cleanTVars as t)
   cleanTVars _ FETrue = FETrue
   cleanTVars _ FEFalse = FEFalse
@@ -783,10 +778,10 @@ instance CleanTVars Type where
   cleanTVars as (TCon c ts) = TCon c (cleanTVars as <$> ts)
   cleanTVars as (TForAll a1 k t) =
     let a2 = freshUserTVarName as
-    in TForAll
-         a2
-         (cleanTVars as k)
-         (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
+     in TForAll
+          a2
+          (cleanTVars as k)
+          (cleanTVars (Set.insert a2 as) (subst a1 (TVar a2) t))
 
 instance CleanTVars Kind where
   cleanTVars _ (KVar b) = KVar b
@@ -800,7 +795,7 @@ instance PrettyPrint ITerm where
   prettyPrint (IEVar x) = show x
   prettyPrint e1@IEAbs {} =
     let (xs, e2) = collectBinders e1
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
+     in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
   prettyPrint e1@(IEApp e2 e3) =
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
   prettyPrint e1@(IELet x e2 e3) =
@@ -831,12 +826,12 @@ instance PrettyPrint FTerm where
   prettyPrint (FEVar x) = show x
   prettyPrint e1@FEAbs {} =
     let (xs, e2) = collectBinders e1
-    in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
+     in show (xs :: BSmallLambda) ++ " → " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FEApp e2 e3) =
     embed LeftAssoc e1 e2 ++ " " ++ embed RightAssoc e1 e3
   prettyPrint e1@FETAbs {} =
     let (aks, e2) = collectBinders e1
-    in show (aks :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e2
+     in show (aks :: BBigLambda) ++ " . " ++ embed RightAssoc e1 e2
   prettyPrint e1@(FETApp e2 t) = embed LeftAssoc e1 e2 ++ " " ++ prettyPrint t
   prettyPrint FETrue = "true"
   prettyPrint FEFalse = "false"
@@ -861,20 +856,19 @@ instance PrettyPrint FTerm where
 instance PrettyPrint Type where
   prettyPrint (TVar a) = show a
   prettyPrint t1@(TCon c [t2, t3])
-    | c == arrowName =
-      embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
+    | c == arrowName = embed LeftAssoc t1 t2 ++ " → " ++ embed RightAssoc t1 t3
   prettyPrint (TCon c ts) =
     let params =
           (\t ->
              let s = prettyPrint t
-             in if ' ' `elem` s
-                  then "(" ++ s ++ ")"
-                  else s) <$>
+              in if ' ' `elem` s
+                   then "(" ++ s ++ ")"
+                   else s) <$>
           ts
-    in show c ++ (params >>= (" " ++))
+     in show c ++ (params >>= (" " ++))
   prettyPrint t1@TForAll {} =
     let (aks, t2) = collectBinders t1
-    in show (aks :: BForAll) ++ " . " ++ embed RightAssoc t1 t2
+     in show (aks :: BForAll) ++ " . " ++ embed RightAssoc t1 t2
 
 instance PrettyPrint Kind where
   prettyPrint (KVar b) = show b

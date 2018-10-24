@@ -61,10 +61,8 @@ instance FreeKVars Substitution where
 -- Check that a substitution is idempotent.
 idempotencyCheck :: Substitution -> Substitution
 idempotencyCheck theta@(Substitution m n) =
-  if Set.null
-       (Map.keysSet m `Set.intersection` Set.fromList (freeTVars theta)) &&
-     Set.null
-       (Map.keysSet n `Set.intersection` Set.fromList (freeKVars theta))
+  if Set.null (Map.keysSet m `Set.intersection` Set.fromList (freeTVars theta)) &&
+     Set.null (Map.keysSet n `Set.intersection` Set.fromList (freeKVars theta))
     then theta
     else error $ "Non-idempotent substitution: " ++ show m ++ " " ++ show n
 
@@ -98,12 +96,10 @@ class SubstRemoveKeys a where
   substRemoveKeys :: Set a -> Substitution -> Substitution
 
 instance SubstRemoveKeys TVarName where
-  substRemoveKeys as (Substitution m n) =
-    Substitution (Map.withoutKeys m as) n
+  substRemoveKeys as (Substitution m n) = Substitution (Map.withoutKeys m as) n
 
 instance SubstRemoveKeys KVarName where
-  substRemoveKeys bs (Substitution m n) =
-    Substitution m (Map.withoutKeys n bs)
+  substRemoveKeys bs (Substitution m n) = Substitution m (Map.withoutKeys n bs)
 
 -- Substitutions can be applied to various entities.
 class ApplySubst a where

@@ -51,5 +51,5 @@ main = do
                 _ <- runProgram program
                 repl
               Nothing -> putStrLn ""
-      in repl
+       in repl
     _ -> putStrLn "Usage:\n  implementation-exe\n  implementation-exe <path>"
