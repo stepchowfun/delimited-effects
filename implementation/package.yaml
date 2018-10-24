@@ -1,0 +1,55 @@
+name: implementation
+version: 0.1.0.0
+github: stepchowfun/effect-classes
+license: BSD3
+author: Stephan Boyer
+maintainer: stephan@stephanboyer.com
+copyright: 2018 Stephan Boyer
+
+extra-source-files:
+- README.md
+
+description: >
+  Please see the README on GitHub at
+  <https://github.com/stepchowfun/effect-classes#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+  dependencies:
+  - QuickCheck
+  - array
+  - containers
+  - mtl
+  build-tools:
+  - alex
+  - happy
+
+executables:
+  implementation-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - implementation
+    - mtl
+    - readline
+
+tests:
+  implementation-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - QuickCheck
+    - hspec
+    - hspec-core
+    - implementation

@@ -6,5 +6,6 @@ _CoqProjectFull
 formalization/**/*.aux
 formalization/**/*.glob
 formalization/**/*.vo
-implementation/.stack-work/*
+implementation/.stack-work/
+implementation/implementation.cabal
 main.pdf

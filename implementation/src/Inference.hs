@@ -182,8 +182,7 @@ subsume e1 t1 t2 = do
          return (c, k))
       aks2
   let e3 = foldr (\(a, _) e2 -> FETApp e2 (TVar a)) e1 aks3
-      t5 =
-        foldr (\((a1, _), (a2, _)) -> subst a1 (TVar a2)) t3 (zip aks1 aks3)
+      t5 = foldr (\((a1, _), (a2, _)) -> subst a1 (TVar a2)) t3 (zip aks1 aks3)
       t6 = foldr (\((a, _), (c, _)) -> subst a (TCon c [])) t4 (zip aks2 cks1)
   unify t5 t6
   (_, _, _, _, theta1) <- get
@@ -305,8 +304,7 @@ instance CheckArities Type where
              show c ++
              " type constructor takes one type argument, " ++
              "but was given " ++ show (length ts)
-  checkArities (TCon c _) =
-    throwError $ "Unknown type constructor: " ++ show c
+  checkArities (TCon c _) = throwError $ "Unknown type constructor: " ++ show c
   checkArities (TForAll _ k t) = do
     checkArities k
     checkArities t
@@ -490,6 +488,6 @@ typeCheck e1 =
               , (arrowName, KType)
               ]
           , emptySubst)
-  in case result of
-       Left s -> Left s
-       Right (e2, t) -> Right (simplify e2, t)
+   in case result of
+        Left s -> Left s
+        Right (e2, t) -> Right (simplify e2, t)
