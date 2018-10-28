@@ -2,8 +2,8 @@ SHELL = bash
 
 .PHONY: \
   all test lint format clean \
+  lint-general \
   paper \
-    lint-general \
     lint-paper \
     clean-paper \
   formalization \
@@ -14,6 +14,7 @@ SHELL = bash
     lint-implementation \
     format-implementation \
     clean-implementation \
+    run-implementation \
   docker-deps docker-build
 
 all: paper formalization implementation
@@ -21,6 +22,10 @@ all: paper formalization implementation
 test: test-implementation
 
 lint: lint-general lint-paper lint-formalization lint-implementation
+
+format: format-implementation
+
+clean: clean-paper clean-formalization clean-implementation
 
 lint-general:
 	./scripts/lint-general.rb $(shell \
@@ -38,10 +43,6 @@ lint-general:
 	  \) -print \
 	)
 	tagref
-
-format: format-implementation
-
-clean: clean-paper clean-formalization clean-implementation
 
 paper: main.pdf
 
@@ -173,6 +174,9 @@ format-implementation:
 
 clean-implementation:
 	rm -rf implementation/.stack-work
+
+run-implementation: implementation
+	cd implementation && stack exec implementation-exe
 
 docker-deps:
 	docker build \
