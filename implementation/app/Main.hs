@@ -15,22 +15,22 @@ import System.Exit (exitFailure, exitSuccess)
 runProgram :: String -> IO Bool
 runProgram program =
   if all isSpace program
-    then return True
+    then pure True
     else do
       result <-
         runExceptT $ do
-          tokens <- ExceptT . return $ scan program
-          iterm <- ExceptT . return $ parse tokens
-          (fterm, ftype) <- ExceptT . return $ typeCheck iterm
-          rterm <- ExceptT . return $ eval fterm
+          tokens <- ExceptT . pure $ scan program
+          iterm <- ExceptT . pure $ parse tokens
+          (fterm, ftype) <- ExceptT . pure $ typeCheck iterm
+          rterm <- ExceptT . pure $ eval fterm
           lift . putStrLn $ "  ⇒ " ++ show rterm
           lift . putStrLn $ "  : " ++ show ftype
-          return ()
+          pure ()
       case result of
         Left s -> do
           putStrLn ("  Error: " ++ s)
-          return False
-        Right () -> return True
+          pure False
+        Right () -> pure True
 
 main :: IO ()
 main = do
