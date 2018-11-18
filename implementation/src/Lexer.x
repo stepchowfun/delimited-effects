@@ -123,13 +123,13 @@ scan :: String -> Either String [Token]
 scan s = fmap reverse $ runAlex s $ do
   let loop memo = do r <- alexScanAction
                      case r of
-                       Nothing -> return memo
+                       Nothing -> pure memo
                        Just t -> do rest <- loop (t : memo)
-                                    return rest
+                                    pure rest
   loop []
 
 alexEOF :: Alex (Maybe Token)
-alexEOF = return Nothing
+alexEOF = pure Nothing
 
 tokenAtom :: Token -> AlexAction (Maybe Token)
 tokenAtom t = token (\_ _ -> Just t)

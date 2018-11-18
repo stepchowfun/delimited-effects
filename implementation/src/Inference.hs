@@ -73,7 +73,7 @@ withUserEVar x t k = do
   result <- k
   (i2, cx2, ca2, cc2, theta2) <- get
   put (i2, Map.delete x cx2, ca2, cc2, theta2)
-  return result
+  pure result
 
 -- Generate a fresh type variable and add it to the context.
 freshTVar :: Kind -> TypeCheck TVarName
@@ -81,7 +81,7 @@ freshTVar k = do
   (i, cx, ca, cc, theta) <- get
   let a = AutoTVarName i
   put (i + 1, cx, Map.insert a k ca, cc, theta)
-  return a
+  pure a
 
 -- Generate a fresh type constructor and add it to the context.
 freshTCon :: Kind -> TypeCheck TConName
@@ -89,7 +89,7 @@ freshTCon k = do
   (i, cx, ca, cc, theta) <- get
   let c = AutoTConName i
   put (i + 1, cx, ca, Map.insert c k cc, theta)
-  return c
+  pure c
 
 -- Generate a fresh type variable and add it to the context.
 freshKVar :: TypeCheck KVarName
@@ -97,7 +97,7 @@ freshKVar = do
   (i, cx, ca, cc, theta) <- get
   let b = AutoKVarName i
   put (i + 1, cx, ca, cc, theta)
-  return b
+  pure b
 
 -- Compose a substitution with the accumulator.
 addSubst :: Substitution -> TypeCheck ()
@@ -114,7 +114,7 @@ addSubst theta1 = do
 runSubst :: ApplySubst a => a -> TypeCheck a
 runSubst x = do
   (_, _, _, _, theta) <- get
-  return (applySubst theta x)
+  pure (applySubst theta x)
 
 -- Compute the most general unifier and apply it to the context.
 class Unify a where
@@ -122,18 +122,18 @@ class Unify a where
 
 instance Unify Kind where
   unify (KVar b1) (KVar b2)
-    | b1 == b2 = return ()
+    | b1 == b2 = pure ()
   unify (KVar b) k
     | b `notElem` freeKVars k = addSubst (singletonSubst b k)
   unify k (KVar b)
     | b `notElem` freeKVars k = addSubst (singletonSubst b k)
-  unify KType KType = return ()
+  unify KType KType = pure ()
   unify k1 k2 =
     throwError $ "Unable to unify " ++ show k1 ++ " with " ++ show k2
 
 instance Unify Type where
   unify (TVar a1) (TVar a2)
-    | a1 == a2 = return ()
+    | a1 == a2 = pure ()
   unify (TVar a) t
     | a `notElem` freeTVars t = addSubst (singletonSubst a t)
   unify t (TVar a)
@@ -141,7 +141,7 @@ instance Unify Type where
   unify t1@(TCon c1 ts1) t2@(TCon c2 ts2)
     | c1 == c2 = do
       if length ts1 == length ts2
-        then return ()
+        then pure ()
         else throwError $ "Unable to unify " ++ show t1 ++ " with " ++ show t2
       mapM_
         (\(t3, t4) -> do
@@ -173,13 +173,13 @@ subsume e1 t1 t2 = do
     mapM
       (\(_, k) -> do
          a <- freshTVar k
-         return (a, k))
+         pure (a, k))
       aks1
   cks1 <-
     mapM
       (\(_, k) -> do
          c <- freshTCon k
-         return (c, k))
+         pure (c, k))
       aks2
   let e3 = foldr (\(a, _) e2 -> FETApp e2 (TVar a)) e1 aks3
       t5 = foldr (\((a1, _), (a2, _)) -> subst a1 (TVar a2)) t3 (zip aks1 aks3)
@@ -192,15 +192,15 @@ subsume e1 t1 t2 = do
      Set.intersection
        (Set.fromList (fst <$> cks1))
        (Set.fromList $ freeTCons theta2)
-    then return ()
+    then pure ()
     else throwError $ show t2 ++ " is not subsumed by " ++ show t1
   caks <-
     mapM
       (\(c, k) -> do
          a <- freshTVar k
-         return (c, a, k))
+         pure (c, a, k))
       cks1
-  return $ foldr (\(c, a, k) e5 -> FETAbs a k (subst c (TVar a) e5)) e4 caks
+  pure $ foldr (\(c, a, k) e5 -> FETAbs a k (subst c (TVar a) e5)) e4 caks
 
 -- Generalize a term and a type.
 generalize :: FTerm -> Type -> TypeCheck (FTerm, Type)
@@ -216,7 +216,7 @@ generalize e1 t1 = do
                error $
                "Type variable " ++ show a ++ " not in context " ++ show ca) <$>
         tfv
-  return
+  pure
     ( foldr (\(a, k) e2 -> FETAbs a k e2) e1 aks
     , foldr (\(a, k) t2 -> TForAll a k t2) t1 aks)
 
@@ -225,7 +225,7 @@ open :: FTerm -> Type -> TypeCheck (FTerm, Type)
 open e (TForAll a1 k t) = do
   a2 <- freshTVar k
   open (FETApp e (TVar a2)) (subst a1 (TVar a2) t)
-open e t = return (e, t)
+open e t = pure (e, t)
 
 -- Replace all variables in a type (both free and bound) with fresh variables.
 -- This is used to sanitize type annotations, which would otherwise be subject
@@ -241,35 +241,35 @@ sanitizeAnnotation t1 = do
       (\t2 a1 -> do
          b <- freshKVar
          a2 <- freshTVar (KVar b)
-         return (subst a1 (TVar a2) t2))
+         pure (subst a1 (TVar a2) t2))
       t1
       as
   t3 <-
     foldM
       (\t3 b1 -> do
          b2 <- freshKVar
-         return (subst b1 (KVar b2) t3))
+         pure (subst b1 (KVar b2) t3))
       t2
       bs
   t4 <- replaceBoundVars t3
   (t5, _) <- infer t4
-  return t5
+  pure t5
   where
-    replaceBoundVars t2@(TVar _) = return t2
+    replaceBoundVars t2@(TVar _) = pure t2
     replaceBoundVars (TCon c ts1) = do
       ts2 <- mapM replaceBoundVars ts1
-      return $ TCon c ts2
+      pure $ TCon c ts2
     replaceBoundVars (TForAll a1 k t2) = do
       a2 <- freshTVar k
       t3 <- replaceBoundVars (subst a1 (TVar a2) t2)
-      return $ TForAll a2 k t3
+      pure $ TForAll a2 k t3
 
 -- Check the arities of type constructors.
 class CheckArities a where
   checkArities :: a -> TypeCheck ()
 
 instance CheckArities Type where
-  checkArities (TVar _) = return ()
+  checkArities (TVar _) = pure ()
   checkArities (TCon c ts)
     | c == arrowName =
       if length ts == 2
@@ -280,7 +280,7 @@ instance CheckArities Type where
   checkArities (TCon c ts)
     | c == boolName =
       if null ts
-        then return ()
+        then pure ()
         else throwError $
              "The " ++
              show c ++
@@ -289,7 +289,7 @@ instance CheckArities Type where
   checkArities (TCon c ts)
     | c == intName =
       if null ts
-        then return ()
+        then pure ()
         else throwError $
              "The " ++
              show c ++
@@ -308,11 +308,11 @@ instance CheckArities Type where
   checkArities (TForAll _ k t) = do
     checkArities k
     checkArities t
-    return ()
+    pure ()
 
 instance CheckArities Kind where
-  checkArities (KVar _) = return ()
-  checkArities KType = return ()
+  checkArities (KVar _) = pure ()
+  checkArities KType = pure ()
 
 -- A type class for type checking (not inference).
 class Check a b c d | a -> b c d where
@@ -323,7 +323,7 @@ instance Check ITerm Type FTerm Type where
     (e2, t2) <- infer e1
     t3 <- runSubst t1
     e3 <- subsume e2 t2 t3
-    return (e3, t3)
+    pure (e3, t3)
 
 instance Check (ITerm, ITerm) (Type, Type) (FTerm, FTerm) (Type, Type) where
   check (e1, e2) (t1, t2) = do
@@ -332,7 +332,7 @@ instance Check (ITerm, ITerm) (Type, Type) (FTerm, FTerm) (Type, Type) where
     (e4, t5) <- check e2 t4
     e5 <- runSubst e3
     t6 <- runSubst t3
-    return ((e5, e4), (t6, t5))
+    pure ((e5, e4), (t6, t5))
 
 instance Check Type Kind Type Kind where
   check t1 k1 = do
@@ -340,7 +340,7 @@ instance Check Type Kind Type Kind where
     unify k1 k2
     t3 <- runSubst t2
     k3 <- runSubst k1
-    return (t3, k3)
+    pure (t3, k3)
 
 -- A type class for type inference.
 class Infer a b c | a -> b c where
@@ -350,7 +350,7 @@ instance Infer Type Type Kind where
   infer (TVar a) = do
     (_, _, ca, _, _) <- get
     case Map.lookup a ca of
-      Just k -> return (TVar a, k)
+      Just k -> pure (TVar a, k)
       Nothing -> throwError $ "Undefined type variable: " ++ show a
   infer (TCon c ts1) = do
     ts2 <-
@@ -359,21 +359,21 @@ instance Infer Type Type Kind where
            t2 <- runSubst t1
            (t3, _) <- check t2 KType
            ts3 <- mapM runSubst ts2
-           return (t3 : ts3))
+           pure (t3 : ts3))
         []
         ts1
-    return (TCon c (reverse ts2), KType)
+    pure (TCon c (reverse ts2), KType)
   infer (TForAll a1 k1 t1) = do
     a2 <- freshTVar k1
     (t2, _) <- check (subst a1 (TVar a2) t1) KType
     k2 <- runSubst k1
-    return (TForAll a2 k2 t2, KType)
+    pure (TForAll a2 k2 t2, KType)
 
 instance Infer ITerm FTerm Type where
   infer (IEVar x) = do
     (_, cx, _, _, _) <- get
     case Map.lookup x cx of
-      Just t -> return (FEVar x, t)
+      Just t -> pure (FEVar x, t)
       Nothing -> throwError $ "Undefined variable: " ++ show x
   infer (IEAbs x t1 e1) = do
     t2 <- sanitizeAnnotation t1
@@ -386,7 +386,7 @@ instance Infer ITerm FTerm Type where
         t6 <- runSubst t3
         e3 <- runSubst e2
         (e4, t7) <- open e3 t6
-        return (FEAbs x t5 e4, arrowType t5 t7)
+        pure (FEAbs x t5 e4, arrowType t5 t7)
     generalize e2 t3
   infer (IEApp e1 e2) = do
     a1 <- freshTVar KType
@@ -402,21 +402,21 @@ instance Infer ITerm FTerm Type where
       (e4, t2) <- infer e2
       e5 <- runSubst e3
       t3 <- runSubst t1
-      return (FEApp (FEAbs x t3 e4) e5, t2)
+      pure (FEApp (FEAbs x t3 e4) e5, t2)
   infer (IEAnno e1 t1) = do
     t2 <- sanitizeAnnotation t1
     checkArities t2
     (e2, t3) <- check e1 t2
     generalize e2 t3
-  infer IETrue = return (FETrue, boolType)
-  infer IEFalse = return (FEFalse, boolType)
+  infer IETrue = pure (FETrue, boolType)
+  infer IEFalse = pure (FEFalse, boolType)
   infer (IEIf e1 e2 e3) = do
     (e4, _) <- check e1 boolType
     t1 <- TVar <$> freshTVar KType
     ((e5, e6), (t2, _)) <- check (e2, e3) (t1, t1)
     e7 <- runSubst e4
     generalize (FEIf e7 e5 e6) t2
-  infer (IEIntLit i) = return (FEIntLit i, intType)
+  infer (IEIntLit i) = pure (FEIntLit i, intType)
   infer (IEAdd e1 e2) = do
     ((e3, e4), _) <- check (e1, e2) (intType, intType)
     generalize (FEAdd e3 e4) intType
@@ -437,7 +437,7 @@ instance Infer ITerm FTerm Type where
            t2 <- runSubst t1
            (e2, _) <- check e1 t2
            es3 <- mapM runSubst es2
-           return (e2 : es3))
+           pure (e2 : es3))
         []
         es1
     t2 <- runSubst t1
