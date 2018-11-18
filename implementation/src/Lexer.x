@@ -1,5 +1,8 @@
 {
 
+-- Alex generates code that does not pass the unused imports check, but we
+-- compile it with `-Wall -Werror`. The following pragma downgrades that
+-- check from an error to a warning for this file to make GHC happy.
 {-# OPTIONS_GHC -Wwarn=unused-imports #-}
 
 module Lexer (Token(..), scan) where

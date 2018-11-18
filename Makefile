@@ -124,7 +124,7 @@ clean-formalization:
 implementation:
 	(cd implementation && \
 	  set -o pipefail && \
-	  stack build --pedantic --install-ghc --allow-different-user 2>&1 | \
+	  stack build --install-ghc --allow-different-user 2>&1 | \
 	    tee ../build-log.txt) || \
 	  (rm -f build-log.txt && false) || \
 	  exit 1
@@ -135,7 +135,7 @@ implementation:
 
 test-implementation: implementation
 	cd implementation && \
-	  stack test --pedantic --install-ghc --allow-different-user && \
+	  stack test --install-ghc --allow-different-user && \
 	  stack exec implementation-exe examples/bools.g && \
 	  stack exec implementation-exe examples/church.g && \
 	  stack exec implementation-exe examples/ints.g && \
