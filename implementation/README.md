@@ -3,7 +3,7 @@
 First, make sure the dependencies listed below are installed. Then you can build the demo with:
 
 ```sh
-stack build --pedantic --install-ghc --allow-different-user
+stack build --install-ghc --allow-different-user
 ```
 
 Use either of the following to run the demo:

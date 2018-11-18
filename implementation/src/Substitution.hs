@@ -1,5 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
-
 module Substitution
   ( ApplySubst
   , Substitution

@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 -- The algorithm presented here is based on the paper by Daan Leijen called
 -- "HMF: Simple type inference for first-class polymorphism". That paper was
 -- published in The 13th ACM SIGPLAN International Conference on Functional
