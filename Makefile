@@ -181,7 +181,7 @@ run-implementation: implementation
 docker-deps:
 	docker build \
 	  -f scripts/Dockerfile \
-	  -t stephanmisc/effect-classes:deps \
+	  -t stephanmisc/paper:deps \
 	  .
 
 docker-build:
@@ -198,7 +198,7 @@ docker-build:
 	    --env "TRAVIS_REPO_SLUG=$$TRAVIS_REPO_SLUG" \
 	    --rm \
 	    --user=root \
-	    stephanmisc/effect-classes:deps \
+	    stephanmisc/paper:deps \
 	    bash -c ' \
 	      chown -R user:user repo && \
 	      cd repo && \
