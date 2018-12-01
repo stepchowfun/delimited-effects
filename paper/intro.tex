@@ -1,22 +1,29 @@
 \section{Introduction}
 
-In the two decades since they were introduced by \citet{wadler89}, \emph{type classes} have proven a versatile apparatus for structuring programs. Consider a class intended to characterize types \(\eA\) for which a monoid can be defined:
-\begin{flalign*}
-  & \eClass{\tMonoid{\eA}} & \\
-  & \quad \tAnno{\eIdentity}{\eA} & \\
-  & \quad \tAnno{\eCombine}{\tArrow{\eA}{\tArrow{\eA}{\eA}}} &
-\end{flalign*}
-Programmers can use this class to define polymorphic functions over all monoids:
-\begin{flalign*}
-  & \tAnno{\eSquare}{\tMonoid{\eA} \Rightarrow \tArrow{\eA}{\eA}} & \\
-  & \eApp{\eSquare}{\eX} = \eApp{\eApp{\eCombine}{\eX}}{\eX} &
-\end{flalign*}
-Finally, an \emph{instance} of the class can be provided for a specific type:
-\begin{flalign*}
-  & \eInstance{\tMonoid{\integer}} & \\
-  & \quad \eIdentity = \numberName{1} & \\
-  & \quad \eCombine = \eMultiply &
-\end{flalign*}
-where \(\tAnno{\numberName{1}}{\integer}\) and \(\tAnno{\eMultiply}{\tArrow{\integer}{\tArrow{\integer}{\integer}}}\). The instance is a witness to justify the well-definedness of expressions like \(\eApp{\eSquare}{\numberName{3}}\).
+We call a monad \(\left(T, \eta, \mu\right)\) in a category \(\mathbb{C}\) \emph{algebraic} if every natural transformation \(\varepsilon : T \rightarrow 1_\mathbb{C}\) makes the diagrams
 
-More recently, algebraic effects \citep{plotkin03} and handlers \citep{plotkin09} have become an attractive alternative to monads for modeling computational effects due to their compositionality.
+\medskip
+\noindent\begin{minipage}{\dimexpr.5\textwidth-.5\columnsep}
+  \centering
+  \begin{tikzcd}[row sep=huge, column sep=huge]
+    1_\mathbb{C} \arrow[r, "\eta"] \arrow[rd, "1"]
+      & T \arrow[d, "\varepsilon"] \\
+    & 1_\mathbb{C}
+  \end{tikzcd}
+\end{minipage}\begin{minipage}{\dimexpr.5\textwidth-.5\columnsep}
+  \centering
+  \begin{tikzcd}[row sep=huge, column sep=huge]
+    T^2
+        \arrow[r, "\mu"]
+        \arrow[d, "\varepsilon T"]
+      & T
+        \arrow[d, "\varepsilon"]
+        \arrow[dl, equal] \\
+    T
+        \arrow[r, "\varepsilon"]
+      & 1_\mathbb{C}
+  \end{tikzcd}
+\end{minipage}
+\medskip
+
+\noindent commute. If \(\left(T, \eta, \mu\right)\) and \(\left(U, \delta, \nu\right)\) are algebraic monads, then any pair of natural transformations \(\varepsilon : T \rightarrow 1_\mathbb{C}\) and \(\theta : U \rightarrow 1_\mathbb{C}\) induces a composite algebraic monad \(\left(T U, \eta U \circ \delta, \theta TU \circ \varepsilon UTU\right)\). Furthermore, \(\delta T \circ \eta \circ \theta \circ \varepsilon U : TU \rightarrow UT\) is a natural isomorphism, which is to say composition of algebraic monads is commutative.

@@ -23,6 +23,7 @@
 \usepackage{mathtools} % For \Coloneqq
 \usepackage{stackengine} % For stacking axioms
 \usepackage{stmaryrd} % For \llbracket and \rrbracket
+\usepackage{tikz-cd} % For commutative diagrams
 
 \ifnoacm
   \usepackage[T1]{fontenc} % The font encoding
@@ -37,7 +38,7 @@
 % Metadata %
 %%%%%%%%%%%%
 
-\title{Type and effect classes}
+\title{Algebraic monads respect interpreters}
 
 \ifnoacm
   \date{}
@@ -124,8 +125,6 @@
   \fi
 
   \input{paper/intro.tex}
-  \input{paper/overview.tex}
-  \input{paper/calculus.tex}
 
   \ifnoacm
     \section{Acknowledgements}

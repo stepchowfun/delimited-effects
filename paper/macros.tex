@@ -1,9 +1,3 @@
-% Typesetting
-\newcommand\constructorName[1]{\textsf{\textsc{#1}}}
-\newcommand\keyword[1]{\textsf{\textbf{#1}}}
-\newcommand\numberName[1]{\textsf{#1}}
-\newcommand\variableName[1]{\textit{#1}}
-
 % Misc
 \newcommand\apply[2]{#1\parens{#2}}
 \newcommand\dom[1]{\apply{\operatorname{dom}}{#1}}
@@ -12,68 +6,3 @@
 \newcommand\parens[1]{\mathopen{}\left( #1 \right)\mathclose{}}
 \newcommand\substitute[3]{#1 \left[ #3 / #2 \right]}
 \newcommand\tAnno[2]{#1 : #2}
-
-% Terms
-\newcommand\term{t}
-\newcommand\eVar{x}
-\newcommand\eAbs[3]{\lambda \tAnno{#1}{#2} \; . \; #3}
-\newcommand\eApp[2]{#1 \; #2}
-\newcommand\eTAbs[3]{\Lambda \kAnno{#1}{#2} \; . \; #3}
-\newcommand\eTAbsNoKind[2]{\Lambda #1 \; . \; #2}
-\newcommand\eTApp[2]{#1 \; #2}
-\newcommand\eReify[3]{\keyword{reify} \; #1 \leftarrow #2 \; \keyword{in} \; #3}
-\newcommand\eReflect[1]{\keyword{reflect} \; #1}
-\newcommand\ePure[1]{\keyword{pure} \; #1}
-\newcommand\eRun[1]{\keyword{run} \; #1}
-\newcommand\eDo[3]{\keyword{do} \; #1 \leftarrow #2 \; \keyword{in} \; #3}
-\newcommand\eUnit{\parens{}}
-
-% Types and rows
-\newcommand\type{\tau}
-\newcommand\tVar{\alpha}
-\newcommand\tArrow[2]{#1 \rightarrow #2}
-\newcommand\tForAll[3]{\forall \kAnno{#1}{#2} \; . \; #3}
-\newcommand\tForAllNoKind[2]{\forall #1 \; . \; #2}
-\newcommand\tComputation[2]{#1 \; ! \; #2}
-\newcommand\tPure{\circ}
-\newcommand\tVoid{\constructorName{0}}
-\newcommand\tUnit{\constructorName{1}}
-
-% Kinds
-\newcommand\kind{\kappa}
-\newcommand\kType{\star}
-\newcommand\kEffect{\diamond}
-\newcommand\kProxy[1]{\left\langle #1 \right\rangle}
-
-% Contexts
-\newcommand\context{\Gamma}
-\newcommand\cEmpty{\varnothing}
-\newcommand\cEExtend[3]{#1, \tAnno{#2}{#3}}
-\newcommand\cTExtend[3]{#1, \kAnno{#2}{#3}}
-
-% Judgments
-\newcommand\hasType[3]{#1 \vdash \tAnno{#2}{#3}}
-\newcommand\hasKind[3]{#1 \vdash \kAnno{#2}{#3}}
-\newcommand\translatesTo[3]{#1 \vdash #2 \rightsquigarrow #3}
-
-% Pseudo-constructs used for exposition
-\newcommand\eClass[1]{\keyword{class} \; #1 \; \keyword{where}}
-\newcommand\eCombine{\variableName{combine}}
-\newcommand\eData[2]{\keyword{data} \; #1 = #2}
-\newcommand\eIdentity{\variableName{identity}}
-\newcommand\eInstance[1]{\keyword{instance} \; #1 \; \keyword{where}}
-\newcommand\eLet[3]{\keyword{let} \; #1 = #2 \; \keyword{in} \; #3}
-\newcommand\eMonoid[2]{\eApp{\eApp{\monoid}{#1}}{#2}}
-\newcommand\eMultiply{\variableName{multiply}}
-\newcommand\eSquare{\variableName{square}}
-\newcommand\eX{\variableName{x}}
-\newcommand\eY{\variableName{y}}
-\newcommand\eZ{\variableName{z}}
-\newcommand\eA{\alpha}
-\newcommand\eB{\beta}
-\newcommand\eC{\gamma}
-\newcommand\integer{\constructorName{Integer}}
-\newcommand\monoid{\constructorName{Monoid}}
-\newcommand\tApp[2]{#1 \; #2}
-\newcommand\tMonoid[1]{\tApp{\monoid}{#1}}
-\newcommand\wildcard{\_}
