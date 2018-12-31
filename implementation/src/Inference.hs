@@ -387,11 +387,15 @@ instance Infer ITerm FTerm Type where
   infer (IEApp e1 e2) = do
     a1 <- freshTVar KType
     a2 <- freshTVar KType
-    (e3, TCon _ [t1, t2]) <- check e1 $ arrowType (TVar a1) (TVar a2)
-    (e4, _) <- check e2 t1
-    e5 <- runSubst e3
-    t4 <- runSubst t2
-    generalize (FEApp e5 e4) t4
+    e1Type <- check e1 $ arrowType (TVar a1) (TVar a2)
+    let (e4, t3, t4) =
+          case e1Type of
+            (e3, TCon _ [t1, t2]) -> (e3, t1, t2)
+            _ -> error "Something went wrong."
+    (e5, _) <- check e2 t3
+    e6 <- runSubst e4
+    t5 <- runSubst t4
+    generalize (FEApp e6 e5) t5
   infer (IELet x e1 e2) = do
     (e3, t1) <- infer e1
     withUserEVar x t1 $ do
