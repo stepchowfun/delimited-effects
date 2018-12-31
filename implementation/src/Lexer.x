@@ -5,6 +5,11 @@
 -- check from an error to a warning for this file to make GHC happy.
 {-# OPTIONS_GHC -Wwarn=unused-imports #-}
 
+-- Alex generates code that does not pass this incomplete pattern match check.
+-- The following pragma downgrades that check from an error to a warning for
+-- this file to make GHC happy.
+{-# OPTIONS_GHC -Wwarn=incomplete-uni-patterns #-}
+
 module Lexer (Token(..), scan) where
 
 }
